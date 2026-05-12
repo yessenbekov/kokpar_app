@@ -427,10 +427,18 @@ export function createKokparGame(container, onHudChange) {
       const speed = Math.hypot(rider.vx, rider.vz);
       const bob = Math.sin(time * 11 + rider.aiPhase) * Math.min(speed / 120, 0.18);
       const scale = rider.bumpCooldown > 0 ? 1.08 : 1;
+      const dust = rider.group.userData.dust;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
       rider.group.scale.setScalar(scale);
+
+      if (dust) {
+        dust.visible = speed > 4;
+        dust.children.forEach((puff, index) => {
+          puff.material.opacity = clamp(speed / 42, 0.12, 0.34) * (1 - index * 0.16);
+        });
+      }
     });
 
     kokpar.mesh.position.set(kokpar.x, kokpar.holder ? 1.55 : 0.72, kokpar.z);

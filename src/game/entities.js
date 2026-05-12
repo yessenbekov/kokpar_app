@@ -23,7 +23,15 @@ export function createHorseMesh(color) {
   const darkMaterial = new THREE.MeshStandardMaterial({ color: COLORS.horseDark, roughness: 0.82 });
   const riderMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.58 });
   const uniformMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
+  const tackMaterial = new THREE.MeshStandardMaterial({ color: "#22bfd0", roughness: 0.48 });
   const trimMaterial = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.68 });
+  const dustMaterial = new THREE.MeshStandardMaterial({
+    color: "#e4c681",
+    transparent: true,
+    opacity: 0.34,
+    roughness: 1,
+    depthWrite: false
+  });
   const skinMaterial = new THREE.MeshStandardMaterial({ color: "#e4b482", roughness: 0.62 });
 
   const body = new THREE.Mesh(new THREE.SphereGeometry(1.8, 24, 14), horseMaterial);
@@ -37,6 +45,17 @@ export function createHorseMesh(color) {
   head.position.set(2.55, 1.45, -0.05);
   group.add(head);
 
+  const mane = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.2, 0.14), darkMaterial);
+  mane.position.set(1.45, 1.92, 0);
+  mane.rotation.z = -0.36;
+  group.add(mane);
+
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.18, 1.25, 10), darkMaterial);
+  tail.position.set(-2.55, 1.1, 0);
+  tail.rotation.z = 1.18;
+  tail.rotation.x = 0.18;
+  group.add(tail);
+
   for (const x of [-1.15, 0.95]) {
     for (const z of [-0.48, 0.48]) {
       const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 1.25, 10), darkMaterial);
@@ -47,20 +66,47 @@ export function createHorseMesh(color) {
   }
 
   const saddleBlanket = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 1.28), uniformMaterial);
-  saddleBlanket.position.set(-0.2, 1.74, 0);
+  saddleBlanket.position.set(-0.2, 2.02, 0);
   saddleBlanket.rotation.z = -0.02;
   group.add(saddleBlanket);
 
   const blanketTrim = new THREE.Mesh(new THREE.BoxGeometry(1.98, 0.08, 1.42), trimMaterial);
-  blanketTrim.position.set(-0.2, 1.68, 0);
+  blanketTrim.position.set(-0.2, 1.94, 0);
   blanketTrim.rotation.z = -0.02;
   group.add(blanketTrim);
+
+  const saddlePad = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.18, 0.92), tackMaterial);
+  saddlePad.position.set(-0.22, 2.16, 0);
+  saddlePad.rotation.z = -0.02;
+  group.add(saddlePad);
+
+  const jerseyBack = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.78), uniformMaterial);
+  jerseyBack.position.set(-0.16, 2.82, 0);
+  jerseyBack.rotation.z = -0.08;
+  group.add(jerseyBack);
+
+  const girth = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.05, 1.52), tackMaterial);
+  girth.position.set(-0.05, 1.18, 0);
+  girth.rotation.z = -0.02;
+  group.add(girth);
 
   for (const z of [-0.73, 0.73]) {
     const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.62, 0.08), uniformMaterial);
     sidePanel.position.set(-0.28, 1.36, z);
     sidePanel.rotation.z = -0.04;
     group.add(sidePanel);
+  }
+
+  const bridle = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.035, 8, 24), tackMaterial);
+  bridle.position.set(2.58, 1.45, -0.03);
+  bridle.rotation.y = Math.PI / 2;
+  group.add(bridle);
+
+  for (const z of [-0.22, 0.22]) {
+    const rein = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.045, 0.035), tackMaterial);
+    rein.position.set(1.32, 1.95, z);
+    rein.rotation.z = -0.25;
+    group.add(rein);
   }
 
   const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.92, 8, 16), riderMaterial);
@@ -76,18 +122,45 @@ export function createHorseMesh(color) {
   riderHead.position.set(0.1, 3.03, 0);
   group.add(riderHead);
 
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), uniformMaterial);
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), uniformMaterial);
   helmet.position.set(0.1, 3.18, 0);
   group.add(helmet);
 
-  const rein = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.035, 0.035), darkMaterial);
-  rein.position.set(1.1, 2.02, 0);
-  rein.rotation.z = -0.24;
-  group.add(rein);
+  const helmetBrim = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.05, 0.5), darkMaterial);
+  helmetBrim.position.set(0.35, 3.14, 0);
+  helmetBrim.rotation.z = -0.06;
+  group.add(helmetBrim);
+
+  for (const z of [-0.34, 0.34]) {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.78, 10), riderMaterial);
+    arm.position.set(0.25, 2.38, z);
+    arm.rotation.z = Math.PI / 2.6;
+    arm.rotation.x = z > 0 ? 0.38 : -0.38;
+    group.add(arm);
+
+    const boot = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.78, 10), darkMaterial);
+    boot.position.set(-0.28, 1.75, z * 1.18);
+    boot.rotation.z = -0.1;
+    group.add(boot);
+  }
+
+  const dust = new THREE.Group();
+  for (const [x, z, scale] of [
+    [-2.3, -0.55, 1.4],
+    [-2.75, 0.12, 1.1],
+    [-2.1, 0.58, 0.9]
+  ]) {
+    const puff = new THREE.Mesh(new THREE.CircleGeometry(0.72 * scale, 18), dustMaterial);
+    puff.position.set(x, 0.04, z);
+    puff.rotation.x = -Math.PI / 2;
+    dust.add(puff);
+  }
+  group.add(dust);
+  group.userData.dust = dust;
 
   group.traverse((node) => {
     if (node.isMesh) {
-      node.castShadow = true;
+      node.castShadow = !node.material?.transparent;
       node.receiveShadow = true;
     }
   });
