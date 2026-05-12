@@ -18,12 +18,25 @@ export default function App() {
   const gameRef = useRef(null);
   const [hud, setHud] = useState(initialHud);
   const [ready, setReady] = useState(false);
+  const [sceneError, setSceneError] = useState("");
 
   useEffect(() => {
     if (!mountRef.current) return undefined;
 
-    gameRef.current = createKokparGame(mountRef.current, setHud);
-    setReady(true);
+    try {
+      gameRef.current = createKokparGame(mountRef.current, setHud);
+      setReady(true);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown WebGL error";
+      setSceneError(message);
+      setReady(true);
+      setHud({
+        ...initialHud,
+        message: "WebGL недоступен",
+        submessage: "Открой игру в браузере с включенным аппаратным ускорением.",
+        showBanner: true
+      });
+    }
 
     return () => {
       gameRef.current?.destroy();
@@ -36,6 +49,12 @@ export default function App() {
       <div className="viewport" ref={mountRef} />
 
       {!ready && <div className="loading">Готовим степь, коней и казаны...</div>}
+      {sceneError && (
+        <div className="webgl-error" role="alert">
+          <strong>3D-сцена не запустилась</strong>
+          <span>{sceneError}</span>
+        </div>
+      )}
 
       <section className="hud" aria-label="Match status">
         <div className="panel">
