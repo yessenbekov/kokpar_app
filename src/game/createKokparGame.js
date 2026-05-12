@@ -30,6 +30,7 @@ function formatTime(seconds) {
 const KOKPAR_START = { x: 0, z: -10 };
 const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
+const ROUND_COUNTDOWN_SECONDS = 3;
 const STARTING_RIDER_SPOTS = [
   [-18, START_LINE_Z + 8],
   [-10, START_LINE_Z + 13],
@@ -162,9 +163,11 @@ export function createKokparGame(container, onHudChange) {
     red: 0,
     time: MATCH_SECONDS,
     over: false,
-    message: "Матч начался",
-    submessage: "Серке лежит на дальней стороне поля.",
-    messageTime: 3
+    phase: "countdown",
+    countdown: ROUND_COUNTDOWN_SECONDS,
+    message: "На старт",
+    submessage: "Всадники за линией. Жди свистка.",
+    messageTime: ROUND_COUNTDOWN_SECONDS
   };
 
   let animationFrame = 0;
@@ -172,6 +175,9 @@ export function createKokparGame(container, onHudChange) {
   let isDestroyed = false;
 
   function publishHud() {
+    const isCountdown = match.phase === "countdown";
+    const countdown = Math.max(1, Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS)));
+
     onHudChange({
       blue: match.blue,
       red: match.red,
@@ -183,9 +189,9 @@ export function createKokparGame(container, onHudChange) {
           : kokpar.holder
             ? `${kokpar.holder.name} держит`
             : "Кокпар на поле",
-      message: match.message,
-      submessage: match.submessage,
-      showBanner: match.messageTime > 0 || match.over
+      message: isCountdown ? `Старт через ${countdown}` : match.message,
+      submessage: isCountdown ? "Всадники за линией. После свистка рви к серке." : match.submessage,
+      showBanner: isCountdown || match.messageTime > 0 || match.over
     });
   }
 
@@ -194,6 +200,29 @@ export function createKokparGame(container, onHudChange) {
     match.submessage = submessage;
     match.messageTime = seconds;
     publishHud();
+  }
+
+  function beginCountdown(message = "На старт", submessage = "Всадники за линией. Жди свистка.") {
+    match.phase = "countdown";
+    match.countdown = ROUND_COUNTDOWN_SECONDS;
+    match.message = message;
+    match.submessage = submessage;
+    match.messageTime = ROUND_COUNTDOWN_SECONDS;
+    riders.forEach((rider) => {
+      rider.vx = 0;
+      rider.vz = 0;
+    });
+    publishHud();
+  }
+
+  function startRound() {
+    match.phase = "live";
+    match.countdown = 0;
+    kokpar.looseCooldown = 0.2;
+    riders.forEach((rider) => {
+      rider.grabCooldown = 0.15;
+    });
+    showMessage("Алға!", "Розыгрыш начался.", 1.1);
   }
 
   function resetPositions() {
@@ -218,10 +247,9 @@ export function createKokparGame(container, onHudChange) {
   function scoreGoal(team) {
     match[team] += 1;
     resetPositions();
-    showMessage(
-      team === TEAM.blue ? "Гол! Кокпар в казане" : "Красные забрали очко",
-      "Центр поля снова открыт.",
-      2.2
+    beginCountdown(
+      team === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
+      "Новый розыгрыш начнется после свистка."
     );
   }
 
@@ -231,7 +259,7 @@ export function createKokparGame(container, onHudChange) {
     match.time = MATCH_SECONDS;
     match.over = false;
     resetPositions();
-    showMessage("Новый матч", "Серке лежит на дальней стороне поля.", 2.8);
+    beginCountdown("Новый матч", "Серке лежит на дальней стороне поля.");
   }
 
   function supportPoint(holder, rider) {
@@ -474,23 +502,30 @@ export function createKokparGame(container, onHudChange) {
   function frame(now) {
     if (isDestroyed) return;
 
-    const dt = Math.min((now - lastFrameTime) / 1000, 0.033);
+    const dt = clamp((now - lastFrameTime) / 1000, 0, 0.033);
     const time = now / 1000;
     lastFrameTime = now;
 
     if (!match.over) {
-      match.time -= dt;
+      if (match.phase === "countdown") {
+        match.countdown -= dt;
+        if (match.countdown <= 0) {
+          startRound();
+        }
+      } else {
+        match.time -= dt;
 
-      if (match.time <= 0) {
-        match.time = 0;
-        match.over = true;
-        const winner = match.blue === match.red ? "Ничья" : match.blue > match.red ? "Синие победили" : "Красные победили";
-        showMessage(winner, "Можно начать новый матч.", 999);
+        if (match.time <= 0) {
+          match.time = 0;
+          match.over = true;
+          const winner = match.blue === match.red ? "Ничья" : match.blue > match.red ? "Синие победили" : "Красные победили";
+          showMessage(winner, "Можно начать новый матч.", 999);
+        }
+
+        updateRiderMovement(dt, time);
+        resolveRiderCollisions();
+        updateKokpar(dt);
       }
-
-      updateRiderMovement(dt, time);
-      resolveRiderCollisions();
-      updateKokpar(dt);
     }
 
     match.messageTime = Math.max(0, match.messageTime - dt);
@@ -507,6 +542,7 @@ export function createKokparGame(container, onHudChange) {
 
   resize();
   resetPositions();
+  beginCountdown("На старт", "Серке лежит на дальней стороне поля.");
   publishHud();
   animationFrame = requestAnimationFrame(frame);
 

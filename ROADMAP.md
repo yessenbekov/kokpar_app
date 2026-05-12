@@ -194,11 +194,11 @@ Step 1: improve the current gameplay feel.
 
 Concrete tasks:
 
-- tune horse movement and turning
-- add a 3-second countdown before riders can cross the start line
-- keep riders locked behind the line until the whistle
-- make serke pickup feedback clearer
-- improve camera to show the start line and serke at the same time
+- [ ] tune horse movement and turning
+- [x] add a 3-second countdown before riders can cross the start line
+- [x] keep riders locked behind the line until the whistle
+- [ ] make serke pickup feedback clearer
+- [ ] improve camera to show the start line and serke at the same time
 
 Step 2: create a first asset target.
 
@@ -224,12 +224,12 @@ Milestone name: Playable Kokpar Prototype 0.2
 
 Done when:
 
-- riders start behind the line
-- whistle/countdown starts the round
-- player can ride to the serke and pick it up
-- AI contests possession
-- player can score in the kazan
-- teams are visually distinct
-- serke is visually distinct
-- match can be replayed without refreshing the page
-- build passes
+- [x] riders start behind the line
+- [x] whistle/countdown starts the round
+- [ ] player can ride to the serke and pick it up
+- [ ] AI contests possession
+- [ ] player can score in the kazan
+- [x] teams are visually distinct
+- [x] serke is visually distinct
+- [x] match can be replayed without refreshing the page
+- [x] build passes
