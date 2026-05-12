@@ -28,13 +28,15 @@ function formatTime(seconds) {
 }
 
 const KOKPAR_START = { x: 0, z: -10 };
+const START_LINE_Z = WORLD.height / 2;
+const START_LANE_DEPTH = 17;
 const STARTING_RIDER_SPOTS = [
-  [-18, 30],
-  [-10, 34],
-  [-2, 30],
-  [6, 34],
-  [14, 30],
-  [22, 34]
+  [-18, START_LINE_Z + 8],
+  [-10, START_LINE_Z + 13],
+  [-2, START_LINE_Z + 8],
+  [6, START_LINE_Z + 13],
+  [14, START_LINE_Z + 8],
+  [22, START_LINE_Z + 13]
 ];
 
 function createInitialRiders() {
@@ -344,7 +346,11 @@ export function createKokparGame(container, onHudChange) {
       rider.vx *= drag;
       rider.vz *= drag;
       rider.x = clamp(rider.x + rider.vx * dt, -WORLD.width / 2 + 3.5, WORLD.width / 2 - 3.5);
-      rider.z = clamp(rider.z + rider.vz * dt, -WORLD.height / 2 + 3.5, WORLD.height / 2 - 3.5);
+      rider.z = clamp(
+        rider.z + rider.vz * dt,
+        -WORLD.height / 2 + 3.5,
+        START_LINE_Z + START_LANE_DEPTH
+      );
 
       if (Math.hypot(rider.vx, rider.vz) > 1) {
         rider.rotation = Math.atan2(rider.vz, rider.vx);
