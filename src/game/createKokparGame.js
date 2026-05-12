@@ -27,14 +27,24 @@ function formatTime(seconds) {
   return `${min}:${sec}`;
 }
 
+const KOKPAR_START = { x: 0, z: -10 };
+const STARTING_RIDER_SPOTS = [
+  [-18, 30],
+  [-10, 34],
+  [-2, 30],
+  [6, 34],
+  [14, 30],
+  [22, 34]
+];
+
 function createInitialRiders() {
   return [
-    createRider({ name: "Сен", team: TEAM.blue, human: true, x: 34, z: 0, color: COLORS.blue }),
-    createRider({ name: "Арман", team: TEAM.blue, x: 40, z: -16, color: COLORS.blueAlt }),
-    createRider({ name: "Ерлан", team: TEAM.blue, x: 41, z: 16, color: COLORS.blueAlt }),
-    createRider({ name: "Бек", team: TEAM.red, x: -34, z: -17, color: COLORS.red }),
-    createRider({ name: "Нур", team: TEAM.red, x: -41, z: 0, color: COLORS.red }),
-    createRider({ name: "Самат", team: TEAM.red, x: -34, z: 17, color: COLORS.red })
+    createRider({ name: "Сен", team: TEAM.blue, human: true, x: STARTING_RIDER_SPOTS[0][0], z: STARTING_RIDER_SPOTS[0][1], color: COLORS.blue }),
+    createRider({ name: "Арман", team: TEAM.blue, x: STARTING_RIDER_SPOTS[1][0], z: STARTING_RIDER_SPOTS[1][1], color: COLORS.blueAlt }),
+    createRider({ name: "Ерлан", team: TEAM.blue, x: STARTING_RIDER_SPOTS[2][0], z: STARTING_RIDER_SPOTS[2][1], color: COLORS.blueAlt }),
+    createRider({ name: "Бек", team: TEAM.red, x: STARTING_RIDER_SPOTS[3][0], z: STARTING_RIDER_SPOTS[3][1], color: COLORS.red }),
+    createRider({ name: "Нур", team: TEAM.red, x: STARTING_RIDER_SPOTS[4][0], z: STARTING_RIDER_SPOTS[4][1], color: COLORS.red }),
+    createRider({ name: "Самат", team: TEAM.red, x: STARTING_RIDER_SPOTS[5][0], z: STARTING_RIDER_SPOTS[5][1], color: COLORS.red })
   ];
 }
 
@@ -151,7 +161,7 @@ export function createKokparGame(container, onHudChange) {
     time: MATCH_SECONDS,
     over: false,
     message: "Матч начался",
-    submessage: "Кокпар в центре поля.",
+    submessage: "Серке лежит на дальней стороне поля.",
     messageTime: 3
   };
 
@@ -185,26 +195,18 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function resetPositions() {
-    const spots = [
-      [34, 0],
-      [40, -16],
-      [41, 16],
-      [-34, -17],
-      [-41, 0],
-      [-34, 17]
-    ];
-
     riders.forEach((rider, index) => {
-      rider.x = spots[index][0];
-      rider.z = spots[index][1];
+      rider.x = STARTING_RIDER_SPOTS[index][0];
+      rider.z = STARTING_RIDER_SPOTS[index][1];
       rider.vx = 0;
       rider.vz = 0;
+      rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
     });
 
-    kokpar.x = 0;
-    kokpar.z = 0;
+    kokpar.x = KOKPAR_START.x;
+    kokpar.z = KOKPAR_START.z;
     kokpar.vx = 0;
     kokpar.vz = 0;
     kokpar.holder = null;
@@ -227,7 +229,7 @@ export function createKokparGame(container, onHudChange) {
     match.time = MATCH_SECONDS;
     match.over = false;
     resetPositions();
-    showMessage("Новый матч", "Кокпар в центре поля.", 2.8);
+    showMessage("Новый матч", "Серке лежит на дальней стороне поля.", 2.8);
   }
 
   function supportPoint(holder, rider) {
