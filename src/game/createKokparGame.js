@@ -620,8 +620,8 @@ export function createKokparGame(container, onHudChange) {
     const forwardSpeed = rider.vx * forward.x + rider.vz * forward.z;
     const sideSpeed = rider.vx * side.x + rider.vz * side.z;
     const carrySlowdown = kokpar.holder === rider ? 0.88 : 1;
-    const sprintBoost = sprint ? 1.14 : 1;
-    const targetSpeed = hasDirection ? rider.maxSpeed * carrySlowdown * sprintBoost * clamp(urgency, 0.45, 1.18) : 0;
+    const sprintBoost = sprint ? 1.06 : 1;
+    const targetSpeed = hasDirection ? rider.maxSpeed * carrySlowdown * sprintBoost * clamp(urgency, 0.45, 1.06) : 0;
     const speedDelta = targetSpeed - forwardSpeed;
     const power = speedDelta >= 0 ? rider.acceleration : rider.brakePower;
     const forwardChange = clamp(speedDelta, -power * dt, power * dt);
@@ -738,7 +738,7 @@ export function createKokparGame(container, onHudChange) {
         updateAI(rider, dt, time);
       }
 
-      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.92 : 1.16);
+      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04);
       const speed = Math.hypot(rider.vx, rider.vz);
 
       if (speed > maxSpeed) {
