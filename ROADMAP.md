@@ -34,6 +34,7 @@ Already done:
 - team horses use different coats and matching tack
 - first pass horse steering, braking, drift, sprint, and speed-aware camera
 - first pass AI roles: pickup, support, blocker, tackler, defender
+- contested pickup state with visible serke battle indicator
 
 Exit criteria:
 

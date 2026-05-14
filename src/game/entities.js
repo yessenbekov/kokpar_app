@@ -266,6 +266,40 @@ export function createKokparMesh() {
   return group;
 }
 
+export function createContestIndicatorMesh() {
+  const group = new THREE.Group();
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: "#f4ead2", transparent: true, opacity: 0.92 });
+  const backMaterial = new THREE.MeshBasicMaterial({ color: "#24170f", transparent: true, opacity: 0.72 });
+  const blueMaterial = new THREE.MeshBasicMaterial({ color: COLORS.blue });
+  const redMaterial = new THREE.MeshBasicMaterial({ color: COLORS.red });
+  const markerMaterial = new THREE.MeshBasicMaterial({ color: "#f4ead2" });
+
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.045, 8, 44), ringMaterial);
+  ring.rotation.x = Math.PI / 2;
+  group.add(ring);
+
+  const barBack = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.08, 0.2), backMaterial);
+  barBack.position.set(0, 0.02, -1.55);
+  group.add(barBack);
+
+  const blueEnd = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.09, 0.22), blueMaterial);
+  blueEnd.position.set(-0.66, 0.07, -1.55);
+  group.add(blueEnd);
+
+  const redEnd = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.09, 0.22), redMaterial);
+  redEnd.position.set(0.66, 0.07, -1.55);
+  group.add(redEnd);
+
+  const marker = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.38), markerMaterial);
+  marker.position.set(0, 0.18, -1.55);
+  group.add(marker);
+
+  group.visible = false;
+  group.userData.ring = ring;
+  group.userData.marker = marker;
+  return group;
+}
+
 export function createGoalMesh(color) {
   const group = new THREE.Group();
   const ringMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.55 });

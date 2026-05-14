@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS, MATCH_SECONDS, TEAM, WORLD, goalFor } from "./constants.js";
 import {
+  createContestIndicatorMesh,
   createGoalMesh,
   createHorseMesh,
   createKokparMesh,
@@ -38,6 +39,12 @@ const START_LANE_DEPTH = 17;
 const ROUND_COUNTDOWN_SECONDS = 3;
 const OUT_OF_BOUNDS_MARGIN = 0.2;
 const RIDER_FIELD_EXIT_BUFFER = 10;
+const GRAB_RADIUS = 4.2;
+const STEAL_RADIUS = 4.7;
+const CONTEST_RADIUS = 5.4;
+const CONTEST_MIN_SECONDS = 0.55;
+const CONTEST_MAX_SECONDS = 1.55;
+const CONTEST_PROGRESS_RATE = 1.15;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -225,9 +232,18 @@ export function createKokparGame(container, onHudChange) {
     vz: 0,
     holder: null,
     looseCooldown: 0,
+    contest: {
+      active: false,
+      progress: 0,
+      time: 0,
+      leader: null
+    },
     mesh: createKokparMesh()
   };
   scene.add(kokpar.mesh);
+
+  const contestIndicator = createContestIndicatorMesh();
+  scene.add(contestIndicator);
 
   const keys = new Set();
   const match = {
@@ -259,7 +275,9 @@ export function createKokparGame(container, onHudChange) {
       timer: formatTime(match.time),
       stamina: player.stamina,
       carry:
-        kokpar.holder === player
+        kokpar.contest.active
+          ? "Борьба за серке"
+          : kokpar.holder === player
           ? "Кокпар у тебя"
           : kokpar.holder
             ? `${kokpar.holder.name} держит`
@@ -309,9 +327,17 @@ export function createKokparGame(container, onHudChange) {
     );
   }
 
+  function clearContest() {
+    kokpar.contest.active = false;
+    kokpar.contest.progress = 0;
+    kokpar.contest.time = 0;
+    kokpar.contest.leader = null;
+  }
+
   function resetPositions() {
     match.duelMode = false;
     match.duelRiders.clear();
+    clearContest();
 
     riders.forEach((rider, index) => {
       rider.x = STARTING_RIDER_SPOTS[index][0];
@@ -413,6 +439,7 @@ export function createKokparGame(container, onHudChange) {
     kokpar.vz = 0;
     kokpar.holder = null;
     kokpar.looseCooldown = 0.8;
+    clearContest();
 
     beginCountdown(
       "Аут",
@@ -457,6 +484,8 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function closestRider(point, candidates) {
+    if (candidates.length === 0) return null;
+
     return candidates.reduce(
       (closest, rider) => (distance2D(rider, point) < distance2D(closest, point) ? rider : closest),
       candidates[0]
@@ -491,7 +520,7 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function blockerPoint(blocker, blockedRider, protectedPoint) {
-    const base = pointBetween(blockedRider, protectedPoint, 0.56);
+    const base = blockedRider ? pointBetween(blockedRider, protectedPoint, 0.56) : protectedPoint;
     const side = blocker.name.charCodeAt(0) % 2 === 0 ? 4 : -4;
     return clampFieldTarget(offsetPoint(base, protectedPoint, side));
   }
@@ -636,27 +665,145 @@ export function createKokparGame(container, onHudChange) {
     rider.vz *= surfaceDrag;
   }
 
-  function attemptGrab(rider, active) {
-    if (match.over || rider.grabCooldown > 0) return;
-    if (match.duelMode && !match.duelRiders.has(rider)) return;
+  function contestCandidates(radius = CONTEST_RADIUS) {
+    return riders.filter(
+      (rider) =>
+        (!match.duelMode || match.duelRiders.has(rider)) &&
+        distance2D(rider, kokpar) <= radius
+    );
+  }
 
-    if (!kokpar.holder && kokpar.looseCooldown <= 0 && distance2D(rider, kokpar) < 4.2) {
-      const wonCenterDuel = match.duelMode;
-      kokpar.holder = rider;
-      rider.grabCooldown = active ? 0.18 : 0.44;
-      showMessage(
-        wonCenterDuel
+  function contestPowerForRider(rider) {
+    const distance = distance2D(rider, kokpar);
+    if (distance > CONTEST_RADIUS) return 0;
+
+    const speed = Math.hypot(rider.vx, rider.vz);
+    const distancePower = clamp(1 - (distance - 1.6) / (CONTEST_RADIUS - 1.6), 0.12, 1);
+    const speedPower = clamp(1 - speed / 24, 0.52, 1);
+    const staminaPower = 0.72 + rider.stamina * 0.28;
+    const intentPower = rider.human && keys.has(" ") ? 1.22 : 1;
+    const rolePower = rider.aiRole === "pickup" || rider.aiRole === "tackler" ? 1.08 : 1;
+    const bumpPower = rider.bumpCooldown > 0 ? 0.64 : 1;
+
+    return distancePower * speedPower * staminaPower * intentPower * rolePower * bumpPower;
+  }
+
+  function contestPowerForTeam(team, candidates) {
+    return candidates
+      .filter((rider) => rider.team === team)
+      .reduce((total, rider) => total + contestPowerForRider(rider), 0);
+  }
+
+  function contestLeader(candidates) {
+    const nearest = closestRider(kokpar, candidates);
+    if (!nearest) return null;
+
+    if (Math.abs(kokpar.contest.progress) < 0.08) return nearest;
+
+    const leadingTeam = kokpar.contest.progress > 0 ? TEAM.blue : TEAM.red;
+    return closestRider(kokpar, candidates.filter((rider) => rider.team === leadingTeam)) ?? nearest;
+  }
+
+  function takeKokpar(rider, options = {}) {
+    const active = options.active ?? false;
+    const contested = options.contested ?? false;
+    const wonCenterDuel = match.duelMode;
+
+    clearContest();
+    kokpar.holder = rider;
+    rider.grabCooldown = active ? 0.22 : 0.48;
+
+    showMessage(
+      contested
+        ? rider.human
+          ? "Ты выиграл борьбу"
+          : `${rider.name} выиграл борьбу`
+        : wonCenterDuel
           ? `${rider.name} поднял серке`
           : rider.human
             ? "Кокпар у тебя"
             : `${rider.name} поднял кокпар`,
-        wonCenterDuel ? "Вытащи серке из круга, остальные пока не войдут." : "Толпа закрывается.",
-        1.6
-      );
+      contested
+        ? wonCenterDuel
+          ? "Вытащи серке из круга, остальные пока не войдут."
+          : "Владение получено после борьбы."
+        : wonCenterDuel
+          ? "Вытащи серке из круга, остальные пока не войдут."
+          : "Толпа закрывается.",
+      1.6
+    );
+  }
+
+  function startContest(rider, active) {
+    kokpar.contest.active = true;
+    kokpar.contest.progress = rider.team === TEAM.blue ? 0.12 : -0.12;
+    kokpar.contest.time = 0;
+    kokpar.contest.leader = rider;
+    kokpar.vx *= 0.28;
+    kokpar.vz *= 0.28;
+    rider.grabCooldown = active ? 0.18 : 0.38;
+
+    showMessage(
+      "Борьба за серке",
+      rider.human ? "Держись рядом и жми Space." : `${rider.name} вошел в борьбу.`,
+      0.95
+    );
+  }
+
+  function updateContest(dt) {
+    if (!kokpar.contest.active) return;
+
+    if (kokpar.holder) {
+      clearContest();
       return;
     }
 
-    if (kokpar.holder && kokpar.holder.team !== rider.team && distance2D(rider, kokpar.holder) < 4.7) {
+    const candidates = contestCandidates();
+    if (candidates.length === 0) {
+      clearContest();
+      return;
+    }
+
+    const bluePower = contestPowerForTeam(TEAM.blue, candidates);
+    const redPower = contestPowerForTeam(TEAM.red, candidates);
+    const totalPower = bluePower + redPower;
+    if (totalPower <= 0.01) return;
+
+    kokpar.contest.time += dt;
+    kokpar.contest.progress = clamp(
+      kokpar.contest.progress + ((bluePower - redPower) / totalPower) * CONTEST_PROGRESS_RATE * dt,
+      -1,
+      1
+    );
+    kokpar.contest.leader = contestLeader(candidates);
+
+    const oneTeamLeft = bluePower <= 0.04 || redPower <= 0.04;
+    const decisive = Math.abs(kokpar.contest.progress) >= 0.78 && kokpar.contest.time >= CONTEST_MIN_SECONDS;
+    const timedOut = kokpar.contest.time >= CONTEST_MAX_SECONDS;
+
+    if ((oneTeamLeft && kokpar.contest.time >= 0.75) || decisive || timedOut) {
+      takeKokpar(kokpar.contest.leader ?? candidates[0], { contested: true });
+    }
+  }
+
+  function attemptGrab(rider, active) {
+    if (match.over || rider.grabCooldown > 0) return;
+    if (match.duelMode && !match.duelRiders.has(rider)) return;
+    if (kokpar.contest.active && !kokpar.holder) return;
+
+    if (!kokpar.holder && kokpar.looseCooldown <= 0 && distance2D(rider, kokpar) < GRAB_RADIUS) {
+      const nearby = contestCandidates();
+      const opponentNearby = nearby.some((candidate) => candidate.team !== rider.team);
+
+      if (opponentNearby) {
+        startContest(rider, active);
+      } else {
+        takeKokpar(rider, { active });
+      }
+      return;
+    }
+
+    if (kokpar.holder && kokpar.holder.team !== rider.team && distance2D(rider, kokpar.holder) < STEAL_RADIUS) {
       const holder = kokpar.holder;
       const speedBonus = clamp(Math.hypot(rider.vx, rider.vz) / 32, 0, 0.22);
 
@@ -793,6 +940,7 @@ export function createKokparGame(container, onHudChange) {
             kokpar.vx = holder.vx * 0.5 + tackler.vx * 0.25;
             kokpar.vz = holder.vz * 0.5 + tackler.vz * 0.25;
             kokpar.looseCooldown = 0.45;
+            clearContest();
             holder.bumpCooldown = 0.8;
             showMessage("Кокпар выбит", "Он снова на земле.", 1.4);
           }
@@ -805,6 +953,11 @@ export function createKokparGame(container, onHudChange) {
 
   function updateKokpar(dt) {
     kokpar.looseCooldown = Math.max(0, kokpar.looseCooldown - dt);
+
+    if (kokpar.contest.active) {
+      updateContest(dt);
+      return;
+    }
 
     if (kokpar.holder) {
       const rider = kokpar.holder;
@@ -860,6 +1013,18 @@ export function createKokparGame(container, onHudChange) {
 
     kokpar.mesh.position.set(kokpar.x, kokpar.holder ? 1.55 : 0.72, kokpar.z);
     kokpar.mesh.rotation.y += 0.02 + Math.hypot(kokpar.vx, kokpar.vz) * 0.002;
+
+    contestIndicator.visible = kokpar.contest.active;
+    if (kokpar.contest.active) {
+      const progress = clamp(kokpar.contest.progress, -1, 1);
+      const leaderColor = progress >= 0 ? COLORS.blue : COLORS.red;
+
+      contestIndicator.position.set(kokpar.x, 2.5, kokpar.z);
+      contestIndicator.userData.marker.position.x = progress * 1.18;
+      contestIndicator.userData.marker.material.color.set(leaderColor);
+      contestIndicator.userData.ring.material.color.set(leaderColor);
+      contestIndicator.rotation.y = 0;
+    }
   }
 
   function updateCamera(dt) {
