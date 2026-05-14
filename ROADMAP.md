@@ -27,6 +27,8 @@ Already done:
 - AI riders chase and steal
 - players start behind a side line
 - serke starts on the far side of the field
+- field marks center and the initial serke spot
+- out-of-bounds resets serke to a center 1v1 pickup
 - team colors, basic uniforms, tack, and dust
 
 Exit criteria:
@@ -65,7 +67,7 @@ Tasks:
 
 - define exact game mode: arena kokpar with kazans
 - add start whistle and riders waiting behind the line
-- add out-of-bounds handling
+- add out-of-bounds handling with center 1v1 pickup
 - add foul-like states only if needed for gameplay
 - add team size settings: 3v3 prototype, then 5v5
 - add round/match settings
