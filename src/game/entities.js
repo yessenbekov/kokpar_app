@@ -13,9 +13,9 @@ export function createRider(config) {
     lean: 0,
     aiRole: "idle",
     aiPhase: Math.random() * Math.PI * 2,
-    maxSpeed: config.human ? 27 : 24,
-    acceleration: config.human ? 36 : 31,
-    brakePower: config.human ? 50 : 42,
+    maxSpeed: config.human ? 23 : 21,
+    acceleration: config.human ? 32 : 28,
+    brakePower: config.human ? 46 : 39,
     turnRate: config.human ? 3.2 : 2.65,
     lateralGrip: config.human ? 7.4 : 6.2,
     group: null

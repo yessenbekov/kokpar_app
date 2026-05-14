@@ -1,8 +1,8 @@
 export const WORLD = {
-  width: 120,
-  height: 78,
-  groundWidth: 190,
-  groundHeight: 130
+  width: 138,
+  height: 90,
+  groundWidth: 215,
+  groundHeight: 150
 };
 
 export const GOAL_RADIUS = 7.2;
@@ -24,5 +24,6 @@ export const COLORS = {
 };
 
 export function goalFor(team) {
-  return team === TEAM.blue ? { x: -52, z: 0 } : { x: 52, z: 0 };
+  const goalX = WORLD.width / 2 - 8;
+  return team === TEAM.blue ? { x: -goalX, z: 0 } : { x: goalX, z: 0 };
 }

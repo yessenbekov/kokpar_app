@@ -155,7 +155,11 @@ function createGroundDetails(scene) {
       new THREE.ConeGeometry(0.18 + (i % 4) * 0.03, 0.9 + (i % 3) * 0.16, 5),
       grassMaterials[i % 2]
     );
-    tuft.position.set((Math.random() - 0.5) * 175, 0.45, (Math.random() - 0.5) * 118);
+    tuft.position.set(
+      (Math.random() - 0.5) * (WORLD.groundWidth - 16),
+      0.45,
+      (Math.random() - 0.5) * (WORLD.groundHeight - 14)
+    );
     tuft.rotation.y = Math.random() * Math.PI;
     tuft.castShadow = true;
     scene.add(tuft);
