@@ -42,6 +42,16 @@ const CENTER_DUEL_SPOTS = {
   blue: { x: -CENTER_DUEL_START_DISTANCE, z: 0 },
   red: { x: CENTER_DUEL_START_DISTANCE, z: 0 }
 };
+const CENTER_SUPPORT_SPOTS = {
+  [TEAM.blue]: [
+    { x: -22, z: -12 },
+    { x: -18, z: 15 }
+  ],
+  [TEAM.red]: [
+    { x: 22, z: 12 },
+    { x: 18, z: -15 }
+  ]
+};
 const STARTING_RIDER_SPOTS = [
   [-18, START_LINE_Z + 8],
   [-10, START_LINE_Z + 13],
@@ -383,13 +393,18 @@ export function createKokparGame(container, onHudChange) {
     if (blueDuelRider) placeRiderAt(blueDuelRider, CENTER_DUEL_SPOTS.blue, CENTER_MARK);
     if (redDuelRider) placeRiderAt(redDuelRider, CENTER_DUEL_SPOTS.red, CENTER_MARK);
 
-    let waitingIndex = 0;
+    const supportIndexByTeam = {
+      [TEAM.blue]: 0,
+      [TEAM.red]: 0
+    };
+
     riders.forEach((rider) => {
       if (match.duelRiders.has(rider)) return;
 
-      const waitingSpot = STARTING_RIDER_SPOTS[waitingIndex % STARTING_RIDER_SPOTS.length];
-      waitingIndex += 1;
-      placeRiderAt(rider, { x: waitingSpot[0], z: waitingSpot[1] }, CENTER_MARK);
+      const supportSpots = CENTER_SUPPORT_SPOTS[rider.team];
+      const supportIndex = supportIndexByTeam[rider.team] % supportSpots.length;
+      supportIndexByTeam[rider.team] += 1;
+      placeRiderAt(rider, supportSpots[supportIndex], CENTER_MARK);
     });
 
     kokpar.x = CENTER_MARK.x;
@@ -401,7 +416,7 @@ export function createKokparGame(container, onHudChange) {
 
     beginCountdown(
       "Аут",
-      "Серке в центре. Дуэлянты ждут за кругом, остальные не входят внутрь.",
+      "Серке в центре. Остальные ждут рядом, но не заходят в круг.",
       "Аут. Подбор через"
     );
   }
