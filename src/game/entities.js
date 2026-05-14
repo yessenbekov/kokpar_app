@@ -11,6 +11,7 @@ export function createRider(config) {
     grabCooldown: 0,
     bumpCooldown: 0,
     lean: 0,
+    aiRole: "idle",
     aiPhase: Math.random() * Math.PI * 2,
     maxSpeed: config.human ? 27 : 24,
     acceleration: config.human ? 36 : 31,

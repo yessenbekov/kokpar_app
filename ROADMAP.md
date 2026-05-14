@@ -33,6 +33,7 @@ Already done:
 - team colors, basic uniforms, tack, and dust
 - team horses use different coats and matching tack
 - first pass horse steering, braking, drift, sprint, and speed-aware camera
+- first pass AI roles: pickup, support, blocker, tackler, defender
 
 Exit criteria:
 

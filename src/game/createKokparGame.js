@@ -444,6 +444,154 @@ export function createKokparGame(container, onHudChange) {
     };
   }
 
+  function opponentTeam(team) {
+    return team === TEAM.blue ? TEAM.red : TEAM.blue;
+  }
+
+  function ridersForTeam(team) {
+    return riders.filter((rider) => rider.team === team);
+  }
+
+  function closestRider(point, candidates) {
+    return candidates.reduce(
+      (closest, rider) => (distance2D(rider, point) < distance2D(closest, point) ? rider : closest),
+      candidates[0]
+    );
+  }
+
+  function sortedRidersByDistance(point, candidates) {
+    return [...candidates].sort((a, b) => distance2D(a, point) - distance2D(b, point));
+  }
+
+  function pointBetween(a, b, amount) {
+    return {
+      x: a.x + (b.x - a.x) * amount,
+      z: a.z + (b.z - a.z) * amount
+    };
+  }
+
+  function offsetPoint(point, toward, sideAmount, backAmount = 0) {
+    const forward = normalize2D(toward.x - point.x, toward.z - point.z);
+    const side = { x: -forward.z, z: forward.x };
+    return {
+      x: point.x - forward.x * backAmount + side.x * sideAmount,
+      z: point.z - forward.z * backAmount + side.z * sideAmount
+    };
+  }
+
+  function clampFieldTarget(target, margin = 6) {
+    return {
+      x: clamp(target.x, -WORLD.width / 2 + margin, WORLD.width / 2 - margin),
+      z: clamp(target.z, -WORLD.height / 2 + margin, WORLD.height / 2 - margin)
+    };
+  }
+
+  function blockerPoint(blocker, blockedRider, protectedPoint) {
+    const base = pointBetween(blockedRider, protectedPoint, 0.56);
+    const side = blocker.name.charCodeAt(0) % 2 === 0 ? 4 : -4;
+    return clampFieldTarget(offsetPoint(base, protectedPoint, side));
+  }
+
+  function chooseAITarget(rider) {
+    const teammates = ridersForTeam(rider.team);
+    const opponents = ridersForTeam(opponentTeam(rider.team));
+    const aiTeammates = teammates.filter((teammate) => !teammate.human);
+    const aiIndex = Math.max(0, aiTeammates.indexOf(rider));
+    const side = rider.name.charCodeAt(0) % 2 === 0 ? 1 : -1;
+
+    if (kokpar.holder) {
+      const holder = kokpar.holder;
+
+      if (holder === rider) {
+        return {
+          role: "carrier",
+          target: goalFor(rider.team),
+          urgency: 1.12,
+          closeRadius: 2,
+          wander: 0.8
+        };
+      }
+
+      if (holder.team === rider.team) {
+        const supportTarget =
+          aiIndex % 2 === 0
+            ? supportPoint(holder, rider)
+            : blockerPoint(rider, closestRider(holder, opponents), holder);
+
+        return {
+          role: aiIndex % 2 === 0 ? "support" : "blocker",
+          target: supportTarget,
+          urgency: aiIndex % 2 === 0 ? 0.92 : 0.82,
+          closeRadius: aiIndex % 2 === 0 ? 4 : 3,
+          wander: 1.5
+        };
+      }
+
+      const defensiveRank = sortedRidersByDistance(holder, teammates).indexOf(rider);
+      const holderGoal = goalFor(holder.team);
+
+      if (defensiveRank === 0) {
+        return {
+          role: "tackler",
+          target: { x: holder.x + holder.vx * 0.16, z: holder.z + holder.vz * 0.16 },
+          urgency: 1.26,
+          closeRadius: 1.5,
+          wander: 1.1
+        };
+      }
+
+      if (defensiveRank === 1) {
+        return {
+          role: "lane_blocker",
+          target: clampFieldTarget(offsetPoint(pointBetween(holder, holderGoal, 0.38), holderGoal, side * 7)),
+          urgency: 0.96,
+          closeRadius: 3.5,
+          wander: 1.3
+        };
+      }
+
+      return {
+        role: "defender",
+        target: clampFieldTarget({ x: holderGoal.x - Math.sign(holderGoal.x) * 11, z: side * 10 }),
+        urgency: 0.78,
+        closeRadius: 6,
+        wander: 1.7
+      };
+    }
+
+    const looseRank = sortedRidersByDistance(kokpar, teammates).indexOf(rider);
+    const closestOpponent = closestRider(kokpar, opponents);
+
+    if (looseRank === 0) {
+      return {
+        role: "pickup",
+        target: kokpar,
+        urgency: 1.16,
+        closeRadius: 1.5,
+        wander: 1
+      };
+    }
+
+    if (looseRank === 1) {
+      return {
+        role: "screen",
+        target: blockerPoint(rider, closestOpponent, kokpar),
+        urgency: 0.9,
+        closeRadius: 3.5,
+        wander: 1.4
+      };
+    }
+
+    const scoringGoal = goalFor(rider.team);
+    return {
+      role: "outlet",
+      target: clampFieldTarget(offsetPoint(kokpar, scoringGoal, side * 9, 7)),
+      urgency: 0.78,
+      closeRadius: 5.5,
+      wander: 1.8
+    };
+  }
+
   function applyHorseControl(rider, direction, dt, options = {}) {
     const sprint = options.sprint ?? false;
     const urgency = options.urgency ?? 1;
@@ -548,28 +696,25 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function updateAI(rider, dt, time) {
-    let target;
-
-    if (kokpar.holder) {
-      if (kokpar.holder.team === rider.team) {
-        target = kokpar.holder === rider ? goalFor(rider.team) : supportPoint(kokpar.holder, rider);
-      } else {
-        target = kokpar.holder;
-      }
-    } else {
-      target = kokpar;
-    }
+    const plan = chooseAITarget(rider);
+    const target = plan.target;
+    rider.aiRole = plan.role;
 
     const wander = {
-      x: Math.cos(rider.aiPhase + time * 0.8) * 3.8,
-      z: Math.sin(rider.aiPhase * 1.6 + time * 0.7) * 3.2
+      x: Math.cos(rider.aiPhase + time * 0.7) * plan.wander,
+      z: Math.sin(rider.aiPhase * 1.6 + time * 0.62) * plan.wander
     };
-    const direction = normalize2D(target.x + wander.x - rider.x, target.z + wander.z - rider.z);
-    const urgency = kokpar.holder && kokpar.holder.team !== rider.team ? 1.22 : 1;
     const targetDistance = Math.hypot(target.x - rider.x, target.z - rider.z);
-    const pacing = kokpar.holder === rider ? 1 : clamp(targetDistance / 14, 0.35, 1);
+    const direction =
+      targetDistance > 0.8
+        ? normalize2D(target.x + wander.x - rider.x, target.z + wander.z - rider.z)
+        : null;
+    const pacing =
+      plan.role === "carrier" || plan.role === "tackler" || plan.role === "pickup"
+        ? 1
+        : clamp((targetDistance - plan.closeRadius) / 12 + 0.24, 0.2, 1);
 
-    applyHorseControl(rider, direction, dt, { urgency: urgency * pacing });
+    applyHorseControl(rider, direction, dt, { urgency: plan.urgency * pacing });
     attemptGrab(rider, false);
   }
 
