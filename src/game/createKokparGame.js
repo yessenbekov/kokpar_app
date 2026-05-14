@@ -27,7 +27,7 @@ function formatTime(seconds) {
   return `${min}:${sec}`;
 }
 
-const KOKPAR_START = { x: 0, z: -10 };
+const KOKPAR_START = { x: 0, z: -14.5 };
 const CENTER_MARK = { x: 0, z: 0 };
 const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
