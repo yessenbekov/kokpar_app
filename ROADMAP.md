@@ -31,6 +31,7 @@ Already done:
 - out-of-bounds resets serke to a center 1v1 pickup
 - center pickup protects the circle from non-duel riders
 - team colors, basic uniforms, tack, and dust
+- team horses use different coats and matching tack
 
 Exit criteria:
 

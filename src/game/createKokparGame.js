@@ -206,7 +206,7 @@ export function createKokparGame(container, onHudChange) {
   const riders = createInitialRiders();
   const player = riders[0];
   riders.forEach((rider) => {
-    rider.group = createHorseMesh(rider.color);
+    rider.group = createHorseMesh(rider.color, rider.team);
     scene.add(rider.group);
   });
 

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { COLORS, GOAL_RADIUS } from "./constants.js";
+import { COLORS, GOAL_RADIUS, TEAM } from "./constants.js";
 
 export function createRider(config) {
   return {
@@ -17,13 +17,34 @@ export function createRider(config) {
   };
 }
 
-export function createHorseMesh(color) {
+function horsePaletteFor(team) {
+  if (team === TEAM.red) {
+    return {
+      coat: "#4f2b1a",
+      dark: "#1d120d",
+      muzzle: "#7a4a2e",
+      marking: "#2a1810"
+    };
+  }
+
+  return {
+    coat: "#8a5c35",
+    dark: "#2d1b13",
+    muzzle: "#b87a45",
+    marking: "#ead7bd"
+  };
+}
+
+export function createHorseMesh(color, team) {
   const group = new THREE.Group();
-  const horseMaterial = new THREE.MeshStandardMaterial({ color: COLORS.horse, roughness: 0.78 });
-  const darkMaterial = new THREE.MeshStandardMaterial({ color: COLORS.horseDark, roughness: 0.82 });
+  const horsePalette = horsePaletteFor(team);
+  const horseMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.coat, roughness: 0.78 });
+  const darkMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.dark, roughness: 0.82 });
+  const muzzleMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.muzzle, roughness: 0.84 });
+  const markingMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.marking, roughness: 0.86 });
   const riderMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.58 });
   const uniformMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
-  const tackMaterial = new THREE.MeshStandardMaterial({ color: "#22bfd0", roughness: 0.48 });
+  const tackMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.48 });
   const trimMaterial = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.68 });
   const dustMaterial = new THREE.MeshStandardMaterial({
     color: "#e4c681",
@@ -45,6 +66,16 @@ export function createHorseMesh(color) {
   head.position.set(2.55, 1.45, -0.05);
   group.add(head);
 
+  const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.25, 14, 10), muzzleMaterial);
+  muzzle.scale.set(1.15, 0.7, 0.8);
+  muzzle.position.set(3.08, 1.35, -0.05);
+  group.add(muzzle);
+
+  const faceMark = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.56, 0.08), markingMaterial);
+  faceMark.position.set(2.94, 1.66, -0.05);
+  faceMark.rotation.z = -0.24;
+  group.add(faceMark);
+
   const mane = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.2, 0.14), darkMaterial);
   mane.position.set(1.45, 1.92, 0);
   mane.rotation.z = -0.36;
@@ -62,6 +93,11 @@ export function createHorseMesh(color) {
       leg.position.set(x, 0.45, z);
       leg.rotation.z = (x > 0 ? -0.12 : 0.1) + z * 0.05;
       group.add(leg);
+
+      const legWrap = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.15, 0.18, 10), uniformMaterial);
+      legWrap.position.set(x, 0.78, z);
+      legWrap.rotation.z = leg.rotation.z;
+      group.add(legWrap);
     }
   }
 
