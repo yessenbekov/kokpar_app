@@ -42,16 +42,12 @@ const CENTER_DUEL_SPOTS = {
   blue: { x: -CENTER_DUEL_START_DISTANCE, z: 0 },
   red: { x: CENTER_DUEL_START_DISTANCE, z: 0 }
 };
-const CENTER_SUPPORT_SPOTS = {
-  [TEAM.blue]: [
-    { x: -22, z: -12 },
-    { x: -18, z: 15 }
-  ],
-  [TEAM.red]: [
-    { x: 22, z: 12 },
-    { x: 18, z: -15 }
-  ]
-};
+const CENTER_SUPPORT_SPOTS = [
+  { x: 18, z: -13 },
+  { x: -18, z: 14 },
+  { x: -15.5, z: 11.5 },
+  { x: 15.5, z: -10.5 }
+];
 const STARTING_RIDER_SPOTS = [
   [-18, START_LINE_Z + 8],
   [-10, START_LINE_Z + 13],
@@ -393,18 +389,12 @@ export function createKokparGame(container, onHudChange) {
     if (blueDuelRider) placeRiderAt(blueDuelRider, CENTER_DUEL_SPOTS.blue, CENTER_MARK);
     if (redDuelRider) placeRiderAt(redDuelRider, CENTER_DUEL_SPOTS.red, CENTER_MARK);
 
-    const supportIndexByTeam = {
-      [TEAM.blue]: 0,
-      [TEAM.red]: 0
-    };
-
+    let supportIndex = 0;
     riders.forEach((rider) => {
       if (match.duelRiders.has(rider)) return;
 
-      const supportSpots = CENTER_SUPPORT_SPOTS[rider.team];
-      const supportIndex = supportIndexByTeam[rider.team] % supportSpots.length;
-      supportIndexByTeam[rider.team] += 1;
-      placeRiderAt(rider, supportSpots[supportIndex], CENTER_MARK);
+      placeRiderAt(rider, CENTER_SUPPORT_SPOTS[supportIndex % CENTER_SUPPORT_SPOTS.length], CENTER_MARK);
+      supportIndex += 1;
     });
 
     kokpar.x = CENTER_MARK.x;
