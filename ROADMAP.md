@@ -35,6 +35,7 @@ Already done:
 - first pass horse steering, braking, drift, sprint, and speed-aware camera
 - first pass AI roles: pickup, support, blocker, tackler, defender
 - contested pickup state with visible serke battle indicator
+- angle and impact based tackle outcomes with stagger feedback
 
 Exit criteria:
 

@@ -10,6 +10,8 @@ export function createRider(config) {
     stamina: 1,
     grabCooldown: 0,
     bumpCooldown: 0,
+    staggerTime: 0,
+    hitFlash: 0,
     lean: 0,
     aiRole: "idle",
     aiPhase: Math.random() * Math.PI * 2,

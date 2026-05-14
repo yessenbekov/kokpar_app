@@ -45,6 +45,9 @@ const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
 const CONTEST_MAX_SECONDS = 1.55;
 const CONTEST_PROGRESS_RATE = 1.15;
+const TACKLE_DROP_THRESHOLD = 0.58;
+const TACKLE_STEAL_THRESHOLD = 0.86;
+const TACKLE_STAGGER_THRESHOLD = 0.4;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -345,6 +348,8 @@ export function createKokparGame(container, onHudChange) {
       rider.vx = 0;
       rider.vz = 0;
       rider.lean = 0;
+      rider.staggerTime = 0;
+      rider.hitFlash = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
@@ -364,6 +369,8 @@ export function createKokparGame(container, onHudChange) {
     rider.vx = 0;
     rider.vz = 0;
     rider.lean = 0;
+    rider.staggerTime = 0;
+    rider.hitFlash = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
     rider.grabCooldown = 0.8;
     rider.bumpCooldown = 0.3;
@@ -665,6 +672,115 @@ export function createKokparGame(container, onHudChange) {
     rider.vz *= surfaceDrag;
   }
 
+  function forwardVector(rider) {
+    return { x: Math.cos(rider.rotation), z: Math.sin(rider.rotation) };
+  }
+
+  function applyStagger(rider, seconds, push = { x: 0, z: 0 }) {
+    rider.staggerTime = Math.max(rider.staggerTime, seconds);
+    rider.hitFlash = Math.max(rider.hitFlash, 1);
+    rider.vx += push.x;
+    rider.vz += push.z;
+  }
+
+  function tackleQuality(tackler, holder, active, impactBonus = 0) {
+    const distance = distance2D(tackler, holder);
+    const toHolder = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
+    const tacklerForward = forwardVector(tackler);
+    const holderForward = forwardVector(holder);
+    const approach = clamp((tacklerForward.x * toHolder.x + tacklerForward.z * toHolder.z + 0.18) / 1.18, 0, 1);
+    const relativeSpeed = Math.hypot(tackler.vx - holder.vx, tackler.vz - holder.vz);
+    const speedPower = clamp(relativeSpeed / 16, 0, 1);
+    const distancePower = clamp(1 - (distance - 2.1) / (STEAL_RADIUS - 2.1), 0, 1);
+    const holderSide = { x: -holderForward.z, z: holderForward.x };
+    const toTackler = normalize2D(tackler.x - holder.x, tackler.z - holder.z);
+    const sideContact = clamp(Math.abs(holderSide.x * toTackler.x + holderSide.z * toTackler.z), 0, 1);
+    const staminaPower = 0.72 + tackler.stamina * 0.28;
+    const activePower = active ? 1 : tackler.aiRole === "tackler" ? 0.9 : 0.74;
+    const holderPenalty = holder.staggerTime > 0 ? 0.08 : 0;
+
+    return clamp(
+      distancePower * 0.2 +
+        approach * 0.24 +
+        speedPower * 0.22 +
+        sideContact * 0.14 +
+        staminaPower * 0.1 +
+        activePower * 0.1 +
+        impactBonus +
+        holderPenalty,
+      0,
+      1
+    );
+  }
+
+  function dropKokparFromTackle(holder, tackler, quality) {
+    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
+
+    kokpar.holder = null;
+    kokpar.x = holder.x + push.x * 1.15;
+    kokpar.z = holder.z + push.z * 1.15;
+    kokpar.vx = holder.vx * 0.38 + tackler.vx * 0.34 + push.x * 3.2;
+    kokpar.vz = holder.vz * 0.38 + tackler.vz * 0.34 + push.z * 3.2;
+    kokpar.looseCooldown = 0.34;
+    clearContest();
+
+    applyStagger(holder, 0.48 + quality * 0.34, { x: push.x * 3.2, z: push.z * 3.2 });
+    applyStagger(tackler, 0.18, { x: -push.x * 1.1, z: -push.z * 1.1 });
+    holder.bumpCooldown = 0.88;
+    tackler.grabCooldown = 0.56;
+
+    showMessage(
+      tackler.human ? "Серке выбит!" : `${tackler.name} выбил серке`,
+      "Он снова на земле. Готовься к борьбе за подбор.",
+      1.45
+    );
+  }
+
+  function stealKokparByTackle(holder, tackler, active) {
+    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
+
+    applyStagger(holder, 0.55, { x: push.x * 3.8, z: push.z * 3.8 });
+    holder.bumpCooldown = 0.86;
+    tackler.grabCooldown = active ? 0.34 : 0.48;
+    takeKokpar(tackler, { active, stolen: true });
+  }
+
+  function staggerFromTackle(holder, tackler, quality) {
+    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
+
+    applyStagger(holder, 0.24 + quality * 0.22, { x: push.x * 1.8, z: push.z * 1.8 });
+    holder.bumpCooldown = 0.48;
+    tackler.grabCooldown = 0.38;
+
+    if (tackler.human || holder.human) {
+      showMessage("Жесткий контакт", "Серке удержан, но всадника шатнуло.", 1.05);
+    }
+  }
+
+  function resolveTackleAttempt(tackler, active, impactBonus = 0) {
+    const holder = kokpar.holder;
+    if (!holder || holder.team === tackler.team || holder === tackler) return;
+
+    const quality = tackleQuality(tackler, holder, active, impactBonus);
+
+    if (quality >= TACKLE_STEAL_THRESHOLD) {
+      stealKokparByTackle(holder, tackler, active);
+      return;
+    }
+
+    if (quality >= TACKLE_DROP_THRESHOLD) {
+      dropKokparFromTackle(holder, tackler, quality);
+      return;
+    }
+
+    if (quality >= TACKLE_STAGGER_THRESHOLD && holder.bumpCooldown <= 0) {
+      staggerFromTackle(holder, tackler, quality);
+      return;
+    }
+
+    tackler.grabCooldown = active ? 0.32 : 0.5;
+  }
+
   function contestCandidates(radius = CONTEST_RADIUS) {
     return riders.filter(
       (rider) =>
@@ -707,6 +823,7 @@ export function createKokparGame(container, onHudChange) {
   function takeKokpar(rider, options = {}) {
     const active = options.active ?? false;
     const contested = options.contested ?? false;
+    const stolen = options.stolen ?? false;
     const wonCenterDuel = match.duelMode;
 
     clearContest();
@@ -714,7 +831,11 @@ export function createKokparGame(container, onHudChange) {
     rider.grabCooldown = active ? 0.22 : 0.48;
 
     showMessage(
-      contested
+      stolen
+        ? rider.human
+          ? "Чистый перехват!"
+          : `${rider.name} вырвал серке`
+        : contested
         ? rider.human
           ? "Ты выиграл борьбу"
           : `${rider.name} выиграл борьбу`
@@ -723,7 +844,9 @@ export function createKokparGame(container, onHudChange) {
           : rider.human
             ? "Кокпар у тебя"
             : `${rider.name} поднял кокпар`,
-      contested
+      stolen
+        ? "Сильный контакт и правильный угол атаки."
+        : contested
         ? wonCenterDuel
           ? "Вытащи серке из круга, остальные пока не войдут."
           : "Владение получено после борьбы."
@@ -804,19 +927,7 @@ export function createKokparGame(container, onHudChange) {
     }
 
     if (kokpar.holder && kokpar.holder.team !== rider.team && distance2D(rider, kokpar.holder) < STEAL_RADIUS) {
-      const holder = kokpar.holder;
-      const speedBonus = clamp(Math.hypot(rider.vx, rider.vz) / 32, 0, 0.22);
-
-      if (Math.random() < (active ? 0.7 : 0.45) + speedBonus) {
-        kokpar.holder = rider;
-        rider.grabCooldown = 0.4;
-        holder.bumpCooldown = 0.55;
-        holder.vx -= (rider.x - holder.x) * 2.3;
-        holder.vz -= (rider.z - holder.z) * 2.3;
-        showMessage(rider.human ? "Перехват!" : `${rider.name} вырвал кокпар`, "Момент для рывка.", 1.5);
-      } else {
-        rider.grabCooldown = active ? 0.35 : 0.55;
-      }
+      resolveTackleAttempt(rider, active);
     }
   }
 
@@ -873,12 +984,16 @@ export function createKokparGame(container, onHudChange) {
     riders.forEach((rider) => {
       rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
+      rider.staggerTime = Math.max(0, rider.staggerTime - dt);
+      rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
 
       const isWaitingDuringDuel = match.duelMode && !kokpar.holder && !match.duelRiders.has(rider);
 
       if (isWaitingDuringDuel) {
         rider.vx = 0;
         rider.vz = 0;
+      } else if (rider.staggerTime > 0) {
+        applyHorseControl(rider, null, dt);
       } else if (rider.human) {
         updateHuman(rider, dt);
       } else {
@@ -914,6 +1029,7 @@ export function createKokparGame(container, onHudChange) {
         const dx = b.x - a.x;
         const dz = b.z - a.z;
         const distance = Math.hypot(dx, dz) || 1;
+        const relativeSpeed = Math.hypot(a.vx - b.vx, a.vz - b.vz);
 
         if (distance >= 3.6) continue;
 
@@ -933,16 +1049,9 @@ export function createKokparGame(container, onHudChange) {
           const holder = kokpar.holder;
           const tackler = holder === a ? b : a;
 
-          if (holder.bumpCooldown <= 0 && Math.random() < 0.016) {
-            kokpar.holder = null;
-            kokpar.x = holder.x;
-            kokpar.z = holder.z;
-            kokpar.vx = holder.vx * 0.5 + tackler.vx * 0.25;
-            kokpar.vz = holder.vz * 0.5 + tackler.vz * 0.25;
-            kokpar.looseCooldown = 0.45;
-            clearContest();
-            holder.bumpCooldown = 0.8;
-            showMessage("Кокпар выбит", "Он снова на земле.", 1.4);
+          if (holder.bumpCooldown <= 0 && tackler.grabCooldown <= 0) {
+            const impactBonus = clamp((relativeSpeed - 4) / 18, 0, 0.18);
+            resolveTackleAttempt(tackler, false, impactBonus);
           }
         }
       }
@@ -995,12 +1104,13 @@ export function createKokparGame(container, onHudChange) {
     riders.forEach((rider) => {
       const speed = Math.hypot(rider.vx, rider.vz);
       const bob = Math.sin(time * 11 + rider.aiPhase) * Math.min(speed / 120, 0.18);
-      const scale = rider.bumpCooldown > 0 ? 1.08 : 1;
+      const scale = (rider.bumpCooldown > 0 ? 1.08 : 1) + rider.hitFlash * 0.04;
+      const hitLean = rider.hitFlash > 0 ? Math.sin(time * 36 + rider.aiPhase) * rider.hitFlash * 0.1 : 0;
       const dust = rider.group.userData.dust;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
-      rider.group.rotation.z = rider.lean ?? 0;
+      rider.group.rotation.z = (rider.lean ?? 0) + hitLean;
       rider.group.scale.setScalar(scale);
 
       if (dust) {
