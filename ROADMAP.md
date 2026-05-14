@@ -29,6 +29,7 @@ Already done:
 - serke starts on the far side of the field
 - field marks center and the initial serke spot
 - out-of-bounds resets serke to a center 1v1 pickup
+- center pickup protects the circle from non-duel riders
 - team colors, basic uniforms, tack, and dust
 
 Exit criteria:

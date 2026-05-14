@@ -33,9 +33,13 @@ const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
 const ROUND_COUNTDOWN_SECONDS = 3;
 const OUT_OF_BOUNDS_MARGIN = 0.8;
+const CENTER_CIRCLE_RADIUS = 8.5;
+const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
+const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
+const CENTER_DUEL_RELEASE_DISTANCE = CENTER_CIRCLE_RADIUS + 1.8;
 const CENTER_DUEL_SPOTS = {
-  blue: { x: -5.5, z: 7.5 },
-  red: { x: 5.5, z: -7.5 }
+  blue: { x: -CENTER_DUEL_START_DISTANCE, z: 0 },
+  red: { x: CENTER_DUEL_START_DISTANCE, z: 0 }
 };
 const STARTING_RIDER_SPOTS = [
   [-18, START_LINE_Z + 8],
@@ -64,6 +68,10 @@ function isOutsideField(point, margin = 0) {
     point.z < -WORLD.height / 2 - margin ||
     point.z > WORLD.height / 2 + margin
   );
+}
+
+function distanceFromCenter(point) {
+  return Math.hypot(point.x - CENTER_MARK.x, point.z - CENTER_MARK.z);
 }
 
 function createGroundDetails(scene) {
@@ -98,7 +106,7 @@ function createGroundDetails(scene) {
     transparent: true,
     opacity: 0.82
   });
-  const centerCircle = new THREE.Mesh(new THREE.TorusGeometry(8.5, 0.09, 8, 84), centerMarkMaterial);
+  const centerCircle = new THREE.Mesh(new THREE.TorusGeometry(CENTER_CIRCLE_RADIUS, 0.09, 8, 84), centerMarkMaterial);
   centerCircle.position.set(CENTER_MARK.x, 0.11, CENTER_MARK.z);
   centerCircle.rotation.x = Math.PI / 2;
   scene.add(centerCircle);
@@ -318,6 +326,48 @@ export function createKokparGame(container, onHudChange) {
     rider.bumpCooldown = 0.3;
   }
 
+  function keepRiderOutsideCenterDuel(rider) {
+    if (!match.duelMode || match.duelRiders.has(rider)) return;
+
+    const minDistance = CENTER_CIRCLE_RADIUS + CENTER_CIRCLE_GUARD_BUFFER;
+    const dx = rider.x - CENTER_MARK.x;
+    const dz = rider.z - CENTER_MARK.z;
+    const distance = Math.hypot(dx, dz);
+
+    if (distance >= minDistance) return;
+
+    const fallbackDirection = rider.team === TEAM.blue ? -1 : 1;
+    const nx = distance > 0.001 ? dx / distance : fallbackDirection;
+    const nz = distance > 0.001 ? dz / distance : 0;
+    rider.x = CENTER_MARK.x + nx * minDistance;
+    rider.z = CENTER_MARK.z + nz * minDistance;
+
+    const inwardSpeed = rider.vx * nx + rider.vz * nz;
+    if (inwardSpeed < 0) {
+      rider.vx -= nx * inwardSpeed;
+      rider.vz -= nz * inwardSpeed;
+    }
+  }
+
+  function keepNonDuelRidersOutsideCenter() {
+    riders.forEach(keepRiderOutsideCenterDuel);
+  }
+
+  function releaseCenterDuelIfNeeded() {
+    if (!match.duelMode) return;
+
+    const serkeStillInCircle = distanceFromCenter(kokpar) <= CENTER_DUEL_RELEASE_DISTANCE;
+    const duelRiderStillInCircle = Array.from(match.duelRiders).some(
+      (rider) => distanceFromCenter(rider) <= CENTER_CIRCLE_RADIUS + CENTER_CIRCLE_GUARD_BUFFER
+    );
+
+    if (serkeStillInCircle || duelRiderStillInCircle) return;
+
+    match.duelMode = false;
+    match.duelRiders.clear();
+    showMessage("Игра открыта", "Серке и дуэлянты вышли из круга. Все снова в борьбе.", 1.4);
+  }
+
   function startCenterDuel() {
     const blueDuelRider =
       riders.find((rider) => rider.team === TEAM.blue && rider.human) ??
@@ -348,7 +398,11 @@ export function createKokparGame(container, onHudChange) {
     kokpar.holder = null;
     kokpar.looseCooldown = 0.8;
 
-    beginCountdown("Аут", "Серке в центре. На подбор выходят один синий и один красный.", "Аут. Подбор через");
+    beginCountdown(
+      "Аут",
+      "Серке в центре. Дуэлянты ждут за кругом, остальные не входят внутрь.",
+      "Аут. Подбор через"
+    );
   }
 
   function scoreGoal(team) {
@@ -380,21 +434,19 @@ export function createKokparGame(container, onHudChange) {
 
   function attemptGrab(rider, active) {
     if (match.over || rider.grabCooldown > 0) return;
-    if (match.duelMode && !kokpar.holder && !match.duelRiders.has(rider)) return;
+    if (match.duelMode && !match.duelRiders.has(rider)) return;
 
     if (!kokpar.holder && kokpar.looseCooldown <= 0 && distance2D(rider, kokpar) < 4.2) {
       const wonCenterDuel = match.duelMode;
       kokpar.holder = rider;
       rider.grabCooldown = active ? 0.18 : 0.44;
-      match.duelMode = false;
-      match.duelRiders.clear();
       showMessage(
         wonCenterDuel
-          ? `${rider.name} выиграл подбор`
+          ? `${rider.name} поднял серке`
           : rider.human
             ? "Кокпар у тебя"
             : `${rider.name} поднял кокпар`,
-        wonCenterDuel ? "Игра снова открыта для всех всадников." : "Толпа закрывается.",
+        wonCenterDuel ? "Вытащи серке из круга, остальные пока не войдут." : "Толпа закрывается.",
         1.6
       );
       return;
@@ -503,6 +555,7 @@ export function createKokparGame(container, onHudChange) {
         -WORLD.height / 2 + 3.5,
         START_LINE_Z + START_LANE_DEPTH
       );
+      keepRiderOutsideCenterDuel(rider);
 
       if (Math.hypot(rider.vx, rider.vz) > 1) {
         rider.rotation = Math.atan2(rider.vz, rider.vx);
@@ -550,6 +603,8 @@ export function createKokparGame(container, onHudChange) {
         }
       }
     }
+
+    keepNonDuelRidersOutsideCenter();
   }
 
   function updateKokpar(dt) {
@@ -569,7 +624,9 @@ export function createKokparGame(container, onHudChange) {
 
       if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
         startCenterDuel();
+        return;
       }
+      releaseCenterDuelIfNeeded();
       return;
     }
 
@@ -580,7 +637,9 @@ export function createKokparGame(container, onHudChange) {
 
     if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
       startCenterDuel();
+      return;
     }
+    releaseCenterDuelIfNeeded();
   }
 
   function syncMeshes(time) {
