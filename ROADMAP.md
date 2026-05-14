@@ -32,6 +32,7 @@ Already done:
 - center pickup protects the circle from non-duel riders
 - team colors, basic uniforms, tack, and dust
 - team horses use different coats and matching tack
+- first pass horse steering, braking, drift, sprint, and speed-aware camera
 
 Exit criteria:
 

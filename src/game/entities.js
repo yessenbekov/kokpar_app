@@ -10,9 +10,13 @@ export function createRider(config) {
     stamina: 1,
     grabCooldown: 0,
     bumpCooldown: 0,
+    lean: 0,
     aiPhase: Math.random() * Math.PI * 2,
-    maxSpeed: config.human ? 25 : 22,
-    acceleration: config.human ? 82 : 64,
+    maxSpeed: config.human ? 27 : 24,
+    acceleration: config.human ? 36 : 31,
+    brakePower: config.human ? 50 : 42,
+    turnRate: config.human ? 3.2 : 2.65,
+    lateralGrip: config.human ? 7.4 : 6.2,
     group: null
   };
 }

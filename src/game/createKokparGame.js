@@ -21,6 +21,10 @@ function normalize2D(x, z) {
   return { x: x / length, z: z / length };
 }
 
+function angleDelta(target, current) {
+  return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+}
+
 function formatTime(seconds) {
   const min = String(Math.floor(seconds / 60)).padStart(2, "0");
   const sec = String(Math.floor(seconds % 60)).padStart(2, "0");
@@ -310,6 +314,7 @@ export function createKokparGame(container, onHudChange) {
       rider.z = STARTING_RIDER_SPOTS[index][1];
       rider.vx = 0;
       rider.vz = 0;
+      rider.lean = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
@@ -328,6 +333,7 @@ export function createKokparGame(container, onHudChange) {
     rider.z = spot.z;
     rider.vx = 0;
     rider.vz = 0;
+    rider.lean = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
     rider.grabCooldown = 0.8;
     rider.bumpCooldown = 0.3;
@@ -438,6 +444,46 @@ export function createKokparGame(container, onHudChange) {
     };
   }
 
+  function applyHorseControl(rider, direction, dt, options = {}) {
+    const sprint = options.sprint ?? false;
+    const urgency = options.urgency ?? 1;
+    const hasDirection = Boolean(direction);
+    const speed = Math.hypot(rider.vx, rider.vz);
+
+    if (hasDirection) {
+      const desiredRotation = Math.atan2(direction.z, direction.x);
+      const turnSlowdown = clamp(1 - speed / (rider.maxSpeed * 1.85), 0.48, 1);
+      const turnStep = rider.turnRate * turnSlowdown * clamp(urgency, 0.55, 1.35) * dt;
+      const turn = clamp(angleDelta(desiredRotation, rider.rotation), -turnStep, turnStep);
+      rider.rotation += turn;
+
+      const targetLean = clamp(-turn / Math.max(dt, 0.001) * 0.06, -0.22, 0.22);
+      rider.lean += (targetLean - rider.lean) * clamp(dt * 8, 0, 1);
+    } else {
+      rider.lean += (0 - rider.lean) * clamp(dt * 6, 0, 1);
+    }
+
+    const forward = { x: Math.cos(rider.rotation), z: Math.sin(rider.rotation) };
+    const side = { x: -forward.z, z: forward.x };
+    const forwardSpeed = rider.vx * forward.x + rider.vz * forward.z;
+    const sideSpeed = rider.vx * side.x + rider.vz * side.z;
+    const carrySlowdown = kokpar.holder === rider ? 0.88 : 1;
+    const sprintBoost = sprint ? 1.14 : 1;
+    const targetSpeed = hasDirection ? rider.maxSpeed * carrySlowdown * sprintBoost * clamp(urgency, 0.45, 1.18) : 0;
+    const speedDelta = targetSpeed - forwardSpeed;
+    const power = speedDelta >= 0 ? rider.acceleration : rider.brakePower;
+    const forwardChange = clamp(speedDelta, -power * dt, power * dt);
+    const grip = clamp(rider.lateralGrip * dt, 0, 0.78);
+    const surfaceDrag = Math.pow(hasDirection ? 0.992 : 0.965, dt * 60);
+
+    rider.vx += forward.x * forwardChange;
+    rider.vz += forward.z * forwardChange;
+    rider.vx -= side.x * sideSpeed * grip;
+    rider.vz -= side.z * sideSpeed * grip;
+    rider.vx *= surfaceDrag;
+    rider.vz *= surfaceDrag;
+  }
+
   function attemptGrab(rider, active) {
     if (match.over || rider.grabCooldown > 0) return;
     if (match.duelMode && !match.duelRiders.has(rider)) return;
@@ -485,19 +531,17 @@ export function createKokparGame(container, onHudChange) {
     if (keys.has("arrowdown") || keys.has("s")) az += 1;
 
     const moving = ax !== 0 || az !== 0;
-    const sprint = keys.has(" ") && rider.stamina > 0.04;
-    const direction = normalize2D(ax, az);
+    const sprint = moving && keys.has(" ") && rider.stamina > 0.08;
+    const direction = moving ? normalize2D(ax, az) : null;
 
-    if (moving) {
-      const power = sprint ? 1.55 : 1;
-      rider.vx += direction.x * rider.acceleration * power * dt;
-      rider.vz += direction.z * rider.acceleration * power * dt;
-    }
+    applyHorseControl(rider, direction, dt, { sprint });
 
     if (sprint && moving) {
       rider.stamina = clamp(rider.stamina - dt * 0.36, 0, 1);
+    } else if (moving) {
+      rider.stamina = clamp(rider.stamina + dt * 0.12, 0, 1);
     } else {
-      rider.stamina = clamp(rider.stamina + dt * 0.18, 0, 1);
+      rider.stamina = clamp(rider.stamina + dt * 0.22, 0, 1);
     }
 
     if (keys.has(" ")) attemptGrab(rider, true);
@@ -522,9 +566,10 @@ export function createKokparGame(container, onHudChange) {
     };
     const direction = normalize2D(target.x + wander.x - rider.x, target.z + wander.z - rider.z);
     const urgency = kokpar.holder && kokpar.holder.team !== rider.team ? 1.22 : 1;
+    const targetDistance = Math.hypot(target.x - rider.x, target.z - rider.z);
+    const pacing = kokpar.holder === rider ? 1 : clamp(targetDistance / 14, 0.35, 1);
 
-    rider.vx += direction.x * rider.acceleration * urgency * dt;
-    rider.vz += direction.z * rider.acceleration * urgency * dt;
+    applyHorseControl(rider, direction, dt, { urgency: urgency * pacing });
     attemptGrab(rider, false);
   }
 
@@ -544,17 +589,13 @@ export function createKokparGame(container, onHudChange) {
         updateAI(rider, dt, time);
       }
 
-      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1);
+      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.92 : 1.16);
       const speed = Math.hypot(rider.vx, rider.vz);
 
       if (speed > maxSpeed) {
         rider.vx = (rider.vx / speed) * maxSpeed;
         rider.vz = (rider.vz / speed) * maxSpeed;
       }
-
-      const drag = Math.pow(0.9, dt * 60);
-      rider.vx *= drag;
-      rider.vz *= drag;
       rider.x = clamp(
         rider.x + rider.vx * dt,
         -WORLD.width / 2 - RIDER_FIELD_EXIT_BUFFER,
@@ -566,10 +607,6 @@ export function createKokparGame(container, onHudChange) {
         START_LINE_Z + START_LANE_DEPTH
       );
       keepRiderOutsideCenterDuel(rider);
-
-      if (Math.hypot(rider.vx, rider.vz) > 1) {
-        rider.rotation = Math.atan2(rider.vz, rider.vx);
-      }
     });
   }
 
@@ -661,6 +698,7 @@ export function createKokparGame(container, onHudChange) {
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
+      rider.group.rotation.z = rider.lean ?? 0;
       rider.group.scale.setScalar(scale);
 
       if (dust) {
@@ -676,9 +714,24 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function updateCamera(dt) {
-    const desired = new THREE.Vector3(player.x - 16, 31, player.z + 30);
-    camera.position.lerp(desired, 1 - Math.pow(0.001, dt));
-    camera.lookAt(player.x + 5, 0.8, player.z);
+    const speed = Math.hypot(player.vx, player.vz);
+    const speedRatio = clamp(speed / player.maxSpeed, 0, 1);
+    const serkeDistance = distance2D(player, kokpar);
+    const serkeLead = kokpar.holder === player ? 0.12 : clamp(0.22 - serkeDistance / 360, 0.08, 0.22);
+    const focusX = player.x + player.vx * 0.24 + (kokpar.x - player.x) * serkeLead;
+    const focusZ = player.z + player.vz * 0.24 + (kokpar.z - player.z) * serkeLead;
+    const desired = new THREE.Vector3(
+      focusX - 18 - speedRatio * 4,
+      31 + speedRatio * 7,
+      focusZ + 31 + speedRatio * 7
+    );
+    const cameraEase = 1 - Math.pow(0.015, dt);
+    const targetFov = 56 + speedRatio * 5;
+
+    camera.position.lerp(desired, cameraEase);
+    camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.04, dt));
+    camera.updateProjectionMatrix();
+    camera.lookAt(focusX + 4, 0.9, focusZ);
   }
 
   function resize() {
