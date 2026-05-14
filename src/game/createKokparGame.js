@@ -32,7 +32,8 @@ const CENTER_MARK = { x: 0, z: 0 };
 const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
 const ROUND_COUNTDOWN_SECONDS = 3;
-const OUT_OF_BOUNDS_MARGIN = 0.8;
+const OUT_OF_BOUNDS_MARGIN = 0.2;
+const RIDER_FIELD_EXIT_BUFFER = 10;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -549,10 +550,14 @@ export function createKokparGame(container, onHudChange) {
       const drag = Math.pow(0.9, dt * 60);
       rider.vx *= drag;
       rider.vz *= drag;
-      rider.x = clamp(rider.x + rider.vx * dt, -WORLD.width / 2 + 3.5, WORLD.width / 2 - 3.5);
+      rider.x = clamp(
+        rider.x + rider.vx * dt,
+        -WORLD.width / 2 - RIDER_FIELD_EXIT_BUFFER,
+        WORLD.width / 2 + RIDER_FIELD_EXIT_BUFFER
+      );
       rider.z = clamp(
         rider.z + rider.vz * dt,
-        -WORLD.height / 2 + 3.5,
+        -WORLD.height / 2 - RIDER_FIELD_EXIT_BUFFER,
         START_LINE_Z + START_LANE_DEPTH
       );
       keepRiderOutsideCenterDuel(rider);
