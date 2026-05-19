@@ -39,6 +39,7 @@ Already done:
 - simple horse gait animation, stronger dust, and visible carried-serke strap
 - broadcast-style countdown camera for start line, serke, and center duel resets
 - tighter horse turning with sharp-turn braking and grip assist
+- first arena pass with rails, flags, stands, crowd silhouettes, and sand tracks
 
 Exit criteria:
 
@@ -97,7 +98,7 @@ Tasks:
 - replace primitive horses with GLB horse models
 - replace primitive riders with GLB rider models
 - add separate serke dummy model
-- add arena boundary, dustier field material, flags, posts, and crowd silhouettes
+- add arena boundary, dustier field material, flags, posts, and crowd silhouettes (first pass done)
 - add better lighting, shadows, fog, and color grading
 - add particle dust trails
 - add UI polish and gamepad-ready controls
