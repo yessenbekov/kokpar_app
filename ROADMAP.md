@@ -44,6 +44,7 @@ Already done:
 - softer rider collisions with damped camera focus and clearer serke contest markers
 - mounted serke tug contest before a held serke can be stolen
 - contest camera lock-on plus separate pickup/down-reach and mounted-pull poses
+- GLB asset pipeline with manifest-based horse, rider, and serke fallbacks
 
 Exit criteria:
 
@@ -104,9 +105,9 @@ Purpose: push the current prototype as far as reasonable before switching engine
 
 Tasks:
 
-- replace primitive horses with GLB horse models
-- replace primitive riders with GLB rider models
-- add separate serke dummy model
+- replace primitive horses with GLB horse models (pipeline ready, asset pending)
+- replace primitive riders with GLB rider models (pipeline ready, asset pending)
+- add separate serke dummy model (pipeline ready, asset pending)
 - add arena boundary, dustier field material, flags, posts, and crowd silhouettes (first pass done)
 - add better lighting, shadows, fog, and color grading
 - add particle dust trails

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS, MATCH_SECONDS, TEAM, WORLD, goalFor } from "./constants.js";
+import { createGameAssetPipeline, createRiderModelInstance, createSerkeModelInstance } from "./assets.js";
 import {
   createContestIndicatorMesh,
   createGoalMesh,
@@ -323,6 +324,7 @@ function createContestRiderMarker(color) {
 }
 
 export function createKokparGame(container, onHudChange) {
+  const assetPipeline = createGameAssetPipeline();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(COLORS.sky);
   scene.fog = new THREE.Fog(COLORS.sky, 82, 160);
@@ -370,10 +372,20 @@ export function createKokparGame(container, onHudChange) {
 
   const riders = createInitialRiders();
   const player = riders[0];
-  riders.forEach((rider) => {
-    rider.group = createHorseMesh(rider.color, rider.team);
-    rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
+
+  function setRiderGroup(rider, nextGroup) {
+    if (rider.group) {
+      scene.remove(rider.group);
+      disposeObject3D(rider.group);
+    }
+
+    rider.group = nextGroup;
     scene.add(rider.group);
+  }
+
+  riders.forEach((rider) => {
+    setRiderGroup(rider, createHorseMesh(rider.color, rider.team));
+    rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.contestMarker);
   });
 
@@ -396,6 +408,13 @@ export function createKokparGame(container, onHudChange) {
     mesh: createKokparMesh()
   };
   scene.add(kokpar.mesh);
+
+  function setKokparMesh(nextMesh) {
+    scene.remove(kokpar.mesh);
+    disposeObject3D(kokpar.mesh);
+    kokpar.mesh = nextMesh;
+    scene.add(kokpar.mesh);
+  }
 
   const carryStrap = new THREE.Mesh(
     new THREE.CylinderGeometry(0.045, 0.045, 1, 8),
@@ -445,6 +464,18 @@ export function createKokparGame(container, onHudChange) {
   const cameraLookAt = new THREE.Vector3();
   const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
   const cameraTrackTarget = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
+
+  assetPipeline.readyPromise.then(() => {
+    if (isDestroyed) return;
+
+    riders.forEach((rider) => {
+      const modelGroup = createRiderModelInstance(assetPipeline, rider);
+      if (modelGroup) setRiderGroup(rider, modelGroup);
+    });
+
+    const serkeModel = createSerkeModelInstance(assetPipeline);
+    if (serkeModel) setKokparMesh(serkeModel);
+  });
 
   function contestStatusText() {
     const progress = kokpar.contest.progress;

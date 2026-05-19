@@ -1,0 +1,31 @@
+{
+  "notes": [
+    "Set any path below to a .glb or .gltf file inside public/models to replace procedural meshes at runtime.",
+    "Use riderHorse for one combined horse+rider model, or use horse and rider separately.",
+    "Local orientation convention: forward is +X, up is +Y, origin is near the horse body center."
+  ],
+  "riderHorse": {
+    "path": null,
+    "scale": 1,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
+  },
+  "horse": {
+    "path": null,
+    "scale": 1,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
+  },
+  "rider": {
+    "path": null,
+    "scale": 1,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
+  },
+  "serke": {
+    "path": null,
+    "scale": 1,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
+  }
+}
