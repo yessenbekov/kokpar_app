@@ -50,8 +50,12 @@ const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
 const CONTEST_MAX_SECONDS = 1.55;
 const CONTEST_PROGRESS_RATE = 1.15;
-const TACKLE_DROP_THRESHOLD = 0.58;
-const TACKLE_STEAL_THRESHOLD = 0.86;
+const MOUNTED_CONTEST_RADIUS = 5.2;
+const MOUNTED_CONTEST_MIN_SECONDS = 0.65;
+const MOUNTED_CONTEST_MAX_SECONDS = 2.35;
+const MOUNTED_CONTEST_PROGRESS_RATE = 0.95;
+const TACKLE_DROP_THRESHOLD = 0.94;
+const TACKLE_MOUNTED_CONTEST_THRESHOLD = 0.36;
 const TACKLE_STAGGER_THRESHOLD = 0.4;
 const RIDER_COLLISION_RADIUS = 3.6;
 const CENTER_CIRCLE_RADIUS = 8.5;
@@ -382,9 +386,12 @@ export function createKokparGame(container, onHudChange) {
     looseCooldown: 0,
     contest: {
       active: false,
+      mode: "loose",
       progress: 0,
       time: 0,
-      leader: null
+      leader: null,
+      holder: null,
+      challenger: null
     },
     mesh: createKokparMesh()
   };
@@ -431,9 +438,10 @@ export function createKokparGame(container, onHudChange) {
 
   function contestStatusText() {
     const progress = kokpar.contest.progress;
-    if (progress > 0.18) return "Борьба: синие ведут";
-    if (progress < -0.18) return "Борьба: красные ведут";
-    return "Борьба: равный подбор";
+    const prefix = kokpar.contest.mode === "mounted" ? "Тянут серке" : "Борьба";
+    if (progress > 0.18) return `${prefix}: синие ведут`;
+    if (progress < -0.18) return `${prefix}: красные ведут`;
+    return `${prefix}: равная`;
   }
 
   function publishHud() {
@@ -500,9 +508,12 @@ export function createKokparGame(container, onHudChange) {
 
   function clearContest() {
     kokpar.contest.active = false;
+    kokpar.contest.mode = "loose";
     kokpar.contest.progress = 0;
     kokpar.contest.time = 0;
     kokpar.contest.leader = null;
+    kokpar.contest.holder = null;
+    kokpar.contest.challenger = null;
   }
 
   function resetPositions() {
@@ -958,15 +969,6 @@ export function createKokparGame(container, onHudChange) {
     );
   }
 
-  function stealKokparByTackle(holder, tackler, active) {
-    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
-
-    applyStagger(holder, 0.55, { x: push.x * 3.8, z: push.z * 3.8 });
-    holder.bumpCooldown = 0.86;
-    tackler.grabCooldown = active ? 0.34 : 0.48;
-    takeKokpar(tackler, { active, stolen: true });
-  }
-
   function staggerFromTackle(holder, tackler, quality) {
     const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
 
@@ -979,19 +981,69 @@ export function createKokparGame(container, onHudChange) {
     }
   }
 
+  function startMountedContest(holder, challenger, active, quality) {
+    if (kokpar.contest.active && kokpar.contest.mode === "mounted") return;
+
+    const holderSign = holder.team === TEAM.blue ? 1 : -1;
+
+    kokpar.contest.active = true;
+    kokpar.contest.mode = "mounted";
+    kokpar.contest.progress = holderSign * 0.46;
+    kokpar.contest.time = 0;
+    kokpar.contest.leader = holder;
+    kokpar.contest.holder = holder;
+    kokpar.contest.challenger = challenger;
+
+    holder.bumpCooldown = Math.max(holder.bumpCooldown, 0.28);
+    challenger.grabCooldown = active ? 0.18 : 0.34;
+    holder.hitFlash = Math.max(holder.hitFlash, 0.45);
+    challenger.hitFlash = Math.max(challenger.hitFlash, 0.45);
+
+    if (quality >= TACKLE_STAGGER_THRESHOLD) {
+      const push = normalize2D(holder.x - challenger.x, holder.z - challenger.z);
+      holder.vx += push.x * 0.75;
+      holder.vz += push.z * 0.75;
+      challenger.vx -= push.x * 0.45;
+      challenger.vz -= push.z * 0.45;
+    }
+
+    showMessage(
+      "Серке тянут!",
+      challenger.human
+        ? "Держись рядом и жми Space, чтобы вырвать серке."
+        : `${challenger.name} тянет серке. Нужна борьба, одного удара мало.`,
+      1.25
+    );
+  }
+
+  function holderKeepsMountedContest(holder, challenger) {
+    clearContest();
+    holder.bumpCooldown = Math.max(holder.bumpCooldown, 0.28);
+    if (challenger) challenger.grabCooldown = Math.max(challenger.grabCooldown, 0.48);
+
+    if (holder.human || challenger?.human) {
+      showMessage(
+        holder.human ? "Ты удержал серке" : `${holder.name} удержал серке`,
+        "Соперник не смог вырвать его в борьбе.",
+        1.2
+      );
+    }
+  }
+
   function resolveTackleAttempt(tackler, active, impactBonus = 0) {
     const holder = kokpar.holder;
     if (!holder || holder.team === tackler.team || holder === tackler) return;
+    if (kokpar.contest.active && kokpar.contest.mode === "mounted") return;
 
     const quality = tackleQuality(tackler, holder, active, impactBonus);
 
-    if (quality >= TACKLE_STEAL_THRESHOLD) {
-      stealKokparByTackle(holder, tackler, active);
+    if (quality >= TACKLE_DROP_THRESHOLD) {
+      dropKokparFromTackle(holder, tackler, quality);
       return;
     }
 
-    if (quality >= TACKLE_DROP_THRESHOLD) {
-      dropKokparFromTackle(holder, tackler, quality);
+    if (quality >= TACKLE_MOUNTED_CONTEST_THRESHOLD) {
+      startMountedContest(holder, tackler, active, quality);
       return;
     }
 
@@ -1004,6 +1056,19 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function contestCandidates(radius = CONTEST_RADIUS) {
+    if (kokpar.contest.active && kokpar.contest.mode === "mounted") {
+      const holder = kokpar.contest.holder;
+      const challenger = kokpar.contest.challenger;
+      const candidates = [];
+
+      if (holder && kokpar.holder === holder) candidates.push(holder);
+      if (challenger && holder && distance2D(challenger, holder) <= MOUNTED_CONTEST_RADIUS) {
+        candidates.push(challenger);
+      }
+
+      return candidates;
+    }
+
     return riders.filter(
       (rider) =>
         (!match.duelMode || match.duelRiders.has(rider)) &&
@@ -1012,18 +1077,34 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function contestPowerForRider(rider) {
-    const distance = distance2D(rider, kokpar);
-    if (distance > CONTEST_RADIUS) return 0;
+    const mounted = kokpar.contest.active && kokpar.contest.mode === "mounted";
+    const holder = kokpar.contest.holder;
+    const challenger = kokpar.contest.challenger;
+    const distance = mounted && holder ? distance2D(rider, holder) : distance2D(rider, kokpar);
+    const maxDistance = mounted ? MOUNTED_CONTEST_RADIUS : CONTEST_RADIUS;
+    if (distance > maxDistance) return 0;
 
     const speed = Math.hypot(rider.vx, rider.vz);
-    const distancePower = clamp(1 - (distance - 1.6) / (CONTEST_RADIUS - 1.6), 0.12, 1);
-    const speedPower = clamp(1 - speed / 24, 0.52, 1);
+    const distancePower = mounted
+      ? rider === holder
+        ? 1
+        : clamp(1 - (distance - 2.1) / (maxDistance - 2.1), 0.16, 1)
+      : clamp(1 - (distance - 1.6) / (CONTEST_RADIUS - 1.6), 0.12, 1);
+    const speedPower = clamp(1 - speed / (mounted ? 22 : 24), 0.52, 1);
     const staminaPower = 0.72 + rider.stamina * 0.28;
     const intentPower = rider.human && keys.has(" ") ? 1.22 : 1;
-    const rolePower = rider.aiRole === "pickup" || rider.aiRole === "tackler" ? 1.08 : 1;
-    const bumpPower = rider.bumpCooldown > 0 ? 0.64 : 1;
+    const rolePower = rider.aiRole === "pickup" || rider.aiRole === "tackler" ? 1.08 : rider.aiRole === "carrier" ? 1.04 : 1;
+    const bumpPower = mounted && rider === holder ? 1 : rider.bumpCooldown > 0 ? 0.64 : 1;
+    const mountedPower =
+      mounted
+        ? rider === holder
+          ? 1.18
+          : rider === challenger
+            ? 1.08
+            : 1
+        : 1;
 
-    return distancePower * speedPower * staminaPower * intentPower * rolePower * bumpPower;
+    return distancePower * speedPower * staminaPower * intentPower * rolePower * bumpPower * mountedPower;
   }
 
   function contestPowerForTeam(team, candidates) {
@@ -1046,6 +1127,7 @@ export function createKokparGame(container, onHudChange) {
     const active = options.active ?? false;
     const contested = options.contested ?? false;
     const stolen = options.stolen ?? false;
+    const mounted = options.mounted ?? false;
     const wonCenterDuel = match.duelMode;
 
     clearContest();
@@ -1055,7 +1137,9 @@ export function createKokparGame(container, onHudChange) {
     showMessage(
       stolen
         ? rider.human
-          ? "Чистый перехват!"
+          ? mounted
+            ? "Ты вырвал серке!"
+            : "Чистый перехват!"
           : `${rider.name} вырвал серке`
         : contested
         ? rider.human
@@ -1067,7 +1151,9 @@ export function createKokparGame(container, onHudChange) {
             ? "Кокпар у тебя"
             : `${rider.name} поднял кокпар`,
       stolen
-        ? "Сильный контакт и правильный угол атаки."
+        ? mounted
+          ? "Победа после борьбы на лошади."
+          : "Сильный контакт и правильный угол атаки."
         : contested
         ? wonCenterDuel
           ? "Вытащи серке из круга, остальные пока не войдут."
@@ -1081,9 +1167,12 @@ export function createKokparGame(container, onHudChange) {
 
   function startContest(rider, active) {
     kokpar.contest.active = true;
+    kokpar.contest.mode = "loose";
     kokpar.contest.progress = rider.team === TEAM.blue ? 0.12 : -0.12;
     kokpar.contest.time = 0;
     kokpar.contest.leader = rider;
+    kokpar.contest.holder = null;
+    kokpar.contest.challenger = null;
     kokpar.vx *= 0.28;
     kokpar.vz *= 0.28;
     rider.grabCooldown = active ? 0.18 : 0.38;
@@ -1100,7 +1189,7 @@ export function createKokparGame(container, onHudChange) {
   function updateContest(dt) {
     if (!kokpar.contest.active) return;
 
-    if (kokpar.holder) {
+    if (kokpar.holder && kokpar.contest.mode !== "mounted") {
       clearContest();
       return;
     }
@@ -1111,18 +1200,64 @@ export function createKokparGame(container, onHudChange) {
       return;
     }
 
+    if (kokpar.contest.mode === "mounted") {
+      const holder = kokpar.contest.holder;
+      const challenger = kokpar.contest.challenger;
+
+      if (!holder || kokpar.holder !== holder || !challenger || distance2D(holder, challenger) > MOUNTED_CONTEST_RADIUS) {
+        if (holder && kokpar.holder === holder) holderKeepsMountedContest(holder, challenger);
+        else clearContest();
+        return;
+      }
+    }
+
     const bluePower = contestPowerForTeam(TEAM.blue, candidates);
     const redPower = contestPowerForTeam(TEAM.red, candidates);
     const totalPower = bluePower + redPower;
     if (totalPower <= 0.01) return;
 
+    const progressRate = kokpar.contest.mode === "mounted" ? MOUNTED_CONTEST_PROGRESS_RATE : CONTEST_PROGRESS_RATE;
+
     kokpar.contest.time += dt;
     kokpar.contest.progress = clamp(
-      kokpar.contest.progress + ((bluePower - redPower) / totalPower) * CONTEST_PROGRESS_RATE * dt,
+      kokpar.contest.progress + ((bluePower - redPower) / totalPower) * progressRate * dt,
       -1,
       1
     );
     kokpar.contest.leader = contestLeader(candidates);
+
+    if (kokpar.contest.mode === "mounted") {
+      const holder = kokpar.contest.holder;
+      const challenger = kokpar.contest.challenger;
+      const holderSign = holder.team === TEAM.blue ? 1 : -1;
+      const challengerSign = challenger.team === TEAM.blue ? 1 : -1;
+      const holderWinning =
+        Math.sign(kokpar.contest.progress) === holderSign && Math.abs(kokpar.contest.progress) >= 0.88;
+      const challengerWinning =
+        Math.sign(kokpar.contest.progress) === challengerSign && Math.abs(kokpar.contest.progress) >= 0.82;
+      const timedOut = kokpar.contest.time >= MOUNTED_CONTEST_MAX_SECONDS;
+      const challengerLeads =
+        Math.sign(kokpar.contest.progress) === challengerSign && Math.abs(kokpar.contest.progress) >= 0.42;
+
+      if (challengerWinning && kokpar.contest.time >= MOUNTED_CONTEST_MIN_SECONDS) {
+        takeKokpar(challenger, { contested: true, stolen: true, mounted: true });
+        return;
+      }
+
+      if (holderWinning && kokpar.contest.time >= MOUNTED_CONTEST_MIN_SECONDS) {
+        holderKeepsMountedContest(holder, challenger);
+        return;
+      }
+
+      if (timedOut) {
+        if (challengerLeads) {
+          takeKokpar(challenger, { contested: true, stolen: true, mounted: true });
+        } else {
+          holderKeepsMountedContest(holder, challenger);
+        }
+      }
+      return;
+    }
 
     const oneTeamLeft = bluePower <= 0.04 || redPower <= 0.04;
     const decisive = Math.abs(kokpar.contest.progress) >= 0.78 && kokpar.contest.time >= CONTEST_MIN_SECONDS;
@@ -1224,7 +1359,11 @@ export function createKokparGame(container, onHudChange) {
         updateAI(rider, dt, time);
       }
 
-      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04);
+      const inMountedContest =
+        kokpar.contest.active &&
+        kokpar.contest.mode === "mounted" &&
+        (kokpar.contest.holder === rider || kokpar.contest.challenger === rider);
+      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04) * (inMountedContest ? 0.72 : 1);
       const speed = Math.hypot(rider.vx, rider.vz);
 
       if (speed > maxSpeed) {
@@ -1330,7 +1469,7 @@ export function createKokparGame(container, onHudChange) {
   function updateKokpar(dt) {
     kokpar.looseCooldown = Math.max(0, kokpar.looseCooldown - dt);
 
-    if (kokpar.contest.active) {
+    if (kokpar.contest.active && kokpar.contest.mode !== "mounted") {
       updateContest(dt);
       return;
     }
@@ -1345,6 +1484,11 @@ export function createKokparGame(container, onHudChange) {
       kokpar.z = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
       kokpar.vx = rider.vx;
       kokpar.vz = rider.vz;
+
+      if (kokpar.contest.active && kokpar.contest.mode === "mounted") {
+        updateContest(dt);
+        if (kokpar.holder !== rider) return;
+      }
 
       if (Math.hypot(kokpar.x - goalFor(rider.team).x, kokpar.z - goalFor(rider.team).z) < GOAL_RADIUS) {
         scoreGoal(rider.team);
@@ -1373,8 +1517,12 @@ export function createKokparGame(container, onHudChange) {
 
   function syncMeshes(time) {
     const contestParticipants =
-      kokpar.contest.active && !kokpar.holder
-        ? new Set(contestCandidates(CONTEST_RADIUS + 0.25))
+      kokpar.contest.active
+        ? new Set(
+            kokpar.contest.mode === "mounted"
+              ? [kokpar.contest.holder, kokpar.contest.challenger].filter(Boolean)
+              : contestCandidates(CONTEST_RADIUS + 0.25)
+          )
         : new Set();
 
     riders.forEach((rider) => {
