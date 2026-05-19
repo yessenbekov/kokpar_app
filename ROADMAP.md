@@ -43,6 +43,7 @@ Already done:
 - pre-start movement inside each team's start lane before the whistle
 - softer rider collisions with damped camera focus and clearer serke contest markers
 - mounted serke tug contest before a held serke can be stolen
+- contest camera lock-on plus separate pickup/down-reach and mounted-pull poses
 
 Exit criteria:
 
@@ -64,6 +65,7 @@ Tasks:
 - reduce camera shake and hard jitter during rider collisions
 - make serke contests readable with team advantage and participant markers
 - require mounted tug-of-war before stealing a held serke
+- show different poses for ground pickup versus pulling serke from another rider
 - add match restart after goal with a short countdown
 - add camera smoothing, zoom, and better angle for reading the play
 - add touch controls later, but keep keyboard first

@@ -404,6 +404,13 @@ export function createKokparGame(container, onHudChange) {
   carryStrap.visible = false;
   scene.add(carryStrap);
 
+  const contestTugStrap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 1, 8),
+    new THREE.MeshBasicMaterial({ color: "#fff4c8", transparent: true, opacity: 0.74 })
+  );
+  contestTugStrap.visible = false;
+  scene.add(contestTugStrap);
+
   const contestIndicator = createContestIndicatorMesh();
   scene.add(contestIndicator);
 
@@ -411,6 +418,9 @@ export function createKokparGame(container, onHudChange) {
   const carryStrapStart = new THREE.Vector3();
   const carryStrapEnd = new THREE.Vector3();
   const carryStrapDirection = new THREE.Vector3();
+  const tugStrapStart = new THREE.Vector3();
+  const tugStrapEnd = new THREE.Vector3();
+  const tugStrapDirection = new THREE.Vector3();
 
   const keys = new Set();
   const match = {
@@ -1516,10 +1526,11 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function syncMeshes(time) {
+    const mountedContest = kokpar.contest.active && kokpar.contest.mode === "mounted";
     const contestParticipants =
       kokpar.contest.active
         ? new Set(
-            kokpar.contest.mode === "mounted"
+            mountedContest
               ? [kokpar.contest.holder, kokpar.contest.challenger].filter(Boolean)
               : contestCandidates(CONTEST_RADIUS + 0.25)
           )
@@ -1534,7 +1545,13 @@ export function createKokparGame(container, onHudChange) {
       const stride = time * (5.3 + speed * 0.52) + rider.aiPhase;
       const legs = rider.group.userData.legs ?? [];
       const tail = rider.group.userData.tail;
+      const arms = rider.group.userData.arms ?? [];
+      const upperBody = rider.group.userData.upperBody ?? [];
       const dust = rider.group.userData.dust;
+      const inContest = contestParticipants.has(rider);
+      const pickupPose = inContest && kokpar.contest.active && !mountedContest ? 1 : 0;
+      const tugPose = inContest && mountedContest ? 1 : 0;
+      const posePower = inContest ? clamp(contestPowerForRider(rider), 0, 1.25) : 0;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
@@ -1562,6 +1579,38 @@ export function createKokparGame(container, onHudChange) {
         tail.rotation.z = rider.group.userData.tailBaseRotationZ + speedRatio * 0.12;
       }
 
+      upperBody.forEach((part) => {
+        const tugDirection =
+          mountedContest && rider === kokpar.contest.challenger
+            ? 1
+            : mountedContest && rider === kokpar.contest.holder
+              ? -0.45
+              : 0;
+
+        part.mesh.rotation.x = part.baseRotationX - pickupPose * (0.2 + posePower * 0.04) - tugPose * 0.06;
+        part.mesh.rotation.z = part.baseRotationZ + tugPose * tugDirection * 0.08;
+        part.mesh.position.y = part.baseY - pickupPose * 0.1;
+      });
+
+      arms.forEach((arm) => {
+        const tugDirection =
+          mountedContest && rider === kokpar.contest.challenger
+            ? 1
+            : mountedContest && rider === kokpar.contest.holder
+              ? -0.35
+              : 0;
+
+        arm.mesh.rotation.z =
+          arm.baseRotationZ +
+          pickupPose * (0.45 + posePower * 0.14) +
+          tugPose * (0.22 + posePower * 0.12);
+        arm.mesh.rotation.x =
+          arm.baseRotationX +
+          arm.side * pickupPose * 0.3 +
+          arm.side * tugPose * tugDirection * 0.34;
+        arm.mesh.position.y = arm.baseY - pickupPose * 0.12;
+      });
+
       if (dust) {
         const dustPower = clamp(speedRatio * 0.82 + Math.abs(rider.lean ?? 0) * 1.35 + rider.hitFlash * 0.5, 0, 1);
         dust.visible = dustPower > 0.12;
@@ -1576,7 +1625,6 @@ export function createKokparGame(container, onHudChange) {
       }
 
       if (rider.contestMarker) {
-        const inContest = contestParticipants.has(rider);
         const isLeader = kokpar.contest.leader === rider;
 
         rider.contestMarker.visible = inContest;
@@ -1624,6 +1672,29 @@ export function createKokparGame(container, onHudChange) {
       }
     }
 
+    const tugChallenger = mountedContest ? kokpar.contest.challenger : null;
+    contestTugStrap.visible = Boolean(tugChallenger && kokpar.holder);
+    if (contestTugStrap.visible) {
+      const challengerForward = forwardVector(tugChallenger);
+      const challengerSide = { x: -challengerForward.z, z: challengerForward.x };
+      const tugSide = tugChallenger.team === TEAM.blue ? -1 : 1;
+
+      tugStrapStart.set(
+        tugChallenger.x + challengerForward.x * 0.3 + challengerSide.x * tugSide * 0.5,
+        2.42,
+        tugChallenger.z + challengerForward.z * 0.3 + challengerSide.z * tugSide * 0.5
+      );
+      tugStrapEnd.set(kokpar.x, carriedHeight, kokpar.z);
+      tugStrapDirection.subVectors(tugStrapEnd, tugStrapStart);
+
+      const tugLength = tugStrapDirection.length();
+      if (tugLength > 0.001) {
+        contestTugStrap.position.copy(tugStrapStart).addScaledVector(tugStrapDirection, 0.5);
+        contestTugStrap.scale.set(1, tugLength, 1);
+        contestTugStrap.quaternion.setFromUnitVectors(carryStrapAxis, tugStrapDirection.normalize());
+      }
+    }
+
     contestIndicator.visible = kokpar.contest.active;
     if (kokpar.contest.active) {
       const progress = clamp(kokpar.contest.progress, -1, 1);
@@ -1665,6 +1736,29 @@ export function createKokparGame(container, onHudChange) {
       cameraTrack.copy(cameraLookAt);
       camera.position.lerp(cameraDesired, countdownEase);
       camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.03, dt));
+      camera.updateProjectionMatrix();
+      camera.lookAt(cameraLookAt);
+      return;
+    }
+
+    if (kokpar.contest.active) {
+      const mounted = kokpar.contest.mode === "mounted";
+      const focusRiders = mounted
+        ? [kokpar.contest.holder, kokpar.contest.challenger].filter(Boolean)
+        : contestCandidates(CONTEST_RADIUS + 0.25);
+      const focusDivisor = focusRiders.length + 1;
+      const focusX = (kokpar.x + focusRiders.reduce((total, rider) => total + rider.x, 0)) / focusDivisor;
+      const focusZ = (kokpar.z + focusRiders.reduce((total, rider) => total + rider.z, 0)) / focusDivisor;
+      const contestEase = 1 - Math.pow(0.008, dt);
+
+      cameraTrackTarget.set(focusX, 1.05, focusZ);
+      cameraTrack.lerp(cameraTrackTarget, contestEase);
+      cameraDesired.set(cameraTrack.x - 15, mounted ? 32 : 36, cameraTrack.z + (mounted ? 26 : 30));
+      cameraLookAt.set(cameraTrack.x + 2.6, 1.1, cameraTrack.z);
+
+      const targetFov = mounted ? 54 : 58;
+      camera.position.lerp(cameraDesired, 1 - Math.pow(0.01, dt));
+      camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.035, dt));
       camera.updateProjectionMatrix();
       camera.lookAt(cameraLookAt);
       return;

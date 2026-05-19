@@ -45,6 +45,8 @@ function horsePaletteFor(team) {
 export function createHorseMesh(color, team) {
   const group = new THREE.Group();
   const legs = [];
+  const arms = [];
+  const upperBody = [];
   const horsePalette = horsePaletteFor(team);
   const horseMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.coat, roughness: 0.78 });
   const darkMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.dark, roughness: 0.82 });
@@ -170,24 +172,54 @@ export function createHorseMesh(color, team) {
   const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.92, 8, 16), riderMaterial);
   torso.position.set(-0.12, 2.3, 0);
   group.add(torso);
+  upperBody.push({
+    mesh: torso,
+    baseRotationX: torso.rotation.x,
+    baseRotationZ: torso.rotation.z,
+    baseY: torso.position.y
+  });
 
   const chestStripe = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.78, 0.58), trimMaterial);
   chestStripe.position.set(0.04, 2.35, 0);
   chestStripe.rotation.z = -0.1;
   group.add(chestStripe);
+  upperBody.push({
+    mesh: chestStripe,
+    baseRotationX: chestStripe.rotation.x,
+    baseRotationZ: chestStripe.rotation.z,
+    baseY: chestStripe.position.y
+  });
 
   const riderHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 12), skinMaterial);
   riderHead.position.set(0.1, 3.03, 0);
   group.add(riderHead);
+  upperBody.push({
+    mesh: riderHead,
+    baseRotationX: riderHead.rotation.x,
+    baseRotationZ: riderHead.rotation.z,
+    baseY: riderHead.position.y
+  });
 
   const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), uniformMaterial);
   helmet.position.set(0.1, 3.18, 0);
   group.add(helmet);
+  upperBody.push({
+    mesh: helmet,
+    baseRotationX: helmet.rotation.x,
+    baseRotationZ: helmet.rotation.z,
+    baseY: helmet.position.y
+  });
 
   const helmetBrim = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.05, 0.5), darkMaterial);
   helmetBrim.position.set(0.35, 3.14, 0);
   helmetBrim.rotation.z = -0.06;
   group.add(helmetBrim);
+  upperBody.push({
+    mesh: helmetBrim,
+    baseRotationX: helmetBrim.rotation.x,
+    baseRotationZ: helmetBrim.rotation.z,
+    baseY: helmetBrim.position.y
+  });
 
   for (const z of [-0.34, 0.34]) {
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.78, 10), riderMaterial);
@@ -195,12 +227,21 @@ export function createHorseMesh(color, team) {
     arm.rotation.z = Math.PI / 2.6;
     arm.rotation.x = z > 0 ? 0.38 : -0.38;
     group.add(arm);
+    arms.push({
+      mesh: arm,
+      side: Math.sign(z),
+      baseRotationX: arm.rotation.x,
+      baseRotationZ: arm.rotation.z,
+      baseY: arm.position.y
+    });
 
     const boot = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.78, 10), darkMaterial);
     boot.position.set(-0.28, 1.75, z * 1.18);
     boot.rotation.z = -0.1;
     group.add(boot);
   }
+  group.userData.arms = arms;
+  group.userData.upperBody = upperBody;
 
   const dust = new THREE.Group();
   for (const [x, z, scale] of [
