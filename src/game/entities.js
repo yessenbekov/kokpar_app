@@ -44,6 +44,7 @@ function horsePaletteFor(team) {
 
 export function createHorseMesh(color, team) {
   const group = new THREE.Group();
+  const legs = [];
   const horsePalette = horsePaletteFor(team);
   const horseMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.coat, roughness: 0.78 });
   const darkMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.dark, roughness: 0.82 });
@@ -93,6 +94,9 @@ export function createHorseMesh(color, team) {
   tail.rotation.z = 1.18;
   tail.rotation.x = 0.18;
   group.add(tail);
+  group.userData.tail = tail;
+  group.userData.tailBaseRotationX = tail.rotation.x;
+  group.userData.tailBaseRotationZ = tail.rotation.z;
 
   for (const x of [-1.15, 0.95]) {
     for (const z of [-0.48, 0.48]) {
@@ -105,8 +109,19 @@ export function createHorseMesh(color, team) {
       legWrap.position.set(x, 0.78, z);
       legWrap.rotation.z = leg.rotation.z;
       group.add(legWrap);
+
+      legs.push({
+        mesh: leg,
+        wrap: legWrap,
+        baseY: leg.position.y,
+        baseWrapY: legWrap.position.y,
+        baseRotationX: leg.rotation.x,
+        baseRotationZ: leg.rotation.z,
+        phase: (x > 0) === (z > 0) ? 0 : Math.PI
+      });
     }
   }
+  group.userData.legs = legs;
 
   const saddleBlanket = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 1.28), uniformMaterial);
   saddleBlanket.position.set(-0.2, 2.02, 0);
@@ -191,13 +206,18 @@ export function createHorseMesh(color, team) {
   for (const [x, z, scale] of [
     [-2.3, -0.55, 1.4],
     [-2.75, 0.12, 1.1],
-    [-2.1, 0.58, 0.9]
+    [-2.1, 0.58, 0.9],
+    [-1.5, -0.78, 0.72],
+    [-1.45, 0.78, 0.72]
   ]) {
-    const puff = new THREE.Mesh(new THREE.CircleGeometry(0.72 * scale, 18), dustMaterial);
+    const puffMaterial = dustMaterial.clone();
+    const puff = new THREE.Mesh(new THREE.CircleGeometry(0.72 * scale, 18), puffMaterial);
     puff.position.set(x, 0.04, z);
     puff.rotation.x = -Math.PI / 2;
+    puff.userData.baseScale = scale;
     dust.add(puff);
   }
+  dust.visible = false;
   group.add(dust);
   group.userData.dust = dust;
 
@@ -334,7 +354,7 @@ export function createGoalMesh(color) {
 
 export function disposeObject3D(object) {
   object.traverse((node) => {
-    if (!node.isMesh) return;
+    if (!node.isMesh && !node.isLine) return;
     node.geometry?.dispose();
 
     if (Array.isArray(node.material)) {

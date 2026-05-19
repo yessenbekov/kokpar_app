@@ -245,8 +245,20 @@ export function createKokparGame(container, onHudChange) {
   };
   scene.add(kokpar.mesh);
 
+  const carryStrap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.045, 0.045, 1, 8),
+    new THREE.MeshBasicMaterial({ color: "#f7e7b8", transparent: true, opacity: 0.82 })
+  );
+  carryStrap.visible = false;
+  scene.add(carryStrap);
+
   const contestIndicator = createContestIndicatorMesh();
   scene.add(contestIndicator);
+
+  const carryStrapAxis = new THREE.Vector3(0, 1, 0);
+  const carryStrapStart = new THREE.Vector3();
+  const carryStrapEnd = new THREE.Vector3();
+  const carryStrapDirection = new THREE.Vector3();
 
   const keys = new Set();
   const match = {
@@ -1070,8 +1082,12 @@ export function createKokparGame(container, onHudChange) {
 
     if (kokpar.holder) {
       const rider = kokpar.holder;
-      kokpar.x = rider.x + Math.cos(rider.rotation) * 2.6;
-      kokpar.z = rider.z + Math.sin(rider.rotation) * 2.6;
+      const forward = forwardVector(rider);
+      const side = { x: -forward.z, z: forward.x };
+      const carrySide = rider.team === TEAM.blue ? -1 : 1;
+
+      kokpar.x = rider.x + forward.x * 1.15 + side.x * carrySide * 1.05;
+      kokpar.z = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
       kokpar.vx = rider.vx;
       kokpar.vz = rider.vz;
 
@@ -1103,9 +1119,13 @@ export function createKokparGame(container, onHudChange) {
   function syncMeshes(time) {
     riders.forEach((rider) => {
       const speed = Math.hypot(rider.vx, rider.vz);
+      const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
       const bob = Math.sin(time * 11 + rider.aiPhase) * Math.min(speed / 120, 0.18);
       const scale = (rider.bumpCooldown > 0 ? 1.08 : 1) + rider.hitFlash * 0.04;
       const hitLean = rider.hitFlash > 0 ? Math.sin(time * 36 + rider.aiPhase) * rider.hitFlash * 0.1 : 0;
+      const stride = time * (5.3 + speed * 0.52) + rider.aiPhase;
+      const legs = rider.group.userData.legs ?? [];
+      const tail = rider.group.userData.tail;
       const dust = rider.group.userData.dust;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
@@ -1113,16 +1133,70 @@ export function createKokparGame(container, onHudChange) {
       rider.group.rotation.z = (rider.lean ?? 0) + hitLean;
       rider.group.scale.setScalar(scale);
 
+      legs.forEach((leg) => {
+        const phase = stride + leg.phase;
+        const swing = Math.sin(phase) * speedRatio;
+        const lift = Math.max(0, Math.cos(phase)) * speedRatio;
+
+        leg.mesh.rotation.z = leg.baseRotationZ + swing * (0.2 + speedRatio * 0.2);
+        leg.mesh.rotation.x = leg.baseRotationX + Math.sin(phase + 0.45) * speedRatio * 0.08;
+        leg.mesh.position.y = leg.baseY + lift * 0.12;
+
+        if (leg.wrap) {
+          leg.wrap.rotation.z = leg.mesh.rotation.z;
+          leg.wrap.rotation.x = leg.mesh.rotation.x;
+          leg.wrap.position.y = leg.baseWrapY + lift * 0.08;
+        }
+      });
+
+      if (tail) {
+        tail.rotation.x = rider.group.userData.tailBaseRotationX + Math.sin(time * 5.4 + rider.aiPhase) * speedRatio * 0.06;
+        tail.rotation.z = rider.group.userData.tailBaseRotationZ + speedRatio * 0.12;
+      }
+
       if (dust) {
-        dust.visible = speed > 4;
+        const dustPower = clamp(speedRatio * 0.82 + Math.abs(rider.lean ?? 0) * 1.35 + rider.hitFlash * 0.5, 0, 1);
+        dust.visible = dustPower > 0.12;
         dust.children.forEach((puff, index) => {
-          puff.material.opacity = clamp(speed / 42, 0.12, 0.34) * (1 - index * 0.16);
+          const baseScale = puff.userData.baseScale ?? 1;
+          const pulse = Math.sin(time * 7.2 + rider.aiPhase + index * 1.6) * 0.07;
+          const spread = 0.68 + dustPower * 0.72 + index * 0.05 + pulse;
+
+          puff.scale.setScalar(baseScale * spread);
+          puff.material.opacity = dustPower * clamp(0.36 - index * 0.045, 0.16, 0.36);
         });
       }
     });
 
-    kokpar.mesh.position.set(kokpar.x, kokpar.holder ? 1.55 : 0.72, kokpar.z);
-    kokpar.mesh.rotation.y += 0.02 + Math.hypot(kokpar.vx, kokpar.vz) * 0.002;
+    const carriedHeight = kokpar.holder ? 1.78 + Math.sin(time * 8.5) * 0.06 : 0.72;
+    kokpar.mesh.position.set(kokpar.x, carriedHeight, kokpar.z);
+    kokpar.mesh.rotation.y += 0.02 + Math.hypot(kokpar.vx, kokpar.vz) * (kokpar.holder ? 0.001 : 0.002);
+    kokpar.mesh.rotation.x = kokpar.holder ? -0.2 + Math.sin(time * 6) * 0.08 : 0;
+    kokpar.mesh.rotation.z = kokpar.holder ? Math.sin(time * 7.5) * 0.16 : 0;
+    kokpar.mesh.scale.setScalar(kokpar.holder ? 1.1 : 1);
+
+    carryStrap.visible = Boolean(kokpar.holder);
+    if (kokpar.holder) {
+      const holder = kokpar.holder;
+      const forward = forwardVector(holder);
+      const side = { x: -forward.z, z: forward.x };
+      const carrySide = holder.team === TEAM.blue ? -1 : 1;
+
+      carryStrapStart.set(
+        holder.x + forward.x * 0.25 + side.x * carrySide * 0.58,
+        2.45,
+        holder.z + forward.z * 0.25 + side.z * carrySide * 0.58
+      );
+      carryStrapEnd.set(kokpar.x, carriedHeight, kokpar.z);
+      carryStrapDirection.subVectors(carryStrapEnd, carryStrapStart);
+
+      const strapLength = carryStrapDirection.length();
+      if (strapLength > 0.001) {
+        carryStrap.position.copy(carryStrapStart).addScaledVector(carryStrapDirection, 0.5);
+        carryStrap.scale.set(1, strapLength, 1);
+        carryStrap.quaternion.setFromUnitVectors(carryStrapAxis, carryStrapDirection.normalize());
+      }
+    }
 
     contestIndicator.visible = kokpar.contest.active;
     if (kokpar.contest.active) {
