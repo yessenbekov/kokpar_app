@@ -654,12 +654,21 @@ export function createKokparGame(container, onHudChange) {
     const urgency = options.urgency ?? 1;
     const hasDirection = Boolean(direction);
     const speed = Math.hypot(rider.vx, rider.vz);
+    const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1.35);
+    let sharpTurnAssist = 0;
 
     if (hasDirection) {
       const desiredRotation = Math.atan2(direction.z, direction.x);
-      const turnSlowdown = clamp(1 - speed / (rider.maxSpeed * 1.85), 0.48, 1);
-      const turnStep = rider.turnRate * turnSlowdown * clamp(urgency, 0.55, 1.35) * dt;
-      const turn = clamp(angleDelta(desiredRotation, rider.rotation), -turnStep, turnStep);
+      const rotationDelta = angleDelta(desiredRotation, rider.rotation);
+      const turnMagnitude = Math.abs(rotationDelta);
+      const lowSpeedPivot = clamp(1 - speedRatio / 0.62, 0, 1);
+      sharpTurnAssist = clamp((turnMagnitude - 0.38) / 1.55, 0, 1);
+
+      const turnSlowdown = clamp(1 - speed / (rider.maxSpeed * 2.35), 0.58, 1.12);
+      const pivotBoost = 1 + sharpTurnAssist * (0.42 + lowSpeedPivot * 0.76);
+      const urgencyBoost = clamp(urgency, 0.55, 1.4);
+      const turnStep = rider.turnRate * turnSlowdown * pivotBoost * urgencyBoost * dt;
+      const turn = clamp(rotationDelta, -turnStep, turnStep);
       rider.rotation += turn;
 
       const targetLean = clamp(-turn / Math.max(dt, 0.001) * 0.06, -0.22, 0.22);
@@ -674,12 +683,17 @@ export function createKokparGame(container, onHudChange) {
     const sideSpeed = rider.vx * side.x + rider.vz * side.z;
     const carrySlowdown = kokpar.holder === rider ? 0.88 : 1;
     const sprintBoost = sprint ? 1.06 : 1;
-    const targetSpeed = hasDirection ? rider.maxSpeed * carrySlowdown * sprintBoost * clamp(urgency, 0.45, 1.06) : 0;
+    const turnSpeedPenalty = 1 - sharpTurnAssist * (0.26 + speedRatio * 0.16);
+    const targetSpeed = hasDirection
+      ? rider.maxSpeed * carrySlowdown * sprintBoost * clamp(urgency, 0.45, 1.06) * turnSpeedPenalty
+      : 0;
     const speedDelta = targetSpeed - forwardSpeed;
-    const power = speedDelta >= 0 ? rider.acceleration : rider.brakePower;
+    const power = speedDelta >= 0 ? rider.acceleration : rider.brakePower * (1 + sharpTurnAssist * 0.5);
     const forwardChange = clamp(speedDelta, -power * dt, power * dt);
-    const grip = clamp(rider.lateralGrip * dt, 0, 0.78);
-    const surfaceDrag = Math.pow(hasDirection ? 0.992 : 0.965, dt * 60);
+    const grip = clamp((rider.lateralGrip + sharpTurnAssist * (rider.human ? 4.5 : 3.2)) * dt, 0, 0.88);
+    const surfaceDrag =
+      Math.pow(hasDirection ? 0.992 : 0.965, dt * 60) *
+      Math.pow(0.976, sharpTurnAssist * dt * 60);
 
     rider.vx += forward.x * forwardChange;
     rider.vz += forward.z * forwardChange;

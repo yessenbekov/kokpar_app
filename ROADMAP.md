@@ -38,6 +38,7 @@ Already done:
 - angle and impact based tackle outcomes with stagger feedback
 - simple horse gait animation, stronger dust, and visible carried-serke strap
 - broadcast-style countdown camera for start line, serke, and center duel resets
+- tighter horse turning with sharp-turn braking and grip assist
 
 Exit criteria:
 
@@ -204,7 +205,7 @@ Step 1: improve the current gameplay feel.
 
 Concrete tasks:
 
-- [ ] tune horse movement and turning
+- [x] tune horse movement and turning
 - [x] add a 3-second countdown before riders can cross the start line
 - [x] keep riders locked behind the line until the whistle
 - [x] make serke pickup feedback clearer
