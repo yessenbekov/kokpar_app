@@ -53,6 +53,7 @@ const CONTEST_PROGRESS_RATE = 1.15;
 const TACKLE_DROP_THRESHOLD = 0.58;
 const TACKLE_STEAL_THRESHOLD = 0.86;
 const TACKLE_STAGGER_THRESHOLD = 0.4;
+const RIDER_COLLISION_RADIUS = 3.6;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -288,6 +289,35 @@ function createArenaEnvironment(scene) {
   }
 }
 
+function createContestRiderMarker(color) {
+  const group = new THREE.Group();
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0.72,
+    depthWrite: false
+  });
+  const leaderMaterial = new THREE.MeshBasicMaterial({
+    color: "#f7e7b8",
+    transparent: true,
+    opacity: 0.86,
+    depthWrite: false
+  });
+
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.9, 0.08, 8, 52), ringMaterial);
+  ring.rotation.x = Math.PI / 2;
+  group.add(ring);
+
+  const leaderDot = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.08, 20), leaderMaterial);
+  leaderDot.position.y = 0.08;
+  group.add(leaderDot);
+
+  group.visible = false;
+  group.userData.ring = ring;
+  group.userData.leaderDot = leaderDot;
+  return group;
+}
+
 export function createKokparGame(container, onHudChange) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(COLORS.sky);
@@ -338,7 +368,9 @@ export function createKokparGame(container, onHudChange) {
   const player = riders[0];
   riders.forEach((rider) => {
     rider.group = createHorseMesh(rider.color, rider.team);
+    rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.group);
+    scene.add(rider.contestMarker);
   });
 
   const kokpar = {
@@ -394,6 +426,15 @@ export function createKokparGame(container, onHudChange) {
   let isDestroyed = false;
   const cameraDesired = new THREE.Vector3();
   const cameraLookAt = new THREE.Vector3();
+  const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
+  const cameraTrackTarget = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
+
+  function contestStatusText() {
+    const progress = kokpar.contest.progress;
+    if (progress > 0.18) return "Борьба: синие ведут";
+    if (progress < -0.18) return "Борьба: красные ведут";
+    return "Борьба: равный подбор";
+  }
 
   function publishHud() {
     const isCountdown = match.phase === "countdown";
@@ -406,7 +447,7 @@ export function createKokparGame(container, onHudChange) {
       stamina: player.stamina,
       carry:
         kokpar.contest.active
-          ? "Борьба за серке"
+          ? contestStatusText()
           : kokpar.holder === player
           ? "Кокпар у тебя"
           : kokpar.holder
@@ -1049,7 +1090,9 @@ export function createKokparGame(container, onHudChange) {
 
     showMessage(
       "Борьба за серке",
-      rider.human ? "Держись рядом и жми Space." : `${rider.name} вошел в борьбу.`,
+      rider.human
+        ? "Держись в кольце у серке и жми Space, чтобы перетянуть шкалу."
+        : `${rider.name} вошел в борьбу. Кольца показывают участников подбора.`,
       0.95
     );
   }
@@ -1246,19 +1289,28 @@ export function createKokparGame(container, onHudChange) {
         const distance = Math.hypot(dx, dz) || 1;
         const relativeSpeed = Math.hypot(a.vx - b.vx, a.vz - b.vz);
 
-        if (distance >= 3.6) continue;
+        if (distance >= RIDER_COLLISION_RADIUS) continue;
 
-        const push = (3.6 - distance) / 2;
+        const penetration = RIDER_COLLISION_RADIUS - distance;
         const nx = dx / distance;
         const nz = dz / distance;
+        const relativeNormalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
+        const approachSpeed = Math.max(0, -relativeNormalSpeed);
+        const push = penetration * 0.34;
+        const impulse = clamp(penetration * 0.62 + approachSpeed * 0.12, 0.24, 1.45);
+
         a.x -= nx * push;
         a.z -= nz * push;
         b.x += nx * push;
         b.z += nz * push;
-        a.vx -= nx * 2.8;
-        a.vz -= nz * 2.8;
-        b.vx += nx * 2.8;
-        b.vz += nz * 2.8;
+        a.vx -= nx * impulse;
+        a.vz -= nz * impulse;
+        b.vx += nx * impulse;
+        b.vz += nz * impulse;
+        a.vx *= 0.992;
+        a.vz *= 0.992;
+        b.vx *= 0.992;
+        b.vz *= 0.992;
 
         if (kokpar.holder && (kokpar.holder === a || kokpar.holder === b) && a.team !== b.team) {
           const holder = kokpar.holder;
@@ -1320,6 +1372,11 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function syncMeshes(time) {
+    const contestParticipants =
+      kokpar.contest.active && !kokpar.holder
+        ? new Set(contestCandidates(CONTEST_RADIUS + 0.25))
+        : new Set();
+
     riders.forEach((rider) => {
       const speed = Math.hypot(rider.vx, rider.vz);
       const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
@@ -1369,6 +1426,24 @@ export function createKokparGame(container, onHudChange) {
           puff.material.opacity = dustPower * clamp(0.36 - index * 0.045, 0.16, 0.36);
         });
       }
+
+      if (rider.contestMarker) {
+        const inContest = contestParticipants.has(rider);
+        const isLeader = kokpar.contest.leader === rider;
+
+        rider.contestMarker.visible = inContest;
+        if (inContest) {
+          const pulse = Math.sin(time * 8.4 + rider.aiPhase) * 0.05;
+          const power = contestPowerForRider(rider);
+          const markerScale = (isLeader ? 1.16 : 0.98) + power * 0.12 + pulse;
+
+          rider.contestMarker.position.set(rider.x, 0.16, rider.z);
+          rider.contestMarker.userData.ring.scale.setScalar(markerScale);
+          rider.contestMarker.userData.ring.material.opacity = isLeader ? 0.92 : 0.58;
+          rider.contestMarker.userData.leaderDot.visible = isLeader;
+          rider.contestMarker.userData.leaderDot.scale.setScalar(1 + Math.sin(time * 11) * 0.12);
+        }
+      }
     });
 
     const carriedHeight = kokpar.holder ? 1.78 + Math.sin(time * 8.5) * 0.06 : 0.72;
@@ -1407,10 +1482,18 @@ export function createKokparGame(container, onHudChange) {
       const leaderColor = progress >= 0 ? COLORS.blue : COLORS.red;
 
       contestIndicator.position.set(kokpar.x, 2.5, kokpar.z);
-      contestIndicator.userData.marker.position.x = progress * 1.18;
+      contestIndicator.scale.setScalar(1 + Math.sin(time * 7.5) * 0.04);
+      contestIndicator.userData.marker.position.x = progress * 1.52;
       contestIndicator.userData.marker.material.color.set(leaderColor);
       contestIndicator.userData.ring.material.color.set(leaderColor);
+      contestIndicator.userData.leaderBeam.material.color.set(leaderColor);
+      contestIndicator.userData.leaderBeam.scale.setScalar(1 + Math.abs(progress) * 0.22);
       contestIndicator.rotation.y = 0;
+    } else {
+      riders.forEach((rider) => {
+        if (rider.contestMarker) rider.contestMarker.visible = false;
+      });
+      contestIndicator.scale.setScalar(1);
     }
   }
 
@@ -1431,6 +1514,7 @@ export function createKokparGame(container, onHudChange) {
       const countdownEase = 1 - Math.pow(0.01, dt);
       const targetFov = match.duelMode ? 58 : 64;
 
+      cameraTrack.copy(cameraLookAt);
       camera.position.lerp(cameraDesired, countdownEase);
       camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.03, dt));
       camera.updateProjectionMatrix();
@@ -1445,13 +1529,16 @@ export function createKokparGame(container, onHudChange) {
     const focusX = player.x + player.vx * 0.24 + (kokpar.x - player.x) * serkeLead;
     const focusZ = player.z + player.vz * 0.24 + (kokpar.z - player.z) * serkeLead;
     const looseSerkeFov = kokpar.holder ? 0 : clamp((serkeDistance - 28) / 80, 0, 1) * 4;
+    const focusEase = 1 - Math.pow(0.018, dt);
 
+    cameraTrackTarget.set(focusX, 0.9, focusZ);
+    cameraTrack.lerp(cameraTrackTarget, focusEase);
     cameraDesired.set(
-      focusX - 18 - speedRatio * 4,
+      cameraTrack.x - 18 - speedRatio * 4,
       31 + speedRatio * 7,
-      focusZ + 31 + speedRatio * 7
+      cameraTrack.z + 31 + speedRatio * 7
     );
-    cameraLookAt.set(focusX + 4, 0.9, focusZ);
+    cameraLookAt.set(cameraTrack.x + 4, 0.9, cameraTrack.z);
     const cameraEase = 1 - Math.pow(0.015, dt);
     const targetFov = 56 + speedRatio * 5 + looseSerkeFov;
 

@@ -296,29 +296,34 @@ export function createContestIndicatorMesh() {
   const redMaterial = new THREE.MeshBasicMaterial({ color: COLORS.red });
   const markerMaterial = new THREE.MeshBasicMaterial({ color: "#f4ead2" });
 
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.045, 8, 44), ringMaterial);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.055, 8, 56), ringMaterial);
   ring.rotation.x = Math.PI / 2;
   group.add(ring);
 
-  const barBack = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.08, 0.2), backMaterial);
-  barBack.position.set(0, 0.02, -1.55);
+  const barBack = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.08, 0.22), backMaterial);
+  barBack.position.set(0, 0.02, -1.92);
   group.add(barBack);
 
-  const blueEnd = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.09, 0.22), blueMaterial);
-  blueEnd.position.set(-0.66, 0.07, -1.55);
+  const blueEnd = new THREE.Mesh(new THREE.BoxGeometry(1.58, 0.09, 0.24), blueMaterial);
+  blueEnd.position.set(-0.86, 0.07, -1.92);
   group.add(blueEnd);
 
-  const redEnd = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.09, 0.22), redMaterial);
-  redEnd.position.set(0.66, 0.07, -1.55);
+  const redEnd = new THREE.Mesh(new THREE.BoxGeometry(1.58, 0.09, 0.24), redMaterial);
+  redEnd.position.set(0.86, 0.07, -1.92);
   group.add(redEnd);
 
   const marker = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.38), markerMaterial);
-  marker.position.set(0, 0.18, -1.55);
+  marker.position.set(0, 0.18, -1.92);
   group.add(marker);
+
+  const leaderBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.22, 1.1, 12), markerMaterial.clone());
+  leaderBeam.position.set(0, 0.9, 0);
+  group.add(leaderBeam);
 
   group.visible = false;
   group.userData.ring = ring;
   group.userData.marker = marker;
+  group.userData.leaderBeam = leaderBeam;
   return group;
 }
 

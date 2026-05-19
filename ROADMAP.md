@@ -41,6 +41,7 @@ Already done:
 - tighter horse turning with sharp-turn braking and grip assist
 - first arena pass with rails, flags, stands, crowd silhouettes, and sand tracks
 - pre-start movement inside each team's start lane before the whistle
+- softer rider collisions with damped camera focus and clearer serke contest markers
 
 Exit criteria:
 
@@ -59,6 +60,8 @@ Tasks:
 - make AI less chaotic: attackers, defenders, support riders
 - add proper possession states: loose, contested, carried, dropped
 - add tackle/steal timing with clearer feedback
+- reduce camera shake and hard jitter during rider collisions
+- make serke contests readable with team advantage and participant markers
 - add match restart after goal with a short countdown
 - add camera smoothing, zoom, and better angle for reading the play
 - add touch controls later, but keep keyboard first
