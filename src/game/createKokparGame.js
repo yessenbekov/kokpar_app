@@ -42,6 +42,8 @@ const CENTER_DUEL_CAMERA_POSITION = { x: -24, y: 54, z: 46 };
 const ROUND_COUNTDOWN_SECONDS = 3;
 const OUT_OF_BOUNDS_MARGIN = 0.2;
 const RIDER_FIELD_EXIT_BUFFER = 10;
+const START_LANE_FIELD_BUFFER = 0.8;
+const START_TEAM_BOUNDARY_GAP = 2.4;
 const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
 const CONTEST_RADIUS = 5.4;
@@ -425,7 +427,7 @@ export function createKokparGame(container, onHudChange) {
 
   function beginCountdown(
     message = "На старт",
-    submessage = "Всадники за линией. Жди свистка.",
+    submessage = "Всадники за линией. Можно двигаться в своей зоне.",
     countdownLabel = "Старт через"
   ) {
     match.phase = "countdown";
@@ -585,7 +587,7 @@ export function createKokparGame(container, onHudChange) {
     resetPositions();
     beginCountdown(
       team === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
-      "Новый розыгрыш начнется после свистка."
+      "Новый розыгрыш после свистка. Пока двигайся в своей зоне."
     );
   }
 
@@ -595,7 +597,7 @@ export function createKokparGame(container, onHudChange) {
     match.time = MATCH_SECONDS;
     match.over = false;
     resetPositions();
-    beginCountdown("Новый матч", "Серке лежит на дальней стороне поля.");
+    beginCountdown("Новый матч", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   }
 
   function supportPoint(holder, rider) {
@@ -648,6 +650,46 @@ export function createKokparGame(container, onHudChange) {
     return {
       x: clamp(target.x, -WORLD.width / 2 + margin, WORLD.width / 2 - margin),
       z: clamp(target.z, -WORLD.height / 2 + margin, WORLD.height / 2 - margin)
+    };
+  }
+
+  function startLaneBoundsForTeam(team) {
+    return team === TEAM.blue
+      ? {
+          minX: -WORLD.width / 2 + 3,
+          maxX: -START_TEAM_BOUNDARY_GAP
+        }
+      : {
+          minX: START_TEAM_BOUNDARY_GAP,
+          maxX: WORLD.width / 2 - 3
+        };
+  }
+
+  function keepRiderInStartLane(rider) {
+    const bounds = startLaneBoundsForTeam(rider.team);
+    const nextX = clamp(rider.x, bounds.minX, bounds.maxX);
+    const nextZ = clamp(rider.z, START_LINE_Z + START_LANE_FIELD_BUFFER, START_LINE_Z + START_LANE_DEPTH);
+
+    if (nextX !== rider.x) {
+      rider.x = nextX;
+      rider.vx *= 0.18;
+    }
+
+    if (nextZ !== rider.z) {
+      rider.z = nextZ;
+      rider.vz *= 0.18;
+    }
+  }
+
+  function startLaneWarmupTarget(rider, index, time) {
+    const [baseX, baseZ] = STARTING_RIDER_SPOTS[index];
+    const bounds = startLaneBoundsForTeam(rider.team);
+    const lateral = Math.sin(time * 0.68 + rider.aiPhase) * 2.8;
+    const depth = Math.cos(time * 0.54 + rider.aiPhase * 1.3) * 2.4;
+
+    return {
+      x: clamp(baseX + lateral, bounds.minX + 1.8, bounds.maxX - 1.8),
+      z: clamp(baseZ + depth, START_LINE_Z + 2.2, START_LINE_Z + START_LANE_DEPTH - 1.2)
     };
   }
 
@@ -1049,7 +1091,7 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function attemptGrab(rider, active) {
-    if (match.over || rider.grabCooldown > 0) return;
+    if (match.phase !== "live" || match.over || rider.grabCooldown > 0) return;
     if (match.duelMode && !match.duelRiders.has(rider)) return;
     if (kokpar.contest.active && !kokpar.holder) return;
 
@@ -1157,6 +1199,40 @@ export function createKokparGame(container, onHudChange) {
         START_LINE_Z + START_LANE_DEPTH
       );
       keepRiderOutsideCenterDuel(rider);
+    });
+  }
+
+  function updateStartLaneMovement(dt, time) {
+    if (match.duelMode) return;
+
+    riders.forEach((rider, index) => {
+      rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
+      rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
+      rider.staggerTime = Math.max(0, rider.staggerTime - dt);
+      rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
+
+      if (rider.human) {
+        updateHuman(rider, dt);
+      } else {
+        const target = startLaneWarmupTarget(rider, index, time);
+        const targetDistance = Math.hypot(target.x - rider.x, target.z - rider.z);
+        const direction = targetDistance > 0.8 ? normalize2D(target.x - rider.x, target.z - rider.z) : null;
+
+        rider.aiRole = "warmup";
+        applyHorseControl(rider, direction, dt, { urgency: 0.42 });
+      }
+
+      const maxSpeed = rider.maxSpeed * 0.46;
+      const speed = Math.hypot(rider.vx, rider.vz);
+
+      if (speed > maxSpeed) {
+        rider.vx = (rider.vx / speed) * maxSpeed;
+        rider.vz = (rider.vz / speed) * maxSpeed;
+      }
+
+      rider.x += rider.vx * dt;
+      rider.z += rider.vz * dt;
+      keepRiderInStartLane(rider);
     });
   }
 
@@ -1414,6 +1490,12 @@ export function createKokparGame(container, onHudChange) {
 
     if (!match.over) {
       if (match.phase === "countdown") {
+        if (!match.duelMode) {
+          updateStartLaneMovement(dt, time);
+          resolveRiderCollisions();
+          riders.forEach(keepRiderInStartLane);
+        }
+
         match.countdown -= dt;
         if (match.countdown <= 0) {
           startRound();
@@ -1448,7 +1530,7 @@ export function createKokparGame(container, onHudChange) {
 
   resize();
   resetPositions();
-  beginCountdown("На старт", "Серке лежит на дальней стороне поля.");
+  beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   publishHud();
   animationFrame = requestAnimationFrame(frame);
 

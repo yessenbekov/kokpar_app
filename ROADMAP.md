@@ -40,6 +40,7 @@ Already done:
 - broadcast-style countdown camera for start line, serke, and center duel resets
 - tighter horse turning with sharp-turn braking and grip assist
 - first arena pass with rails, flags, stands, crowd silhouettes, and sand tracks
+- pre-start movement inside each team's start lane before the whistle
 
 Exit criteria:
 
@@ -77,6 +78,7 @@ Tasks:
 
 - define exact game mode: arena kokpar with kazans
 - add start whistle and riders waiting behind the line
+- allow pre-start movement inside the start lane without crossing the line
 - add out-of-bounds handling with center 1v1 pickup
 - add foul-like states only if needed for gameplay
 - add team size settings: 3v3 prototype, then 5v5
