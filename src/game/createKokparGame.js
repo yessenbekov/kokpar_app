@@ -36,6 +36,9 @@ const KOKPAR_START = { x: 0, z: -14.5 };
 const CENTER_MARK = { x: 0, z: 0 };
 const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
+const START_CAMERA_FOCUS_Z = (START_LINE_Z + START_LANE_DEPTH * 0.62 + KOKPAR_START.z) / 2;
+const START_CAMERA_POSITION = { x: -34, y: 72, z: 94 };
+const CENTER_DUEL_CAMERA_POSITION = { x: -24, y: 54, z: 46 };
 const ROUND_COUNTDOWN_SECONDS = 3;
 const OUT_OF_BOUNDS_MARGIN = 0.2;
 const RIDER_FIELD_EXIT_BUFFER = 10;
@@ -181,8 +184,8 @@ export function createKokparGame(container, onHudChange) {
   scene.background = new THREE.Color(COLORS.sky);
   scene.fog = new THREE.Fog(COLORS.sky, 82, 160);
 
-  const camera = new THREE.PerspectiveCamera(56, 1, 0.1, 260);
-  camera.position.set(0, 44, 48);
+  const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 260);
+  camera.position.set(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -279,6 +282,8 @@ export function createKokparGame(container, onHudChange) {
   let animationFrame = 0;
   let lastFrameTime = performance.now();
   let isDestroyed = false;
+  const cameraDesired = new THREE.Vector3();
+  const cameraLookAt = new THREE.Vector3();
 
   function publishHud() {
     const isCountdown = match.phase === "countdown";
@@ -1212,24 +1217,50 @@ export function createKokparGame(container, onHudChange) {
   }
 
   function updateCamera(dt) {
+    if (match.phase === "countdown") {
+      if (match.duelMode) {
+        cameraDesired.set(
+          CENTER_DUEL_CAMERA_POSITION.x,
+          CENTER_DUEL_CAMERA_POSITION.y,
+          CENTER_DUEL_CAMERA_POSITION.z
+        );
+        cameraLookAt.set(CENTER_MARK.x, 1.1, CENTER_MARK.z);
+      } else {
+        cameraDesired.set(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
+        cameraLookAt.set(0, 1.1, START_CAMERA_FOCUS_Z);
+      }
+
+      const countdownEase = 1 - Math.pow(0.01, dt);
+      const targetFov = match.duelMode ? 58 : 64;
+
+      camera.position.lerp(cameraDesired, countdownEase);
+      camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.03, dt));
+      camera.updateProjectionMatrix();
+      camera.lookAt(cameraLookAt);
+      return;
+    }
+
     const speed = Math.hypot(player.vx, player.vz);
     const speedRatio = clamp(speed / player.maxSpeed, 0, 1);
     const serkeDistance = distance2D(player, kokpar);
-    const serkeLead = kokpar.holder === player ? 0.12 : clamp(0.22 - serkeDistance / 360, 0.08, 0.22);
+    const serkeLead = kokpar.holder === player ? 0.12 : clamp(0.33 - serkeDistance / 420, 0.1, 0.3);
     const focusX = player.x + player.vx * 0.24 + (kokpar.x - player.x) * serkeLead;
     const focusZ = player.z + player.vz * 0.24 + (kokpar.z - player.z) * serkeLead;
-    const desired = new THREE.Vector3(
+    const looseSerkeFov = kokpar.holder ? 0 : clamp((serkeDistance - 28) / 80, 0, 1) * 4;
+
+    cameraDesired.set(
       focusX - 18 - speedRatio * 4,
       31 + speedRatio * 7,
       focusZ + 31 + speedRatio * 7
     );
+    cameraLookAt.set(focusX + 4, 0.9, focusZ);
     const cameraEase = 1 - Math.pow(0.015, dt);
-    const targetFov = 56 + speedRatio * 5;
+    const targetFov = 56 + speedRatio * 5 + looseSerkeFov;
 
-    camera.position.lerp(desired, cameraEase);
+    camera.position.lerp(cameraDesired, cameraEase);
     camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.04, dt));
     camera.updateProjectionMatrix();
-    camera.lookAt(focusX + 4, 0.9, focusZ);
+    camera.lookAt(cameraLookAt);
   }
 
   function resize() {

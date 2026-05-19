@@ -37,6 +37,7 @@ Already done:
 - contested pickup state with visible serke battle indicator
 - angle and impact based tackle outcomes with stagger feedback
 - simple horse gait animation, stronger dust, and visible carried-serke strap
+- broadcast-style countdown camera for start line, serke, and center duel resets
 
 Exit criteria:
 
@@ -207,7 +208,7 @@ Concrete tasks:
 - [x] add a 3-second countdown before riders can cross the start line
 - [x] keep riders locked behind the line until the whistle
 - [x] make serke pickup feedback clearer
-- [ ] improve camera to show the start line and serke at the same time
+- [x] improve camera to show the start line and serke at the same time
 
 Step 2: create a first asset target.
 
