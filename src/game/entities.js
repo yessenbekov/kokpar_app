@@ -9,6 +9,7 @@ export function createRider(config) {
     rotation: 0,
     stamina: 1,
     grabCooldown: 0,
+    throwCooldown: 0,
     bumpCooldown: 0,
     staggerTime: 0,
     hitFlash: 0,

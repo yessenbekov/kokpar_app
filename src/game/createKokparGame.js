@@ -47,6 +47,13 @@ const START_LANE_FIELD_BUFFER = 0.8;
 const START_TEAM_BOUNDARY_GAP = 2.4;
 const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
+const THROW_READY_EXTRA_RADIUS = 8.5;
+const THROW_HINT_EXTRA_RADIUS = 16;
+const THROW_MIN_SPEED = 12;
+const THROW_MAX_SPEED = 24;
+const THROW_GRAVITY = 14;
+const LOOSE_SERKE_HEIGHT = 0.72;
+const CARRIED_SERKE_HEIGHT = 1.78;
 const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
 const CONTEST_MAX_SECONDS = 1.55;
@@ -430,10 +437,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   const kokpar = {
     x: 0,
+    y: LOOSE_SERKE_HEIGHT,
     z: 0,
     vx: 0,
+    vy: 0,
     vz: 0,
     holder: null,
+    flightTeam: null,
+    flightScorer: null,
+    flightTime: 0,
+    lastThrowHuman: false,
     looseCooldown: 0,
     contest: {
       active: false,
@@ -524,6 +537,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return `${prefix}: равная`;
   }
 
+  function targetName() {
+    return gameSettings.goalType === "kazan" ? "казан" : "круг";
+  }
+
+  function goalDistanceFor(rider) {
+    return Math.hypot(rider.x - goalFor(rider.team).x, rider.z - goalFor(rider.team).z);
+  }
+
+  function canThrowAtTarget(rider) {
+    return goalDistanceFor(rider) <= scoreRadius + THROW_READY_EXTRA_RADIUS;
+  }
+
+  function carryStatusText() {
+    if (kokpar.contest.active) return contestStatusText();
+    if (kokpar.flightTeam) return kokpar.flightTeam === TEAM.blue ? "Бросок синих" : "Бросок красных";
+    if (kokpar.holder === player) return canThrowAtTarget(player) ? "Space: бросить" : "Кокпар у тебя";
+    if (kokpar.holder) return `${kokpar.holder.name} держит`;
+    return "Кокпар на поле";
+  }
+
   function publishHud() {
     const isCountdown = match.phase === "countdown";
     const countdown = Math.max(1, Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS)));
@@ -533,14 +566,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       red: match.red,
       timer: formatTime(match.time),
       stamina: player.stamina,
-      carry:
-        kokpar.contest.active
-          ? contestStatusText()
-          : kokpar.holder === player
-          ? "Кокпар у тебя"
-          : kokpar.holder
-            ? `${kokpar.holder.name} держит`
-            : "Кокпар на поле",
+      carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
       showBanner: isCountdown || match.messageTime > 0 || match.over
@@ -609,16 +635,23 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.lean = 0;
       rider.staggerTime = 0;
       rider.hitFlash = 0;
+      rider.throwCooldown = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
     });
 
     kokpar.x = KOKPAR_START.x;
+    kokpar.y = LOOSE_SERKE_HEIGHT;
     kokpar.z = KOKPAR_START.z;
     kokpar.vx = 0;
+    kokpar.vy = 0;
     kokpar.vz = 0;
     kokpar.holder = null;
+    kokpar.flightTeam = null;
+    kokpar.flightScorer = null;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = false;
     kokpar.looseCooldown = 0.8;
   }
 
@@ -630,6 +663,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.lean = 0;
     rider.staggerTime = 0;
     rider.hitFlash = 0;
+    rider.throwCooldown = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
     rider.grabCooldown = 0.8;
     rider.bumpCooldown = 0.3;
@@ -700,10 +734,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
 
     kokpar.x = CENTER_MARK.x;
+    kokpar.y = LOOSE_SERKE_HEIGHT;
     kokpar.z = CENTER_MARK.z;
     kokpar.vx = 0;
+    kokpar.vy = 0;
     kokpar.vz = 0;
     kokpar.holder = null;
+    kokpar.flightTeam = null;
+    kokpar.flightScorer = null;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = false;
     kokpar.looseCooldown = 0.8;
     clearContest();
 
@@ -719,8 +759,77 @@ export function createKokparGame(container, onHudChange, options = {}) {
     resetPositions();
     beginCountdown(
       team === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
-      "Новый розыгрыш после свистка. Пока двигайся в своей зоне."
+      `Серке заброшен в ${targetName()}. Новый розыгрыш после свистка.`
     );
+  }
+
+  function isThrownSerkeScoring() {
+    if (!kokpar.flightTeam || kokpar.flightTime < 0.1) return false;
+
+    const target = goalFor(kokpar.flightTeam);
+    const distance = Math.hypot(kokpar.x - target.x, kokpar.z - target.z);
+    const targetRadius = gameSettings.goalType === "kazan" ? scoreRadius * 0.78 : scoreRadius;
+    const heightOk = gameSettings.goalType === "kazan"
+      ? kokpar.y >= 0.35 && kokpar.y <= 2.65
+      : kokpar.y <= 1.65;
+
+    return distance <= targetRadius && heightOk;
+  }
+
+  function attemptThrow(rider, active = false) {
+    if (match.phase !== "live" || match.over) return false;
+    if (kokpar.holder !== rider || rider.throwCooldown > 0) return false;
+    if (kokpar.contest.active) return false;
+
+    const distanceToGoal = goalDistanceFor(rider);
+    const readyDistance = scoreRadius + THROW_READY_EXTRA_RADIUS;
+    const shouldHint = active && rider.human && distanceToGoal <= scoreRadius + THROW_HINT_EXTRA_RADIUS;
+
+    if (distanceToGoal > readyDistance) {
+      if (shouldHint) {
+        rider.throwCooldown = 0.45;
+        showMessage(
+          "Еще ближе",
+          `Подведи коня к ${targetName()}у и нажми Space для броска.`,
+          1.1
+        );
+      }
+      return false;
+    }
+
+    const forward = forwardVector(rider);
+    const side = { x: -forward.z, z: forward.x };
+    const carrySide = rider.team === TEAM.blue ? -1 : 1;
+    const startX = rider.x + forward.x * 1.15 + side.x * carrySide * 1.05;
+    const startZ = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
+    const target = goalFor(rider.team);
+    const toGoal = normalize2D(target.x - startX, target.z - startZ);
+    const aim = normalize2D(toGoal.x * 0.84 + forward.x * 0.16, toGoal.z * 0.84 + forward.z * 0.16);
+    const throwDistance = Math.hypot(target.x - startX, target.z - startZ);
+    const riderSpeed = Math.hypot(rider.vx, rider.vz);
+    const throwSpeed = clamp(throwDistance * 1.18 + riderSpeed * 0.28, THROW_MIN_SPEED, THROW_MAX_SPEED);
+
+    kokpar.holder = null;
+    kokpar.flightTeam = rider.team;
+    kokpar.flightScorer = rider;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = rider.human;
+    kokpar.x = startX;
+    kokpar.y = CARRIED_SERKE_HEIGHT + 0.22;
+    kokpar.z = startZ;
+    kokpar.vx = aim.x * throwSpeed + rider.vx * 0.18;
+    kokpar.vy = 5.4 + clamp(throwDistance / 9, 0, 2.4);
+    kokpar.vz = aim.z * throwSpeed + rider.vz * 0.18;
+    kokpar.looseCooldown = 0.52;
+    rider.throwCooldown = 0.8;
+    rider.grabCooldown = Math.max(rider.grabCooldown, 0.35);
+    clearContest();
+
+    if (active || rider.human) {
+      showMessage("Бросок!", `Серке летит в ${targetName()}.`, 0.9);
+    }
+
+    return true;
   }
 
   function restart() {
@@ -1031,9 +1140,15 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     kokpar.holder = null;
     kokpar.x = holder.x + push.x * 1.15;
+    kokpar.y = LOOSE_SERKE_HEIGHT;
     kokpar.z = holder.z + push.z * 1.15;
     kokpar.vx = holder.vx * 0.38 + tackler.vx * 0.34 + push.x * 3.2;
+    kokpar.vy = 0;
     kokpar.vz = holder.vz * 0.38 + tackler.vz * 0.34 + push.z * 3.2;
+    kokpar.flightTeam = null;
+    kokpar.flightScorer = null;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = false;
     kokpar.looseCooldown = 0.34;
     clearContest();
 
@@ -1212,6 +1327,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     clearContest();
     kokpar.holder = rider;
+    kokpar.flightTeam = null;
+    kokpar.flightScorer = null;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = false;
+    kokpar.vy = 0;
     rider.grabCooldown = active ? 0.22 : 0.48;
 
     showMessage(
@@ -1351,6 +1471,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function attemptGrab(rider, active) {
     if (match.phase !== "live" || match.over || rider.grabCooldown > 0) return;
     if (match.duelMode && !match.duelRiders.has(rider)) return;
+    if (kokpar.flightTeam) return;
     if (kokpar.contest.active && !kokpar.holder) return;
 
     if (!kokpar.holder && kokpar.looseCooldown <= 0 && distance2D(rider, kokpar) < GRAB_RADIUS) {
@@ -1401,6 +1522,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const target = plan.target;
     rider.aiRole = plan.role;
 
+    if (kokpar.holder === rider && canThrowAtTarget(rider) && attemptThrow(rider, false)) {
+      return;
+    }
+
     const wander = {
       x: Math.cos(rider.aiPhase + time * 0.7) * plan.wander,
       z: Math.sin(rider.aiPhase * 1.6 + time * 0.62) * plan.wander
@@ -1422,6 +1547,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function updateRiderMovement(dt, time) {
     riders.forEach((rider) => {
       rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
+      rider.throwCooldown = Math.max(0, rider.throwCooldown - dt);
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
@@ -1469,6 +1595,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     riders.forEach((rider, index) => {
       rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
+      rider.throwCooldown = Math.max(0, rider.throwCooldown - dt);
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
@@ -1561,18 +1688,15 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const carrySide = rider.team === TEAM.blue ? -1 : 1;
 
       kokpar.x = rider.x + forward.x * 1.15 + side.x * carrySide * 1.05;
+      kokpar.y = CARRIED_SERKE_HEIGHT;
       kokpar.z = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
       kokpar.vx = rider.vx;
+      kokpar.vy = 0;
       kokpar.vz = rider.vz;
 
       if (kokpar.contest.active && kokpar.contest.mode === "mounted") {
         updateContest(dt);
         if (kokpar.holder !== rider) return;
-      }
-
-      if (Math.hypot(kokpar.x - goalFor(rider.team).x, kokpar.z - goalFor(rider.team).z) < scoreRadius) {
-        scoreGoal(rider.team);
-        return;
       }
 
       if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
@@ -1583,10 +1707,51 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return;
     }
 
+    if (kokpar.flightTeam) {
+      kokpar.flightTime += dt;
+      kokpar.vy -= THROW_GRAVITY * dt;
+      kokpar.x += kokpar.vx * dt;
+      kokpar.y += kokpar.vy * dt;
+      kokpar.z += kokpar.vz * dt;
+      kokpar.vx *= Math.pow(0.988, dt * 60);
+      kokpar.vz *= Math.pow(0.988, dt * 60);
+
+      if (isThrownSerkeScoring()) {
+        scoreGoal(kokpar.flightTeam);
+        return;
+      }
+
+      if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
+        startCenterDuel();
+        return;
+      }
+
+      if (kokpar.y <= LOOSE_SERKE_HEIGHT) {
+        const missedByHuman = kokpar.lastThrowHuman;
+
+        kokpar.y = LOOSE_SERKE_HEIGHT;
+        kokpar.vy = 0;
+        kokpar.vx *= 0.42;
+        kokpar.vz *= 0.42;
+        kokpar.flightTeam = null;
+        kokpar.flightScorer = null;
+        kokpar.flightTime = 0;
+        kokpar.lastThrowHuman = false;
+        kokpar.looseCooldown = 0.42;
+
+        if (missedByHuman) {
+          showMessage("Мимо", "Серке упал на поле. Можно бороться за подбор.", 1.2);
+        }
+      }
+      releaseCenterDuelIfNeeded();
+      return;
+    }
+
     kokpar.vx *= Math.pow(0.91, dt * 60);
     kokpar.vz *= Math.pow(0.91, dt * 60);
     kokpar.x += kokpar.vx * dt;
     kokpar.z += kokpar.vz * dt;
+    kokpar.y = LOOSE_SERKE_HEIGHT;
 
     if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
       startCenterDuel();
@@ -1712,12 +1877,20 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
     });
 
-    const carriedHeight = kokpar.holder ? 1.78 + Math.sin(time * 8.5) * 0.06 : 0.72;
+    const carriedHeight = kokpar.holder ? CARRIED_SERKE_HEIGHT + Math.sin(time * 8.5) * 0.06 : kokpar.y;
     kokpar.mesh.position.set(kokpar.x, carriedHeight, kokpar.z);
     kokpar.mesh.rotation.y += 0.02 + Math.hypot(kokpar.vx, kokpar.vz) * (kokpar.holder ? 0.001 : 0.002);
-    kokpar.mesh.rotation.x = kokpar.holder ? -0.2 + Math.sin(time * 6) * 0.08 : 0;
-    kokpar.mesh.rotation.z = kokpar.holder ? Math.sin(time * 7.5) * 0.16 : 0;
-    kokpar.mesh.scale.setScalar(kokpar.holder ? 1.1 : 1);
+    kokpar.mesh.rotation.x = kokpar.holder
+      ? -0.2 + Math.sin(time * 6) * 0.08
+      : kokpar.flightTeam
+        ? kokpar.mesh.rotation.x + 0.12
+        : 0;
+    kokpar.mesh.rotation.z = kokpar.holder
+      ? Math.sin(time * 7.5) * 0.16
+      : kokpar.flightTeam
+        ? kokpar.mesh.rotation.z + 0.18
+        : 0;
+    kokpar.mesh.scale.setScalar(kokpar.holder ? 1.1 : kokpar.flightTeam ? 1.06 : 1);
 
     carryStrap.visible = Boolean(kokpar.holder);
     if (kokpar.holder) {
@@ -1873,6 +2046,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       event.preventDefault();
     }
     if (key === "r") restart();
+    if (key === " " && !event.repeat && kokpar.holder === player && attemptThrow(player, true)) {
+      keys.delete(key);
+      return;
+    }
     keys.add(key);
   }
 

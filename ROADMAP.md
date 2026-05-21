@@ -50,13 +50,14 @@ Already done:
 - generated starter low-poly rider-horse and serke GLB assets wired through the manifest
 - pre-match menu for goal type, team size, and match time
 - raised kazan goal variant alongside the ground-circle goal variant
+- throw-to-score mechanic for both ground-circle and kazan target modes
 
 Exit criteria:
 
 - game starts correctly
 - player can understand who is who
 - player can find and grab the serke
-- scoring loop works
+- scoring loop works through an intentional throw
 
 ## Phase 1: Core Gameplay Feel
 
@@ -97,6 +98,7 @@ Tasks:
 - add team size settings: 3v3 prototype, then 5v5
 - add round/match settings
 - add goal target settings: ground circle or raised kazan
+- require a throw into the selected target instead of proximity scoring
 - add basic referee messages
 
 Exit criteria:
@@ -257,7 +259,7 @@ Done when:
 - [x] whistle/countdown starts the round
 - [ ] player can ride to the serke and pick it up
 - [ ] AI contests possession
-- [ ] player can score in the selected goal target
+- [x] player can score in the selected goal target
 - [x] teams are visually distinct
 - [x] serke is visually distinct
 - [x] match can be replayed without refreshing the page
