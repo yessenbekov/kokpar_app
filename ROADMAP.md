@@ -46,6 +46,8 @@ Already done:
 - contest camera lock-on plus separate pickup/down-reach and mounted-pull poses
 - GLB asset pipeline with manifest-based horse, rider, and serke fallbacks
 - generated starter low-poly rider-horse and serke GLB assets wired through the manifest
+- pre-match menu for goal type, team size, and match time
+- raised kazan goal variant alongside the ground-circle goal variant
 
 Exit criteria:
 
@@ -92,6 +94,7 @@ Tasks:
 - add foul-like states only if needed for gameplay
 - add team size settings: 3v3 prototype, then 5v5
 - add round/match settings
+- add goal target settings: ground circle or raised kazan
 - add basic referee messages
 
 Exit criteria:
@@ -252,7 +255,7 @@ Done when:
 - [x] whistle/countdown starts the round
 - [ ] player can ride to the serke and pick it up
 - [ ] AI contests possession
-- [ ] player can score in the kazan
+- [ ] player can score in the selected goal target
 - [x] teams are visually distinct
 - [x] serke is visually distinct
 - [x] match can be replayed without refreshing the page

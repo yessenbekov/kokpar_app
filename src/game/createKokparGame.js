@@ -71,26 +71,59 @@ const CENTER_SUPPORT_SPOTS = [
   { x: 18, z: -13 },
   { x: -18, z: 14 },
   { x: -15.5, z: 11.5 },
-  { x: 15.5, z: -10.5 }
+  { x: 15.5, z: -10.5 },
+  { x: 22, z: 8 },
+  { x: -22, z: -8 },
+  { x: 8, z: 16 },
+  { x: -8, z: -15 }
 ];
 const STARTING_RIDER_SPOTS = [
-  [-18, START_LINE_Z + 8],
-  [-10, START_LINE_Z + 13],
-  [-2, START_LINE_Z + 8],
-  [6, START_LINE_Z + 13],
-  [14, START_LINE_Z + 8],
-  [22, START_LINE_Z + 13]
+  [-28, START_LINE_Z + 8],
+  [-20, START_LINE_Z + 13],
+  [-12, START_LINE_Z + 8],
+  [-4, START_LINE_Z + 13],
+  [4, START_LINE_Z + 8],
+  [12, START_LINE_Z + 13],
+  [20, START_LINE_Z + 8],
+  [28, START_LINE_Z + 13],
+  [-8, START_LINE_Z + 17],
+  [8, START_LINE_Z + 17]
 ];
 
-function createInitialRiders() {
-  return [
-    createRider({ name: "Сен", team: TEAM.blue, human: true, x: STARTING_RIDER_SPOTS[0][0], z: STARTING_RIDER_SPOTS[0][1], color: COLORS.blue }),
-    createRider({ name: "Арман", team: TEAM.blue, x: STARTING_RIDER_SPOTS[1][0], z: STARTING_RIDER_SPOTS[1][1], color: COLORS.blueAlt }),
-    createRider({ name: "Ерлан", team: TEAM.blue, x: STARTING_RIDER_SPOTS[2][0], z: STARTING_RIDER_SPOTS[2][1], color: COLORS.blueAlt }),
-    createRider({ name: "Бек", team: TEAM.red, x: STARTING_RIDER_SPOTS[3][0], z: STARTING_RIDER_SPOTS[3][1], color: COLORS.red }),
-    createRider({ name: "Нур", team: TEAM.red, x: STARTING_RIDER_SPOTS[4][0], z: STARTING_RIDER_SPOTS[4][1], color: COLORS.red }),
-    createRider({ name: "Самат", team: TEAM.red, x: STARTING_RIDER_SPOTS[5][0], z: STARTING_RIDER_SPOTS[5][1], color: COLORS.red })
-  ];
+const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", "Аян"];
+const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
+
+function createInitialRiders(teamSize) {
+  const riders = [];
+  const size = clamp(Math.round(teamSize), 1, 5);
+
+  for (let i = 0; i < size; i += 1) {
+    const blueSpot = STARTING_RIDER_SPOTS[i * 2];
+    const redSpot = STARTING_RIDER_SPOTS[i * 2 + 1];
+
+    riders.push(
+      createRider({
+        name: BLUE_RIDER_NAMES[i],
+        team: TEAM.blue,
+        human: i === 0,
+        x: blueSpot[0],
+        z: blueSpot[1],
+        color: i === 0 ? COLORS.blue : COLORS.blueAlt
+      })
+    );
+
+    riders.push(
+      createRider({
+        name: RED_RIDER_NAMES[i],
+        team: TEAM.red,
+        x: redSpot[0],
+        z: redSpot[1],
+        color: COLORS.red
+      })
+    );
+  }
+
+  return riders;
 }
 
 function isOutsideField(point, margin = 0) {
@@ -323,7 +356,13 @@ function createContestRiderMarker(color) {
   return group;
 }
 
-export function createKokparGame(container, onHudChange) {
+export function createKokparGame(container, onHudChange, options = {}) {
+  const gameSettings = {
+    goalType: options.goalType === "kazan" ? "kazan" : "circle",
+    teamSize: clamp(Math.round(Number(options.teamSize) || 3), 1, 5),
+    matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60)
+  };
+  const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
   const assetPipeline = createGameAssetPipeline();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(COLORS.sky);
@@ -362,15 +401,15 @@ export function createKokparGame(container, onHudChange) {
   createGroundDetails(scene);
   createArenaEnvironment(scene);
 
-  const blueGoal = createGoalMesh(COLORS.blue);
+  const blueGoal = createGoalMesh(COLORS.blue, gameSettings.goalType);
   blueGoal.position.set(goalFor(TEAM.blue).x, 0, goalFor(TEAM.blue).z);
   scene.add(blueGoal);
 
-  const redGoal = createGoalMesh(COLORS.red);
+  const redGoal = createGoalMesh(COLORS.red, gameSettings.goalType);
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders();
+  const riders = createInitialRiders(gameSettings.teamSize);
   const player = riders[0];
 
   function setRiderGroup(rider, nextGroup) {
@@ -445,7 +484,7 @@ export function createKokparGame(container, onHudChange) {
   const match = {
     blue: 0,
     red: 0,
-    time: MATCH_SECONDS,
+    time: gameSettings.matchSeconds,
     over: false,
     phase: "countdown",
     countdown: ROUND_COUNTDOWN_SECONDS,
@@ -687,7 +726,7 @@ export function createKokparGame(container, onHudChange) {
   function restart() {
     match.blue = 0;
     match.red = 0;
-    match.time = MATCH_SECONDS;
+    match.time = gameSettings.matchSeconds;
     match.over = false;
     resetPositions();
     beginCountdown("Новый матч", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
@@ -1531,7 +1570,7 @@ export function createKokparGame(container, onHudChange) {
         if (kokpar.holder !== rider) return;
       }
 
-      if (Math.hypot(kokpar.x - goalFor(rider.team).x, kokpar.z - goalFor(rider.team).z) < GOAL_RADIUS) {
+      if (Math.hypot(kokpar.x - goalFor(rider.team).x, kokpar.z - goalFor(rider.team).z) < scoreRadius) {
         scoreGoal(rider.team);
         return;
       }

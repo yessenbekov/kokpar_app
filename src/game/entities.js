@@ -368,7 +368,7 @@ export function createContestIndicatorMesh() {
   return group;
 }
 
-export function createGoalMesh(color) {
+function createGroundGoalMesh(color) {
   const group = new THREE.Group();
   const ringMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.55 });
   const baseMaterial = new THREE.MeshStandardMaterial({
@@ -396,6 +396,72 @@ export function createGoalMesh(color) {
   }
 
   return group;
+}
+
+function createKazanGoalMesh(color) {
+  const group = new THREE.Group();
+  const strawMaterial = new THREE.MeshStandardMaterial({ color: "#b79a62", roughness: 0.96 });
+  const rimMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.58 });
+  const tireMaterial = new THREE.MeshStandardMaterial({ color: "#202225", roughness: 0.76 });
+  const tireSideMaterial = new THREE.MeshStandardMaterial({ color: "#4b4f54", roughness: 0.82 });
+  const basinMaterial = new THREE.MeshStandardMaterial({
+    color: "#8f6d41",
+    roughness: 0.98,
+    transparent: true,
+    opacity: 0.74
+  });
+
+  const basin = new THREE.Mesh(new THREE.CylinderGeometry(GOAL_RADIUS * 0.58, GOAL_RADIUS * 0.68, 0.16, 48), basinMaterial);
+  basin.position.y = 0.08;
+  basin.receiveShadow = true;
+  group.add(basin);
+
+  const strawWall = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.72, 0.62, 12, 72), strawMaterial);
+  strawWall.name = "kazan_straw_wall";
+  strawWall.position.y = 0.72;
+  strawWall.rotation.x = Math.PI / 2;
+  strawWall.castShadow = true;
+  strawWall.receiveShadow = true;
+  group.add(strawWall);
+
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.52, 0.16, 10, 64), rimMaterial);
+  rim.name = "kazan_team_rim";
+  rim.position.y = 1.12;
+  rim.rotation.x = Math.PI / 2;
+  rim.castShadow = true;
+  group.add(rim);
+
+  const innerLip = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.36, 0.08, 8, 48), tireSideMaterial);
+  innerLip.position.y = 0.42;
+  innerLip.rotation.x = Math.PI / 2;
+  innerLip.receiveShadow = true;
+  group.add(innerLip);
+
+  for (let i = 0; i < 14; i += 1) {
+    const angle = (i / 14) * Math.PI * 2;
+    const tire = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.18, 8, 18), i % 2 === 0 ? tireMaterial : tireSideMaterial);
+    tire.name = "kazan_tire";
+    tire.position.set(Math.cos(angle) * GOAL_RADIUS * 0.8, 0.78, Math.sin(angle) * GOAL_RADIUS * 0.8);
+    tire.rotation.y = Math.PI / 2;
+    tire.rotation.z = angle;
+    tire.castShadow = true;
+    tire.receiveShadow = true;
+    group.add(tire);
+  }
+
+  for (let i = 0; i < 8; i += 1) {
+    const angle = (i / 8) * Math.PI * 2;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.55, 8), rimMaterial);
+    post.position.set(Math.cos(angle) * GOAL_RADIUS * 0.72, 0.78, Math.sin(angle) * GOAL_RADIUS * 0.72);
+    post.castShadow = true;
+    group.add(post);
+  }
+
+  return group;
+}
+
+export function createGoalMesh(color, goalType = "circle") {
+  return goalType === "kazan" ? createKazanGoalMesh(color) : createGroundGoalMesh(color);
 }
 
 export function disposeObject3D(object) {

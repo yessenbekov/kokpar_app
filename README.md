@@ -23,6 +23,14 @@ npm run generate:models
 - `Space`: sprint, pick up, or steal the kokpar
 - `R`: restart
 
+## Match setup
+
+Before a match, choose:
+
+- goal type: ground circle or raised kazan
+- team size: 3v3, 4v4, or 5v5
+- match time: 2, 3, or 5 minutes
+
 ## Project structure
 
 - `src/App.jsx`: React shell and HUD
