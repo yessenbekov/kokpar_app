@@ -70,6 +70,8 @@ const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
 const CENTER_DUEL_RELEASE_DISTANCE = CENTER_CIRCLE_RADIUS + 1.8;
+const KAZAN_BLOCK_RADIUS = GOAL_RADIUS * 0.98;
+const KAZAN_COLLISION_DAMPING = 0.74;
 const CENTER_DUEL_SPOTS = {
   blue: { x: -CENTER_DUEL_START_DISTANCE, z: 0 },
   red: { x: CENTER_DUEL_START_DISTANCE, z: 0 }
@@ -694,6 +696,38 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   function keepNonDuelRidersOutsideCenter() {
     riders.forEach(keepRiderOutsideCenterDuel);
+  }
+
+  function keepRiderOutsideKazanGoal(rider, goal) {
+    const dx = rider.x - goal.x;
+    const dz = rider.z - goal.z;
+    const distance = Math.hypot(dx, dz);
+
+    if (distance >= KAZAN_BLOCK_RADIUS) return;
+
+    const fallbackDirection = goal.x < 0 ? 1 : -1;
+    const nx = distance > 0.001 ? dx / distance : fallbackDirection;
+    const nz = distance > 0.001 ? dz / distance : 0;
+    const inwardSpeed = rider.vx * nx + rider.vz * nz;
+
+    rider.x = goal.x + nx * KAZAN_BLOCK_RADIUS;
+    rider.z = goal.z + nz * KAZAN_BLOCK_RADIUS;
+    rider.vx *= KAZAN_COLLISION_DAMPING;
+    rider.vz *= KAZAN_COLLISION_DAMPING;
+
+    if (inwardSpeed < 0) {
+      rider.vx -= nx * inwardSpeed * 1.08;
+      rider.vz -= nz * inwardSpeed * 1.08;
+    }
+
+    rider.bumpCooldown = Math.max(rider.bumpCooldown, 0.12);
+  }
+
+  function keepRiderOutsideKazanGoals(rider) {
+    if (gameSettings.goalType !== "kazan") return;
+
+    keepRiderOutsideKazanGoal(rider, goalFor(TEAM.blue));
+    keepRiderOutsideKazanGoal(rider, goalFor(TEAM.red));
   }
 
   function releaseCenterDuelIfNeeded() {
@@ -1587,6 +1621,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         START_LINE_Z + START_LANE_DEPTH
       );
       keepRiderOutsideCenterDuel(rider);
+      keepRiderOutsideKazanGoals(rider);
     });
   }
 
@@ -1671,6 +1706,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
 
     keepNonDuelRidersOutsideCenter();
+    riders.forEach(keepRiderOutsideKazanGoals);
   }
 
   function updateKokpar(dt) {
