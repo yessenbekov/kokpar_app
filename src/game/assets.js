@@ -15,6 +15,7 @@ const DEFAULT_MODEL_MANIFEST = {
 const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket"];
 const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail"];
 const SERKE_MATERIAL_TOKENS = ["serke", "kokpar", "dummy", "hide"];
+const LEG_KEYS = ["fl", "fr", "bl", "br"];
 
 const gltfLoader = new GLTFLoader();
 
@@ -171,6 +172,114 @@ function addModelPart(root, prototype, name) {
   return part;
 }
 
+function findLegKey(name) {
+  return LEG_KEYS.find((key) => name.includes(`_${key}`) || name.endsWith(key)) ?? null;
+}
+
+function legPhaseFor(key) {
+  return key === "fl" || key === "br" ? 0 : Math.PI;
+}
+
+function addRiderDustPuffs(root) {
+  const dustMaterial = new THREE.MeshStandardMaterial({
+    color: "#e4c681",
+    transparent: true,
+    opacity: 0.34,
+    roughness: 1,
+    depthWrite: false
+  });
+  const dust = new THREE.Group();
+  dust.name = "asset_dust";
+
+  for (const [x, z, scale] of [
+    [-2.3, -0.55, 1.4],
+    [-2.75, 0.12, 1.1],
+    [-2.1, 0.58, 0.9],
+    [-1.5, -0.78, 0.72],
+    [-1.45, 0.78, 0.72]
+  ]) {
+    const puff = new THREE.Mesh(new THREE.CircleGeometry(0.72 * scale, 18), dustMaterial.clone());
+    puff.name = `asset_dust_puff_${dust.children.length + 1}`;
+    puff.position.set(x, 0.04, z);
+    puff.rotation.x = -Math.PI / 2;
+    puff.userData.baseScale = scale;
+    dust.add(puff);
+  }
+
+  dust.visible = false;
+  root.add(dust);
+  root.userData.dust = dust;
+}
+
+function hydrateRiderModelControls(root) {
+  const legNodes = [];
+  const wrapByKey = new Map();
+
+  root.traverse((node) => {
+    if (node === root || !node.name) return;
+
+    const name = node.name.toLowerCase();
+    const key = findLegKey(name);
+
+    if (name.includes("gait_wrap") && key) {
+      wrapByKey.set(key, node);
+      return;
+    }
+
+    if (name.includes("gait_leg") && key) {
+      legNodes.push({ key, node });
+      return;
+    }
+
+    if (name.includes("gait_tail")) {
+      root.userData.tail = node;
+      root.userData.tailBaseRotationX = node.rotation.x;
+      root.userData.tailBaseRotationZ = node.rotation.z;
+      return;
+    }
+
+    if (name.includes("pose_arm")) {
+      root.userData.arms ??= [];
+      root.userData.arms.push({
+        mesh: node,
+        side: name.includes("left") ? 1 : -1,
+        baseRotationX: node.rotation.x,
+        baseRotationZ: node.rotation.z,
+        baseY: node.position.y
+      });
+      return;
+    }
+
+    if (name.includes("pose_torso") || name.includes("pose_chest") || name.includes("pose_head") || name.includes("pose_helmet")) {
+      root.userData.upperBody ??= [];
+      root.userData.upperBody.push({
+        mesh: node,
+        baseRotationX: node.rotation.x,
+        baseRotationZ: node.rotation.z,
+        baseY: node.position.y
+      });
+    }
+  });
+
+  if (legNodes.length > 0) {
+    root.userData.legs = legNodes.map(({ key, node }) => {
+      const wrap = wrapByKey.get(key);
+
+      return {
+        mesh: node,
+        wrap,
+        baseY: node.position.y,
+        baseWrapY: wrap?.position.y ?? 0,
+        baseRotationX: node.rotation.x,
+        baseRotationZ: node.rotation.z,
+        phase: legPhaseFor(key)
+      };
+    });
+  }
+
+  addRiderDustPuffs(root);
+}
+
 export function createGameAssetPipeline() {
   const pipeline = {
     manifest: DEFAULT_MODEL_MANIFEST,
@@ -218,6 +327,7 @@ export function createRiderModelInstance(assetPipeline, rider) {
   }
 
   tintRiderModel(group, rider);
+  hydrateRiderModelControls(group);
   return group;
 }
 

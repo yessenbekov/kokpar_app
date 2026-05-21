@@ -11,6 +11,12 @@ npm run dev
 
 Open the local URL printed by Vite.
 
+To regenerate the starter low-poly GLB assets:
+
+```bash
+npm run generate:models
+```
+
 ## Controls
 
 - `WASD` or arrow keys: ride
@@ -25,12 +31,13 @@ Open the local URL printed by Vite.
 - `src/game/entities.js`: mesh factories and rider factory
 - `src/game/constants.js`: world and tuning constants
 - `src/styles/app.css`: layout and HUD styles
+- `scripts/generate-model-assets.mjs`: starter GLB asset generator
 - `public/models/manifest.json`: model paths and transform settings
 - `public/models/*`: folders for horse, rider, and serke GLB assets
 
 ## Model pipeline
 
-The game now supports optional GLB/GLTF models while keeping procedural fallbacks.
+The game supports optional GLB/GLTF models while keeping procedural fallbacks. The repo includes starter low-poly GLB files for the combined rider-horse model and serke dummy.
 
 1. Put models in `public/models/horses`, `public/models/riders`, or `public/models/serke`.
 2. Set the matching `path` in `public/models/manifest.json`.
@@ -44,5 +51,5 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 - Add real horse animations and sound
 - Add team selection and match settings
 - Add mobile touch controls
-- Add the first real low-poly horse/rider/serke GLB files
+- Replace starter low-poly GLB files with production horse/rider/serke assets
 - Add tournament mode and persistent scores

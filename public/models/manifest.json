@@ -1,11 +1,12 @@
 {
   "notes": [
     "Set any path below to a .glb or .gltf file inside public/models to replace procedural meshes at runtime.",
+    "Starter low-poly assets can be regenerated with npm run generate:models.",
     "Use riderHorse for one combined horse+rider model, or use horse and rider separately.",
     "Local orientation convention: forward is +X, up is +Y, origin is near the horse body center."
   ],
   "riderHorse": {
-    "path": null,
+    "path": "/models/horses/kokpar-rider-horse.glb",
     "scale": 1,
     "position": [0, 0, 0],
     "rotation": [0, 0, 0]
@@ -23,7 +24,7 @@
     "rotation": [0, 0, 0]
   },
   "serke": {
-    "path": null,
+    "path": "/models/serke/serke.glb",
     "scale": 1,
     "position": [0, 0, 0],
     "rotation": [0, 0, 0]

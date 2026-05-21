@@ -45,6 +45,7 @@ Already done:
 - mounted serke tug contest before a held serke can be stolen
 - contest camera lock-on plus separate pickup/down-reach and mounted-pull poses
 - GLB asset pipeline with manifest-based horse, rider, and serke fallbacks
+- generated starter low-poly rider-horse and serke GLB assets wired through the manifest
 
 Exit criteria:
 
@@ -105,9 +106,9 @@ Purpose: push the current prototype as far as reasonable before switching engine
 
 Tasks:
 
-- replace primitive horses with GLB horse models (pipeline ready, asset pending)
-- replace primitive riders with GLB rider models (pipeline ready, asset pending)
-- add separate serke dummy model (pipeline ready, asset pending)
+- replace primitive horses with GLB horse models (starter combined asset done, production asset pending)
+- replace primitive riders with GLB rider models (starter combined asset done, production asset pending)
+- add separate serke dummy model (starter asset done, production asset pending)
 - add arena boundary, dustier field material, flags, posts, and crowd silhouettes (first pass done)
 - add better lighting, shadows, fog, and color grading
 - add particle dust trails
@@ -226,10 +227,11 @@ Step 2: create a first asset target.
 
 Concrete tasks:
 
-- pick or create one low-poly horse GLB
-- pick or create one rider GLB
-- replace the primitive horse-rider mesh
-- preserve team colors through materials
+- [x] create one low-poly combined rider-horse GLB
+- [x] create one low-poly serke GLB
+- [x] replace the primitive horse-rider mesh through the manifest
+- [x] preserve team colors through materials
+- [ ] replace starter GLBs with production horse, rider, and serke assets
 
 Step 3: prepare for Unreal without abandoning the prototype.
 
