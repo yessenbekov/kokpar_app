@@ -53,6 +53,7 @@ Already done:
 - throw-to-score mechanic for both ground-circle and kazan target modes
 - hold-and-release throw power meter for player scoring attempts
 - throw arc and landing marker preview while charging a throw
+- throw-angle adjustment while charging, with a matching rider preparation pose
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
 
 Exit criteria:

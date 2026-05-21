@@ -23,6 +23,15 @@ function normalize2D(x, z) {
   return { x: x / length, z: z / length };
 }
 
+function rotate2D(vector, angle) {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return {
+    x: vector.x * cos - vector.z * sin,
+    z: vector.x * sin + vector.z * cos
+  };
+}
+
 function angleDelta(target, current) {
   return Math.atan2(Math.sin(target - current), Math.cos(target - current));
 }
@@ -55,6 +64,8 @@ const THROW_CHARGE_SECONDS = 0.92;
 const THROW_GRAVITY = 14;
 const THROW_PREVIEW_STEPS = 22;
 const THROW_PREVIEW_STEP_SECONDS = 0.075;
+const THROW_AIM_MAX_ANGLE = Math.PI * 0.18;
+const THROW_AIM_RATE = 1.18;
 const LOOSE_SERKE_HEIGHT = 0.72;
 const CARRIED_SERKE_HEIGHT = 1.78;
 const CONTEST_RADIUS = 5.4;
@@ -454,6 +465,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     lastThrowHuman: false,
     throwCharging: false,
     throwCharge: 0,
+    throwAimOffset: 0,
     looseCooldown: 0,
     contest: {
       active: false,
@@ -678,6 +690,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.staggerTime = 0;
       rider.hitFlash = 0;
       rider.throwCooldown = 0;
+      rider.throwPose = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
@@ -696,6 +709,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.lastThrowHuman = false;
     kokpar.throwCharging = false;
     kokpar.throwCharge = 0;
+    kokpar.throwAimOffset = 0;
     kokpar.looseCooldown = 0.8;
   }
 
@@ -708,6 +722,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.staggerTime = 0;
     rider.hitFlash = 0;
     rider.throwCooldown = 0;
+    rider.throwPose = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
     rider.grabCooldown = 0.8;
     rider.bumpCooldown = 0.3;
@@ -822,6 +837,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.lastThrowHuman = false;
     kokpar.throwCharging = false;
     kokpar.throwCharge = 0;
+    kokpar.throwAimOffset = 0;
     kokpar.looseCooldown = 0.8;
     clearContest();
 
@@ -848,6 +864,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function resetThrowCharge() {
     kokpar.throwCharging = false;
     kokpar.throwCharge = 0;
+    kokpar.throwAimOffset = 0;
   }
 
   function startThrowCharge(rider) {
@@ -869,8 +886,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     kokpar.throwCharging = true;
     kokpar.throwCharge = Math.max(kokpar.throwCharge, 0.16);
+    kokpar.throwAimOffset = 0;
     showMessage("Готовишь бросок", "Отпусти Space, чтобы забросить серке.", 0.85);
     return true;
+  }
+
+  function throwAimInput() {
+    let input = 0;
+    if (keys.has("arrowleft") || keys.has("a")) input -= 1;
+    if (keys.has("arrowright") || keys.has("d")) input += 1;
+    return clamp(input, -1, 1);
   }
 
   function updateThrowCharge(dt) {
@@ -881,6 +906,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return;
     }
 
+    kokpar.throwAimOffset = clamp(
+      kokpar.throwAimOffset + throwAimInput() * THROW_AIM_RATE * dt,
+      -THROW_AIM_MAX_ANGLE,
+      THROW_AIM_MAX_ANGLE
+    );
     kokpar.throwCharge = clamp(kokpar.throwCharge + dt / THROW_CHARGE_SECONDS, 0.16, 1);
   }
 
@@ -888,11 +918,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (!kokpar.throwCharging || kokpar.holder !== rider) return false;
 
     const power = kokpar.throwCharge;
+    const aimOffset = kokpar.throwAimOffset;
     resetThrowCharge();
-    return attemptThrow(rider, true, power);
+    return attemptThrow(rider, true, power, aimOffset);
   }
 
-  function calculateThrowPlan(rider, chargePower = 0.78) {
+  function calculateThrowPlan(rider, chargePower = 0.78, aimOffset = 0) {
     const forward = forwardVector(rider);
     const side = { x: -forward.z, z: forward.x };
     const carrySide = rider.team === TEAM.blue ? -1 : 1;
@@ -900,7 +931,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const startZ = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
     const target = goalFor(rider.team);
     const toGoal = normalize2D(target.x - startX, target.z - startZ);
-    const aim = normalize2D(toGoal.x * 0.84 + forward.x * 0.16, toGoal.z * 0.84 + forward.z * 0.16);
+    const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
+    const aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
     const throwDistance = Math.hypot(target.x - startX, target.z - startZ);
     const riderSpeed = Math.hypot(rider.vx, rider.vz);
     const power = clamp(chargePower, 0.2, 1);
@@ -917,7 +949,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     };
   }
 
-  function attemptThrow(rider, active = false, chargePower = 0.78) {
+  function attemptThrow(rider, active = false, chargePower = 0.78, aimOffset = 0) {
     if (match.phase !== "live" || match.over) return false;
     if (kokpar.holder !== rider || rider.throwCooldown > 0) return false;
     if (kokpar.contest.active) return false;
@@ -938,7 +970,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return false;
     }
 
-    const throwPlan = calculateThrowPlan(rider, chargePower);
+    const throwPlan = calculateThrowPlan(rider, chargePower, aimOffset);
 
     kokpar.holder = null;
     kokpar.flightTeam = rider.team;
@@ -953,6 +985,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.vy = throwPlan.vy;
     kokpar.vz = throwPlan.vz;
     kokpar.looseCooldown = 0.52;
+    rider.throwPose = Math.max(rider.throwPose ?? 0, 1.1);
     rider.throwCooldown = 0.8;
     rider.grabCooldown = Math.max(rider.grabCooldown, 0.35);
     clearContest();
@@ -964,8 +997,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return true;
   }
 
-  function predictThrowPath(rider, chargePower) {
-    const state = calculateThrowPlan(rider, chargePower);
+  function predictThrowPath(rider, chargePower, aimOffset = 0) {
+    const state = calculateThrowPlan(rider, chargePower, aimOffset);
     const points = [];
     let scores = false;
     let flightTime = 0;
@@ -1001,7 +1034,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return;
     }
 
-    const preview = predictThrowPath(player, kokpar.throwCharge);
+    const preview = predictThrowPath(player, kokpar.throwCharge, kokpar.throwAimOffset);
     const points = preview.points;
     if (points.length < 2) {
       throwPreviewLine.visible = false;
@@ -1717,6 +1750,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (keys.has(" ")) attemptGrab(rider, true);
   }
 
+  function updateRiderThrowPose(rider, dt) {
+    const current = rider.throwPose ?? 0;
+    const target = kokpar.throwCharging && kokpar.holder === rider ? 0.58 + kokpar.throwCharge * 0.46 : 0;
+
+    if (target > current) {
+      rider.throwPose = current + (target - current) * clamp(dt * 8.5, 0, 1);
+    } else {
+      rider.throwPose = Math.max(0, current - dt * 3.2);
+    }
+  }
+
   function updateAI(rider, dt, time) {
     const plan = chooseAITarget(rider);
     const target = plan.target;
@@ -1751,6 +1795,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
+      updateRiderThrowPose(rider, dt);
 
       const isWaitingDuringDuel = match.duelMode && !kokpar.holder && !match.duelRiders.has(rider);
 
@@ -1989,6 +2034,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const inContest = contestParticipants.has(rider);
       const pickupPose = inContest && kokpar.contest.active && !mountedContest ? 1 : 0;
       const tugPose = inContest && mountedContest ? 1 : 0;
+      const throwPose = rider.throwPose ?? 0;
+      const throwSide = rider.team === TEAM.blue ? -1 : 1;
+      const throwAimLean = kokpar.throwCharging && kokpar.holder === rider
+        ? clamp(kokpar.throwAimOffset / THROW_AIM_MAX_ANGLE, -1, 1)
+        : 0;
       const posePower = inContest ? clamp(contestPowerForRider(rider), 0, 1.25) : 0;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
@@ -2025,9 +2075,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
               ? -0.45
               : 0;
 
-        part.mesh.rotation.x = part.baseRotationX - pickupPose * (0.2 + posePower * 0.04) - tugPose * 0.06;
-        part.mesh.rotation.z = part.baseRotationZ + tugPose * tugDirection * 0.08;
-        part.mesh.position.y = part.baseY - pickupPose * 0.1;
+        part.mesh.rotation.x =
+          part.baseRotationX -
+          pickupPose * (0.2 + posePower * 0.04) -
+          tugPose * 0.06 -
+          throwPose * 0.1;
+        part.mesh.rotation.z =
+          part.baseRotationZ +
+          tugPose * tugDirection * 0.08 +
+          throwPose * (throwSide * 0.1 + throwAimLean * 0.08);
+        part.mesh.position.y = part.baseY - pickupPose * 0.1 + throwPose * 0.03;
       });
 
       arms.forEach((arm) => {
@@ -2035,18 +2092,21 @@ export function createKokparGame(container, onHudChange, options = {}) {
           mountedContest && rider === kokpar.contest.challenger
             ? 1
             : mountedContest && rider === kokpar.contest.holder
-              ? -0.35
-              : 0;
+            ? -0.35
+            : 0;
+        const isThrowingArm = arm.side === throwSide;
 
         arm.mesh.rotation.z =
           arm.baseRotationZ +
           pickupPose * (0.45 + posePower * 0.14) +
-          tugPose * (0.22 + posePower * 0.12);
+          tugPose * (0.22 + posePower * 0.12) +
+          throwPose * (isThrowingArm ? 0.78 : 0.24);
         arm.mesh.rotation.x =
           arm.baseRotationX +
           arm.side * pickupPose * 0.3 +
-          arm.side * tugPose * tugDirection * 0.34;
-        arm.mesh.position.y = arm.baseY - pickupPose * 0.12;
+          arm.side * tugPose * tugDirection * 0.34 +
+          throwPose * (isThrowingArm ? -throwSide * 0.42 + throwAimLean * 0.16 : arm.side * 0.12);
+        arm.mesh.position.y = arm.baseY - pickupPose * 0.12 + throwPose * (isThrowingArm ? 0.15 : 0.02);
       });
 
       if (dust) {
@@ -2252,6 +2312,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
     if (key === "r") restart();
     if (key === " " && !event.repeat && kokpar.holder === player && startThrowCharge(player)) {
+      keys.delete(key);
+      return;
+    }
+    if (key === " " && kokpar.throwCharging) {
       keys.delete(key);
       return;
     }

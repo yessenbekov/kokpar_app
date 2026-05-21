@@ -21,6 +21,7 @@ npm run generate:models
 
 - `WASD` or arrow keys: ride
 - `Space`: sprint, pick up, steal, or charge/release a throw near the target
+- `A/D` or left/right while charging: adjust the throw angle
 - `R`: restart
 
 ## Match setup
@@ -32,7 +33,7 @@ Before a match, choose:
 - match time: 2, 3, or 5 minutes
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
-While charging, a throw arc and landing marker preview the approximate path.
+While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
 In circle mode, riders can ride over the ground marking. In kazan mode, the raised kazan blocks riders like a physical obstacle.
 
 ## Project structure
