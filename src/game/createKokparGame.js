@@ -50,6 +50,7 @@ const START_CAMERA_FOCUS_Z = (START_LINE_Z + START_LANE_DEPTH * 0.62 + KOKPAR_ST
 const START_CAMERA_POSITION = { x: -34, y: 72, z: 94 };
 const CENTER_DUEL_CAMERA_POSITION = { x: -24, y: 54, z: 46 };
 const ROUND_COUNTDOWN_SECONDS = 3;
+const GOAL_CELEBRATION_SECONDS = 2.4;
 const OUT_OF_BOUNDS_MARGIN = 0.2;
 const RIDER_FIELD_EXIT_BUFFER = 10;
 const START_LANE_FIELD_BUFFER = 0.8;
@@ -538,6 +539,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
     over: false,
     phase: "countdown",
     countdown: ROUND_COUNTDOWN_SECONDS,
+    goalPause: 0,
+    goalTeam: null,
+    goalScorer: null,
     countdownLabel: "Старт через",
     message: "На старт",
     submessage: "Всадники за линией. Жди свистка.",
@@ -600,6 +604,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function carryStatusText() {
+    if (match.phase === "goal") return match.goalTeam === TEAM.blue ? "Гол синих" : "Гол красных";
     if (kokpar.contest.active) return contestStatusText();
     if (kokpar.flightTeam) return kokpar.flightTeam === TEAM.blue ? "Бросок синих" : "Бросок красных";
     if (kokpar.holder === player) {
@@ -641,6 +646,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   ) {
     match.phase = "countdown";
     match.countdown = ROUND_COUNTDOWN_SECONDS;
+    match.goalPause = 0;
+    match.goalTeam = null;
+    match.goalScorer = null;
     match.countdownLabel = countdownLabel;
     match.message = message;
     match.submessage = submessage;
@@ -655,6 +663,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function startRound() {
     match.phase = "live";
     match.countdown = 0;
+    match.goalPause = 0;
+    match.goalTeam = null;
+    match.goalScorer = null;
     kokpar.looseCooldown = 0.2;
     riders.forEach((rider) => {
       rider.grabCooldown = 0.15;
@@ -850,11 +861,66 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   function scoreGoal(team) {
     match[team] += 1;
+    match.phase = "goal";
+    match.goalPause = GOAL_CELEBRATION_SECONDS;
+    match.goalTeam = team;
+    match.goalScorer = kokpar.flightScorer;
+
+    const target = goalFor(team);
+    kokpar.x = clamp(kokpar.x, target.x - scoreRadius * 0.5, target.x + scoreRadius * 0.5);
+    kokpar.z = clamp(kokpar.z, target.z - scoreRadius * 0.5, target.z + scoreRadius * 0.5);
+    kokpar.y = gameSettings.goalType === "kazan" ? clamp(kokpar.y, 0.95, 1.65) : LOOSE_SERKE_HEIGHT;
+    kokpar.vx = 0;
+    kokpar.vy = 0;
+    kokpar.vz = 0;
+    kokpar.holder = null;
+    kokpar.flightTeam = null;
+    kokpar.flightScorer = null;
+    kokpar.flightTime = 0;
+    kokpar.lastThrowHuman = false;
+    kokpar.looseCooldown = GOAL_CELEBRATION_SECONDS;
+    resetThrowCharge();
+    clearContest();
+
+    const scorerText = match.goalScorer ? `${match.goalScorer.name} забросил серке.` : "Серке в цели.";
+    showMessage(
+      team === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
+      `${scorerText} Новый розыгрыш через мгновение.`,
+      GOAL_CELEBRATION_SECONDS
+    );
+  }
+
+  function finishGoalCelebration() {
+    const goalTeam = match.goalTeam;
     resetPositions();
     beginCountdown(
-      team === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
+      goalTeam === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
       `Серке заброшен в ${targetName()}. Новый розыгрыш после свистка.`
     );
+  }
+
+  function updateGoalCelebration(dt) {
+    match.goalPause -= dt;
+    riders.forEach((rider) => {
+      applyHorseControl(rider, null, dt);
+      rider.x = clamp(
+        rider.x + rider.vx * dt,
+        -WORLD.width / 2 - RIDER_FIELD_EXIT_BUFFER,
+        WORLD.width / 2 + RIDER_FIELD_EXIT_BUFFER
+      );
+      rider.z = clamp(
+        rider.z + rider.vz * dt,
+        -WORLD.height / 2 - RIDER_FIELD_EXIT_BUFFER,
+        START_LINE_Z + START_LANE_DEPTH
+      );
+      rider.throwPose = Math.max(0, (rider.throwPose ?? 0) - dt * 1.6);
+      keepRiderOutsideKazanGoals(rider);
+    });
+    resolveRiderCollisions();
+
+    if (match.goalPause <= 0) {
+      finishGoalCelebration();
+    }
   }
 
   function isThrownSerkeScoring() {
@@ -2225,6 +2291,27 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function updateCamera(dt) {
+    if (match.phase === "goal") {
+      const team = match.goalTeam ?? kokpar.flightTeam ?? TEAM.blue;
+      const target = goalFor(team);
+      const cameraSide = team === TEAM.blue ? -1 : 1;
+      const goalEase = 1 - Math.pow(0.012, dt);
+
+      cameraTrackTarget.set(
+        target.x * 0.72 + kokpar.x * 0.28,
+        1.15,
+        target.z * 0.72 + kokpar.z * 0.28
+      );
+      cameraTrack.lerp(cameraTrackTarget, goalEase);
+      cameraDesired.set(cameraTrack.x - cameraSide * 19, 24, cameraTrack.z + 23);
+      cameraLookAt.set(cameraTrack.x, 1.35, cameraTrack.z);
+      camera.position.lerp(cameraDesired, goalEase);
+      camera.fov += (50 - camera.fov) * (1 - Math.pow(0.035, dt));
+      camera.updateProjectionMatrix();
+      camera.lookAt(cameraLookAt);
+      return;
+    }
+
     if (match.phase === "countdown") {
       if (match.duelMode) {
         cameraDesired.set(
@@ -2350,6 +2437,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
         if (match.countdown <= 0) {
           startRound();
         }
+      } else if (match.phase === "goal") {
+        updateGoalCelebration(dt);
       } else {
         match.time -= dt;
         updateThrowCharge(dt);
