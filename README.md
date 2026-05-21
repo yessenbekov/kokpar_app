@@ -32,6 +32,7 @@ Before a match, choose:
 - match time: 2, 3, or 5 minutes
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
+While charging, a throw arc and landing marker preview the approximate path.
 In circle mode, riders can ride over the ground marking. In kazan mode, the raised kazan blocks riders like a physical obstacle.
 
 ## Project structure
