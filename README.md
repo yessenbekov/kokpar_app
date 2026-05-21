@@ -42,6 +42,7 @@ Before a match, choose:
 - `scripts/generate-model-assets.mjs`: starter GLB asset generator
 - `public/models/manifest.json`: model paths and transform settings
 - `public/models/*`: folders for horse, rider, and serke GLB assets
+- `REFERENCES.md`: gameplay and visual references for future iterations
 
 ## Model pipeline
 

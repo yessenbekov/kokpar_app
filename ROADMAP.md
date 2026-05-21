@@ -12,6 +12,8 @@ The target is not just "a browser toy." The long-term target is a sports game fe
 - realistic arena, dust, lighting, crowds, sound, and presentation
 - real 3D assets, animations, and eventually a stronger engine if needed
 
+Primary gameplay references are tracked in `REFERENCES.md`.
+
 ## Phase 0: Current Prototype
 
 Status: in progress.
