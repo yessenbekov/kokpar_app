@@ -23,6 +23,7 @@ npm run generate:models
 - `Space`: sprint, pick up, steal, or charge/release a throw near the target
 - `A/D` or left/right while charging: adjust the throw angle
 - `R`: restart
+- mobile: use the on-screen joystick and action button
 
 ## Match setup
 

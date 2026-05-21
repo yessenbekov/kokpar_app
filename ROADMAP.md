@@ -55,6 +55,7 @@ Already done:
 - throw arc and landing marker preview while charging a throw
 - throw-angle adjustment while charging, with a matching rider preparation pose
 - short goal celebration hold before resetting to the next start
+- mobile touch controls with a virtual joystick and action button
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
 
 Exit criteria:
@@ -80,7 +81,7 @@ Tasks:
 - show different poses for ground pickup versus pulling serke from another rider
 - add match restart after goal with a short countdown
 - add camera smoothing, zoom, and better angle for reading the play
-- add touch controls later, but keep keyboard first
+- refine touch controls after phone testing: joystick feel, action button placement, and haptics
 
 Exit criteria:
 

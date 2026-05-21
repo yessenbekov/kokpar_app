@@ -532,6 +532,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const tugStrapDirection = new THREE.Vector3();
 
   const keys = new Set();
+  const touchInput = {
+    x: 0,
+    z: 0,
+    action: false
+  };
   const match = {
     blue: 0,
     red: 0,
@@ -675,6 +680,29 @@ export function createKokparGame(container, onHudChange, options = {}) {
       match.duelMode ? "Один на один за серке." : "Розыгрыш начался.",
       1.1
     );
+  }
+
+  function setTouchInput(nextInput = {}) {
+    const wasActionPressed = touchInput.action;
+
+    if (Number.isFinite(nextInput.x)) touchInput.x = clamp(nextInput.x, -1, 1);
+    if (Number.isFinite(nextInput.z)) touchInput.z = clamp(nextInput.z, -1, 1);
+
+    if (typeof nextInput.action === "boolean") {
+      touchInput.action = nextInput.action;
+
+      if (touchInput.action && !wasActionPressed && kokpar.holder === player) {
+        startThrowCharge(player);
+      } else if (!touchInput.action && wasActionPressed) {
+        releaseThrowCharge(player);
+      }
+    }
+  }
+
+  function resetTouchInput() {
+    touchInput.x = 0;
+    touchInput.z = 0;
+    touchInput.action = false;
   }
 
   function clearContest() {
@@ -961,6 +989,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     let input = 0;
     if (keys.has("arrowleft") || keys.has("a")) input -= 1;
     if (keys.has("arrowright") || keys.has("d")) input += 1;
+    input += touchInput.x;
     return clamp(input, -1, 1);
   }
 
@@ -1793,17 +1822,22 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function updateHuman(rider, dt) {
     let ax = 0;
     let az = 0;
+    const actionHeld = keys.has(" ") || touchInput.action;
 
     if (keys.has("arrowleft") || keys.has("a")) ax -= 1;
     if (keys.has("arrowright") || keys.has("d")) ax += 1;
     if (keys.has("arrowup") || keys.has("w")) az -= 1;
     if (keys.has("arrowdown") || keys.has("s")) az += 1;
 
-    const moving = ax !== 0 || az !== 0;
-    const sprint = moving && keys.has(" ") && rider.stamina > 0.08;
+    ax += touchInput.x;
+    az += touchInput.z;
+
+    const inputStrength = clamp(Math.hypot(ax, az), 0, 1);
+    const moving = inputStrength > 0.05;
+    const sprint = moving && actionHeld && !kokpar.throwCharging && rider.stamina > 0.08;
     const direction = moving ? normalize2D(ax, az) : null;
 
-    applyHorseControl(rider, direction, dt, { sprint });
+    applyHorseControl(rider, direction, dt, { sprint, urgency: moving ? 0.38 + inputStrength * 0.68 : 1 });
 
     if (sprint && moving) {
       rider.stamina = clamp(rider.stamina - dt * 0.36, 0, 1);
@@ -1813,7 +1847,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.stamina = clamp(rider.stamina + dt * 0.22, 0, 1);
     }
 
-    if (keys.has(" ")) attemptGrab(rider, true);
+    if (actionHeld) attemptGrab(rider, true);
   }
 
   function updateRiderThrowPose(rider, dt) {
@@ -2476,8 +2510,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   return {
     restart,
+    setTouchInput,
     destroy() {
       isDestroyed = true;
+      resetTouchInput();
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", onKeyDown);

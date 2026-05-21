@@ -1,4 +1,13 @@
-import { CircleDot, Clock3, Play, RotateCcw, SlidersHorizontal, Trophy, Users } from "lucide-react";
+import {
+  CircleDot,
+  Clock3,
+  Hand,
+  Play,
+  RotateCcw,
+  SlidersHorizontal,
+  Trophy,
+  Users
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createKokparGame } from "./game/createKokparGame.js";
 
@@ -47,9 +56,13 @@ const initialHud = {
   ...makeInitialHud()
 };
 
+const JOYSTICK_RADIUS = 46;
+
 export default function App() {
   const mountRef = useRef(null);
   const gameRef = useRef(null);
+  const joystickRef = useRef(null);
+  const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
   const [settings, setSettings] = useState(() => readUrlSettings());
   const [activeSettings, setActiveSettings] = useState(() => (shouldAutoStart() ? readUrlSettings() : null));
   const [hud, setHud] = useState(initialHud);
@@ -85,6 +98,79 @@ export default function App() {
     };
   }, [activeSettings]);
 
+  function setGameTouchInput(input) {
+    gameRef.current?.setTouchInput?.(input);
+  }
+
+  function updateJoystick(event) {
+    event.preventDefault();
+    const rect = joystickRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const dx = event.clientX - (rect.left + rect.width / 2);
+    const dz = event.clientY - (rect.top + rect.height / 2);
+    const distance = Math.hypot(dx, dz);
+    const scale = distance > JOYSTICK_RADIUS ? JOYSTICK_RADIUS / distance : 1;
+    const x = (dx * scale) / JOYSTICK_RADIUS;
+    const z = (dz * scale) / JOYSTICK_RADIUS;
+
+    setJoystick({ active: true, x, z });
+    setGameTouchInput({ x, z });
+  }
+
+  function startJoystick(event) {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    updateJoystick(event);
+  }
+
+  function releaseJoystick(event) {
+    event.preventDefault();
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    setJoystick({ active: false, x: 0, z: 0 });
+    setGameTouchInput({ x: 0, z: 0 });
+  }
+
+  function pressAction(event) {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    setGameTouchInput({ action: true });
+  }
+
+  function releaseAction(event) {
+    event.preventDefault();
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setGameTouchInput({ action: false });
+  }
+
+  function releaseTouchControls(updateUi = true) {
+    if (updateUi) setJoystick({ active: false, x: 0, z: 0 });
+    setGameTouchInput({ x: 0, z: 0, action: false });
+  }
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.hidden) releaseTouchControls();
+    }
+
+    window.addEventListener("blur", releaseTouchControls);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      releaseTouchControls(false);
+      window.removeEventListener("blur", releaseTouchControls);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    releaseTouchControls();
+  }, [activeSettings]);
+
   function updateSetting(key, value) {
     setSettings((current) => ({ ...current, [key]: value }));
   }
@@ -108,6 +194,24 @@ export default function App() {
   const isSetup = !activeSettings;
   const goalLabel = activeSettings?.goalType === "kazan" ? "Казан" : "Круг";
   const activeMeterValue = hud.throwPower > 0 ? hud.throwPower : hud.stamina;
+
+  function renderActionButton() {
+    return (
+      <button
+        className="touch-button touch-action"
+        type="button"
+        aria-label="Действие"
+        title="Действие"
+        onPointerDown={pressAction}
+        onPointerUp={releaseAction}
+        onPointerCancel={releaseAction}
+        onLostPointerCapture={releaseAction}
+        onContextMenu={(event) => event.preventDefault()}
+      >
+        <Hand size={30} strokeWidth={2.6} />
+      </button>
+    );
+  }
 
   return (
     <main className="game" aria-label="Kokpar Game">
@@ -257,6 +361,36 @@ export default function App() {
           <strong>{hud.message}</strong>
           <span>{hud.submessage}</span>
         </div>
+      )}
+
+      {activeSettings && (
+        <section className="touch-controls" aria-label="Сенсорное управление">
+          <div
+            className={joystick.active ? "touch-joystick active" : "touch-joystick"}
+            ref={joystickRef}
+            aria-label="Джойстик движения"
+            role="application"
+            style={{
+              "--stick-x": joystick.x,
+              "--stick-z": joystick.z
+            }}
+            onPointerDown={startJoystick}
+            onPointerMove={(event) => {
+              if (joystick.active) updateJoystick(event);
+            }}
+            onPointerUp={releaseJoystick}
+            onPointerCancel={releaseJoystick}
+            onLostPointerCapture={releaseJoystick}
+            onContextMenu={(event) => event.preventDefault()}
+          >
+            <span className="touch-stick-base" />
+            <span className="touch-stick-knob" />
+          </div>
+
+          <div className="touch-action-wrap">
+            {renderActionButton()}
+          </div>
+        </section>
       )}
     </main>
   );
