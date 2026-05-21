@@ -51,6 +51,7 @@ Already done:
 - pre-match menu for goal type, team size, and match time
 - raised kazan goal variant alongside the ground-circle goal variant
 - throw-to-score mechanic for both ground-circle and kazan target modes
+- hold-and-release throw power meter for player scoring attempts
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
 
 Exit criteria:

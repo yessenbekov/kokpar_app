@@ -275,6 +275,14 @@ button {
   background: linear-gradient(90deg, #7fb26b, #d9a12e);
 }
 
+.throw-meter {
+  background: rgba(47, 35, 24, 0.2);
+}
+
+.throw-meter i {
+  background: linear-gradient(90deg, #2f86bd, #f0c347, #bb3c31);
+}
+
 .hud-actions {
   display: flex;
   gap: 8px;

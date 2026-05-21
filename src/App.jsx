@@ -18,6 +18,7 @@ function makeInitialHud(settings = DEFAULT_SETTINGS) {
     red: 0,
     timer: formatTimer(settings.matchMinutes),
     stamina: 1,
+    throwPower: 0,
     carry: "Кокпар на поле",
     message: "Загрузка матча",
     submessage: "Готовим поле.",
@@ -106,6 +107,7 @@ export default function App() {
 
   const isSetup = !activeSettings;
   const goalLabel = activeSettings?.goalType === "kazan" ? "Казан" : "Круг";
+  const activeMeterValue = hud.throwPower > 0 ? hud.throwPower : hud.stamina;
 
   return (
     <main className="game" aria-label="Kokpar Game">
@@ -218,8 +220,11 @@ export default function App() {
         <div className="panel right">
           <p className="label">Конь</p>
           <p className="status">{hud.carry}</p>
-          <div className="meter" aria-label="Выносливость">
-            <i style={{ "--value": `${Math.round(hud.stamina * 100)}%` }} />
+          <div
+            className={hud.throwPower > 0 ? "meter throw-meter" : "meter"}
+            aria-label={hud.throwPower > 0 ? "Сила броска" : "Выносливость"}
+          >
+            <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
           </div>
         </div>
 

@@ -20,7 +20,7 @@ npm run generate:models
 ## Controls
 
 - `WASD` or arrow keys: ride
-- `Space`: sprint, pick up, steal, or throw the kokpar near the target
+- `Space`: sprint, pick up, steal, or charge/release a throw near the target
 - `R`: restart
 
 ## Match setup
@@ -31,7 +31,7 @@ Before a match, choose:
 - team size: 3v3, 4v4, or 5v5
 - match time: 2, 3, or 5 minutes
 
-Scoring requires a throw: carry the serke near the selected target and press `Space`. Riding into the circle or kazan is not enough.
+Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 In circle mode, riders can ride over the ground marking. In kazan mode, the raised kazan blocks riders like a physical obstacle.
 
 ## Project structure
