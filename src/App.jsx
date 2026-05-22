@@ -28,6 +28,7 @@ function makeInitialHud(settings = DEFAULT_SETTINGS) {
     timer: formatTimer(settings.matchMinutes),
     stamina: 1,
     throwPower: 0,
+    tugPower: 0,
     carry: "Кокпар на поле",
     message: "Загрузка матча",
     submessage: "Готовим поле.",
@@ -193,7 +194,8 @@ export default function App() {
 
   const isSetup = !activeSettings;
   const goalLabel = activeSettings?.goalType === "kazan" ? "Казан" : "Круг";
-  const activeMeterValue = hud.throwPower > 0 ? hud.throwPower : hud.stamina;
+  const meterMode = hud.throwPower > 0 ? "throw" : hud.tugPower > 0 ? "tug" : "stamina";
+  const activeMeterValue = meterMode === "throw" ? hud.throwPower : meterMode === "tug" ? hud.tugPower : hud.stamina;
 
   function renderActionButton() {
     return (
@@ -325,8 +327,8 @@ export default function App() {
           <p className="label">Конь</p>
           <p className="status">{hud.carry}</p>
           <div
-            className={hud.throwPower > 0 ? "meter throw-meter" : "meter"}
-            aria-label={hud.throwPower > 0 ? "Сила броска" : "Выносливость"}
+            className={meterMode === "throw" ? "meter throw-meter" : meterMode === "tug" ? "meter tug-meter" : "meter"}
+            aria-label={meterMode === "throw" ? "Сила броска" : meterMode === "tug" ? "Усилие борьбы" : "Выносливость"}
           >
             <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
           </div>

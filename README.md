@@ -43,6 +43,7 @@ When your rider carries the serke, nearby teammates switch into guard support an
 Away from immediate pressure, teammates form an escort lane toward the scoring target and mark opponents who can cut off the run.
 Small overhead markers highlight the serke carrier, active contests, and teammate support roles during possession.
 Mounted tug-of-war shows a floating pull arrow between riders, colored by the team currently winning the struggle.
+When you are part of a mounted tug, holding `Space` or the mobile action button builds pull effort and spends stamina.
 
 ## Project structure
 

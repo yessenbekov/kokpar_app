@@ -15,6 +15,7 @@ export function createRider(config) {
     hitFlash: 0,
     lean: 0,
     throwPose: 0,
+    tugEffort: 0,
     aiRole: "idle",
     aiPhase: Math.random() * Math.PI * 2,
     maxSpeed: config.human ? 19.5 : 18,

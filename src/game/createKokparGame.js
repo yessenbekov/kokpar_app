@@ -77,6 +77,12 @@ const MOUNTED_CONTEST_RADIUS = 5.2;
 const MOUNTED_CONTEST_MIN_SECONDS = 0.65;
 const MOUNTED_CONTEST_MAX_SECONDS = 2.35;
 const MOUNTED_CONTEST_PROGRESS_RATE = 0.95;
+const MOUNTED_TUG_BUILD_RATE = 2.35;
+const MOUNTED_TUG_FADE_RATE = 1.45;
+const MOUNTED_TUG_STAMINA_DRAIN = 0.42;
+const MOUNTED_TUG_STAMINA_RECOVERY = 0.08;
+const MOUNTED_TUG_MIN_STAMINA = 0.08;
+const MOUNTED_TUG_POWER_BONUS = 0.5;
 const TACKLE_DROP_THRESHOLD = 0.94;
 const TACKLE_MOUNTED_CONTEST_THRESHOLD = 0.36;
 const TACKLE_STAGGER_THRESHOLD = 0.4;
@@ -657,9 +663,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function contestStatusText() {
     const progress = kokpar.contest.progress;
     const prefix = kokpar.contest.mode === "mounted" ? "Тянут серке" : "Борьба";
+    if (kokpar.contest.mode === "mounted" && isMountedContestParticipant(player)) {
+      const effort = player.tugEffort ?? 0;
+      if (effort > 0.08) return `Тянешь: ${Math.round(effort * 100)}%`;
+      return "Жми действие";
+    }
     if (progress > 0.18) return `${prefix}: синие ведут`;
     if (progress < -0.18) return `${prefix}: красные ведут`;
     return `${prefix}: равная`;
+  }
+
+  function actionHeldForRider(rider) {
+    return rider.human && (keys.has(" ") || touchInput.action);
+  }
+
+  function isMountedContestParticipant(rider) {
+    return (
+      kokpar.contest.active &&
+      kokpar.contest.mode === "mounted" &&
+      (kokpar.contest.holder === rider || kokpar.contest.challenger === rider)
+    );
   }
 
   function targetName() {
@@ -709,6 +732,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       timer: formatTime(match.time),
       stamina: player.stamina,
       throwPower: kokpar.throwCharging ? kokpar.throwCharge : 0,
+      tugPower: isMountedContestParticipant(player) ? player.tugEffort ?? 0 : 0,
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
@@ -792,6 +816,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.contest.leader = null;
     kokpar.contest.holder = null;
     kokpar.contest.challenger = null;
+    riders.forEach((rider) => {
+      rider.tugEffort = 0;
+    });
   }
 
   function resetPositions() {
@@ -809,6 +836,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.hitFlash = 0;
       rider.throwCooldown = 0;
       rider.throwPose = 0;
+      rider.tugEffort = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
       rider.grabCooldown = 0.8;
       rider.bumpCooldown = 0.3;
@@ -841,6 +869,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.hitFlash = 0;
     rider.throwCooldown = 0;
     rider.throwPose = 0;
+    rider.tugEffort = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
     rider.grabCooldown = 0.8;
     rider.bumpCooldown = 0.3;
@@ -1718,6 +1747,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.contest.holder = holder;
     kokpar.contest.challenger = challenger;
 
+    holder.tugEffort = 0;
+    challenger.tugEffort = 0;
     holder.bumpCooldown = Math.max(holder.bumpCooldown, 0.28);
     challenger.grabCooldown = active ? 0.18 : 0.34;
     holder.hitFlash = Math.max(holder.hitFlash, 0.45);
@@ -1733,8 +1764,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     showMessage(
       "Серке тянут!",
-      challenger.human
-        ? "Держись рядом и жми Space, чтобы вырвать серке."
+      challenger.human || holder.human
+        ? "Удерживай действие, чтобы перетянуть серке. Это тратит выносливость."
         : `${challenger.name} тянет серке. Нужна борьба, одного удара мало.`,
       1.25
     );
@@ -1816,7 +1847,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
       : clamp(1 - (distance - 1.6) / (CONTEST_RADIUS - 1.6), 0.12, 1);
     const speedPower = clamp(1 - speed / (mounted ? 22 : 24), 0.52, 1);
     const staminaPower = 0.72 + rider.stamina * 0.28;
-    const intentPower = rider.human && keys.has(" ") ? 1.22 : 1;
+    const intentPower = !mounted && actionHeldForRider(rider) ? 1.22 : 1;
+    const tugPower = mounted && rider.human ? 1 + (rider.tugEffort ?? 0) * MOUNTED_TUG_POWER_BONUS : 1;
     const rolePower = rider.aiRole === "pickup" || rider.aiRole === "tackler" ? 1.08 : rider.aiRole === "carrier" ? 1.04 : 1;
     const bumpPower = mounted && rider === holder ? 1 : rider.bumpCooldown > 0 ? 0.64 : 1;
     const mountedPower =
@@ -1828,7 +1860,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
             : 1
         : 1;
 
-    return distancePower * speedPower * staminaPower * intentPower * rolePower * bumpPower * mountedPower;
+    return distancePower * speedPower * staminaPower * intentPower * tugPower * rolePower * bumpPower * mountedPower;
   }
 
   function contestPowerForTeam(team, candidates) {
@@ -1845,6 +1877,22 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     const leadingTeam = kokpar.contest.progress > 0 ? TEAM.blue : TEAM.red;
     return closestRider(kokpar, candidates.filter((rider) => rider.team === leadingTeam)) ?? nearest;
+  }
+
+  function updateMountedContestEffort(dt, candidates) {
+    candidates.forEach((rider) => {
+      if (!rider.human) return;
+
+      const canPull = actionHeldForRider(rider) && rider.stamina > MOUNTED_TUG_MIN_STAMINA;
+      if (canPull) {
+        rider.tugEffort = clamp((rider.tugEffort ?? 0) + dt * MOUNTED_TUG_BUILD_RATE, 0, 1);
+        rider.stamina = clamp(rider.stamina - dt * MOUNTED_TUG_STAMINA_DRAIN, 0, 1);
+        rider.hitFlash = Math.max(rider.hitFlash, 0.18 + (rider.tugEffort ?? 0) * 0.2);
+      } else {
+        rider.tugEffort = Math.max(0, (rider.tugEffort ?? 0) - dt * MOUNTED_TUG_FADE_RATE);
+        rider.stamina = clamp(rider.stamina + dt * MOUNTED_TUG_STAMINA_RECOVERY, 0, 1);
+      }
+    });
   }
 
   function takeKokpar(rider, options = {}) {
@@ -1939,6 +1987,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
         else clearContest();
         return;
       }
+
+      updateMountedContestEffort(dt, candidates);
     }
 
     const bluePower = contestPowerForTeam(TEAM.blue, candidates);
@@ -2036,7 +2086,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     const inputStrength = clamp(Math.hypot(ax, az), 0, 1);
     const moving = inputStrength > 0.05;
-    const sprint = moving && actionHeld && !kokpar.throwCharging && rider.stamina > 0.08;
+    const sprint = moving && actionHeld && !kokpar.throwCharging && !isMountedContestParticipant(rider) && rider.stamina > 0.08;
     const direction = moving ? normalize2D(ax, az) : null;
 
     applyHorseControl(rider, direction, dt, { sprint, urgency: moving ? 0.38 + inputStrength * 0.68 : 1 });
@@ -2235,13 +2285,15 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function riderRoleMarkerState(rider, inContest) {
+    const tugEffort = rider.tugEffort ?? 0;
+
     if (kokpar.holder === rider) {
       return {
         visible: true,
         color: "#f0c347",
         core: "#fff3d2",
         opacity: 0.94,
-        scale: 1.22,
+        scale: 1.22 + tugEffort * 0.18,
         height: 4.55
       };
     }
@@ -2252,7 +2304,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         color: rider.team === TEAM.blue ? COLORS.blue : COLORS.red,
         core: "#f7e7b8",
         opacity: 0.86,
-        scale: 1.06,
+        scale: 1.06 + tugEffort * 0.18,
         height: 4.35
       };
     }

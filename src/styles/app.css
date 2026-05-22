@@ -297,6 +297,14 @@ button {
   background: linear-gradient(90deg, #2f86bd, #f0c347, #bb3c31);
 }
 
+.tug-meter {
+  background: rgba(47, 35, 24, 0.24);
+}
+
+.tug-meter i {
+  background: linear-gradient(90deg, #f7e7b8, #f0c347);
+}
+
 .hud-actions {
   display: flex;
   gap: 8px;

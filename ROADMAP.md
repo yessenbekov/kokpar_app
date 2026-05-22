@@ -63,6 +63,7 @@ Already done:
 - escort-lane teammate AI for marking opponents ahead of the serke carrier
 - overhead possession and support markers for faster match readability
 - mounted tug-of-war pull direction and advantage indicator
+- player-controlled mounted tug effort with stamina cost
 
 Exit criteria:
 
