@@ -62,6 +62,7 @@ Already done:
 - teammate guard support when your team carries the serke near opponents
 - escort-lane teammate AI for marking opponents ahead of the serke carrier
 - overhead possession and support markers for faster match readability
+- mounted tug-of-war pull direction and advantage indicator
 
 Exit criteria:
 

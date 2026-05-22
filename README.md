@@ -42,6 +42,7 @@ Goal targets sit inside the field edge so there is playable space behind the cir
 When your rider carries the serke, nearby teammates switch into guard support and try to block opponents pulling at you.
 Away from immediate pressure, teammates form an escort lane toward the scoring target and mark opponents who can cut off the run.
 Small overhead markers highlight the serke carrier, active contests, and teammate support roles during possession.
+Mounted tug-of-war shows a floating pull arrow between riders, colored by the team currently winning the struggle.
 
 ## Project structure
 

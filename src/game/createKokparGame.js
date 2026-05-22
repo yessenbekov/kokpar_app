@@ -429,6 +429,28 @@ function createRiderRoleMarker() {
   return group;
 }
 
+function createMountedTensionGuide() {
+  const group = new THREE.Group();
+  const shaftMaterial = new THREE.MeshBasicMaterial({
+    color: "#f0c347",
+    transparent: true,
+    opacity: 0.78,
+    depthWrite: false
+  });
+  const headMaterial = shaftMaterial.clone();
+
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 1, 10), shaftMaterial);
+  group.add(shaft);
+
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.48, 12), headMaterial);
+  group.add(head);
+
+  group.visible = false;
+  group.userData.shaft = shaft;
+  group.userData.head = head;
+  return group;
+}
+
 export function createKokparGame(container, onHudChange, options = {}) {
   const gameSettings = {
     goalType: options.goalType === "kazan" ? "kazan" : "circle",
@@ -556,6 +578,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const contestIndicator = createContestIndicatorMesh();
   scene.add(contestIndicator);
 
+  const mountedTensionGuide = createMountedTensionGuide();
+  scene.add(mountedTensionGuide);
+
   const throwPreviewPositions = new Float32Array((THROW_PREVIEW_STEPS + 2) * 3);
   const throwPreviewGeometry = new THREE.BufferGeometry();
   throwPreviewGeometry.setAttribute("position", new THREE.BufferAttribute(throwPreviewPositions, 3));
@@ -581,6 +606,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const tugStrapStart = new THREE.Vector3();
   const tugStrapEnd = new THREE.Vector3();
   const tugStrapDirection = new THREE.Vector3();
+  const tensionStart = new THREE.Vector3();
+  const tensionEnd = new THREE.Vector3();
+  const tensionDirection = new THREE.Vector3();
 
   const keys = new Set();
   const touchInput = {
@@ -2277,6 +2305,64 @@ export function createKokparGame(container, onHudChange, options = {}) {
     marker.userData.pointer.material.opacity = Math.max(0.44, (state.opacity ?? 0.78) - 0.18);
   }
 
+  function riderTugPoint(rider, height = 3.18) {
+    return {
+      x: rider.x,
+      y: height,
+      z: rider.z
+    };
+  }
+
+  function updateMountedTensionGuide(time) {
+    const holder = kokpar.contest.holder;
+    const challenger = kokpar.contest.challenger;
+
+    mountedTensionGuide.visible = false;
+    if (!holder || !challenger || kokpar.holder !== holder) return;
+
+    const progress = clamp(kokpar.contest.progress, -1, 1);
+    const holderSign = holder.team === TEAM.blue ? 1 : -1;
+    const holderWinning = Math.sign(progress || holderSign) === holderSign;
+    const winner = holderWinning ? holder : challenger;
+    const loser = holderWinning ? challenger : holder;
+    const winnerPoint = riderTugPoint(winner);
+    const loserPoint = riderTugPoint(loser);
+
+    tensionStart.set(
+      loserPoint.x + (winnerPoint.x - loserPoint.x) * 0.24,
+      loserPoint.y + Math.sin(time * 9.5) * 0.05,
+      loserPoint.z + (winnerPoint.z - loserPoint.z) * 0.24
+    );
+    tensionEnd.set(
+      loserPoint.x + (winnerPoint.x - loserPoint.x) * 0.76,
+      winnerPoint.y + Math.sin(time * 9.5 + 0.8) * 0.05,
+      loserPoint.z + (winnerPoint.z - loserPoint.z) * 0.76
+    );
+    tensionDirection.subVectors(tensionEnd, tensionStart);
+
+    const length = tensionDirection.length();
+    if (length < 0.4) return;
+
+    const leaderColor = progress >= 0 ? COLORS.blue : COLORS.red;
+    const advantage = clamp(Math.abs(progress), 0.18, 1);
+    const opacity = 0.48 + advantage * 0.42;
+    const radiusScale = 1 + advantage * 0.65 + Math.sin(time * 12) * 0.05;
+    const shaft = mountedTensionGuide.userData.shaft;
+    const head = mountedTensionGuide.userData.head;
+
+    mountedTensionGuide.visible = true;
+    mountedTensionGuide.position.copy(tensionStart).addScaledVector(tensionDirection, 0.5);
+    mountedTensionGuide.quaternion.setFromUnitVectors(carryStrapAxis, tensionDirection.normalize());
+    shaft.position.set(0, 0, 0);
+    shaft.scale.set(radiusScale, Math.max(0.2, length - 0.38), radiusScale);
+    head.position.set(0, length / 2, 0);
+    head.scale.setScalar(0.8 + advantage * 0.42);
+    shaft.material.color.set(leaderColor);
+    head.material.color.set(leaderColor);
+    shaft.material.opacity = opacity;
+    head.material.opacity = Math.min(0.96, opacity + 0.08);
+  }
+
   function updateKokpar(dt) {
     kokpar.looseCooldown = Math.max(0, kokpar.looseCooldown - dt);
 
@@ -2558,6 +2644,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
         contestTugStrap.scale.set(1, tugLength, 1);
         contestTugStrap.quaternion.setFromUnitVectors(carryStrapAxis, tugStrapDirection.normalize());
       }
+    }
+
+    if (mountedContest) {
+      updateMountedTensionGuide(time);
+    } else {
+      mountedTensionGuide.visible = false;
     }
 
     contestIndicator.visible = kokpar.contest.active;
