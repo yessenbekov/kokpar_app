@@ -60,6 +60,7 @@ Already done:
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
 - goal targets moved inside the touchline so both circle and kazan modes leave space behind the target
 - teammate guard support when your team carries the serke near opponents
+- escort-lane teammate AI for marking opponents ahead of the serke carrier
 
 Exit criteria:
 

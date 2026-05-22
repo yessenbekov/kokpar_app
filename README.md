@@ -40,6 +40,7 @@ After a successful goal, the camera holds briefly on the target before the next 
 In circle mode, riders can ride over the ground marking. In kazan mode, the raised kazan blocks riders like a physical obstacle.
 Goal targets sit inside the field edge so there is playable space behind the circle or kazan for serke battles.
 When your rider carries the serke, nearby teammates switch into guard support and try to block opponents pulling at you.
+Away from immediate pressure, teammates form an escort lane toward the scoring target and mark opponents who can cut off the run.
 
 ## Project structure
 

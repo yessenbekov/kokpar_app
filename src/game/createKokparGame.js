@@ -84,6 +84,8 @@ const RIDER_COLLISION_RADIUS = 3.6;
 const TEAM_GUARD_RADIUS = 15;
 const TEAM_GUARD_BLOCK_RADIUS = 8.5;
 const TEAM_GUARD_PUSH = 1.25;
+const TEAM_LANE_THREAT_RADIUS = 17;
+const TEAM_LANE_THREAT_LOOKAHEAD = 38;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -1207,6 +1209,19 @@ export function createKokparGame(container, onHudChange, options = {}) {
     };
   }
 
+  function distanceToSegment2D(point, start, end) {
+    const dx = end.x - start.x;
+    const dz = end.z - start.z;
+    const lengthSq = dx * dx + dz * dz || 1;
+    const projection = clamp(((point.x - start.x) * dx + (point.z - start.z) * dz) / lengthSq, 0, 1);
+    const closest = {
+      x: start.x + dx * projection,
+      z: start.z + dz * projection
+    };
+
+    return distance2D(point, closest);
+  }
+
   function offsetPoint(point, toward, sideAmount, backAmount = 0) {
     const forward = normalize2D(toward.x - point.x, toward.z - point.z);
     const side = { x: -forward.z, z: forward.x };
@@ -1229,6 +1244,34 @@ export function createKokparGame(container, onHudChange, options = {}) {
     );
   }
 
+  function laneThreats(holder, opponents, scoringGoal) {
+    const direction = normalize2D(scoringGoal.x - holder.x, scoringGoal.z - holder.z);
+
+    return opponents
+      .map((opponent) => {
+        const toOpponent = { x: opponent.x - holder.x, z: opponent.z - holder.z };
+        const forwardDistance = toOpponent.x * direction.x + toOpponent.z * direction.z;
+        const laneEnd = pointBetween(holder, scoringGoal, 0.54);
+        const laneDistance = distanceToSegment2D(opponent, holder, laneEnd);
+        const holderDistance = distance2D(opponent, holder);
+
+        return {
+          opponent,
+          forwardDistance,
+          laneDistance,
+          score: laneDistance + holderDistance * 0.04 - forwardDistance * 0.035
+        };
+      })
+      .filter(
+        ({ forwardDistance, laneDistance }) =>
+          forwardDistance > -4 &&
+          forwardDistance < TEAM_LANE_THREAT_LOOKAHEAD &&
+          laneDistance <= TEAM_LANE_THREAT_RADIUS
+      )
+      .sort((a, b) => a.score - b.score)
+      .map(({ opponent }) => opponent);
+  }
+
   function guardPoint(holder, guard, threat, slot = 0) {
     if (!threat) return supportPoint(holder, guard);
 
@@ -1240,6 +1283,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const shield = pointBetween(threat, leadHolder, 0.52);
 
     return clampFieldTarget(offsetPoint(shield, leadHolder, side, 1.2));
+  }
+
+  function laneEscortPoint(holder, slot = 0) {
+    const scoringGoal = goalFor(holder.team);
+    const laneAmount = 0.2 + (slot % 3) * 0.08;
+    const sideSign = slot % 2 === 0 ? 1 : -1;
+    const sideAmount = sideSign * (7 + Math.floor(slot / 2) * 2.5);
+    const lane = pointBetween(holder, scoringGoal, laneAmount);
+
+    return clampFieldTarget(offsetPoint(lane, scoringGoal, sideAmount, 0.8));
   }
 
   function startLaneBoundsForTeam(team) {
@@ -1309,10 +1362,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
 
       if (holder.team === rider.team) {
+        const scoringGoal = goalFor(rider.team);
         const threats = holderThreats(holder, opponents);
         const threat = threats[aiIndex % Math.max(1, threats.length)];
+        const guardCount = Math.min(aiTeammates.length, Math.max(2, threats.length));
 
-        if (threat) {
+        if (threat && aiIndex < guardCount) {
           return {
             role: "guard",
             target: guardPoint(holder, rider, threat, aiIndex),
@@ -1322,17 +1377,25 @@ export function createKokparGame(container, onHudChange, options = {}) {
           };
         }
 
-        const supportTarget =
-          aiIndex % 2 === 0
-            ? supportPoint(holder, rider)
-            : blockerPoint(rider, closestRider(holder, opponents), holder);
+        const laneOpponents = laneThreats(holder, opponents, scoringGoal);
+        const laneThreat = laneOpponents[aiIndex % Math.max(1, laneOpponents.length)];
+
+        if (laneThreat && aiIndex % 2 === 1) {
+          return {
+            role: "lane_guard",
+            target: blockerPoint(rider, laneThreat, pointBetween(holder, scoringGoal, 0.34)),
+            urgency: 1.02,
+            closeRadius: 2.8,
+            wander: 0.9
+          };
+        }
 
         return {
-          role: aiIndex % 2 === 0 ? "support" : "blocker",
-          target: supportTarget,
-          urgency: aiIndex % 2 === 0 ? 0.92 : 0.82,
-          closeRadius: aiIndex % 2 === 0 ? 4 : 3,
-          wander: 1.5
+          role: "escort",
+          target: laneEscortPoint(holder, aiIndex),
+          urgency: 0.96,
+          closeRadius: 3.2,
+          wander: 1.1
         };
       }
 
@@ -1471,7 +1534,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     if (!holder || guard === holder || opponent === holder) return;
     if (guard.team !== holder.team || opponent.team === holder.team) return;
-    if (!["guard", "blocker", "support", "lane_blocker"].includes(guard.aiRole)) return;
+    if (!["guard", "blocker", "support", "lane_guard", "lane_blocker", "escort"].includes(guard.aiRole)) return;
 
     const opponentDistance = distance2D(opponent, holder);
     const guardDistance = distance2D(guard, holder);
@@ -1945,7 +2008,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
         ? normalize2D(target.x + wander.x - rider.x, target.z + wander.z - rider.z)
         : null;
     const pacing =
-      plan.role === "carrier" || plan.role === "tackler" || plan.role === "pickup" || plan.role === "guard"
+      plan.role === "carrier" ||
+      plan.role === "tackler" ||
+      plan.role === "pickup" ||
+      plan.role === "guard" ||
+      plan.role === "lane_guard"
         ? 1
         : clamp((targetDistance - plan.closeRadius) / 12 + 0.24, 0.2, 1);
 
