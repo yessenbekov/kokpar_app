@@ -61,6 +61,7 @@ Already done:
 - goal targets moved inside the touchline so both circle and kazan modes leave space behind the target
 - teammate guard support when your team carries the serke near opponents
 - escort-lane teammate AI for marking opponents ahead of the serke carrier
+- overhead possession and support markers for faster match readability
 
 Exit criteria:
 

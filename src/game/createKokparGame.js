@@ -385,6 +385,50 @@ function createContestRiderMarker(color) {
   return group;
 }
 
+function createRiderRoleMarker() {
+  const group = new THREE.Group();
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color: "#f0c347",
+    transparent: true,
+    opacity: 0.78,
+    depthTest: false,
+    depthWrite: false
+  });
+  const coreMaterial = new THREE.MeshBasicMaterial({
+    color: "#f7e7b8",
+    transparent: true,
+    opacity: 0.92,
+    depthTest: false,
+    depthWrite: false
+  });
+  const pointerMaterial = new THREE.MeshBasicMaterial({
+    color: "#24170f",
+    transparent: true,
+    opacity: 0.72,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.045, 8, 28), ringMaterial);
+  group.add(ring);
+
+  const core = new THREE.Mesh(new THREE.CircleGeometry(0.23, 24), coreMaterial);
+  core.position.z = 0.01;
+  group.add(core);
+
+  const pointer = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 3), pointerMaterial);
+  pointer.position.set(0, -0.42, 0.02);
+  pointer.rotation.z = Math.PI;
+  group.add(pointer);
+
+  group.visible = false;
+  group.renderOrder = 10;
+  group.userData.ring = ring;
+  group.userData.core = core;
+  group.userData.pointer = pointer;
+  return group;
+}
+
 export function createKokparGame(container, onHudChange, options = {}) {
   const gameSettings = {
     goalType: options.goalType === "kazan" ? "kazan" : "circle",
@@ -455,6 +499,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     setRiderGroup(rider, createHorseMesh(rider.color, rider.team));
     rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.contestMarker);
+    rider.roleMarker = createRiderRoleMarker();
+    scene.add(rider.roleMarker);
   });
 
   const kokpar = {
@@ -2160,6 +2206,77 @@ export function createKokparGame(container, onHudChange, options = {}) {
     riders.forEach(keepRiderOutsideKazanGoals);
   }
 
+  function riderRoleMarkerState(rider, inContest) {
+    if (kokpar.holder === rider) {
+      return {
+        visible: true,
+        color: "#f0c347",
+        core: "#fff3d2",
+        opacity: 0.94,
+        scale: 1.22,
+        height: 4.55
+      };
+    }
+
+    if (inContest) {
+      return {
+        visible: true,
+        color: rider.team === TEAM.blue ? COLORS.blue : COLORS.red,
+        core: "#f7e7b8",
+        opacity: 0.86,
+        scale: 1.06,
+        height: 4.35
+      };
+    }
+
+    if (!kokpar.holder || rider.team !== kokpar.holder.team) return { visible: false };
+
+    if (rider.aiRole === "guard" || rider.aiRole === "lane_guard") {
+      return {
+        visible: true,
+        color: rider.team === TEAM.blue ? COLORS.blue : COLORS.red,
+        core: "#f7e7b8",
+        opacity: 0.82,
+        scale: 0.9,
+        height: 4.22
+      };
+    }
+
+    if (rider.aiRole === "escort") {
+      return {
+        visible: true,
+        color: rider.team === TEAM.blue ? COLORS.blue : COLORS.red,
+        core: "#f0c347",
+        opacity: 0.68,
+        scale: 0.78,
+        height: 4.08
+      };
+    }
+
+    return { visible: false };
+  }
+
+  function updateRiderRoleMarker(rider, state, time) {
+    const marker = rider.roleMarker;
+    if (!marker) return;
+
+    marker.visible = state.visible;
+    if (!state.visible) return;
+
+    const pulse = 1 + Math.sin(time * 8.6 + rider.aiPhase) * 0.06;
+    const scale = (state.scale ?? 1) * pulse;
+
+    marker.position.set(rider.x, state.height ?? 4.2, rider.z);
+    marker.quaternion.copy(camera.quaternion);
+    marker.scale.setScalar(scale);
+    marker.userData.ring.material.color.set(state.color);
+    marker.userData.core.material.color.set(state.core ?? state.color);
+    marker.userData.pointer.material.color.set(state.color);
+    marker.userData.ring.material.opacity = state.opacity ?? 0.78;
+    marker.userData.core.material.opacity = Math.min(0.96, (state.opacity ?? 0.78) + 0.1);
+    marker.userData.pointer.material.opacity = Math.max(0.44, (state.opacity ?? 0.78) - 0.18);
+  }
+
   function updateKokpar(dt) {
     kokpar.looseCooldown = Math.max(0, kokpar.looseCooldown - dt);
 
@@ -2378,6 +2495,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
           rider.contestMarker.userData.leaderDot.scale.setScalar(1 + Math.sin(time * 11) * 0.12);
         }
       }
+
+      updateRiderRoleMarker(rider, riderRoleMarkerState(rider, inContest), time);
     });
 
     const carriedHeight = kokpar.holder ? CARRIED_SERKE_HEIGHT + Math.sin(time * 8.5) * 0.06 : kokpar.y;
