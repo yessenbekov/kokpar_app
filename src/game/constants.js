@@ -7,6 +7,7 @@ export const WORLD = {
 
 export const GOAL_RADIUS = 7.2;
 export const MATCH_SECONDS = 120;
+const GOAL_BACK_SPACE = 18;
 
 export const TEAM = {
   blue: "blue",
@@ -24,6 +25,6 @@ export const COLORS = {
 };
 
 export function goalFor(team) {
-  const goalX = WORLD.width / 2 - 8;
+  const goalX = WORLD.width / 2 - GOAL_BACK_SPACE;
   return team === TEAM.blue ? { x: -goalX, z: 0 } : { x: goalX, z: 0 };
 }

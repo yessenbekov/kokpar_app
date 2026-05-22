@@ -81,6 +81,9 @@ const TACKLE_DROP_THRESHOLD = 0.94;
 const TACKLE_MOUNTED_CONTEST_THRESHOLD = 0.36;
 const TACKLE_STAGGER_THRESHOLD = 0.4;
 const RIDER_COLLISION_RADIUS = 3.6;
+const TEAM_GUARD_RADIUS = 15;
+const TEAM_GUARD_BLOCK_RADIUS = 8.5;
+const TEAM_GUARD_PUSH = 1.25;
 const CENTER_CIRCLE_RADIUS = 8.5;
 const CENTER_CIRCLE_GUARD_BUFFER = 2.2;
 const CENTER_DUEL_START_DISTANCE = CENTER_CIRCLE_RADIUS + 4;
@@ -1170,10 +1173,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function supportPoint(holder, rider) {
     const scoringGoal = goalFor(rider.team);
     const side = rider.name.charCodeAt(0) % 2 === 0 ? -1 : 1;
-    return {
+    return clampFieldTarget({
       x: holder.x + (scoringGoal.x - holder.x) * 0.22,
       z: holder.z + side * 12
-    };
+    });
   }
 
   function opponentTeam(team) {
@@ -1218,6 +1221,25 @@ export function createKokparGame(container, onHudChange, options = {}) {
       x: clamp(target.x, -WORLD.width / 2 + margin, WORLD.width / 2 - margin),
       z: clamp(target.z, -WORLD.height / 2 + margin, WORLD.height / 2 - margin)
     };
+  }
+
+  function holderThreats(holder, opponents) {
+    return sortedRidersByDistance(holder, opponents).filter(
+      (opponent) => distance2D(opponent, holder) <= TEAM_GUARD_RADIUS
+    );
+  }
+
+  function guardPoint(holder, guard, threat, slot = 0) {
+    if (!threat) return supportPoint(holder, guard);
+
+    const leadHolder = {
+      x: holder.x + holder.vx * 0.22,
+      z: holder.z + holder.vz * 0.22
+    };
+    const side = slot % 2 === 0 ? 4.2 : -4.2;
+    const shield = pointBetween(threat, leadHolder, 0.52);
+
+    return clampFieldTarget(offsetPoint(shield, leadHolder, side, 1.2));
   }
 
   function startLaneBoundsForTeam(team) {
@@ -1287,6 +1309,19 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
 
       if (holder.team === rider.team) {
+        const threats = holderThreats(holder, opponents);
+        const threat = threats[aiIndex % Math.max(1, threats.length)];
+
+        if (threat) {
+          return {
+            role: "guard",
+            target: guardPoint(holder, rider, threat, aiIndex),
+            urgency: 1.12,
+            closeRadius: 2.2,
+            wander: 0.7
+          };
+        }
+
         const supportTarget =
           aiIndex % 2 === 0
             ? supportPoint(holder, rider)
@@ -1429,6 +1464,36 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.hitFlash = Math.max(rider.hitFlash, 1);
     rider.vx += push.x;
     rider.vz += push.z;
+  }
+
+  function resolveGuardBlock(guard, opponent, relativeSpeed) {
+    const holder = kokpar.holder;
+
+    if (!holder || guard === holder || opponent === holder) return;
+    if (guard.team !== holder.team || opponent.team === holder.team) return;
+    if (!["guard", "blocker", "support", "lane_blocker"].includes(guard.aiRole)) return;
+
+    const opponentDistance = distance2D(opponent, holder);
+    const guardDistance = distance2D(guard, holder);
+
+    if (opponentDistance > TEAM_GUARD_BLOCK_RADIUS || guardDistance > TEAM_GUARD_RADIUS + 4) return;
+
+    const away = normalize2D(opponent.x - holder.x, opponent.z - holder.z);
+    const pressure = clamp(
+      (TEAM_GUARD_BLOCK_RADIUS - opponentDistance) / TEAM_GUARD_BLOCK_RADIUS + relativeSpeed / 18,
+      0.25,
+      1
+    );
+    const push = TEAM_GUARD_PUSH + pressure;
+
+    opponent.vx += away.x * push;
+    opponent.vz += away.z * push;
+    guard.vx -= away.x * 0.35;
+    guard.vz -= away.z * 0.35;
+    opponent.grabCooldown = Math.max(opponent.grabCooldown, 0.24);
+    opponent.bumpCooldown = Math.max(opponent.bumpCooldown, 0.14);
+    guard.bumpCooldown = Math.max(guard.bumpCooldown, 0.12);
+    opponent.hitFlash = Math.max(opponent.hitFlash, 0.35);
   }
 
   function tackleQuality(tackler, holder, active, impactBonus = 0) {
@@ -1880,7 +1945,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         ? normalize2D(target.x + wander.x - rider.x, target.z + wander.z - rider.z)
         : null;
     const pacing =
-      plan.role === "carrier" || plan.role === "tackler" || plan.role === "pickup"
+      plan.role === "carrier" || plan.role === "tackler" || plan.role === "pickup" || plan.role === "guard"
         ? 1
         : clamp((targetDistance - plan.closeRadius) / 12 + 0.24, 0.2, 1);
 
@@ -2011,6 +2076,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
           if (holder.bumpCooldown <= 0 && tackler.grabCooldown <= 0) {
             const impactBonus = clamp((relativeSpeed - 4) / 18, 0, 0.18);
             resolveTackleAttempt(tackler, false, impactBonus);
+          }
+        }
+
+        if (kokpar.holder && a.team !== b.team && a !== kokpar.holder && b !== kokpar.holder) {
+          if (a.team === kokpar.holder.team) {
+            resolveGuardBlock(a, b, relativeSpeed);
+          } else if (b.team === kokpar.holder.team) {
+            resolveGuardBlock(b, a, relativeSpeed);
           }
         }
       }

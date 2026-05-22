@@ -58,6 +58,8 @@ Already done:
 - mobile touch controls with a virtual joystick and action button
 - compact iOS/mobile landscape layout for controls and match setup
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
+- goal targets moved inside the touchline so both circle and kazan modes leave space behind the target
+- teammate guard support when your team carries the serke near opponents
 
 Exit criteria:
 
@@ -79,6 +81,7 @@ Tasks:
 - reduce camera shake and hard jitter during rider collisions
 - make serke contests readable with team advantage and participant markers
 - require mounted tug-of-war before stealing a held serke
+- make teammates shield the holder when opponents are close
 - show different poses for ground pickup versus pulling serke from another rider
 - add match restart after goal with a short countdown
 - add camera smoothing, zoom, and better angle for reading the play

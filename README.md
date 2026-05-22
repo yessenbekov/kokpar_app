@@ -38,6 +38,8 @@ Scoring requires a throw: carry the serke near the selected target, hold `Space`
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
 After a successful goal, the camera holds briefly on the target before the next start countdown.
 In circle mode, riders can ride over the ground marking. In kazan mode, the raised kazan blocks riders like a physical obstacle.
+Goal targets sit inside the field edge so there is playable space behind the circle or kazan for serke battles.
+When your rider carries the serke, nearby teammates switch into guard support and try to block opponents pulling at you.
 
 ## Project structure
 
