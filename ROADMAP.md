@@ -56,6 +56,7 @@ Already done:
 - throw-angle adjustment while charging, with a matching rider preparation pose
 - short goal celebration hold before resetting to the next start
 - mobile touch controls with a virtual joystick and action button
+- compact iOS/mobile landscape layout for controls and match setup
 - physical rider collision against raised kazans while ground-circle targets remain pass-through
 
 Exit criteria:

@@ -24,6 +24,7 @@ npm run generate:models
 - `A/D` or left/right while charging: adjust the throw angle
 - `R`: restart
 - mobile: use the on-screen joystick and action button
+- iOS landscape is supported with compact HUD and controls
 
 ## Match setup
 
