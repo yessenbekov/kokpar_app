@@ -794,16 +794,19 @@ button {
   }
 
   .banner {
-    bottom: calc(112px + env(safe-area-inset-bottom));
-    width: min(480px, calc(100% - 230px));
-    padding: 10px 12px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: min(360px, calc(100% - 240px));
+    min-height: 46px;
+    padding: 8px 12px;
+    background: rgba(32, 23, 15, 0.76);
   }
 
   .banner strong {
-    font-size: 16px;
+    margin-bottom: 0;
+    font-size: 14px;
   }
 
   .banner span {
-    font-size: 12px;
+    display: none;
   }
 }
