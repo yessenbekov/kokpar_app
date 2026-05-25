@@ -64,6 +64,7 @@ Already done:
 - overhead possession and support markers for faster match readability
 - mounted tug-of-war pull direction and advantage indicator
 - player-controlled mounted tug effort with stamina cost
+- event audio, mute control, and supported-device haptic feedback
 
 Exit criteria:
 

@@ -330,6 +330,10 @@ button {
   background: rgba(255, 242, 207, 0.96);
 }
 
+.icon-button[aria-pressed="false"] {
+  color: var(--muted);
+}
+
 .icon-button:focus-visible {
   outline: 3px solid rgba(23, 109, 159, 0.35);
   outline-offset: 3px;

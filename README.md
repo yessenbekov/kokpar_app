@@ -25,6 +25,7 @@ npm run generate:models
 - `R`: restart
 - mobile: use the on-screen joystick and action button
 - iOS landscape is supported with compact HUD and controls
+- speaker icon: mute or enable match audio and supported-device haptics
 
 ## Match setup
 
@@ -44,6 +45,7 @@ Away from immediate pressure, teammates form an escort lane toward the scoring t
 Small overhead markers highlight the serke carrier, active contests, and teammate support roles during possession.
 Mounted tug-of-war shows a floating pull arrow between riders, colored by the team currently winning the struggle.
 When you are part of a mounted tug, holding `Space` or the mobile action button builds pull effort and spends stamina.
+Match feedback includes synthesized whistle, possession, contact, throw, out-of-bounds, and goal sounds plus vibration where the browser supports it.
 
 ## Project structure
 

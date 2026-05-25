@@ -6,7 +6,9 @@ import {
   RotateCcw,
   SlidersHorizontal,
   Trophy,
-  Users
+  Users,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createKokparGame } from "./game/createKokparGame.js";
@@ -69,13 +71,15 @@ export default function App() {
   const [hud, setHud] = useState(initialHud);
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
+  const [feedbackEnabled, setFeedbackEnabled] = useState(true);
 
   useEffect(() => {
     if (!mountRef.current || !activeSettings) return undefined;
 
     const gameSettings = {
       ...activeSettings,
-      matchSeconds: activeSettings.matchMinutes * 60
+      matchSeconds: activeSettings.matchMinutes * 60,
+      feedbackEnabled
     };
 
     try {
@@ -190,6 +194,12 @@ export default function App() {
     setReady(false);
     setSceneError("");
     setHud(makeInitialHud(settings));
+  }
+
+  function toggleFeedback() {
+    const enabled = !feedbackEnabled;
+    setFeedbackEnabled(enabled);
+    gameRef.current?.setFeedbackEnabled?.(enabled);
   }
 
   const isSetup = !activeSettings;
@@ -353,6 +363,17 @@ export default function App() {
             onClick={openSettings}
           >
             <SlidersHorizontal size={18} strokeWidth={2.4} />
+          </button>
+
+          <button
+            className="icon-button"
+            type="button"
+            aria-label={feedbackEnabled ? "Отключить звук и отклик" : "Включить звук и отклик"}
+            aria-pressed={feedbackEnabled}
+            title={feedbackEnabled ? "Отключить звук и отклик" : "Включить звук и отклик"}
+            onClick={toggleFeedback}
+          >
+            {feedbackEnabled ? <Volume2 size={18} strokeWidth={2.4} /> : <VolumeX size={18} strokeWidth={2.4} />}
           </button>
         </div>
       </section>
