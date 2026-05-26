@@ -66,6 +66,7 @@ Already done:
 - player-controlled mounted tug effort with stamina cost
 - event audio, mute control, and supported-device haptic feedback
 - responsive field radar for serke, possession, support, and target awareness
+- first architecture pass separating React UI, match feedback, and 3D indicators into modules
 
 Exit criteria:
 
@@ -236,7 +237,11 @@ Exit criteria:
 
 ## Immediate Next Steps
 
-Step 1: improve the current gameplay feel.
+Step 1: continue modularizing the prototype runtime into arena, rules, AI, and camera systems without changing gameplay.
+
+Step 2: tune gameplay feel and clarity after each extracted system is stable.
+
+Step 3: begin the production horse/rider animation and asset pass on the cleaner runtime.
 
 Concrete tasks:
 

@@ -50,10 +50,14 @@ A compact field radar shows both targets, riders, loose serke, active possession
 
 ## Project structure
 
-- `src/App.jsx`: React shell and HUD
+- `src/App.jsx`: React application shell and game lifecycle wiring
+- `src/app/matchConfig.js`: match settings and initial HUD state
+- `src/components/*`: setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
-- `src/game/createKokparGame.js`: Three.js scene, game loop, controls, AI, scoring
+- `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring
 - `src/game/entities.js`: mesh factories and rider factory
+- `src/game/feedback.js`: match audio and supported-device haptics
+- `src/game/visualIndicators.js`: contest, support, and mounted tug 3D markers
 - `src/game/constants.js`: world and tuning constants
 - `src/styles/app.css`: layout and HUD styles
 - `scripts/generate-model-assets.mjs`: starter GLB asset generator
@@ -74,8 +78,8 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 
 ## Next ideas
 
-- Add real horse animations and sound
-- Add team selection and match settings
-- Add mobile touch controls
+- Continue splitting the match runtime into arena, rules, AI, and camera systems
+- Add real horse animation blending and production sound
+- Add team selection and richer match settings
 - Replace starter low-poly GLB files with production horse/rider/serke assets
 - Add tournament mode and persistent scores
