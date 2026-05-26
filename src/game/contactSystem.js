@@ -13,6 +13,7 @@ const BODY_CHECK_HIT_RECOVERY_SECONDS = 0.34;
 const IMPACT_REACTION_SECONDS = 0.44;
 const TEAM_GUARD_BLOCK_RADIUS = 8.5;
 const TEAM_GUARD_PUSH = 1.25;
+const TEAM_GUARD_INTERVENTION_COOLDOWN = 0.56;
 
 export const BODY_CHECK_WINDUP_SECONDS = 0.14;
 export const BODY_CHECK_WINDOW_SECONDS = 0.4;
@@ -49,7 +50,8 @@ export function createContactSystem({
   isMountedContestParticipant,
   keepNonDuelRidersOutsideCenter,
   keepRiderOutsideKazanGoals,
-  onBodyCheckImpact
+  onBodyCheckImpact,
+  onGuardIntervention
 }) {
   function isBodyCheckDriving(rider) {
     return rider.bodyCheckTime > 0;
@@ -104,6 +106,7 @@ export function createContactSystem({
     rider.bodyCheckCooldown = Math.max(0, rider.bodyCheckCooldown - dt);
     rider.bodyCheckRecovery = Math.max(0, rider.bodyCheckRecovery - dt);
     rider.impactReactionTime = Math.max(0, rider.impactReactionTime - dt);
+    rider.protectionCooldown = Math.max(0, rider.protectionCooldown - dt);
 
     if (rider.bodyCheckWindup > 0) {
       rider.bodyCheckWindup = Math.max(0, rider.bodyCheckWindup - dt);
@@ -131,7 +134,7 @@ export function createContactSystem({
 
     if (!holder || guard === holder || opponent === holder) return;
     if (guard.team !== holder.team || opponent.team === holder.team) return;
-    if (!["guard", "blocker", "support", "lane_guard", "lane_blocker", "escort"].includes(guard.aiRole)) return;
+    if (!["guard", "protector", "blocker", "support", "lane_guard", "lane_blocker", "escort"].includes(guard.aiRole)) return;
 
     const opponentDistance = distance2D(opponent, holder);
     const guardDistance = distance2D(guard, holder);
@@ -154,6 +157,26 @@ export function createContactSystem({
     opponent.bumpCooldown = Math.max(opponent.bumpCooldown, 0.14);
     guard.bumpCooldown = Math.max(guard.bumpCooldown, 0.12);
     opponent.hitFlash = Math.max(opponent.hitFlash, 0.35);
+
+    const mountedIntervention =
+      kokpar.contest.active &&
+      kokpar.contest.mode === "mounted" &&
+      kokpar.contest.holder === holder &&
+      kokpar.contest.challenger === opponent;
+
+    if (!mountedIntervention || guard.protectionCooldown > 0) return;
+
+    const holderSign = holder.team === TEAM.blue ? 1 : -1;
+    const relief = 0.12 + pressure * 0.13;
+
+    kokpar.contest.progress = clamp(kokpar.contest.progress + holderSign * relief, -1, 1);
+    opponent.tugEffort = Math.max(0, (opponent.tugEffort ?? 0) - 0.46);
+    opponent.grabCooldown = Math.max(opponent.grabCooldown, 0.32);
+    guard.protectionCooldown = TEAM_GUARD_INTERVENTION_COOLDOWN;
+    setImpactReaction(guard, -0.34);
+    setImpactReaction(opponent, 0.72);
+    feedback.impact(relativeSpeed > 8);
+    onGuardIntervention?.(guard, opponent, pressure, holder);
   }
 
   function tackleQuality(tackler, holder, active, impactBonus = 0) {

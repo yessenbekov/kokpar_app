@@ -578,6 +578,18 @@ export function createKokparGame(container, onHudChange, options = {}) {
     bodyCheckImpact.until = performance.now() / 1000 + bodyCheckImpact.duration;
   }
 
+  function showGuardIntervention(guard, opponent, pressure, holder) {
+    showBodyCheckImpact(guard, opponent, 0.72 + pressure * 0.35, false);
+
+    if (holder.human) {
+      showMessage(
+        "Партнер прикрыл!",
+        `${guard.name} оттеснил соперника от серке.`,
+        0.92
+      );
+    }
+  }
+
   const contactSystem = createContactSystem({
     riders,
     kokpar,
@@ -591,7 +603,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     isMountedContestParticipant,
     keepNonDuelRidersOutsideCenter,
     keepRiderOutsideKazanGoals,
-    onBodyCheckImpact: showBodyCheckImpact
+    onBodyCheckImpact: showBodyCheckImpact,
+    onGuardIntervention: showGuardIntervention
   });
 
   assetPipeline.readyPromise.then(() => {
@@ -694,7 +707,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
             : contestCandidates(CONTEST_RADIUS + 0.25)
         )
       : new Set();
-    const supportRoles = new Set(["guard", "lane_guard", "escort"]);
+    const supportRoles = new Set(["guard", "protector", "lane_guard", "escort"]);
 
     return {
       goals: [TEAM.blue, TEAM.red].map((team) => ({
@@ -722,6 +735,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function publishHud() {
     const isCountdown = match.phase === "countdown";
     const countdown = Math.max(1, Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS)));
+    const mountedContest = isMountedContestParticipant(player);
+    const contestBalance = mountedContest ? clamp((1 - kokpar.contest.progress) / 2, 0, 1) : 0.5;
+    const contestLeadingTeam =
+      mountedContest && Math.abs(kokpar.contest.progress) >= 0.08
+        ? kokpar.contest.progress > 0
+          ? TEAM.blue
+          : TEAM.red
+        : null;
 
     onHudChange({
       blue: match.blue,
@@ -729,7 +750,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       timer: formatTime(match.time),
       stamina: player.stamina,
       throwPower: kokpar.throwCharging ? kokpar.throwCharge : 0,
-      tugPower: isMountedContestParticipant(player) ? player.tugEffort ?? 0 : 0,
+      tugPower: mountedContest ? player.tugEffort ?? 0 : 0,
+      mountedContest,
+      contestBalance,
+      contestLeadingTeam,
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
       bodyCheckActive: contactSystem.isBodyCheckActive(player),
       bodyCheckReady:
@@ -855,6 +879,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.bodyCheckRecovery = 0;
       rider.impactReactionTime = 0;
       rider.impactLean = 0;
+      rider.protectionCooldown = 0;
       rider.throwPose = 0;
       rider.tugEffort = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
@@ -896,6 +921,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.bodyCheckRecovery = 0;
     rider.impactReactionTime = 0;
     rider.impactLean = 0;
+    rider.protectionCooldown = 0;
     rider.throwPose = 0;
     rider.tugEffort = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
@@ -1494,6 +1520,31 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       if (holder.team === rider.team) {
         const scoringGoal = scoringGoalFor(rider.team);
+        const mountedChallenger =
+          kokpar.contest.active && kokpar.contest.mode === "mounted" && kokpar.contest.holder === holder
+            ? kokpar.contest.challenger
+            : null;
+
+        if (mountedChallenger) {
+          const protectors = sortedRidersByDistance(
+            mountedChallenger,
+            aiTeammates.filter((teammate) => teammate !== holder)
+          );
+
+          if (protectors[0] === rider) {
+            return {
+              role: "protector",
+              target: {
+                x: mountedChallenger.x + mountedChallenger.vx * 0.1,
+                z: mountedChallenger.z + mountedChallenger.vz * 0.1
+              },
+              urgency: 1.28,
+              closeRadius: 1.25,
+              wander: 0.28
+            };
+          }
+        }
+
         const threats = holderThreats(holder, opponents);
         const threat = threats[aiIndex % Math.max(1, threats.length)];
         const guardCount = Math.min(aiTeammates.length, Math.max(2, threats.length));
@@ -1999,6 +2050,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       plan.role === "carrier" ||
       plan.role === "tackler" ||
       plan.role === "pickup" ||
+      plan.role === "protector" ||
       plan.role === "guard" ||
       plan.role === "lane_guard"
         ? 1
@@ -2146,6 +2198,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     if (!kokpar.holder || rider.team !== kokpar.holder.team) return { visible: false };
 
+    if (rider.aiRole === "protector") {
+      return {
+        visible: true,
+        color: "#f0c347",
+        core: rider.team === TEAM.blue ? COLORS.blue : COLORS.red,
+        opacity: 0.95,
+        scale: 1.08,
+        height: 4.36
+      };
+    }
+
     if (rider.aiRole === "guard" || rider.aiRole === "lane_guard") {
       return {
         visible: true,
@@ -2250,6 +2313,25 @@ export function createKokparGame(container, onHudChange, options = {}) {
     head.material.opacity = Math.min(0.96, opacity + 0.08);
   }
 
+  function pullSerkeDuringMountedContest(holder) {
+    const challenger = kokpar.contest.challenger;
+    if (!challenger || kokpar.contest.holder !== holder) return;
+
+    const challengerForward = forwardVector(challenger);
+    const challengerSide = { x: -challengerForward.z, z: challengerForward.x };
+    const carrySide = challenger.team === TEAM.blue ? -1 : 1;
+    const reachX = challenger.x + challengerForward.x * 0.72 + challengerSide.x * carrySide * 0.74;
+    const reachZ = challenger.z + challengerForward.z * 0.72 + challengerSide.z * carrySide * 0.74;
+    const holderSign = holder.team === TEAM.blue ? 1 : -1;
+    const challengerAdvantage = clamp(-kokpar.contest.progress * holderSign, 0, 1);
+    const challengerEffort = challenger.tugEffort ?? 0;
+    const pull = 0.12 + challengerAdvantage * 0.46 + challengerEffort * 0.1;
+
+    kokpar.x += (reachX - kokpar.x) * pull;
+    kokpar.z += (reachZ - kokpar.z) * pull;
+    kokpar.y = CARRIED_SERKE_HEIGHT + 0.05 + challengerAdvantage * 0.08;
+  }
+
   function updateKokpar(dt) {
     kokpar.looseCooldown = Math.max(0, kokpar.looseCooldown - dt);
 
@@ -2274,6 +2356,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       if (kokpar.contest.active && kokpar.contest.mode === "mounted") {
         updateContest(dt);
         if (kokpar.holder !== rider) return;
+        if (kokpar.contest.active && kokpar.contest.mode === "mounted") {
+          pullSerkeDuringMountedContest(rider);
+        }
       }
 
       if (isOutsideField(kokpar, OUT_OF_BOUNDS_MARGIN)) {
@@ -2568,9 +2653,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       const tugLength = tugStrapDirection.length();
       if (tugLength > 0.001) {
+        const holderSign = kokpar.contest.holder.team === TEAM.blue ? 1 : -1;
+        const challengerAdvantage = clamp(-kokpar.contest.progress * holderSign, 0, 1);
+        const effort = tugChallenger.tugEffort ?? 0;
+        const tensionWidth = 1 + challengerAdvantage * 0.72 + effort * 0.5 + Math.sin(time * 13) * 0.04;
+
         contestTugStrap.position.copy(tugStrapStart).addScaledVector(tugStrapDirection, 0.5);
-        contestTugStrap.scale.set(1, tugLength, 1);
+        contestTugStrap.scale.set(tensionWidth, tugLength, tensionWidth);
         contestTugStrap.quaternion.setFromUnitVectors(carryStrapAxis, tugStrapDirection.normalize());
+        contestTugStrap.material.color.set(tugChallenger.team === TEAM.blue ? COLORS.blueAlt : COLORS.red);
+        contestTugStrap.material.opacity = 0.58 + challengerAdvantage * 0.22 + effort * 0.15;
       }
     }
 

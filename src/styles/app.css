@@ -351,11 +351,45 @@ button {
 }
 
 .tug-meter {
-  background: rgba(47, 35, 24, 0.24);
+  position: relative;
+  background: linear-gradient(90deg, rgba(23, 109, 159, 0.26), rgba(47, 35, 24, 0.13) 48%, rgba(47, 35, 24, 0.13) 52%, rgba(187, 60, 49, 0.26));
 }
 
 .tug-meter i {
-  background: linear-gradient(90deg, #f7e7b8, #f0c347);
+  background: rgba(240, 195, 71, 0.42);
+}
+
+.tug-meter::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(67, 42, 18, 0.35);
+  content: "";
+}
+
+.contest-balance {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: var(--balance);
+  display: block;
+  width: 9px;
+  height: 15px;
+  border: 2px solid #fff3d2;
+  border-radius: 4px;
+  background: #f0c347;
+  transform: translate(-50%, -50%);
+  transition: left 90ms linear;
+}
+
+.contest-balance.blue {
+  background: #2f86bd;
+}
+
+.contest-balance.red {
+  background: #d25445;
 }
 
 .hud-actions {

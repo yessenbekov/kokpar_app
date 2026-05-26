@@ -17,6 +17,7 @@ export function createRider(config) {
     bodyCheckRecovery: 0,
     impactReactionTime: 0,
     impactLean: 0,
+    protectionCooldown: 0,
     staggerTime: 0,
     hitFlash: 0,
     lean: 0,

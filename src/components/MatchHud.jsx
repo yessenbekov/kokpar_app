@@ -9,7 +9,7 @@ export function MatchHud({
   onToggleFeedback
 }) {
   const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
-  const meterMode = hud.throwPower > 0 ? "throw" : hud.tugPower > 0 ? "tug" : "stamina";
+  const meterMode = hud.throwPower > 0 ? "throw" : hud.mountedContest ? "tug" : "stamina";
   const activeMeterValue = meterMode === "throw" ? hud.throwPower : meterMode === "tug" ? hud.tugPower : hud.stamina;
 
   return (
@@ -35,6 +35,12 @@ export function MatchHud({
             aria-label={meterMode === "throw" ? "Сила броска" : meterMode === "tug" ? "Усилие борьбы" : "Выносливость"}
           >
             <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
+            {meterMode === "tug" && (
+              <b
+                className={hud.contestLeadingTeam ? `contest-balance ${hud.contestLeadingTeam}` : "contest-balance"}
+                style={{ "--balance": `${Math.round(hud.contestBalance * 100)}%` }}
+              />
+            )}
           </div>
           <span
             className={hud.bodyCheckActive ? "check-indicator active" : hud.bodyCheckReady ? "check-indicator ready" : "check-indicator cooldown"}
