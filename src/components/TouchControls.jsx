@@ -10,7 +10,8 @@ export function TouchControls({
   onActionRelease,
   onBodyCheck,
   bodyCheckActive,
-  bodyCheckCooldown
+  bodyCheckCooldown,
+  bodyCheckReady
 }) {
   return (
     <section className="touch-controls" aria-label="Сенсорное управление">
@@ -42,7 +43,7 @@ export function TouchControls({
           type="button"
           aria-label="Силовой прием"
           title="Силовой прием"
-          disabled={bodyCheckCooldown > 0 && !bodyCheckActive}
+          disabled={!bodyCheckActive && !bodyCheckReady}
           style={{ "--cooldown": `${Math.round(bodyCheckCooldown * 100)}%` }}
           onPointerDown={onBodyCheck}
           onContextMenu={(event) => event.preventDefault()}

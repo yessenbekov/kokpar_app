@@ -289,6 +289,59 @@ button {
   background: linear-gradient(90deg, #7fb26b, #d9a12e);
 }
 
+.horse-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.horse-status .meter {
+  flex: 1;
+  min-width: 84px;
+  width: 145px;
+  margin-top: 0;
+}
+
+.check-indicator {
+  position: relative;
+  display: grid;
+  flex: 0 0 20px;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(67, 42, 18, 0.25);
+  border-radius: 6px;
+  color: rgba(67, 42, 18, 0.42);
+  background: rgba(67, 42, 18, 0.08);
+}
+
+.check-indicator::before {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--cooldown);
+  background: rgba(67, 42, 18, 0.16);
+  content: "";
+}
+
+.check-indicator svg {
+  position: relative;
+  z-index: 1;
+}
+
+.check-indicator.ready {
+  border-color: rgba(27, 108, 149, 0.4);
+  color: #176d9f;
+  background: rgba(23, 109, 159, 0.08);
+}
+
+.check-indicator.active {
+  border-color: #ba8321;
+  color: #362316;
+  background: #f0c347;
+}
+
 .throw-meter {
   background: rgba(47, 35, 24, 0.2);
 }

@@ -1,4 +1,4 @@
-import { RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
+import { RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
 
 export function MatchHud({
   settings,
@@ -29,11 +29,21 @@ export function MatchHud({
       <div className="panel right">
         <p className="label">Конь</p>
         <p className="status">{hud.carry}</p>
-        <div
-          className={meterMode === "throw" ? "meter throw-meter" : meterMode === "tug" ? "meter tug-meter" : "meter"}
-          aria-label={meterMode === "throw" ? "Сила броска" : meterMode === "tug" ? "Усилие борьбы" : "Выносливость"}
-        >
-          <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
+        <div className="horse-status">
+          <div
+            className={meterMode === "throw" ? "meter throw-meter" : meterMode === "tug" ? "meter tug-meter" : "meter"}
+            aria-label={meterMode === "throw" ? "Сила броска" : meterMode === "tug" ? "Усилие борьбы" : "Выносливость"}
+          >
+            <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
+          </div>
+          <span
+            className={hud.bodyCheckActive ? "check-indicator active" : hud.bodyCheckReady ? "check-indicator ready" : "check-indicator cooldown"}
+            aria-label={hud.bodyCheckActive ? "Силовой прием активен" : hud.bodyCheckReady ? "Силовой прием готов" : "Силовой прием восстанавливается"}
+            title="Силовой прием"
+            style={{ "--cooldown": `${Math.round(hud.bodyCheckCooldown * 100)}%` }}
+          >
+            <Shield size={13} strokeWidth={2.6} />
+          </span>
         </div>
       </div>
 

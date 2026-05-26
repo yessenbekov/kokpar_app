@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS, MATCH_SECONDS, TEAM, WORLD, goalFor } from "./constants.js";
 import { createGameAssetPipeline, createRiderModelInstance, createSerkeModelInstance } from "./assets.js";
+import {
+  BODY_CHECK_COOLDOWN_SECONDS,
+  TEAM_GUARD_RADIUS,
+  createContactSystem
+} from "./contactSystem.js";
 import { createMatchFeedback } from "./feedback.js";
 import {
   createContestIndicatorMesh,
@@ -11,6 +16,7 @@ import {
   disposeObject3D
 } from "./entities.js";
 import {
+  createBodyCheckImpactMarker,
   createContestRiderMarker,
   createMountedTensionGuide,
   createRiderRoleMarker
@@ -89,19 +95,6 @@ const MOUNTED_TUG_STAMINA_DRAIN = 0.42;
 const MOUNTED_TUG_STAMINA_RECOVERY = 0.08;
 const MOUNTED_TUG_MIN_STAMINA = 0.08;
 const MOUNTED_TUG_POWER_BONUS = 0.5;
-const TACKLE_DROP_THRESHOLD = 0.94;
-const TACKLE_MOUNTED_CONTEST_THRESHOLD = 0.36;
-const TACKLE_STAGGER_THRESHOLD = 0.4;
-const RIDER_COLLISION_RADIUS = 3.6;
-const BODY_CHECK_WINDOW_SECONDS = 0.46;
-const BODY_CHECK_COOLDOWN_SECONDS = 1.45;
-const BODY_CHECK_STAMINA_COST = 0.2;
-const BODY_CHECK_LUNGE_SPEED = 4.8;
-const BODY_CHECK_CONTACT_BONUS = 0.22;
-const BODY_CHECK_PUSH = 2.45;
-const TEAM_GUARD_RADIUS = 15;
-const TEAM_GUARD_BLOCK_RADIUS = 8.5;
-const TEAM_GUARD_PUSH = 1.25;
 const TEAM_LANE_THREAT_RADIUS = 17;
 const TEAM_LANE_THREAT_LOOKAHEAD = 38;
 const CENTER_CIRCLE_RADIUS = 8.5;
@@ -505,6 +498,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const mountedTensionGuide = createMountedTensionGuide();
   scene.add(mountedTensionGuide);
 
+  const bodyCheckImpactMarker = createBodyCheckImpactMarker();
+  scene.add(bodyCheckImpactMarker);
+  const bodyCheckImpact = {
+    until: 0,
+    duration: 0.42,
+    x: 0,
+    z: 0,
+    strength: 0,
+    color: "#f0c347"
+  };
+
   const throwPreviewPositions = new Float32Array((THROW_PREVIEW_STEPS + 2) * 3);
   const throwPreviewGeometry = new THREE.BufferGeometry();
   throwPreviewGeometry.setAttribute("position", new THREE.BufferAttribute(throwPreviewPositions, 3));
@@ -565,6 +569,30 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const cameraLookAt = new THREE.Vector3();
   const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
   const cameraTrackTarget = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
+
+  function showBodyCheckImpact(tackler, opponent, power, hitHolder) {
+    bodyCheckImpact.x = (tackler.x + opponent.x) * 0.5;
+    bodyCheckImpact.z = (tackler.z + opponent.z) * 0.5;
+    bodyCheckImpact.strength = power + (hitHolder ? 0.16 : 0);
+    bodyCheckImpact.color = tackler.team === TEAM.blue ? COLORS.blue : COLORS.red;
+    bodyCheckImpact.until = performance.now() / 1000 + bodyCheckImpact.duration;
+  }
+
+  const contactSystem = createContactSystem({
+    riders,
+    kokpar,
+    match,
+    feedback,
+    stealRadius: STEAL_RADIUS,
+    looseSerkeHeight: LOOSE_SERKE_HEIGHT,
+    clearContest,
+    resetThrowCharge,
+    showMessage,
+    isMountedContestParticipant,
+    keepNonDuelRidersOutsideCenter,
+    keepRiderOutsideKazanGoals,
+    onBodyCheckImpact: showBodyCheckImpact
+  });
 
   assetPipeline.readyPromise.then(() => {
     if (isDestroyed) return;
@@ -632,7 +660,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (match.phase === "goal") return match.goalTeam === TEAM.blue ? "Гол синих" : "Гол красных";
     if (kokpar.contest.active) return contestStatusText();
     if (kokpar.flightTeam) return kokpar.flightTeam === TEAM.blue ? "Бросок синих" : "Бросок красных";
-    if (player.bodyCheckTime > 0) return "Силовой прием";
+    if (contactSystem.isBodyCheckActive(player)) return "Силовой прием";
     if (kokpar.holder === player) {
       if (kokpar.throwCharging) return `Сила ${Math.round(kokpar.throwCharge * 100)}%`;
       return canThrowAtTarget(player) ? "Удерживай Space" : "Кокпар у тебя";
@@ -671,7 +699,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
           holder: kokpar.holder === rider,
           contesting: activeContestRiders.has(rider),
           supporting: Boolean(kokpar.holder && rider.team === kokpar.holder.team && supportRoles.has(rider.aiRole)),
-          checking: rider.bodyCheckTime > 0,
+          checking: contactSystem.isBodyCheckActive(rider),
           ...radarPoint(rider)
       })),
       serke: {
@@ -694,7 +722,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
       throwPower: kokpar.throwCharging ? kokpar.throwCharge : 0,
       tugPower: isMountedContestParticipant(player) ? player.tugEffort ?? 0 : 0,
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
-      bodyCheckActive: player.bodyCheckTime > 0,
+      bodyCheckActive: contactSystem.isBodyCheckActive(player),
+      bodyCheckReady:
+        match.phase === "live" &&
+        !match.over &&
+        player.bodyCheckCooldown <= 0 &&
+        player.stamina >= 0.2 &&
+        kokpar.holder !== player,
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
@@ -769,7 +803,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
 
     if (nextInput.bodyCheck) {
-      startBodyCheck(player);
+      contactSystem.startBodyCheck(player);
     }
   }
 
@@ -806,8 +840,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.staggerTime = 0;
       rider.hitFlash = 0;
       rider.throwCooldown = 0;
+      rider.bodyCheckWindup = 0;
       rider.bodyCheckTime = 0;
       rider.bodyCheckCooldown = 0;
+      rider.bodyCheckRecovery = 0;
+      rider.impactReactionTime = 0;
+      rider.impactLean = 0;
       rider.throwPose = 0;
       rider.tugEffort = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
@@ -830,6 +868,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.throwCharge = 0;
     kokpar.throwAimOffset = 0;
     kokpar.looseCooldown = 0.8;
+    bodyCheckImpact.until = 0;
+    bodyCheckImpactMarker.visible = false;
   }
 
   function placeRiderAt(rider, spot, target = KOKPAR_START) {
@@ -841,8 +881,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.staggerTime = 0;
     rider.hitFlash = 0;
     rider.throwCooldown = 0;
+    rider.bodyCheckWindup = 0;
     rider.bodyCheckTime = 0;
     rider.bodyCheckCooldown = 0;
+    rider.bodyCheckRecovery = 0;
+    rider.impactReactionTime = 0;
+    rider.impactLean = 0;
     rider.throwPose = 0;
     rider.tugEffort = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
@@ -1015,6 +1059,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function updateGoalCelebration(dt) {
     match.goalPause -= dt;
     riders.forEach((rider) => {
+      contactSystem.updateRiderContactState(rider, dt);
       applyHorseControl(rider, null, dt);
       rider.x = clamp(
         rider.x + rider.vx * dt,
@@ -1029,7 +1074,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.throwPose = Math.max(0, (rider.throwPose ?? 0) - dt * 1.6);
       keepRiderOutsideKazanGoals(rider);
     });
-    resolveRiderCollisions();
+    contactSystem.resolveRiderCollisions();
 
     if (match.goalPause <= 0) {
       finishGoalCelebration();
@@ -1603,179 +1648,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return { x: Math.cos(rider.rotation), z: Math.sin(rider.rotation) };
   }
 
-  function startBodyCheck(rider) {
-    if (match.phase !== "live" || match.over || kokpar.holder === rider) return false;
-    if (rider.bodyCheckCooldown > 0 || rider.staggerTime > 0 || rider.stamina < BODY_CHECK_STAMINA_COST) return false;
-    if (isMountedContestParticipant(rider) || kokpar.throwCharging) return false;
-
-    const forward = forwardVector(rider);
-    const speed = Math.hypot(rider.vx, rider.vz);
-    const lunge = BODY_CHECK_LUNGE_SPEED * (0.76 + clamp(speed / rider.maxSpeed, 0, 1) * 0.24);
-
-    rider.bodyCheckTime = BODY_CHECK_WINDOW_SECONDS;
-    rider.bodyCheckCooldown = BODY_CHECK_COOLDOWN_SECONDS;
-    rider.stamina = clamp(rider.stamina - BODY_CHECK_STAMINA_COST, 0, 1);
-    rider.hitFlash = Math.max(rider.hitFlash, 0.28);
-    rider.vx += forward.x * lunge;
-    rider.vz += forward.z * lunge;
-    feedback.bodyCheck();
-
-    if (rider.human) {
-      showMessage("Силовой прием", "Войди корпусом в соперника, пока идет рывок.", 0.72);
-    }
-
-    return true;
-  }
-
-  function applyStagger(rider, seconds, push = { x: 0, z: 0 }) {
-    rider.staggerTime = Math.max(rider.staggerTime, seconds);
-    rider.hitFlash = Math.max(rider.hitFlash, 1);
-    rider.vx += push.x;
-    rider.vz += push.z;
-  }
-
-  function resolveGuardBlock(guard, opponent, relativeSpeed) {
-    const holder = kokpar.holder;
-
-    if (!holder || guard === holder || opponent === holder) return;
-    if (guard.team !== holder.team || opponent.team === holder.team) return;
-    if (!["guard", "blocker", "support", "lane_guard", "lane_blocker", "escort"].includes(guard.aiRole)) return;
-
-    const opponentDistance = distance2D(opponent, holder);
-    const guardDistance = distance2D(guard, holder);
-
-    if (opponentDistance > TEAM_GUARD_BLOCK_RADIUS || guardDistance > TEAM_GUARD_RADIUS + 4) return;
-
-    const away = normalize2D(opponent.x - holder.x, opponent.z - holder.z);
-    const pressure = clamp(
-      (TEAM_GUARD_BLOCK_RADIUS - opponentDistance) / TEAM_GUARD_BLOCK_RADIUS + relativeSpeed / 18,
-      0.25,
-      1
-    );
-    const push = TEAM_GUARD_PUSH + pressure;
-
-    opponent.vx += away.x * push;
-    opponent.vz += away.z * push;
-    guard.vx -= away.x * 0.35;
-    guard.vz -= away.z * 0.35;
-    opponent.grabCooldown = Math.max(opponent.grabCooldown, 0.24);
-    opponent.bumpCooldown = Math.max(opponent.bumpCooldown, 0.14);
-    guard.bumpCooldown = Math.max(guard.bumpCooldown, 0.12);
-    opponent.hitFlash = Math.max(opponent.hitFlash, 0.35);
-  }
-
-  function tackleQuality(tackler, holder, active, impactBonus = 0) {
-    const distance = distance2D(tackler, holder);
-    const toHolder = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
-    const tacklerForward = forwardVector(tackler);
-    const holderForward = forwardVector(holder);
-    const approach = clamp((tacklerForward.x * toHolder.x + tacklerForward.z * toHolder.z + 0.18) / 1.18, 0, 1);
-    const relativeSpeed = Math.hypot(tackler.vx - holder.vx, tackler.vz - holder.vz);
-    const speedPower = clamp(relativeSpeed / 16, 0, 1);
-    const distancePower = clamp(1 - (distance - 2.1) / (STEAL_RADIUS - 2.1), 0, 1);
-    const holderSide = { x: -holderForward.z, z: holderForward.x };
-    const toTackler = normalize2D(tackler.x - holder.x, tackler.z - holder.z);
-    const sideContact = clamp(Math.abs(holderSide.x * toTackler.x + holderSide.z * toTackler.z), 0, 1);
-    const staminaPower = 0.72 + tackler.stamina * 0.28;
-    const activePower = active ? 1 : tackler.aiRole === "tackler" ? 0.9 : 0.74;
-    const holderPenalty = holder.staggerTime > 0 ? 0.08 : 0;
-
-    return clamp(
-      distancePower * 0.2 +
-        approach * 0.24 +
-        speedPower * 0.22 +
-        sideContact * 0.14 +
-        staminaPower * 0.1 +
-        activePower * 0.1 +
-        impactBonus +
-        holderPenalty,
-      0,
-      1
-    );
-  }
-
-  function dropKokparFromTackle(holder, tackler, quality) {
-    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
-
-    kokpar.holder = null;
-    kokpar.x = holder.x + push.x * 1.15;
-    kokpar.y = LOOSE_SERKE_HEIGHT;
-    kokpar.z = holder.z + push.z * 1.15;
-    kokpar.vx = holder.vx * 0.38 + tackler.vx * 0.34 + push.x * 3.2;
-    kokpar.vy = 0;
-    kokpar.vz = holder.vz * 0.38 + tackler.vz * 0.34 + push.z * 3.2;
-    kokpar.flightTeam = null;
-    kokpar.flightScorer = null;
-    kokpar.flightTime = 0;
-    kokpar.lastThrowHuman = false;
-    resetThrowCharge();
-    kokpar.looseCooldown = 0.34;
-    clearContest();
-
-    applyStagger(holder, 0.48 + quality * 0.34, { x: push.x * 3.2, z: push.z * 3.2 });
-    applyStagger(tackler, 0.18, { x: -push.x * 1.1, z: -push.z * 1.1 });
-    holder.bumpCooldown = 0.88;
-    tackler.grabCooldown = 0.56;
-    feedback.impact(true);
-
-    showMessage(
-      tackler.human ? "Серке выбит!" : `${tackler.name} выбил серке`,
-      "Он снова на земле. Готовься к борьбе за подбор.",
-      1.45
-    );
-  }
-
-  function staggerFromTackle(holder, tackler, quality) {
-    const push = normalize2D(holder.x - tackler.x, holder.z - tackler.z);
-
-    applyStagger(holder, 0.24 + quality * 0.22, { x: push.x * 1.8, z: push.z * 1.8 });
-    holder.bumpCooldown = 0.48;
-    tackler.grabCooldown = 0.38;
-
-    if (tackler.human || holder.human) {
-      feedback.impact();
-      showMessage("Жесткий контакт", "Серке удержан, но всадника шатнуло.", 1.05);
-    }
-  }
-
-  function startMountedContest(holder, challenger, active, quality) {
-    if (kokpar.contest.active && kokpar.contest.mode === "mounted") return;
-
-    const holderSign = holder.team === TEAM.blue ? 1 : -1;
-
-    kokpar.contest.active = true;
-    kokpar.contest.mode = "mounted";
-    kokpar.contest.progress = holderSign * 0.46;
-    kokpar.contest.time = 0;
-    kokpar.contest.leader = holder;
-    kokpar.contest.holder = holder;
-    kokpar.contest.challenger = challenger;
-
-    holder.tugEffort = 0;
-    challenger.tugEffort = 0;
-    holder.bumpCooldown = Math.max(holder.bumpCooldown, 0.28);
-    challenger.grabCooldown = active ? 0.18 : 0.34;
-    holder.hitFlash = Math.max(holder.hitFlash, 0.45);
-    challenger.hitFlash = Math.max(challenger.hitFlash, 0.45);
-
-    if (quality >= TACKLE_STAGGER_THRESHOLD) {
-      const push = normalize2D(holder.x - challenger.x, holder.z - challenger.z);
-      holder.vx += push.x * 0.75;
-      holder.vz += push.z * 0.75;
-      challenger.vx -= push.x * 0.45;
-      challenger.vz -= push.z * 0.45;
-    }
-
-    feedback.contest();
-    showMessage(
-      "Серке тянут!",
-      challenger.human || holder.human
-        ? "Удерживай действие, чтобы перетянуть серке. Это тратит выносливость."
-        : `${challenger.name} тянет серке. Нужна борьба, одного удара мало.`,
-      1.25
-    );
-  }
-
   function holderKeepsMountedContest(holder, challenger) {
     clearContest();
     holder.bumpCooldown = Math.max(holder.bumpCooldown, 0.28);
@@ -1788,70 +1660,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
         1.2
       );
     }
-  }
-
-  function resolveTackleAttempt(tackler, active, impactBonus = 0) {
-    const holder = kokpar.holder;
-    if (!holder || holder.team === tackler.team || holder === tackler) return;
-    if (kokpar.contest.active && kokpar.contest.mode === "mounted") return;
-
-    const quality = tackleQuality(tackler, holder, active, impactBonus);
-
-    if (quality >= TACKLE_DROP_THRESHOLD) {
-      dropKokparFromTackle(holder, tackler, quality);
-      return;
-    }
-
-    if (quality >= TACKLE_MOUNTED_CONTEST_THRESHOLD) {
-      startMountedContest(holder, tackler, active, quality);
-      return;
-    }
-
-    if (quality >= TACKLE_STAGGER_THRESHOLD && holder.bumpCooldown <= 0) {
-      staggerFromTackle(holder, tackler, quality);
-      return;
-    }
-
-    tackler.grabCooldown = active ? 0.32 : 0.5;
-  }
-
-  function resolveBodyCheckImpact(tackler, opponent, relativeSpeed) {
-    if (tackler.team === opponent.team || tackler.bodyCheckTime <= 0) return false;
-
-    const push = normalize2D(opponent.x - tackler.x, opponent.z - tackler.z);
-    const impactPower = clamp(0.72 + relativeSpeed / 20, 0.72, 1.32);
-    const hitHolder = kokpar.holder === opponent;
-
-    tackler.bodyCheckTime = 0;
-    tackler.hitFlash = Math.max(tackler.hitFlash, 0.8);
-    opponent.hitFlash = Math.max(opponent.hitFlash, 0.9);
-    opponent.vx += push.x * BODY_CHECK_PUSH * impactPower;
-    opponent.vz += push.z * BODY_CHECK_PUSH * impactPower;
-    tackler.vx -= push.x * 0.55;
-    tackler.vz -= push.z * 0.55;
-    tackler.bumpCooldown = Math.max(tackler.bumpCooldown, 0.16);
-
-    if (hitHolder) {
-      const speedBonus = clamp((relativeSpeed - 3) / 17, 0, 0.13);
-      resolveTackleAttempt(tackler, true, BODY_CHECK_CONTACT_BONUS + speedBonus);
-    } else {
-      applyStagger(opponent, 0.2 + impactPower * 0.1, {
-        x: push.x * (0.8 + impactPower * 0.55),
-        z: push.z * (0.8 + impactPower * 0.55)
-      });
-      tackler.grabCooldown = Math.max(tackler.grabCooldown, 0.28);
-      feedback.impact(relativeSpeed > 9);
-
-      if (tackler.human || opponent.human) {
-        showMessage(
-          tackler.human ? "Попадание корпусом!" : `${tackler.name} ударил корпусом`,
-          "Всадник сбит с траектории, но борьба продолжается.",
-          1.05
-        );
-      }
-    }
-
-    return true;
   }
 
   function contestCandidates(radius = CONTEST_RADIUS) {
@@ -2113,7 +1921,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
 
     if (kokpar.holder && kokpar.holder.team !== rider.team && distance2D(rider, kokpar.holder) < STEAL_RADIUS) {
-      resolveTackleAttempt(rider, active);
+      contactSystem.resolveTackleAttempt(rider, active);
     }
   }
 
@@ -2132,13 +1940,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     const inputStrength = clamp(Math.hypot(ax, az), 0, 1);
     const moving = inputStrength > 0.05;
-    const bodyChecking = rider.bodyCheckTime > 0;
-    const sprint = moving && actionHeld && !bodyChecking && !kokpar.throwCharging && !isMountedContestParticipant(rider) && rider.stamina > 0.08;
+    const bodyChecking = contactSystem.isBodyCheckActive(rider);
+    const recovering = rider.bodyCheckRecovery > 0;
+    const sprint = moving && actionHeld && !bodyChecking && !recovering && !kokpar.throwCharging && !isMountedContestParticipant(rider) && rider.stamina > 0.08;
     const direction = moving ? normalize2D(ax, az) : null;
 
     applyHorseControl(rider, direction, dt, {
       sprint,
-      urgency: bodyChecking ? 1.08 : moving ? 0.38 + inputStrength * 0.68 : 1
+      urgency: bodyChecking ? 1.08 : recovering ? 0.58 : moving ? 0.38 + inputStrength * 0.68 : 1
     });
 
     if (sprint && moving) {
@@ -2149,7 +1958,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.stamina = clamp(rider.stamina + dt * 0.22, 0, 1);
     }
 
-    if (actionHeld && !bodyChecking) attemptGrab(rider, true);
+    if (actionHeld && !bodyChecking && !recovering) attemptGrab(rider, true);
   }
 
   function updateRiderThrowPose(rider, dt) {
@@ -2197,11 +2006,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
       distance2D(rider, kokpar.holder) < 6.3 &&
       Math.hypot(rider.vx, rider.vz) > 3.5
     ) {
-      startBodyCheck(rider);
+      contactSystem.startBodyCheck(rider);
     }
 
     applyHorseControl(rider, direction, dt, { urgency: plan.urgency * pacing });
-    if (rider.bodyCheckTime <= 0) attemptGrab(rider, false);
+    if (!contactSystem.isBodyCheckActive(rider)) attemptGrab(rider, false);
   }
 
   function updateRiderMovement(dt, time) {
@@ -2209,8 +2018,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
       rider.throwCooldown = Math.max(0, rider.throwCooldown - dt);
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
-      rider.bodyCheckTime = Math.max(0, rider.bodyCheckTime - dt);
-      rider.bodyCheckCooldown = Math.max(0, rider.bodyCheckCooldown - dt);
+      contactSystem.updateRiderContactState(rider, dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
       updateRiderThrowPose(rider, dt);
@@ -2232,7 +2040,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
         kokpar.contest.active &&
         kokpar.contest.mode === "mounted" &&
         (kokpar.contest.holder === rider || kokpar.contest.challenger === rider);
-      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04) * (inMountedContest ? 0.72 : 1);
+      const checkSpeedFactor = contactSystem.isBodyCheckDriving(rider)
+        ? 1.12
+        : rider.bodyCheckRecovery > 0
+          ? 0.78
+          : 1;
+      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04) * (inMountedContest ? 0.72 : 1) * checkSpeedFactor;
       const speed = Math.hypot(rider.vx, rider.vz);
 
       if (speed > maxSpeed) {
@@ -2261,8 +2074,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.grabCooldown = Math.max(0, rider.grabCooldown - dt);
       rider.throwCooldown = Math.max(0, rider.throwCooldown - dt);
       rider.bumpCooldown = Math.max(0, rider.bumpCooldown - dt);
-      rider.bodyCheckTime = Math.max(0, rider.bodyCheckTime - dt);
-      rider.bodyCheckCooldown = Math.max(0, rider.bodyCheckCooldown - dt);
+      contactSystem.updateRiderContactState(rider, dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
 
@@ -2291,76 +2103,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
   }
 
-  function resolveRiderCollisions() {
-    for (let i = 0; i < riders.length; i += 1) {
-      for (let j = i + 1; j < riders.length; j += 1) {
-        const a = riders[i];
-        const b = riders[j];
-        const dx = b.x - a.x;
-        const dz = b.z - a.z;
-        const distance = Math.hypot(dx, dz) || 1;
-        const relativeSpeed = Math.hypot(a.vx - b.vx, a.vz - b.vz);
-
-        if (distance >= RIDER_COLLISION_RADIUS) continue;
-
-        const penetration = RIDER_COLLISION_RADIUS - distance;
-        const nx = dx / distance;
-        const nz = dz / distance;
-        const relativeNormalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
-        const approachSpeed = Math.max(0, -relativeNormalSpeed);
-        const push = penetration * 0.34;
-        const impulse = clamp(penetration * 0.62 + approachSpeed * 0.12, 0.24, 1.45);
-
-        a.x -= nx * push;
-        a.z -= nz * push;
-        b.x += nx * push;
-        b.z += nz * push;
-        a.vx -= nx * impulse;
-        a.vz -= nz * impulse;
-        b.vx += nx * impulse;
-        b.vz += nz * impulse;
-        a.vx *= 0.992;
-        a.vz *= 0.992;
-        b.vx *= 0.992;
-        b.vz *= 0.992;
-
-        let bodyCheckConnected = false;
-        if (a.team !== b.team) {
-          if (a.bodyCheckTime > 0) {
-            bodyCheckConnected = resolveBodyCheckImpact(a, b, relativeSpeed);
-          } else if (b.bodyCheckTime > 0) {
-            bodyCheckConnected = resolveBodyCheckImpact(b, a, relativeSpeed);
-          }
-        }
-
-        if (!bodyCheckConnected && kokpar.holder && (kokpar.holder === a || kokpar.holder === b) && a.team !== b.team) {
-          const holder = kokpar.holder;
-          const tackler = holder === a ? b : a;
-
-          if (holder.bumpCooldown <= 0 && tackler.grabCooldown <= 0) {
-            const impactBonus = clamp((relativeSpeed - 4) / 18, 0, 0.18);
-            resolveTackleAttempt(tackler, false, impactBonus);
-          }
-        }
-
-        if (kokpar.holder && a.team !== b.team && a !== kokpar.holder && b !== kokpar.holder) {
-          if (a.team === kokpar.holder.team) {
-            resolveGuardBlock(a, b, relativeSpeed);
-          } else if (b.team === kokpar.holder.team) {
-            resolveGuardBlock(b, a, relativeSpeed);
-          }
-        }
-      }
-    }
-
-    keepNonDuelRidersOutsideCenter();
-    riders.forEach(keepRiderOutsideKazanGoals);
-  }
-
   function riderRoleMarkerState(rider, inContest) {
     const tugEffort = rider.tugEffort ?? 0;
 
-    if (rider.bodyCheckTime > 0) {
+    if (contactSystem.isBodyCheckActive(rider)) {
       return {
         visible: true,
         color: "#f0c347",
@@ -2587,6 +2333,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
     releaseCenterDuelIfNeeded();
   }
 
+  function updateBodyCheckImpactMarker(time) {
+    const remaining = bodyCheckImpact.until - time;
+    bodyCheckImpactMarker.visible = remaining > 0;
+    if (remaining <= 0) return;
+
+    const progress = 1 - remaining / bodyCheckImpact.duration;
+    const scale = 0.78 + progress * (1.15 + bodyCheckImpact.strength * 0.3);
+    const opacity = Math.max(0, (1 - progress) * 0.92);
+
+    bodyCheckImpactMarker.position.set(bodyCheckImpact.x, 2.55, bodyCheckImpact.z);
+    bodyCheckImpactMarker.quaternion.copy(camera.quaternion);
+    bodyCheckImpactMarker.scale.setScalar(scale);
+    bodyCheckImpactMarker.userData.ring.material.color.set(bodyCheckImpact.color);
+    bodyCheckImpactMarker.userData.ring.material.opacity = opacity;
+    bodyCheckImpactMarker.userData.slashes.forEach((slash) => {
+      slash.material.color.set(bodyCheckImpact.color);
+      slash.material.opacity = opacity * 0.9;
+    });
+  }
+
   function syncMeshes(time) {
     const mountedContest = kokpar.contest.active && kokpar.contest.mode === "mounted";
     const contestParticipants =
@@ -2602,8 +2368,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const speed = Math.hypot(rider.vx, rider.vz);
       const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
       const bob = Math.sin(time * 11 + rider.aiPhase) * Math.min(speed / 120, 0.18);
-      const scale = (rider.bumpCooldown > 0 ? 1.08 : 1) + rider.hitFlash * 0.04;
+      const bodyCheckState = contactSystem.bodyCheckPose(rider);
+      const bodyCheckPose = Math.max(bodyCheckState.drive, bodyCheckState.windup * 0.7);
+      const bodyCheckRecoveryPose = Math.max(bodyCheckState.recovery, bodyCheckState.impact);
+      const scale = (rider.bumpCooldown > 0 ? 1.08 : 1) + rider.hitFlash * 0.04 + bodyCheckState.impact * 0.025;
       const hitLean = rider.hitFlash > 0 ? Math.sin(time * 36 + rider.aiPhase) * rider.hitFlash * 0.1 : 0;
+      const contactLean = (rider.impactLean ?? 0) * bodyCheckState.impact * 0.2;
       const stride = time * (5.3 + speed * 0.52) + rider.aiPhase;
       const legs = rider.group.userData.legs ?? [];
       const tail = rider.group.userData.tail;
@@ -2613,7 +2383,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const inContest = contestParticipants.has(rider);
       const pickupPose = inContest && kokpar.contest.active && !mountedContest ? 1 : 0;
       const tugPose = inContest && mountedContest ? 1 : 0;
-      const bodyCheckPose = clamp((rider.bodyCheckTime ?? 0) / BODY_CHECK_WINDOW_SECONDS, 0, 1);
       const throwPose = rider.throwPose ?? 0;
       const throwSide = rider.team === TEAM.blue ? -1 : 1;
       const throwAimLean = kokpar.throwCharging && kokpar.holder === rider
@@ -2623,7 +2392,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
-      rider.group.rotation.z = (rider.lean ?? 0) + hitLean - bodyCheckPose * 0.09;
+      rider.group.rotation.z = (rider.lean ?? 0) + hitLean - bodyCheckPose * 0.09 + contactLean;
       rider.group.scale.setScalar(scale);
 
       legs.forEach((leg) => {
@@ -2660,11 +2429,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
           pickupPose * (0.2 + posePower * 0.04) -
           tugPose * 0.06 -
           bodyCheckPose * 0.14 -
+          bodyCheckRecoveryPose * 0.08 -
           throwPose * 0.1;
         part.mesh.rotation.z =
           part.baseRotationZ +
           tugPose * tugDirection * 0.08 +
           bodyCheckPose * 0.08 +
+          bodyCheckRecoveryPose * 0.06 +
           throwPose * (throwSide * 0.1 + throwAimLean * 0.08);
         part.mesh.position.y = part.baseY - pickupPose * 0.1 + throwPose * 0.03;
       });
@@ -2683,6 +2454,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
           pickupPose * (0.45 + posePower * 0.14) +
           tugPose * (0.22 + posePower * 0.12) +
           bodyCheckPose * 0.24 +
+          bodyCheckRecoveryPose * 0.12 +
           throwPose * (isThrowingArm ? 0.78 : 0.24);
         arm.mesh.rotation.x =
           arm.baseRotationX +
@@ -2694,7 +2466,15 @@ export function createKokparGame(container, onHudChange, options = {}) {
       });
 
       if (dust) {
-        const dustPower = clamp(speedRatio * 0.82 + Math.abs(rider.lean ?? 0) * 1.35 + rider.hitFlash * 0.5 + bodyCheckPose * 0.35, 0, 1);
+        const dustPower = clamp(
+          speedRatio * 0.82 +
+            Math.abs(rider.lean ?? 0) * 1.35 +
+            rider.hitFlash * 0.5 +
+            bodyCheckPose * 0.35 +
+            bodyCheckRecoveryPose * 0.12,
+          0,
+          1
+        );
         dust.visible = dustPower > 0.12;
         dust.children.forEach((puff, index) => {
           const baseScale = puff.userData.baseScale ?? 1;
@@ -2725,6 +2505,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       updateRiderRoleMarker(rider, riderRoleMarkerState(rider, inContest), time);
     });
+
+    updateBodyCheckImpactMarker(time);
 
     const carriedHeight = kokpar.holder ? CARRIED_SERKE_HEIGHT + Math.sin(time * 8.5) * 0.06 : kokpar.y;
     kokpar.mesh.position.set(kokpar.x, carriedHeight, kokpar.z);
@@ -2926,7 +2708,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
     if (key === "r") restart();
     if (key === "e" && !event.repeat) {
-      startBodyCheck(player);
+      contactSystem.startBodyCheck(player);
       keys.delete(key);
       return;
     }
@@ -2961,7 +2743,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       if (match.phase === "countdown") {
         if (!match.duelMode) {
           updateStartLaneMovement(dt, time);
-          resolveRiderCollisions();
+          contactSystem.resolveRiderCollisions();
           riders.forEach(keepRiderInStartLane);
         }
 
@@ -2983,7 +2765,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         }
 
         updateRiderMovement(dt, time);
-        resolveRiderCollisions();
+        contactSystem.resolveRiderCollisions();
         updateKokpar(dt);
       }
     }

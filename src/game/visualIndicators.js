@@ -94,3 +94,32 @@ export function createMountedTensionGuide() {
   group.userData.head = head;
   return group;
 }
+
+export function createBodyCheckImpactMarker() {
+  const group = new THREE.Group();
+  const material = new THREE.MeshBasicMaterial({
+    color: "#f0c347",
+    transparent: true,
+    opacity: 0.9,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.07, 8, 28), material);
+  group.add(ring);
+
+  const slashA = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.065, 0.035), material.clone());
+  slashA.rotation.z = Math.PI * 0.22;
+  group.add(slashA);
+
+  const slashB = slashA.clone();
+  slashB.material = material.clone();
+  slashB.rotation.z = -Math.PI * 0.22;
+  group.add(slashB);
+
+  group.visible = false;
+  group.renderOrder = 12;
+  group.userData.ring = ring;
+  group.userData.slashes = [slashA, slashB];
+  return group;
+}

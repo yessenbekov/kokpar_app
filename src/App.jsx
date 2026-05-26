@@ -202,6 +202,7 @@ export default function App() {
           onBodyCheck={pressBodyCheck}
           bodyCheckActive={hud.bodyCheckActive}
           bodyCheckCooldown={hud.bodyCheckCooldown}
+          bodyCheckReady={hud.bodyCheckReady}
         />
       )}
     </main>
