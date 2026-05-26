@@ -65,6 +65,7 @@ Already done:
 - mounted tug-of-war pull direction and advantage indicator
 - player-controlled mounted tug effort with stamina cost
 - event audio, mute control, and supported-device haptic feedback
+- responsive field radar for serke, possession, support, and target awareness
 
 Exit criteria:
 

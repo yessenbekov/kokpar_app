@@ -840,6 +840,46 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return "Кокпар на поле";
   }
 
+  function radarPoint(point) {
+    return {
+      x: clamp((point.x + WORLD.width / 2) / WORLD.width, 0, 1),
+      z: clamp((point.z + WORLD.height / 2) / WORLD.height, 0, 1)
+    };
+  }
+
+  function radarState() {
+    const mountedContest = kokpar.contest.active && kokpar.contest.mode === "mounted";
+    const activeContestRiders = kokpar.contest.active
+      ? new Set(
+          mountedContest
+            ? [kokpar.contest.holder, kokpar.contest.challenger].filter(Boolean)
+            : contestCandidates(CONTEST_RADIUS + 0.25)
+        )
+      : new Set();
+    const supportRoles = new Set(["guard", "lane_guard", "escort"]);
+
+    return {
+      goals: [TEAM.blue, TEAM.red].map((team) => ({
+        team,
+        ...radarPoint(goalFor(team))
+      })),
+      riders: riders.map((rider) => ({
+        name: rider.name,
+        team: rider.team,
+        human: rider.human,
+        holder: kokpar.holder === rider,
+        contesting: activeContestRiders.has(rider),
+        supporting: Boolean(kokpar.holder && rider.team === kokpar.holder.team && supportRoles.has(rider.aiRole)),
+        ...radarPoint(rider)
+      })),
+      serke: {
+        carried: Boolean(kokpar.holder),
+        flight: Boolean(kokpar.flightTeam),
+        ...radarPoint(kokpar)
+      }
+    };
+  }
+
   function publishHud() {
     const isCountdown = match.phase === "countdown";
     const countdown = Math.max(1, Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS)));
@@ -854,7 +894,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
-      showBanner: isCountdown || match.messageTime > 0 || match.over
+      showBanner: isCountdown || match.messageTime > 0 || match.over,
+      radar: radarState()
     });
   }
 

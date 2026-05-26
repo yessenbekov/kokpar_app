@@ -46,6 +46,7 @@ Small overhead markers highlight the serke carrier, active contests, and teammat
 Mounted tug-of-war shows a floating pull arrow between riders, colored by the team currently winning the struggle.
 When you are part of a mounted tug, holding `Space` or the mobile action button builds pull effort and spends stamina.
 Match feedback includes synthesized whistle, possession, contact, throw, out-of-bounds, and goal sounds plus vibration where the browser supports it.
+A compact field radar shows both targets, riders, loose serke, active possession, contests, and supporting teammates.
 
 ## Project structure
 
