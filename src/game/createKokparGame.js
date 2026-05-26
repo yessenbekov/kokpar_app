@@ -635,8 +635,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return gameSettings.goalType === "kazan" ? "казан" : "круг";
   }
 
+  function opponentTeam(team) {
+    return team === TEAM.blue ? TEAM.red : TEAM.blue;
+  }
+
+  function scoringGoalFor(team) {
+    return goalFor(opponentTeam(team));
+  }
+
   function goalDistanceFor(rider) {
-    return Math.hypot(rider.x - goalFor(rider.team).x, rider.z - goalFor(rider.team).z);
+    const target = scoringGoalFor(rider.team);
+    return Math.hypot(rider.x - target.x, rider.z - target.z);
   }
 
   function canThrowAtTarget(rider) {
@@ -646,7 +655,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function throwPointScores(team, x, y, z, flightTime) {
     if (!team || flightTime < 0.1) return false;
 
-    const target = goalFor(team);
+    const target = scoringGoalFor(team);
     const distance = Math.hypot(x - target.x, z - target.z);
     const targetRadius = gameSettings.goalType === "kazan" ? scoreRadius * 0.78 : scoreRadius;
     const heightOk = gameSettings.goalType === "kazan"
@@ -1023,7 +1032,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.goalTeam = team;
     match.goalScorer = kokpar.flightScorer;
 
-    const target = goalFor(team);
+    const target = scoringGoalFor(team);
     kokpar.x = clamp(kokpar.x, target.x - scoreRadius * 0.5, target.x + scoreRadius * 0.5);
     kokpar.z = clamp(kokpar.z, target.z - scoreRadius * 0.5, target.z + scoreRadius * 0.5);
     kokpar.y = gameSettings.goalType === "kazan" ? clamp(kokpar.y, 0.95, 1.65) : LOOSE_SERKE_HEIGHT;
@@ -1154,7 +1163,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const carrySide = rider.team === TEAM.blue ? -1 : 1;
     const startX = rider.x + forward.x * 1.15 + side.x * carrySide * 1.05;
     const startZ = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
-    const target = goalFor(rider.team);
+    const target = scoringGoalFor(rider.team);
     const toGoal = normalize2D(target.x - startX, target.z - startZ);
     const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
     const aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
@@ -1299,16 +1308,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function supportPoint(holder, rider) {
-    const scoringGoal = goalFor(rider.team);
+    const scoringGoal = scoringGoalFor(rider.team);
     const side = rider.name.charCodeAt(0) % 2 === 0 ? -1 : 1;
     return clampFieldTarget({
       x: holder.x + (scoringGoal.x - holder.x) * 0.22,
       z: holder.z + side * 12
     });
-  }
-
-  function opponentTeam(team) {
-    return team === TEAM.blue ? TEAM.red : TEAM.blue;
   }
 
   function ridersForTeam(team) {
@@ -1412,7 +1417,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function laneEscortPoint(holder, slot = 0) {
-    const scoringGoal = goalFor(holder.team);
+    const scoringGoal = scoringGoalFor(holder.team);
     const laneAmount = 0.2 + (slot % 3) * 0.08;
     const sideSign = slot % 2 === 0 ? 1 : -1;
     const sideAmount = sideSign * (7 + Math.floor(slot / 2) * 2.5);
@@ -1480,7 +1485,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       if (holder === rider) {
         return {
           role: "carrier",
-          target: goalFor(rider.team),
+          target: scoringGoalFor(rider.team),
           urgency: 1.12,
           closeRadius: 2,
           wander: 0.8
@@ -1488,7 +1493,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
 
       if (holder.team === rider.team) {
-        const scoringGoal = goalFor(rider.team);
+        const scoringGoal = scoringGoalFor(rider.team);
         const threats = holderThreats(holder, opponents);
         const threat = threats[aiIndex % Math.max(1, threats.length)];
         const guardCount = Math.min(aiTeammates.length, Math.max(2, threats.length));
@@ -1526,7 +1531,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
 
       const defensiveRank = sortedRidersByDistance(holder, teammates).indexOf(rider);
-      const holderGoal = goalFor(holder.team);
+      const holderGoal = scoringGoalFor(holder.team);
 
       if (defensiveRank === 0) {
         return {
@@ -1580,7 +1585,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       };
     }
 
-    const scoringGoal = goalFor(rider.team);
+    const scoringGoal = scoringGoalFor(rider.team);
     return {
       role: "outlet",
       target: clampFieldTarget(offsetPoint(kokpar, scoringGoal, side * 9, 7)),
@@ -2601,8 +2606,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function updateCamera(dt) {
     if (match.phase === "goal") {
       const team = match.goalTeam ?? kokpar.flightTeam ?? TEAM.blue;
-      const target = goalFor(team);
-      const cameraSide = team === TEAM.blue ? -1 : 1;
+      const target = scoringGoalFor(team);
+      const cameraSide = Math.sign(target.x) || 1;
       const goalEase = 1 - Math.pow(0.012, dt);
 
       cameraTrackTarget.set(
