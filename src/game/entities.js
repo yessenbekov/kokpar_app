@@ -11,6 +11,8 @@ export function createRider(config) {
     grabCooldown: 0,
     throwCooldown: 0,
     bumpCooldown: 0,
+    bodyCheckTime: 0,
+    bodyCheckCooldown: 0,
     staggerTime: 0,
     hitFlash: 0,
     lean: 0,

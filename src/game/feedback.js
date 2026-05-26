@@ -85,6 +85,11 @@ export function createMatchFeedback(initialEnabled = true) {
       });
       vibrate(strong ? [28, 32, 34] : 18);
     },
+    bodyCheck() {
+      tone({ frequency: 118, endFrequency: 82, duration: 0.12, gain: 0.12, type: "triangle" });
+      tone({ frequency: 196, endFrequency: 128, duration: 0.16, gain: 0.09, type: "sawtooth", delay: 0.04 });
+      vibrate(14);
+    },
     throw() {
       tone({ frequency: 310, endFrequency: 620, duration: 0.16, gain: 0.11, type: "triangle" });
       vibrate(12);

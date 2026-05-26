@@ -16,6 +16,8 @@ export function makeInitialHud(settings = DEFAULT_SETTINGS) {
     stamina: 1,
     throwPower: 0,
     tugPower: 0,
+    bodyCheckCooldown: 0,
+    bodyCheckActive: false,
     carry: "Кокпар на поле",
     message: "Загрузка матча",
     submessage: "Готовим поле.",

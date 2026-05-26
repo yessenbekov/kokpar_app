@@ -100,6 +100,11 @@ export default function App() {
     setGameTouchInput({ action: false });
   }
 
+  function pressBodyCheck(event) {
+    event.preventDefault();
+    setGameTouchInput({ bodyCheck: true });
+  }
+
   function releaseTouchControls(updateUi = true) {
     if (updateUi) setJoystick({ active: false, x: 0, z: 0 });
     setGameTouchInput({ x: 0, z: 0, action: false });
@@ -194,6 +199,9 @@ export default function App() {
           onJoystickRelease={releaseJoystick}
           onActionPress={pressAction}
           onActionRelease={releaseAction}
+          onBodyCheck={pressBodyCheck}
+          bodyCheckActive={hud.bodyCheckActive}
+          bodyCheckCooldown={hud.bodyCheckCooldown}
         />
       )}
     </main>

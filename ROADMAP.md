@@ -67,6 +67,7 @@ Already done:
 - event audio, mute control, and supported-device haptic feedback
 - responsive field radar for serke, possession, support, and target awareness
 - first architecture pass separating React UI, match feedback, and 3D indicators into modules
+- timed defensive body check with horse contact, cooldown, mobile control, and AI use
 
 Exit criteria:
 

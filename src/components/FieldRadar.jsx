@@ -30,7 +30,8 @@ export function FieldRadar({ radar, goalType }) {
                 rider.team,
                 rider.human ? "human" : "",
                 rider.contesting ? "contesting" : "",
-                rider.supporting ? "supporting" : ""
+                rider.supporting ? "supporting" : "",
+                rider.checking ? "checking" : ""
               ].filter(Boolean).join(" ")}
               cx={xFor(rider)}
               cy={yFor(rider)}

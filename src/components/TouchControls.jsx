@@ -1,4 +1,4 @@
-import { Hand } from "lucide-react";
+import { Hand, Shield } from "lucide-react";
 
 export function TouchControls({
   joystick,
@@ -7,7 +7,10 @@ export function TouchControls({
   onJoystickMove,
   onJoystickRelease,
   onActionPress,
-  onActionRelease
+  onActionRelease,
+  onBodyCheck,
+  bodyCheckActive,
+  bodyCheckCooldown
 }) {
   return (
     <section className="touch-controls" aria-label="Сенсорное управление">
@@ -34,6 +37,18 @@ export function TouchControls({
       </div>
 
       <div className="touch-action-wrap">
+        <button
+          className={bodyCheckActive ? "touch-button touch-check active" : "touch-button touch-check"}
+          type="button"
+          aria-label="Силовой прием"
+          title="Силовой прием"
+          disabled={bodyCheckCooldown > 0 && !bodyCheckActive}
+          style={{ "--cooldown": `${Math.round(bodyCheckCooldown * 100)}%` }}
+          onPointerDown={onBodyCheck}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          <Shield size={25} strokeWidth={2.5} />
+        </button>
         <button
           className="touch-button touch-action"
           type="button"

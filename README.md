@@ -21,9 +21,10 @@ npm run generate:models
 
 - `WASD` or arrow keys: ride
 - `Space`: sprint, pick up, steal, or charge/release a throw near the target
+- `E`: commit to a short defensive body check with the horse
 - `A/D` or left/right while charging: adjust the throw angle
 - `R`: restart
-- mobile: use the on-screen joystick and action button
+- mobile: use the on-screen joystick, action button, and shield button for a body check
 - iOS landscape is supported with compact HUD and controls
 - speaker icon: mute or enable match audio and supported-device haptics
 
@@ -47,6 +48,7 @@ Mounted tug-of-war shows a floating pull arrow between riders, colored by the te
 When you are part of a mounted tug, holding `Space` or the mobile action button builds pull effort and spends stamina.
 Match feedback includes synthesized whistle, possession, contact, throw, out-of-bounds, and goal sounds plus vibration where the browser supports it.
 A compact field radar shows both targets, riders, loose serke, active possession, contests, and supporting teammates.
+Defenders can attempt a timed body check: a clean high-speed hit can dislodge the serke, while weaker contact pushes the rider or starts a mounted tug contest.
 
 ## Project structure
 
