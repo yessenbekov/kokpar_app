@@ -71,8 +71,8 @@ const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
 const CHASE_CAMERA_SIDE_OFFSET = 3.8;
 const CAMERA_MODES = [
-  { id: "chase", label: "Ближе" },
   { id: "wide", label: "Обзор" },
+  { id: "chase", label: "Ближе" },
   { id: "broadcast", label: "ТВ" }
 ];
 const THROW_READY_EXTRA_RADIUS = 8.5;
