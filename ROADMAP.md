@@ -70,6 +70,7 @@ Already done:
 - timed defensive body check with horse contact, cooldown, mobile control, and AI use
 - closer third-person gameplay camera inspired by the kok-boru prototype reference
 - stadium presentation pass with in-arena scoreboard and Kazakhstan flags
+- first action pose pass for ground pickup, mounted pulling, and throw release
 
 Exit criteria:
 
@@ -158,7 +159,7 @@ Tasks:
 - add horse animations: idle, trot, gallop, turn, stop
 - blend animations based on speed and turning
 - add rider lean while turning and sprinting
-- add pickup animation or visual pose for carrying serke
+- add pickup animation or visual pose for carrying serke (first pose pass done)
 - add collision reactions between riders
 - add better ball/serke attachment and dropping
 - evaluate physics libraries for browser prototype

@@ -75,6 +75,8 @@ const CAMERA_MODES = [
   { id: "chase", label: "Ближе" },
   { id: "broadcast", label: "ТВ" }
 ];
+const PICKUP_POSE_DECAY = 2.4;
+const PULL_POSE_DECAY = 2.8;
 const THROW_READY_EXTRA_RADIUS = 8.5;
 const THROW_HINT_EXTRA_RADIUS = 16;
 const THROW_MIN_SPEED = 12;
@@ -1131,6 +1133,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.impactReactionTime = 0;
       rider.impactLean = 0;
       rider.protectionCooldown = 0;
+      rider.pickupPose = 0;
+      rider.pullPose = 0;
       rider.throwPose = 0;
       rider.tugEffort = 0;
       rider.rotation = Math.atan2(KOKPAR_START.z - rider.z, KOKPAR_START.x - rider.x);
@@ -1173,6 +1177,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.impactReactionTime = 0;
     rider.impactLean = 0;
     rider.protectionCooldown = 0;
+    rider.pickupPose = 0;
+    rider.pullPose = 0;
     rider.throwPose = 0;
     rider.tugEffort = 0;
     rider.rotation = Math.atan2(target.z - rider.z, target.x - rider.x);
@@ -1358,6 +1364,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         START_LINE_Z + START_LANE_DEPTH
       );
       rider.throwPose = Math.max(0, (rider.throwPose ?? 0) - dt * 1.6);
+      updateRiderActionPoses(rider, dt);
       keepRiderOutsideKazanGoals(rider);
     });
     contactSystem.resolveRiderCollisions();
@@ -1496,7 +1503,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.vy = throwPlan.vy;
     kokpar.vz = throwPlan.vz;
     kokpar.looseCooldown = 0.52;
-    rider.throwPose = Math.max(rider.throwPose ?? 0, 1.1);
+    rider.throwPose = Math.max(rider.throwPose ?? 0, 1.25);
+    rider.pullPose = Math.max(rider.pullPose ?? 0, 0.36);
     rider.throwCooldown = 0.8;
     rider.grabCooldown = Math.max(rider.grabCooldown, 0.35);
     clearContest();
@@ -2051,7 +2059,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
         rider.tugEffort = Math.max(0, (rider.tugEffort ?? 0) - dt * MOUNTED_TUG_FADE_RATE);
         rider.stamina = clamp(rider.stamina + dt * MOUNTED_TUG_STAMINA_RECOVERY, 0, 1);
       }
+
+      rider.pullPose = Math.max(rider.pullPose ?? 0, 0.45 + (rider.tugEffort ?? 0) * 0.44);
     });
+  }
+
+  function updateRiderActionPoses(rider, dt) {
+    rider.pickupPose = Math.max(0, (rider.pickupPose ?? 0) - dt * PICKUP_POSE_DECAY);
+    rider.pullPose = Math.max(0, (rider.pullPose ?? 0) - dt * PULL_POSE_DECAY);
   }
 
   function takeKokpar(rider, options = {}) {
@@ -2070,6 +2085,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.vy = 0;
     resetThrowCharge();
     rider.grabCooldown = active ? 0.22 : 0.48;
+    if (mounted || stolen) {
+      rider.pullPose = Math.max(rider.pullPose ?? 0, 1.14);
+      rider.pickupPose = Math.max(rider.pickupPose ?? 0, 0.22);
+    } else {
+      rider.pickupPose = Math.max(rider.pickupPose ?? 0, contested ? 1.18 : 1.08);
+    }
     feedback.pickup(rider.team, stolen || contested);
 
     showMessage(
@@ -2341,6 +2362,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
       updateRiderThrowPose(rider, dt);
+      updateRiderActionPoses(rider, dt);
 
       const isWaitingDuringDuel = match.duelMode && !kokpar.holder && !match.duelRiders.has(rider);
 
@@ -2396,6 +2418,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
       contactSystem.updateRiderContactState(rider, dt);
       rider.staggerTime = Math.max(0, rider.staggerTime - dt);
       rider.hitFlash = Math.max(0, rider.hitFlash - dt * 2.8);
+      updateRiderThrowPose(rider, dt);
+      updateRiderActionPoses(rider, dt);
 
       if (rider.human) {
         updateHuman(rider, dt);
@@ -2733,8 +2757,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const upperBody = rider.group.userData.upperBody ?? [];
       const dust = rider.group.userData.dust;
       const inContest = contestParticipants.has(rider);
-      const pickupPose = inContest && kokpar.contest.active && !mountedContest ? 1 : 0;
+      const reachSide = rider.team === TEAM.blue ? -1 : 1;
+      const pickupPose = clamp(
+        Math.max(rider.pickupPose ?? 0, inContest && kokpar.contest.active && !mountedContest ? 1 : 0),
+        0,
+        1.2
+      );
       const tugPose = inContest && mountedContest ? 1 : 0;
+      const pullPose = clamp(Math.max(rider.pullPose ?? 0, tugPose * (0.72 + (rider.tugEffort ?? 0) * 0.32)), 0, 1.25);
       const throwPose = rider.throwPose ?? 0;
       const throwSide = rider.team === TEAM.blue ? -1 : 1;
       const throwAimLean = kokpar.throwCharging && kokpar.holder === rider
@@ -2744,7 +2774,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
       rider.group.rotation.y = -rider.rotation;
-      rider.group.rotation.z = (rider.lean ?? 0) + hitLean - bodyCheckPose * 0.09 + contactLean;
+      rider.group.rotation.z =
+        (rider.lean ?? 0) +
+        hitLean -
+        bodyCheckPose * 0.09 +
+        contactLean +
+        reachSide * pickupPose * 0.11 -
+        reachSide * pullPose * 0.08;
       rider.group.scale.setScalar(scale);
 
       legs.forEach((leg) => {
@@ -2778,18 +2814,19 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
         part.mesh.rotation.x =
           part.baseRotationX -
-          pickupPose * (0.2 + posePower * 0.04) -
-          tugPose * 0.06 -
+          pickupPose * (0.34 + posePower * 0.06) -
+          pullPose * 0.12 -
           bodyCheckPose * 0.14 -
           bodyCheckRecoveryPose * 0.08 -
           throwPose * 0.1;
         part.mesh.rotation.z =
           part.baseRotationZ +
-          tugPose * tugDirection * 0.08 +
+          reachSide * pickupPose * 0.1 +
+          pullPose * tugDirection * 0.12 +
           bodyCheckPose * 0.08 +
           bodyCheckRecoveryPose * 0.06 +
           throwPose * (throwSide * 0.1 + throwAimLean * 0.08);
-        part.mesh.position.y = part.baseY - pickupPose * 0.1 + throwPose * 0.03;
+        part.mesh.position.y = part.baseY - pickupPose * 0.2 - pullPose * 0.03 + throwPose * 0.03;
       });
 
       arms.forEach((arm) => {
@@ -2800,21 +2837,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
             ? -0.35
             : 0;
         const isThrowingArm = arm.side === throwSide;
+        const isReachArm = arm.side === reachSide;
 
         arm.mesh.rotation.z =
           arm.baseRotationZ +
-          pickupPose * (0.45 + posePower * 0.14) +
-          tugPose * (0.22 + posePower * 0.12) +
+          pickupPose * (isReachArm ? 0.78 + posePower * 0.18 : 0.22) +
+          pullPose * (isReachArm ? 0.56 + posePower * 0.12 : 0.24) +
           bodyCheckPose * 0.24 +
           bodyCheckRecoveryPose * 0.12 +
-          throwPose * (isThrowingArm ? 0.78 : 0.24);
+          throwPose * (isThrowingArm ? 0.92 : 0.2);
         arm.mesh.rotation.x =
           arm.baseRotationX +
-          arm.side * pickupPose * 0.3 +
-          arm.side * tugPose * tugDirection * 0.34 +
+          arm.side * pickupPose * (isReachArm ? 0.52 : 0.18) +
+          arm.side * pullPose * tugDirection * 0.42 +
           arm.side * bodyCheckPose * 0.18 +
-          throwPose * (isThrowingArm ? -throwSide * 0.42 + throwAimLean * 0.16 : arm.side * 0.12);
-        arm.mesh.position.y = arm.baseY - pickupPose * 0.12 + throwPose * (isThrowingArm ? 0.15 : 0.02);
+          throwPose * (isThrowingArm ? -throwSide * 0.5 + throwAimLean * 0.16 : arm.side * 0.1);
+        arm.mesh.position.y =
+          arm.baseY -
+          pickupPose * (isReachArm ? 0.28 : 0.08) -
+          pullPose * 0.04 +
+          throwPose * (isThrowingArm ? 0.18 : 0.02);
       });
 
       if (dust) {

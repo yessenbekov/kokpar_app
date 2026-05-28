@@ -21,6 +21,8 @@ export function createRider(config) {
     staggerTime: 0,
     hitFlash: 0,
     lean: 0,
+    pickupPose: 0,
+    pullPose: 0,
     throwPose: 0,
     tugEffort: 0,
     aiRole: "idle",
