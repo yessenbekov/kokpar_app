@@ -21,6 +21,10 @@ export function createRider(config) {
     staggerTime: 0,
     hitFlash: 0,
     lean: 0,
+    gaitPhase: Math.random() * Math.PI * 2,
+    lastSpeed: 0,
+    stopPose: 0,
+    turnPose: 0,
     pickupPose: 0,
     pullPose: 0,
     throwPose: 0,
@@ -82,11 +86,19 @@ export function createHorseMesh(color, team) {
   body.position.y = 1.2;
   body.rotation.z = Math.PI / 2;
   group.add(body);
+  group.userData.body = body;
+  group.userData.bodyBaseY = body.position.y;
+  group.userData.bodyBaseRotationX = body.rotation.x;
+  group.userData.bodyBaseRotationZ = body.rotation.z;
 
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.58, 18, 12), darkMaterial);
   head.scale.set(1.15, 0.78, 0.85);
   head.position.set(2.55, 1.45, -0.05);
   group.add(head);
+  group.userData.head = head;
+  group.userData.headBaseY = head.position.y;
+  group.userData.headBaseRotationX = head.rotation.x;
+  group.userData.headBaseRotationZ = head.rotation.z;
 
   const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.25, 14, 10), muzzleMaterial);
   muzzle.scale.set(1.15, 0.7, 0.8);
@@ -127,6 +139,8 @@ export function createHorseMesh(color, team) {
       legs.push({
         mesh: leg,
         wrap: legWrap,
+        baseX: x,
+        baseZ: z,
         baseY: leg.position.y,
         baseWrapY: legWrap.position.y,
         baseRotationX: leg.rotation.x,

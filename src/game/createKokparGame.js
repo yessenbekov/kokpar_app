@@ -75,6 +75,8 @@ const CAMERA_MODES = [
   { id: "chase", label: "Ближе" },
   { id: "broadcast", label: "ТВ" }
 ];
+const GAIT_PHASE_MIN_RATE = 1.55;
+const GAIT_PHASE_SPEED_RATE = 0.62;
 const PICKUP_POSE_DECAY = 2.4;
 const PULL_POSE_DECAY = 2.8;
 const THROW_READY_EXTRA_RADIUS = 8.5;
@@ -1126,6 +1128,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.staggerTime = 0;
       rider.hitFlash = 0;
       rider.throwCooldown = 0;
+      rider.gaitPhase = rider.aiPhase;
+      rider.lastSpeed = 0;
+      rider.stopPose = 0;
+      rider.turnPose = 0;
       rider.bodyCheckWindup = 0;
       rider.bodyCheckTime = 0;
       rider.bodyCheckCooldown = 0;
@@ -1170,6 +1176,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     rider.staggerTime = 0;
     rider.hitFlash = 0;
     rider.throwCooldown = 0;
+    rider.gaitPhase = rider.aiPhase;
+    rider.lastSpeed = 0;
+    rider.stopPose = 0;
+    rider.turnPose = 0;
     rider.bodyCheckWindup = 0;
     rider.bodyCheckTime = 0;
     rider.bodyCheckCooldown = 0;
@@ -1366,6 +1376,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.throwPose = Math.max(0, (rider.throwPose ?? 0) - dt * 1.6);
       updateRiderActionPoses(rider, dt);
       keepRiderOutsideKazanGoals(rider);
+      updateRiderGaitState(rider, dt);
     });
     contactSystem.resolveRiderCollisions();
 
@@ -1926,10 +1937,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const turnStep = rider.turnRate * turnSlowdown * pivotBoost * urgencyBoost * dt;
       const turn = clamp(rotationDelta, -turnStep, turnStep);
       rider.rotation += turn;
+      rider.turnPose = Math.max(
+        rider.turnPose ?? 0,
+        sharpTurnAssist * clamp(0.25 + speedRatio * 0.9, 0, 1)
+      );
 
       const targetLean = clamp(-turn / Math.max(dt, 0.001) * 0.06, -0.22, 0.22);
       rider.lean += (targetLean - rider.lean) * clamp(dt * 8, 0, 1);
     } else {
+      if (speed > 3.2) {
+        rider.stopPose = Math.max(rider.stopPose ?? 0, clamp(speed / (rider.maxSpeed * 0.85), 0, 1) * 0.82);
+      }
       rider.lean += (0 - rider.lean) * clamp(dt * 6, 0, 1);
     }
 
@@ -2067,6 +2085,19 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function updateRiderActionPoses(rider, dt) {
     rider.pickupPose = Math.max(0, (rider.pickupPose ?? 0) - dt * PICKUP_POSE_DECAY);
     rider.pullPose = Math.max(0, (rider.pullPose ?? 0) - dt * PULL_POSE_DECAY);
+  }
+
+  function updateRiderGaitState(rider, dt) {
+    const speed = Math.hypot(rider.vx, rider.vz);
+    const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1.3);
+    const previousSpeed = rider.lastSpeed ?? speed;
+    const brakingRate = Math.max(0, previousSpeed - speed) / Math.max(dt, 0.001);
+    const brakingPose = previousSpeed > 4.2 ? clamp((brakingRate - 3.5) / 20, 0, 1) : 0;
+
+    rider.gaitPhase = (rider.gaitPhase ?? rider.aiPhase) + dt * (GAIT_PHASE_MIN_RATE + speed * GAIT_PHASE_SPEED_RATE);
+    rider.stopPose = Math.max(0, Math.max(rider.stopPose ?? 0, brakingPose) - dt * (1.6 + speedRatio * 0.8));
+    rider.turnPose = Math.max(0, (rider.turnPose ?? 0) - dt * 2.35);
+    rider.lastSpeed = speed;
   }
 
   function takeKokpar(rider, options = {}) {
@@ -2405,6 +2436,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       );
       keepRiderOutsideCenterDuel(rider);
       keepRiderOutsideKazanGoals(rider);
+      updateRiderGaitState(rider, dt);
     });
   }
 
@@ -2443,6 +2475,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.x += rider.vx * dt;
       rider.z += rider.vz * dt;
       keepRiderInStartLane(rider);
+      updateRiderGaitState(rider, dt);
     });
   }
 
@@ -2743,15 +2776,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
     riders.forEach((rider) => {
       const speed = Math.hypot(rider.vx, rider.vz);
       const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
-      const bob = Math.sin(time * 11 + rider.aiPhase) * Math.min(speed / 120, 0.18);
+      const gaitPhase = rider.gaitPhase ?? time * (GAIT_PHASE_MIN_RATE + speed * GAIT_PHASE_SPEED_RATE);
+      const idleBlend = clamp(1 - speedRatio / 0.16, 0, 1);
+      const trotBlend = clamp(1 - Math.abs(speedRatio - 0.42) / 0.34, 0, 1);
+      const gallopBlend = clamp((speedRatio - 0.46) / 0.46, 0, 1);
+      const stopPose = clamp(rider.stopPose ?? 0, 0, 1);
+      const turnPose = clamp(rider.turnPose ?? 0, 0, 1);
+      const idleBreath = Math.sin(time * 2.2 + rider.aiPhase) * idleBlend;
+      const gaitBounce =
+        Math.max(0, Math.sin(gaitPhase * 2)) * (0.03 + trotBlend * 0.07 + gallopBlend * 0.13);
+      const bob = idleBreath * 0.026 + gaitBounce - stopPose * 0.035;
       const bodyCheckState = contactSystem.bodyCheckPose(rider);
       const bodyCheckPose = Math.max(bodyCheckState.drive, bodyCheckState.windup * 0.7);
       const bodyCheckRecoveryPose = Math.max(bodyCheckState.recovery, bodyCheckState.impact);
       const scale = (rider.bumpCooldown > 0 ? 1.08 : 1) + rider.hitFlash * 0.04 + bodyCheckState.impact * 0.025;
       const hitLean = rider.hitFlash > 0 ? Math.sin(time * 36 + rider.aiPhase) * rider.hitFlash * 0.1 : 0;
       const contactLean = (rider.impactLean ?? 0) * bodyCheckState.impact * 0.2;
-      const stride = time * (5.3 + speed * 0.52) + rider.aiPhase;
+      const stride = gaitPhase + rider.aiPhase * 0.12;
       const legs = rider.group.userData.legs ?? [];
+      const horseBody = rider.group.userData.body;
+      const horseHead = rider.group.userData.head;
       const tail = rider.group.userData.tail;
       const arms = rider.group.userData.arms ?? [];
       const upperBody = rider.group.userData.upperBody ?? [];
@@ -2779,29 +2823,76 @@ export function createKokparGame(container, onHudChange, options = {}) {
         hitLean -
         bodyCheckPose * 0.09 +
         contactLean +
+        turnPose * Math.sign(rider.lean || reachSide) * 0.08 +
         reachSide * pickupPose * 0.11 -
         reachSide * pullPose * 0.08;
       rider.group.scale.setScalar(scale);
 
+      if (horseBody) {
+        horseBody.position.y =
+          (rider.group.userData.bodyBaseY ?? horseBody.position.y) +
+          idleBreath * 0.025 +
+          gallopBlend * Math.sin(gaitPhase * 2.05) * 0.055 -
+          stopPose * 0.04;
+        horseBody.rotation.x =
+          (rider.group.userData.bodyBaseRotationX ?? 0) +
+          gallopBlend * Math.sin(gaitPhase * 2.05 + 0.4) * 0.035 -
+          stopPose * 0.055;
+        horseBody.rotation.z =
+          (rider.group.userData.bodyBaseRotationZ ?? horseBody.rotation.z) +
+          turnPose * Math.sign(rider.lean || 1) * 0.045;
+      }
+
+      if (horseHead) {
+        horseHead.position.y =
+          (rider.group.userData.headBaseY ?? horseHead.position.y) +
+          idleBreath * 0.035 +
+          speedRatio * Math.sin(gaitPhase * 1.8 + 0.35) * 0.055 -
+          stopPose * 0.04;
+        horseHead.rotation.x =
+          (rider.group.userData.headBaseRotationX ?? 0) -
+          stopPose * 0.14 +
+          speedRatio * Math.sin(gaitPhase * 1.4) * 0.055;
+        horseHead.rotation.z =
+          (rider.group.userData.headBaseRotationZ ?? 0) +
+          turnPose * Math.sign(rider.lean || 1) * 0.08;
+      }
+
       legs.forEach((leg) => {
         const phase = stride + leg.phase;
-        const swing = Math.sin(phase) * speedRatio;
-        const lift = Math.max(0, Math.cos(phase)) * speedRatio;
+        const isFront = (leg.baseX ?? 0) > 0;
+        const isLeft = (leg.baseZ ?? 0) > 0;
+        const walkSwing = Math.sin(phase * 0.85) * clamp(speedRatio * 2.6, 0, 0.34);
+        const trotSwing = Math.sin(phase * 1.08) * trotBlend * 0.36;
+        const gallopSwing = Math.sin(phase * 1.38 + (isFront ? 0.35 : -0.2)) * gallopBlend * 0.58;
+        const swing = walkSwing + trotSwing + gallopSwing;
+        const lift =
+          Math.max(0, Math.cos(phase)) * clamp(speedRatio * 1.1, 0, 0.44) +
+          Math.max(0, Math.sin(phase * 1.38 + (isFront ? 0.5 : -0.4))) * gallopBlend * 0.2;
+        const stopBrace = stopPose * (isFront ? -0.28 : 0.18);
+        const turnBrace = turnPose * (isLeft ? -0.12 : 0.12);
 
-        leg.mesh.rotation.z = leg.baseRotationZ + swing * (0.2 + speedRatio * 0.2);
-        leg.mesh.rotation.x = leg.baseRotationX + Math.sin(phase + 0.45) * speedRatio * 0.08;
-        leg.mesh.position.y = leg.baseY + lift * 0.12;
+        leg.mesh.rotation.z = leg.baseRotationZ + swing + stopBrace + turnBrace;
+        leg.mesh.rotation.x =
+          leg.baseRotationX +
+          Math.sin(phase + 0.45) * (0.03 + speedRatio * 0.09) +
+          gallopBlend * Math.sin(phase * 1.2) * 0.08;
+        leg.mesh.position.y = leg.baseY + lift * 0.16 - stopPose * (isFront ? 0.04 : 0);
 
         if (leg.wrap) {
           leg.wrap.rotation.z = leg.mesh.rotation.z;
           leg.wrap.rotation.x = leg.mesh.rotation.x;
-          leg.wrap.position.y = leg.baseWrapY + lift * 0.08;
+          leg.wrap.position.y = leg.baseWrapY + lift * 0.11 - stopPose * (isFront ? 0.025 : 0);
         }
       });
 
       if (tail) {
-        tail.rotation.x = rider.group.userData.tailBaseRotationX + Math.sin(time * 5.4 + rider.aiPhase) * speedRatio * 0.06;
-        tail.rotation.z = rider.group.userData.tailBaseRotationZ + speedRatio * 0.12;
+        tail.rotation.x =
+          rider.group.userData.tailBaseRotationX +
+          Math.sin(time * 2.6 + rider.aiPhase) * idleBlend * 0.035 +
+          Math.sin(gaitPhase * 0.9) * speedRatio * 0.075 -
+          stopPose * 0.04;
+        tail.rotation.z = rider.group.userData.tailBaseRotationZ + speedRatio * 0.16 + turnPose * 0.08;
       }
 
       upperBody.forEach((part) => {
@@ -2865,7 +2956,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
             Math.abs(rider.lean ?? 0) * 1.35 +
             rider.hitFlash * 0.5 +
             bodyCheckPose * 0.35 +
-            bodyCheckRecoveryPose * 0.12,
+            bodyCheckRecoveryPose * 0.12 +
+            stopPose * 0.34 +
+            turnPose * 0.24,
           0,
           1
         );

@@ -268,6 +268,8 @@ function hydrateRiderModelControls(root) {
       return {
         mesh: node,
         wrap,
+        baseX: node.position.x,
+        baseZ: node.position.z,
         baseY: node.position.y,
         baseWrapY: wrap?.position.y ?? 0,
         baseRotationX: node.rotation.x,

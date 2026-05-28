@@ -71,6 +71,7 @@ Already done:
 - closer third-person gameplay camera inspired by the kok-boru prototype reference
 - stadium presentation pass with in-arena scoreboard and Kazakhstan flags
 - first action pose pass for ground pickup, mounted pulling, and throw release
+- first locomotion pass for idle, trot, gallop, turning, and braking poses
 
 Exit criteria:
 
@@ -156,8 +157,8 @@ Purpose: make movement believable.
 
 Tasks:
 
-- add horse animations: idle, trot, gallop, turn, stop
-- blend animations based on speed and turning
+- add horse animations: idle, trot, gallop, turn, stop (first procedural pass done)
+- blend animations based on speed and turning (first procedural pass done)
 - add rider lean while turning and sprinting
 - add pickup animation or visual pose for carrying serke (first pose pass done)
 - add collision reactions between riders
