@@ -2,6 +2,8 @@
 
 3D browser prototype of kokpar built with React, Vite, and Three.js.
 
+Long-term direction: grow this from one playable match into a horse-based team sports game with a stable/garage, selectable horses, tack and rider customization, multiple kokpar/kok-boru modes, tournaments, and eventually online team play.
+
 ## Run locally
 
 ```bash
@@ -82,6 +84,9 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 
 - Continue splitting the match runtime into arena, rules, AI, and camera systems
 - Add real horse animation blending and production sound
+- Add horse selection with different speed, stamina, strength, and turning profiles
+- Add a stable/garage screen for horses, accessories, and rider kit
+- Add mode selection for kokpar, kok-boru, wild kokpar, training, and tournament
 - Add team selection and richer match settings
 - Replace starter low-poly GLB files with production horse/rider/serke assets
 - Add tournament mode and persistent scores

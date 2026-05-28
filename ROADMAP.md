@@ -1,16 +1,27 @@
 # Kokpar Game Roadmap
 
-Goal: build a kokpar game that can grow from a playable prototype into a high-fidelity sports simulator with modern 3D presentation.
+Goal: build a kokpar game that can grow from a playable prototype into a high-fidelity horse-based team sports game with modern 3D presentation, long-term progression, multiple modes, and a stable of collectible horses.
 
 ## North Star
 
-The target is not just "a browser toy." The long-term target is a sports game feeling closer to a premium football/horse-riding simulator:
+The target is not just "a browser toy." The long-term target is a horse-based team action/sports game with the strategic structure of a vehicle-combat game: players build a stable, own different horses, customize tack and rider gear, and queue into different kokpar/kok-boru modes.
+
+The match should feel closer to a premium football/horse-riding simulator:
 
 - believable horses, riders, speed, weight, and collisions
 - readable kokpar rules and match flow
 - cinematic but playable camera
 - realistic arena, dust, lighting, crowds, sound, and presentation
 - real 3D assets, animations, and eventually a stronger engine if needed
+
+The meta-game should grow toward:
+
+- stable/garage screen where each horse has stats, handling, stamina, strength, and personality
+- horse classes and roles: fast runner, heavy defender, balanced all-rounder, endurance horse
+- progression through horse upgrades, rider equipment, saddles, bridles, blankets, colors, and accessories
+- cosmetic identity: national/team uniforms, horse coats, tack, numbers, badges, and arena banners
+- multiple modes: arena kokpar, kok-boru with raised kazans, wild kokpar, training, tournament, and later online team play
+- regional authenticity first, monetization second: cultural respect and gameplay clarity must drive the design
 
 Primary gameplay references are tracked in `REFERENCES.md`.
 
@@ -241,11 +252,49 @@ Exit criteria:
 - adding a new horse, uniform, arena, or animation follows a repeatable process
 - project can scale beyond one developer session
 
+## Phase 8: Meta-Game And Modes
+
+Purpose: turn the match prototype into a game people can keep playing.
+
+Product direction:
+
+- a player starts with a basic horse and rider kit
+- the main menu becomes a stable/garage, not a static setup screen
+- horses are selectable objects with stats and visual identity
+- equipment and accessories affect either cosmetics only or carefully tuned gameplay stats
+- match modes become queues, similar to a battle selection screen
+
+Candidate modes:
+
+- Kokpar: current arena rule set with selectable goal type
+- Kok-boru: raised kazan-focused rule set
+- Wild kokpar: more chaotic open-field mode with fewer formal restrictions
+- Training: free ride, pickup, throw, and body-check practice
+- Tournament: offline bracket/league against AI teams
+- Online team mode: long-term goal after core gameplay is proven
+
+Systems needed:
+
+- horse roster data model
+- horse stats: speed, acceleration, turn, stamina, strength, recovery, temperament
+- equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet
+- unlock/progression model
+- mode selection menu
+- saved player profile
+- balance rules so upgrades create variety without pay-to-win feeling
+
+Exit criteria:
+
+- player can choose at least two horses with different handling
+- player can enter at least two modes from a menu
+- selected horse and kit appear in the match
+- progression direction is documented before any real-money monetization is considered
+
 ## Immediate Next Steps
 
-Step 1: continue modularizing the prototype runtime into arena, rules, AI, and camera systems without changing gameplay.
+Step 1: keep improving the match prototype until one 2-minute kokpar round feels fun and understandable.
 
-Step 2: tune gameplay feel and clarity after each extracted system is stable.
+Step 2: start separating long-term game concepts from match runtime: horse stats, team selection, mode selection, and stable data.
 
 Step 3: begin the production horse/rider animation and asset pass on the cleaner runtime.
 
