@@ -129,6 +129,10 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.choice-grid.horse-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .choice {
   min-height: 58px;
   padding: 10px 12px;
@@ -170,6 +174,22 @@ button {
   margin-top: 4px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.horse-choice i {
+  display: grid;
+  gap: 4px;
+  margin-top: 9px;
+  font-style: normal;
+}
+
+.horse-choice b {
+  display: block;
+  width: var(--value);
+  height: 5px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #176d9f, #d9a12e);
+  opacity: 0.86;
 }
 
 .start-button {
@@ -787,7 +807,8 @@ button {
   }
 
   .choice-grid.two,
-  .choice-grid.three {
+  .choice-grid.three,
+  .choice-grid.horse-grid {
     grid-template-columns: 1fr;
   }
 
@@ -929,6 +950,10 @@ button {
   }
 
   .choice-grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .choice-grid.horse-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

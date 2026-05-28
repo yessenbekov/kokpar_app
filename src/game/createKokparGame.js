@@ -7,6 +7,7 @@ import {
   createContactSystem
 } from "./contactSystem.js";
 import { createMatchFeedback } from "./feedback.js";
+import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "./horseTypes.js";
 import {
   createContestIndicatorMesh,
   createGoalMesh,
@@ -142,8 +143,9 @@ const STARTING_RIDER_SPOTS = [
 
 const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", "Аян"];
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
+const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID) {
   const riders = [];
   const size = clamp(Math.round(teamSize), 1, 5);
 
@@ -158,7 +160,8 @@ function createInitialRiders(teamSize) {
         human: i === 0,
         x: blueSpot[0],
         z: blueSpot[1],
-        color: i === 0 ? COLORS.blue : COLORS.blueAlt
+        color: i === 0 ? COLORS.blue : COLORS.blueAlt,
+        horseType: i === 0 ? playerHorseType : AI_HORSE_ROTATION[i]
       })
     );
 
@@ -168,7 +171,8 @@ function createInitialRiders(teamSize) {
         team: TEAM.red,
         x: redSpot[0],
         z: redSpot[1],
-        color: COLORS.red
+        color: COLORS.red,
+        horseType: AI_HORSE_ROTATION[(i + 1) % AI_HORSE_ROTATION.length]
       })
     );
   }
@@ -589,8 +593,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const gameSettings = {
     goalType: options.goalType === "kazan" ? "kazan" : "circle",
     teamSize: clamp(Math.round(Number(options.teamSize) || 3), 1, 5),
-    matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60)
+    matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60),
+    horseType: horseTypeById(options.horseType).id
   };
+  const playerHorseType = horseTypeById(gameSettings.horseType);
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
   const assetPipeline = createGameAssetPipeline();
   const feedback = createMatchFeedback(options.feedbackEnabled !== false);
@@ -639,7 +645,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders(gameSettings.teamSize);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType);
   const player = riders[0];
 
   function setRiderGroup(rider, nextGroup) {
@@ -653,7 +659,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   riders.forEach((rider) => {
-    setRiderGroup(rider, createHorseMesh(rider.color, rider.team));
+    setRiderGroup(rider, createHorseMesh(rider.color, rider.team, rider.horseType));
     rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.contestMarker);
     rider.roleMarker = createRiderRoleMarker();
@@ -993,6 +999,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         player.stamina >= 0.2 &&
         kokpar.holder !== player,
       cameraMode: currentCameraMode().label,
+      horseName: playerHorseType.name,
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
@@ -1955,7 +1962,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const side = { x: -forward.z, z: forward.x };
     const forwardSpeed = rider.vx * forward.x + rider.vz * forward.z;
     const sideSpeed = rider.vx * side.x + rider.vz * side.z;
-    const carrySlowdown = kokpar.holder === rider ? 0.88 : 1;
+    const carrySlowdown = kokpar.holder === rider ? rider.carrySpeedMultiplier ?? 0.88 : 1;
     const sprintBoost = sprint ? 1.06 : 1;
     const turnSpeedPenalty = 1 - sharpTurnAssist * (0.26 + speedRatio * 0.16);
     const targetSpeed = hasDirection
@@ -2045,7 +2052,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
             : 1
         : 1;
 
-    return distancePower * speedPower * staminaPower * intentPower * tugPower * rolePower * bumpPower * mountedPower;
+    return (
+      distancePower *
+      speedPower *
+      staminaPower *
+      intentPower *
+      tugPower *
+      rolePower *
+      bumpPower *
+      mountedPower *
+      (rider.contestPowerMultiplier ?? 1)
+    );
   }
 
   function contestPowerForTeam(team, candidates) {
@@ -2071,11 +2088,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const canPull = actionHeldForRider(rider) && rider.stamina > MOUNTED_TUG_MIN_STAMINA;
       if (canPull) {
         rider.tugEffort = clamp((rider.tugEffort ?? 0) + dt * MOUNTED_TUG_BUILD_RATE, 0, 1);
-        rider.stamina = clamp(rider.stamina - dt * MOUNTED_TUG_STAMINA_DRAIN, 0, 1);
+        rider.stamina = clamp(rider.stamina - dt * MOUNTED_TUG_STAMINA_DRAIN * (rider.staminaDrainMultiplier ?? 1), 0, 1);
         rider.hitFlash = Math.max(rider.hitFlash, 0.18 + (rider.tugEffort ?? 0) * 0.2);
       } else {
         rider.tugEffort = Math.max(0, (rider.tugEffort ?? 0) - dt * MOUNTED_TUG_FADE_RATE);
-        rider.stamina = clamp(rider.stamina + dt * MOUNTED_TUG_STAMINA_RECOVERY, 0, 1);
+        rider.stamina = clamp(rider.stamina + dt * MOUNTED_TUG_STAMINA_RECOVERY * (rider.staminaRecoveryMultiplier ?? 1), 0, 1);
       }
 
       rider.pullPose = Math.max(rider.pullPose ?? 0, 0.45 + (rider.tugEffort ?? 0) * 0.44);
@@ -2321,11 +2338,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
 
     if (sprint && moving) {
-      rider.stamina = clamp(rider.stamina - dt * 0.36, 0, 1);
+      rider.stamina = clamp(rider.stamina - dt * 0.36 * (rider.staminaDrainMultiplier ?? 1), 0, 1);
     } else if (moving) {
-      rider.stamina = clamp(rider.stamina + dt * 0.12, 0, 1);
+      rider.stamina = clamp(rider.stamina + dt * 0.12 * (rider.staminaRecoveryMultiplier ?? 1), 0, 1);
     } else {
-      rider.stamina = clamp(rider.stamina + dt * 0.22, 0, 1);
+      rider.stamina = clamp(rider.stamina + dt * 0.22 * (rider.staminaRecoveryMultiplier ?? 1), 0, 1);
     }
 
     if (actionHeld && !bodyChecking && !recovering) attemptGrab(rider, true);
@@ -2417,7 +2434,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
         : rider.bodyCheckRecovery > 0
           ? 0.78
           : 1;
-      const maxSpeed = rider.maxSpeed * (kokpar.holder === rider ? 0.88 : 1.04) * (inMountedContest ? 0.72 : 1) * checkSpeedFactor;
+      const heldSpeedFactor = kokpar.holder === rider ? rider.carrySpeedMultiplier ?? 0.88 : 1.04;
+      const maxSpeed = rider.maxSpeed * heldSpeedFactor * (inMountedContest ? 0.72 : 1) * checkSpeedFactor;
       const speed = Math.hypot(rider.vx, rider.vz);
 
       if (speed > maxSpeed) {

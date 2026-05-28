@@ -1,4 +1,5 @@
-import { CircleDot, Clock3, Play, Trophy, Users } from "lucide-react";
+import { CircleDot, Clock3, Gauge, Play, Trophy, Users } from "lucide-react";
+import { HORSE_TYPES } from "../game/horseTypes.js";
 
 export function MatchSetup({ settings, onSettingChange, onStart }) {
   return (
@@ -34,6 +35,31 @@ export function MatchSetup({ settings, onSettingChange, onStart }) {
               <strong>Казан</strong>
               <span>С бортом</span>
             </button>
+          </div>
+        </div>
+
+        <div className="setting-group" aria-label="Лошадь">
+          <div className="setting-title">
+            <Gauge size={17} strokeWidth={2.4} />
+            <span>Лошадь</span>
+          </div>
+          <div className="choice-grid horse-grid">
+            {HORSE_TYPES.map((horse) => (
+              <button
+                className={settings.horseType === horse.id ? "choice horse-choice active" : "choice horse-choice"}
+                type="button"
+                key={horse.id}
+                onClick={() => onSettingChange("horseType", horse.id)}
+              >
+                <strong>{horse.name}</strong>
+                <span>{horse.role}</span>
+                <i>
+                  <b style={{ "--value": `${Math.round(horse.stats.speed * 72)}%` }} />
+                  <b style={{ "--value": `${Math.round(horse.stats.turn * 72)}%` }} />
+                  <b style={{ "--value": `${Math.round(horse.stats.contestPower * 72)}%` }} />
+                </i>
+              </button>
+            ))}
           </div>
         </div>
 

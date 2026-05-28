@@ -35,8 +35,11 @@ npm run generate:models
 Before a match, choose:
 
 - goal type: ground circle or raised kazan
+- horse type: Argymak, Zhuyrik, or Auyr At
 - team size: 3v3, 4v4, or 5v5
 - match time: 2, 3, or 5 minutes
+
+The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.

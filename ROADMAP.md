@@ -83,6 +83,7 @@ Already done:
 - stadium presentation pass with in-arena scoreboard and Kazakhstan flags
 - first action pose pass for ground pickup, mounted pulling, and throw release
 - first locomotion pass for idle, trot, gallop, turning, and braking poses
+- first horse class pass with selectable Argymak, Zhuyrik, and Auyr At handling profiles
 
 Exit criteria:
 
@@ -275,8 +276,8 @@ Candidate modes:
 
 Systems needed:
 
-- horse roster data model
-- horse stats: speed, acceleration, turn, stamina, strength, recovery, temperament
+- horse roster data model (first three selectable classes done in prototype)
+- horse stats: speed, acceleration, turn, stamina, strength, recovery, temperament (first gameplay stats done)
 - equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet
 - unlock/progression model
 - mode selection menu

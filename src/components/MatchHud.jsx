@@ -28,7 +28,7 @@ export function MatchHud({
       </div>
 
       <div className="panel right">
-        <p className="label">Конь</p>
+        <p className="label">Конь · {hud.horseName}</p>
         <p className="status">{hud.carry}</p>
         <div className="horse-status">
           <div

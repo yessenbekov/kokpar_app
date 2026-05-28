@@ -75,7 +75,10 @@ export function createContactSystem({
   function launchBodyCheck(rider) {
     const forward = forwardVector(rider);
     const speed = Math.hypot(rider.vx, rider.vz);
-    const lunge = BODY_CHECK_LUNGE_SPEED * (0.76 + clamp(speed / rider.maxSpeed, 0, 1) * 0.24);
+    const lunge =
+      BODY_CHECK_LUNGE_SPEED *
+      (rider.bodyCheckLungeMultiplier ?? 1) *
+      (0.76 + clamp(speed / rider.maxSpeed, 0, 1) * 0.24);
 
     rider.bodyCheckTime = BODY_CHECK_WINDOW_SECONDS;
     rider.hitFlash = Math.max(rider.hitFlash, 0.28);
@@ -92,7 +95,7 @@ export function createContactSystem({
     rider.bodyCheckTime = 0;
     rider.bodyCheckCooldown = BODY_CHECK_COOLDOWN_SECONDS;
     rider.bodyCheckRecovery = 0;
-    rider.stamina = clamp(rider.stamina - BODY_CHECK_STAMINA_COST, 0, 1);
+    rider.stamina = clamp(rider.stamina - BODY_CHECK_STAMINA_COST * (rider.staminaDrainMultiplier ?? 1), 0, 1);
     feedback.bodyCheck();
 
     if (rider.human) {
@@ -194,19 +197,18 @@ export function createContactSystem({
     const staminaPower = 0.72 + tackler.stamina * 0.28;
     const activePower = active ? 1 : tackler.aiRole === "tackler" ? 0.9 : 0.74;
     const holderPenalty = holder.staggerTime > 0 ? 0.08 : 0;
-
-    return clamp(
+    const baseQuality =
       distancePower * 0.2 +
-        approach * 0.24 +
-        speedPower * 0.22 +
-        sideContact * 0.14 +
-        staminaPower * 0.1 +
-        activePower * 0.1 +
-        impactBonus +
-        holderPenalty,
-      0,
-      1
-    );
+      approach * 0.24 +
+      speedPower * 0.22 +
+      sideContact * 0.14 +
+      staminaPower * 0.1 +
+      activePower * 0.1 +
+      impactBonus +
+      holderPenalty;
+    const horsePower = (tackler.tacklePowerMultiplier ?? 1) / (holder.stabilityMultiplier ?? 1);
+
+    return clamp(baseQuality * horsePower, 0, 1);
   }
 
   function setImpactReaction(rider, lean) {
@@ -327,7 +329,7 @@ export function createContactSystem({
     const push = normalize2D(opponent.x - tackler.x, opponent.z - tackler.z);
     const tacklerSide = { x: -Math.sin(tackler.rotation), z: Math.cos(tackler.rotation) };
     const leanSign = Math.sign(push.x * tacklerSide.x + push.z * tacklerSide.z) || 1;
-    const impactPower = clamp(0.72 + relativeSpeed / 20, 0.72, 1.32);
+    const impactPower = clamp((0.72 + relativeSpeed / 20) * (tackler.bodyCheckPowerMultiplier ?? 1), 0.62, 1.46);
     const hitHolder = kokpar.holder === opponent;
 
     tackler.bodyCheckTime = 0;

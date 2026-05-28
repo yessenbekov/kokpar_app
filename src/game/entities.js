@@ -1,9 +1,20 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS, TEAM } from "./constants.js";
+import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "./horseTypes.js";
 
 export function createRider(config) {
+  const horseType = horseTypeById(config.horseType);
+  const stats = horseType.stats;
+  const baseMaxSpeed = config.human ? 19.5 : 18;
+  const baseAcceleration = config.human ? 27 : 24;
+  const baseBrakePower = config.human ? 44 : 38;
+  const baseTurnRate = config.human ? 4.15 : 3.25;
+  const baseLateralGrip = config.human ? 9.2 : 7.4;
+
   return {
     ...config,
+    horseType: horseType.id,
+    horseName: horseType.name,
     vx: 0,
     vz: 0,
     rotation: 0,
@@ -31,39 +42,34 @@ export function createRider(config) {
     tugEffort: 0,
     aiRole: "idle",
     aiPhase: Math.random() * Math.PI * 2,
-    maxSpeed: config.human ? 19.5 : 18,
-    acceleration: config.human ? 27 : 24,
-    brakePower: config.human ? 44 : 38,
-    turnRate: config.human ? 4.15 : 3.25,
-    lateralGrip: config.human ? 9.2 : 7.4,
+    maxSpeed: baseMaxSpeed * stats.speed,
+    acceleration: baseAcceleration * stats.acceleration,
+    brakePower: baseBrakePower * stats.brake,
+    turnRate: baseTurnRate * stats.turn,
+    lateralGrip: baseLateralGrip * stats.grip,
+    staminaDrainMultiplier: stats.staminaDrain,
+    staminaRecoveryMultiplier: stats.staminaRecovery,
+    carrySpeedMultiplier: stats.carrySpeed,
+    contestPowerMultiplier: stats.contestPower,
+    tacklePowerMultiplier: stats.tacklePower,
+    stabilityMultiplier: stats.stability,
+    bodyCheckPowerMultiplier: stats.bodyCheckPower,
+    bodyCheckLungeMultiplier: stats.bodyCheckLunge,
     group: null
   };
 }
 
-function horsePaletteFor(team) {
-  if (team === TEAM.red) {
-    return {
-      coat: "#4f2b1a",
-      dark: "#1d120d",
-      muzzle: "#7a4a2e",
-      marking: "#2a1810"
-    };
-  }
-
-  return {
-    coat: "#8a5c35",
-    dark: "#2d1b13",
-    muzzle: "#b87a45",
-    marking: "#ead7bd"
-  };
+function horsePaletteFor(team, horseTypeId = DEFAULT_HORSE_TYPE_ID) {
+  const horseType = horseTypeById(horseTypeId);
+  return horseType.palette[team === TEAM.red ? "red" : "blue"];
 }
 
-export function createHorseMesh(color, team) {
+export function createHorseMesh(color, team, horseTypeId) {
   const group = new THREE.Group();
   const legs = [];
   const arms = [];
   const upperBody = [];
-  const horsePalette = horsePaletteFor(team);
+  const horsePalette = horsePaletteFor(team, horseTypeId);
   const horseMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.coat, roughness: 0.78 });
   const darkMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.dark, roughness: 0.82 });
   const muzzleMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.muzzle, roughness: 0.84 });
