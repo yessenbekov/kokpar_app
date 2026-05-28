@@ -69,6 +69,12 @@ const START_LANE_FIELD_BUFFER = 0.8;
 const START_TEAM_BOUNDARY_GAP = 2.4;
 const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
+const CHASE_CAMERA_SIDE_OFFSET = 3.8;
+const CAMERA_MODES = [
+  { id: "chase", label: "Ближе" },
+  { id: "wide", label: "Обзор" },
+  { id: "broadcast", label: "ТВ" }
+];
 const THROW_READY_EXTRA_RADIUS = 8.5;
 const THROW_HINT_EXTRA_RADIUS = 16;
 const THROW_MIN_SPEED = 12;
@@ -260,11 +266,190 @@ function createGroundDetails(scene) {
   }
 }
 
+function createCanvasTexture(width, height, draw) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  draw(context, width, height);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+
+  return { canvas, context, texture, draw };
+}
+
+function createKazakhstanFlagTexture() {
+  return createCanvasTexture(768, 384, (context, width, height) => {
+    context.fillStyle = "#00a9c7";
+    context.fillRect(0, 0, width, height);
+
+    context.fillStyle = "#f2c84b";
+    context.strokeStyle = "#f2c84b";
+    context.lineWidth = 8;
+
+    const ornamentX = width * 0.12;
+    context.lineWidth = 6;
+    for (let i = 0; i < 5; i += 1) {
+      const y = height * 0.12 + i * height * 0.18;
+      context.beginPath();
+      context.moveTo(ornamentX - 28, y + 24);
+      context.quadraticCurveTo(ornamentX + 22, y - 16, ornamentX + 52, y + 26);
+      context.quadraticCurveTo(ornamentX + 18, y + 10, ornamentX - 4, y + 58);
+      context.stroke();
+    }
+
+    const sunX = width * 0.54;
+    const sunY = height * 0.38;
+    const sunRadius = height * 0.075;
+    for (let i = 0; i < 28; i += 1) {
+      const angle = (i / 28) * Math.PI * 2;
+      context.beginPath();
+      context.moveTo(sunX + Math.cos(angle) * (sunRadius + 8), sunY + Math.sin(angle) * (sunRadius + 8));
+      context.lineTo(sunX + Math.cos(angle) * (sunRadius + 28), sunY + Math.sin(angle) * (sunRadius + 28));
+      context.stroke();
+    }
+    context.beginPath();
+    context.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+    context.fill();
+
+    context.beginPath();
+    context.moveTo(sunX - 92, height * 0.67);
+    context.quadraticCurveTo(sunX - 46, height * 0.55, sunX - 10, height * 0.66);
+    context.quadraticCurveTo(sunX - 54, height * 0.71, sunX - 112, height * 0.72);
+    context.quadraticCurveTo(sunX - 84, height * 0.69, sunX - 92, height * 0.67);
+    context.fill();
+
+    context.beginPath();
+    context.moveTo(sunX + 92, height * 0.67);
+    context.quadraticCurveTo(sunX + 46, height * 0.55, sunX + 10, height * 0.66);
+    context.quadraticCurveTo(sunX + 54, height * 0.71, sunX + 112, height * 0.72);
+    context.quadraticCurveTo(sunX + 84, height * 0.69, sunX + 92, height * 0.67);
+    context.fill();
+
+    context.beginPath();
+    context.moveTo(sunX - 16, height * 0.67);
+    context.quadraticCurveTo(sunX, height * 0.75, sunX + 16, height * 0.67);
+    context.quadraticCurveTo(sunX, height * 0.7, sunX - 16, height * 0.67);
+    context.fill();
+  }).texture;
+}
+
+function createStadiumScoreboardMesh() {
+  const board = createCanvasTexture(1024, 384, (context, width, height) => {
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = "#18212a";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#223343";
+    context.fillRect(20, 20, width - 40, height - 40);
+
+    context.fillStyle = "#f4d66a";
+    context.font = "700 54px Arial";
+    context.textAlign = "center";
+    context.fillText("KOKPAR 3D", width / 2, 82);
+
+    context.font = "700 104px Arial";
+    context.fillStyle = COLORS.blue;
+    context.fillText("0", width * 0.28, 232);
+    context.fillStyle = COLORS.red;
+    context.fillText("0", width * 0.72, 232);
+
+    context.fillStyle = "#f7e7b8";
+    context.font = "700 42px Arial";
+    context.fillText("00:00", width / 2, 216);
+    context.font = "700 26px Arial";
+    context.fillText("START", width / 2, 278);
+  });
+
+  const group = new THREE.Group();
+  const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(26.6, 9.7, 0.55),
+    new THREE.MeshStandardMaterial({ color: "#2f2419", roughness: 0.78 })
+  );
+  frame.position.z = -0.12;
+  frame.castShadow = true;
+  group.add(frame);
+
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(24.8, 8.25),
+    new THREE.MeshBasicMaterial({ map: board.texture, side: THREE.DoubleSide })
+  );
+  screen.position.z = 0.19;
+  group.add(screen);
+
+  const legsMaterial = new THREE.MeshStandardMaterial({ color: "#3d2819", roughness: 0.82 });
+  for (const x of [-9.8, 9.8]) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.55, 8.8, 0.55), legsMaterial);
+    leg.position.set(x, -8.5, -0.2);
+    leg.castShadow = true;
+    group.add(leg);
+  }
+
+  let lastKey = "";
+  function update({ blue, red, timer, status }) {
+    const key = `${blue}|${red}|${timer}|${status}`;
+    if (key === lastKey) return;
+    lastKey = key;
+
+    const { context, canvas, texture } = board;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    context.clearRect(0, 0, width, height);
+    const gradient = context.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#14202b");
+    gradient.addColorStop(1, "#243446");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+
+    context.strokeStyle = "#f2c84b";
+    context.lineWidth = 10;
+    context.strokeRect(18, 18, width - 36, height - 36);
+
+    context.fillStyle = "#f7e7b8";
+    context.font = "700 42px Arial";
+    context.textAlign = "center";
+    context.fillText("KOKPAR 3D", width / 2, 76);
+
+    context.fillStyle = "rgba(247,231,184,0.16)";
+    context.fillRect(width * 0.39, 118, width * 0.22, 116);
+
+    context.font = "700 44px Arial";
+    context.fillStyle = COLORS.blue;
+    context.fillText("BLUE", width * 0.23, 132);
+    context.fillStyle = COLORS.red;
+    context.fillText("RED", width * 0.77, 132);
+
+    context.font = "700 132px Arial";
+    context.fillStyle = "#e6f4ff";
+    context.fillText(String(blue), width * 0.23, 260);
+    context.fillStyle = "#ffe4dc";
+    context.fillText(String(red), width * 0.77, 260);
+
+    context.fillStyle = "#f2c84b";
+    context.font = "700 56px Arial";
+    context.fillText(timer, width / 2, 197);
+    context.fillStyle = "#f7e7b8";
+    context.font = "700 30px Arial";
+    context.fillText(status.toUpperCase(), width / 2, 306);
+
+    texture.needsUpdate = true;
+  }
+
+  return { group, update };
+}
+
 function createArenaEnvironment(scene) {
   const railMaterial = new THREE.MeshStandardMaterial({ color: "#5f3b22", roughness: 0.78 });
   const postMaterial = new THREE.MeshStandardMaterial({ color: "#3d2819", roughness: 0.82 });
   const flagBlueMaterial = new THREE.MeshStandardMaterial({ color: COLORS.blue, roughness: 0.55, side: THREE.DoubleSide });
   const flagRedMaterial = new THREE.MeshStandardMaterial({ color: COLORS.red, roughness: 0.55, side: THREE.DoubleSide });
+  const kazakhstanFlagMaterial = new THREE.MeshStandardMaterial({
+    map: createKazakhstanFlagTexture(),
+    roughness: 0.54,
+    side: THREE.DoubleSide
+  });
   const standMaterial = new THREE.MeshStandardMaterial({ color: "#8b704a", roughness: 0.9 });
   const crowdMaterials = [
     new THREE.MeshStandardMaterial({ color: "#26384a", roughness: 0.92 }),
@@ -320,16 +505,38 @@ function createArenaEnvironment(scene) {
     [-fenceX, southFenceZ, flagBlueMaterial],
     [-fenceX, northFenceZ, flagBlueMaterial],
     [fenceX, southFenceZ, flagRedMaterial],
-    [fenceX, northFenceZ, flagRedMaterial]
+    [fenceX, northFenceZ, flagRedMaterial],
+    [0, northFenceZ + 15.5, kazakhstanFlagMaterial]
   ]) {
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 4.4, 8), postMaterial);
-    pole.position.set(x, 2.15, z);
+    const isNationalFlag = x === 0;
+    const poleHeight = isNationalFlag ? 8.6 : 4.4;
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, poleHeight, 8), postMaterial);
+    pole.position.set(x, poleHeight / 2, z);
     pole.castShadow = true;
     scene.add(pole);
 
-    const flag = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 1.35), material);
-    flag.position.set(x + Math.sign(x) * 1.35, 3.35, z);
-    flag.rotation.y = Math.PI / 2;
+    const flag = new THREE.Mesh(
+      new THREE.PlaneGeometry(isNationalFlag ? 7.2 : 2.8, isNationalFlag ? 3.6 : 1.35),
+      material
+    );
+    flag.position.set(x + (isNationalFlag ? 0 : Math.sign(x) * 1.35), isNationalFlag ? 6.1 : 3.35, z);
+    flag.rotation.y = isNationalFlag ? Math.PI : Math.PI / 2;
+    flag.castShadow = true;
+    scene.add(flag);
+  }
+
+  for (const [x, z, rotationY] of [
+    [-fenceX, -9, Math.PI / 2],
+    [fenceX, 10, -Math.PI / 2]
+  ]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 4.8, 8), postMaterial);
+    pole.position.set(x, 2.4, z);
+    pole.castShadow = true;
+    scene.add(pole);
+
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 1.9), kazakhstanFlagMaterial);
+    flag.position.set(x, 4.15, z);
+    flag.rotation.y = rotationY;
     flag.castShadow = true;
     scene.add(flag);
   }
@@ -365,6 +572,13 @@ function createArenaEnvironment(scene) {
       }
     }
   }
+
+  const scoreboard = createStadiumScoreboardMesh();
+  scoreboard.group.position.set(0, 12.2, northFenceZ + 23);
+  scoreboard.group.rotation.y = Math.PI;
+  scene.add(scoreboard.group);
+
+  return { scoreboard };
 }
 
 export function createKokparGame(container, onHudChange, options = {}) {
@@ -411,7 +625,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   ground.receiveShadow = true;
   scene.add(ground);
   createGroundDetails(scene);
-  createArenaEnvironment(scene);
+  const arenaPresentation = createArenaEnvironment(scene);
 
   const blueGoal = createGoalMesh(COLORS.blue, gameSettings.goalType);
   blueGoal.position.set(goalFor(TEAM.blue).x, 0, goalFor(TEAM.blue).z);
@@ -544,6 +758,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     z: 0,
     action: false
   };
+  let cameraModeIndex = 0;
   const match = {
     blue: 0,
     red: 0,
@@ -569,6 +784,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const cameraLookAt = new THREE.Vector3();
   const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
   const cameraTrackTarget = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
+  const cameraForwardVector = new THREE.Vector3();
 
   function showBodyCheckImpact(tackler, opponent, power, hitHolder) {
     bodyCheckImpact.x = (tackler.x + opponent.x) * 0.5;
@@ -691,6 +907,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
     return "Кокпар на поле";
   }
 
+  function currentCameraMode() {
+    return CAMERA_MODES[cameraModeIndex] ?? CAMERA_MODES[0];
+  }
+
+  function cycleCameraMode() {
+    cameraModeIndex = (cameraModeIndex + 1) % CAMERA_MODES.length;
+    publishHud();
+    return currentCameraMode();
+  }
+
   function radarPoint(point) {
     return {
       x: clamp((point.x + WORLD.width / 2) / WORLD.width, 0, 1),
@@ -762,11 +988,36 @@ export function createKokparGame(container, onHudChange, options = {}) {
         player.bodyCheckCooldown <= 0 &&
         player.stamina >= 0.2 &&
         kokpar.holder !== player,
+      cameraMode: currentCameraMode().label,
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
       showBanner: isCountdown || match.messageTime > 0 || match.over,
       radar: radarState()
+    });
+  }
+
+  function updateStadiumPresentation() {
+    const status =
+      match.phase === "goal"
+        ? match.goalTeam === TEAM.blue
+          ? "Goal blue"
+          : "Goal red"
+        : match.phase === "countdown"
+          ? match.duelMode
+            ? "Center duel"
+            : "Start"
+          : kokpar.holder
+            ? `${kokpar.holder.team} ball`
+            : kokpar.flightTeam
+              ? "Throw"
+              : "Live";
+
+    arenaPresentation.scoreboard.update({
+      blue: match.blue,
+      red: match.red,
+      timer: formatTime(match.time),
+      status
     });
   }
 
@@ -1981,6 +2232,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
   }
 
+  function cameraRelativeDirection(inputX, inputZ) {
+    camera.getWorldDirection(cameraForwardVector);
+    const forward = normalize2D(cameraForwardVector.x, cameraForwardVector.z);
+    const right = { x: -forward.z, z: forward.x };
+
+    return normalize2D(
+      right.x * inputX - forward.x * inputZ,
+      right.z * inputX - forward.z * inputZ
+    );
+  }
+
   function updateHuman(rider, dt) {
     let ax = 0;
     let az = 0;
@@ -1999,7 +2261,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const bodyChecking = contactSystem.isBodyCheckActive(rider);
     const recovering = rider.bodyCheckRecovery > 0;
     const sprint = moving && actionHeld && !bodyChecking && !recovering && !kokpar.throwCharging && !isMountedContestParticipant(rider) && rider.stamina > 0.08;
-    const direction = moving ? normalize2D(ax, az) : null;
+    const direction = moving ? cameraRelativeDirection(ax, az) : null;
 
     applyHorseControl(rider, direction, dt, {
       sprint,
@@ -2768,21 +3030,51 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const speedRatio = clamp(speed / player.maxSpeed, 0, 1);
     const serkeDistance = distance2D(player, kokpar);
     const serkeLead = kokpar.holder === player ? 0.12 : clamp(0.33 - serkeDistance / 420, 0.1, 0.3);
-    const focusX = player.x + player.vx * 0.24 + (kokpar.x - player.x) * serkeLead;
-    const focusZ = player.z + player.vz * 0.24 + (kokpar.z - player.z) * serkeLead;
+    const movingDirection = speed > 1.2 ? normalize2D(player.vx, player.vz) : null;
+    const forward = movingDirection ?? { x: Math.cos(player.rotation), z: Math.sin(player.rotation) };
+    const side = { x: -forward.z, z: forward.x };
+    const lookAhead = 5.2 + speedRatio * 5.3;
+    const focusX = player.x + forward.x * lookAhead + (kokpar.x - player.x) * serkeLead;
+    const focusZ = player.z + forward.z * lookAhead + (kokpar.z - player.z) * serkeLead;
     const looseSerkeFov = kokpar.holder ? 0 : clamp((serkeDistance - 28) / 80, 0, 1) * 4;
     const focusEase = 1 - Math.pow(0.018, dt);
-
-    cameraTrackTarget.set(focusX, 0.9, focusZ);
-    cameraTrack.lerp(cameraTrackTarget, focusEase);
-    cameraDesired.set(
-      cameraTrack.x - 18 - speedRatio * 4,
-      31 + speedRatio * 7,
-      cameraTrack.z + 31 + speedRatio * 7
-    );
-    cameraLookAt.set(cameraTrack.x + 4, 0.9, cameraTrack.z);
+    const chaseDistance = 18.8 + speedRatio * 6 + looseSerkeFov * 0.7;
+    const chaseHeight = 12.4 + speedRatio * 4.8 + looseSerkeFov * 0.8;
+    const cameraMode = currentCameraMode().id;
     const cameraEase = 1 - Math.pow(0.015, dt);
-    const targetFov = 56 + speedRatio * 5 + looseSerkeFov;
+    let targetFov = 53 + speedRatio * 4 + looseSerkeFov;
+
+    if (cameraMode === "wide") {
+      cameraTrackTarget.set(focusX, 0.9, focusZ);
+      cameraTrack.lerp(cameraTrackTarget, focusEase);
+      cameraDesired.set(
+        cameraTrack.x - 18 - speedRatio * 4,
+        31 + speedRatio * 7,
+        cameraTrack.z + 31 + speedRatio * 7
+      );
+      cameraLookAt.set(cameraTrack.x + 4, 0.9, cameraTrack.z);
+      targetFov = 56 + speedRatio * 5 + looseSerkeFov;
+    } else if (cameraMode === "broadcast") {
+      const broadcastSide = kokpar.holder?.team === TEAM.red ? -1 : 1;
+      cameraTrackTarget.set(
+        focusX * 0.78 + kokpar.x * 0.22,
+        1.15,
+        focusZ * 0.72 + kokpar.z * 0.28
+      );
+      cameraTrack.lerp(cameraTrackTarget, 1 - Math.pow(0.012, dt));
+      cameraDesired.set(cameraTrack.x - broadcastSide * 34, 42, cameraTrack.z + 50);
+      cameraLookAt.set(cameraTrack.x + broadcastSide * 4, 1.2, cameraTrack.z);
+      targetFov = 58 + looseSerkeFov * 0.8;
+    } else {
+      cameraTrackTarget.set(focusX, 1.55, focusZ);
+      cameraTrack.lerp(cameraTrackTarget, focusEase);
+      cameraDesired.set(
+        cameraTrack.x - forward.x * chaseDistance + side.x * CHASE_CAMERA_SIDE_OFFSET,
+        chaseHeight,
+        cameraTrack.z - forward.z * chaseDistance + side.z * CHASE_CAMERA_SIDE_OFFSET
+      );
+      cameraLookAt.set(cameraTrack.x + forward.x * 3.2, 1.85, cameraTrack.z + forward.z * 3.2);
+    }
 
     camera.position.lerp(cameraDesired, cameraEase);
     camera.fov += (targetFov - camera.fov) * (1 - Math.pow(0.04, dt));
@@ -2804,6 +3096,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
       event.preventDefault();
     }
     if (key === "r") restart();
+    if (key === "c" && !event.repeat) {
+      cycleCameraMode();
+      keys.delete(key);
+      return;
+    }
     if (key === "e" && !event.repeat) {
       contactSystem.startBodyCheck(player);
       keys.delete(key);
@@ -2869,6 +3166,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     match.messageTime = Math.max(0, match.messageTime - dt);
     syncMeshes(time);
+    updateStadiumPresentation();
     updateCamera(dt);
     renderer.render(scene, camera);
     publishHud();
@@ -2882,11 +3180,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
   resize();
   resetPositions();
   beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
+  updateStadiumPresentation();
   publishHud();
   animationFrame = requestAnimationFrame(frame);
 
   return {
     restart,
+    cycleCameraMode,
     setTouchInput,
     setFeedbackEnabled(enabled) {
       feedback.setEnabled(enabled);

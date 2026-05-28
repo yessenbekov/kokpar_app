@@ -1,4 +1,4 @@
-import { RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
+import { Camera, RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
 
 export function MatchHud({
   settings,
@@ -6,6 +6,7 @@ export function MatchHud({
   feedbackEnabled,
   onRestart,
   onOpenSettings,
+  onCycleCamera,
   onToggleFeedback
 }) {
   const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
@@ -54,6 +55,16 @@ export function MatchHud({
       </div>
 
       <div className="hud-actions">
+        <button
+          className="icon-button"
+          type="button"
+          aria-label={`Сменить камеру. Сейчас: ${hud.cameraMode}`}
+          title={`Камера: ${hud.cameraMode}`}
+          onClick={onCycleCamera}
+        >
+          <Camera size={18} strokeWidth={2.4} />
+        </button>
+
         <button
           className="icon-button"
           type="button"

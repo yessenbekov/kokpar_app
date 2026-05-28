@@ -177,6 +177,7 @@ export default function App() {
           feedbackEnabled={feedbackEnabled}
           onRestart={() => gameRef.current?.restart()}
           onOpenSettings={openSettings}
+          onCycleCamera={() => gameRef.current?.cycleCameraMode?.()}
           onToggleFeedback={toggleFeedback}
         />
       )}

@@ -68,6 +68,8 @@ Already done:
 - responsive field radar for serke, possession, support, and target awareness
 - first architecture pass separating React UI, match feedback, and 3D indicators into modules
 - timed defensive body check with horse contact, cooldown, mobile control, and AI use
+- closer third-person gameplay camera inspired by the kok-boru prototype reference
+- stadium presentation pass with in-arena scoreboard and Kazakhstan flags
 
 Exit criteria:
 
@@ -138,6 +140,7 @@ Tasks:
 - add better lighting, shadows, fog, and color grading
 - add particle dust trails
 - add UI polish and gamepad-ready controls
+- keep improving in-arena presentation: scoreboards, national/team flags, banners, and camera framing
 
 Exit criteria:
 

@@ -22,6 +22,7 @@ export function makeInitialHud(settings = DEFAULT_SETTINGS) {
     bodyCheckCooldown: 0,
     bodyCheckActive: false,
     bodyCheckReady: false,
+    cameraMode: "Ближе",
     carry: "Кокпар на поле",
     message: "Загрузка матча",
     submessage: "Готовим поле.",
