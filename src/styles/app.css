@@ -223,6 +223,9 @@ button {
 .team-choice:focus-visible,
 .ready-button:focus-visible,
 .stable-card:focus-visible,
+.horse-edit-button:focus-visible,
+.horse-name-form button:focus-visible,
+.horse-name-form input:focus-visible,
 .start-button:focus-visible {
   outline: 3px solid rgba(23, 109, 159, 0.34);
   outline-offset: 3px;
@@ -569,6 +572,59 @@ button {
   letter-spacing: 0;
 }
 
+.horse-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.horse-name-row h2 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.horse-edit-button,
+.horse-name-form button {
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(76, 54, 34, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.72);
+  color: #3e2c1d;
+  cursor: pointer;
+}
+
+.horse-edit-button:hover,
+.horse-name-form button:hover {
+  background: rgba(255, 247, 220, 0.98);
+}
+
+.horse-name-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px 34px;
+  gap: 7px;
+  width: 100%;
+}
+
+.horse-name-form input {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(76, 54, 34, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.86);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 850;
+}
+
 .stable-copy p:not(.label) {
   max-width: 460px;
   margin: 8px 0 0;
@@ -665,6 +721,72 @@ button {
 .stable-stat strong {
   text-align: right;
   font-size: 12px;
+}
+
+.horse-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.horse-record,
+.horse-equipment {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(76, 54, 34, 0.13);
+  border-radius: 8px;
+  background: rgba(255, 248, 229, 0.58);
+}
+
+.horse-record > strong,
+.horse-equipment > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #3e2c1d;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.horse-record div,
+.horse-equipment div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.horse-record span,
+.horse-equipment span {
+  min-width: 0;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(255, 253, 244, 0.68);
+}
+
+.horse-record small,
+.horse-equipment small,
+.horse-record b,
+.horse-equipment b {
+  display: block;
+  min-width: 0;
+}
+
+.horse-record small,
+.horse-equipment small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.horse-record b,
+.horse-equipment b {
+  overflow: hidden;
+  margin-top: 3px;
+  color: #3e2c1d;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .match-options {
@@ -1478,6 +1600,7 @@ button {
   .stable-layout,
   .stable-detail-head,
   .stable-stats,
+  .horse-meta-grid,
   .match-options {
     grid-template-columns: 1fr;
   }
@@ -1492,6 +1615,17 @@ button {
 
   .stable-copy h2 {
     font-size: 26px;
+  }
+
+  .horse-name-form {
+    grid-template-columns: minmax(0, 1fr) 32px 32px;
+  }
+
+  .horse-edit-button,
+  .horse-name-form button {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
   }
 
   .stable-stat {
@@ -1818,6 +1952,23 @@ button {
     font-size: 24px;
   }
 
+  .horse-name-form {
+    grid-template-columns: minmax(0, 1fr) 30px 30px;
+    gap: 5px;
+  }
+
+  .horse-edit-button,
+  .horse-name-form button {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .horse-name-form input {
+    height: 30px;
+    font-size: 14px;
+  }
+
   .stable-copy p:not(.label) {
     margin-top: 5px;
     font-size: 12px;
@@ -1836,6 +1987,37 @@ button {
   .stable-stats {
     gap: 7px 10px;
     margin-top: 11px;
+  }
+
+  .horse-meta-grid {
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  .horse-record,
+  .horse-equipment {
+    padding: 7px;
+  }
+
+  .horse-record > strong,
+  .horse-equipment > strong {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+
+  .horse-record div,
+  .horse-equipment div {
+    gap: 5px;
+  }
+
+  .horse-record span,
+  .horse-equipment span {
+    padding: 5px 6px;
+  }
+
+  .horse-record b,
+  .horse-equipment b {
+    font-size: 11px;
   }
 
   .horse-progress {

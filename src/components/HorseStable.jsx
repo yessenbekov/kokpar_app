@@ -1,4 +1,5 @@
-import { Gauge } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Gauge, Pencil, X } from "lucide-react";
 import { horseTypeById } from "../game/horseTypes.js";
 
 function clamp(value, min, max) {
@@ -59,12 +60,45 @@ function HorseToken({ horse }) {
   );
 }
 
-export function HorseStable({ horseId, ownedHorses = [], onHorseChange }) {
+const EQUIPMENT_LABELS = [
+  ["saddle", "Седло"],
+  ["bridle", "Узда"],
+  ["blanket", "Попона"],
+  ["legWraps", "Бинты"]
+];
+
+function recordRowsFor(record = {}) {
+  return [
+    ["Матчи", record.matches ?? 0],
+    ["Победы", record.wins ?? 0],
+    ["Голы", record.goals ?? 0],
+    ["Отборы", record.steals ?? 0]
+  ];
+}
+
+export function HorseStable({ horseId, ownedHorses = [], onHorseChange, onHorseRename }) {
   const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
   const selectedOwnedHorse = stableHorses.find((horse) => horse.id === horseId) ?? stableHorses[0];
   const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
+  const equipment = selectedOwnedHorse?.equipment ?? {};
   const statRows = statRowsFor(selectedHorse);
   const xpProgress = selectedOwnedHorse ? clamp(selectedOwnedHorse.xp / 100, 0, 1) : 0;
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState(selectedOwnedHorse?.name ?? "");
+  const recordRows = recordRowsFor(selectedOwnedHorse?.record);
+
+  useEffect(() => {
+    setEditing(false);
+    setDraftName(selectedOwnedHorse?.name ?? "");
+  }, [selectedOwnedHorse?.id, selectedOwnedHorse?.name]);
+
+  function submitName(event) {
+    event.preventDefault();
+    const nextName = draftName.trim();
+    if (!nextName || !selectedOwnedHorse) return;
+    onHorseRename?.(selectedOwnedHorse.id, nextName);
+    setEditing(false);
+  }
 
   return (
     <div className="stable-layout">
@@ -106,7 +140,31 @@ export function HorseStable({ horseId, ownedHorses = [], onHorseChange }) {
             <p className="label">
               {selectedHorse.role} · {selectedHorse.name}
             </p>
-            <h2>{selectedOwnedHorse.name}</h2>
+            <div className="horse-name-row">
+              {editing ? (
+                <form className="horse-name-form" onSubmit={submitName}>
+                  <input
+                    aria-label="Имя лошади"
+                    maxLength={24}
+                    onChange={(event) => setDraftName(event.target.value)}
+                    value={draftName}
+                  />
+                  <button type="submit" aria-label="Сохранить имя">
+                    <Check size={16} strokeWidth={2.7} />
+                  </button>
+                  <button type="button" aria-label="Отменить" onClick={() => setEditing(false)}>
+                    <X size={16} strokeWidth={2.7} />
+                  </button>
+                </form>
+              ) : (
+                <>
+                  <h2>{selectedOwnedHorse.name}</h2>
+                  <button className="horse-edit-button" type="button" aria-label="Переименовать" onClick={() => setEditing(true)}>
+                    <Pencil size={16} strokeWidth={2.4} />
+                  </button>
+                </>
+              )}
+            </div>
             <p>{selectedHorse.description}</p>
             <div className="horse-tags" aria-label="Профиль лошади">
               <span>{selectedHorse.stable.line}</span>
@@ -138,6 +196,32 @@ export function HorseStable({ horseId, ownedHorses = [], onHorseChange }) {
               </div>
             );
           })}
+        </div>
+
+        <div className="horse-meta-grid">
+          <div className="horse-record" aria-label="Статистика лошади">
+            <strong>Статистика</strong>
+            <div>
+              {recordRows.map(([label, value]) => (
+                <span key={label}>
+                  <small>{label}</small>
+                  <b>{value}</b>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="horse-equipment" aria-label="Снаряжение лошади">
+            <strong>Снаряжение</strong>
+            <div>
+              {EQUIPMENT_LABELS.map(([key, label]) => (
+                <span key={key}>
+                  <small>{label}</small>
+                  <b>{equipment[key] ?? "Пусто"}</b>
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>

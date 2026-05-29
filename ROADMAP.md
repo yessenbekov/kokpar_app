@@ -87,6 +87,7 @@ Already done:
 - first stable/garage-style horse selection screen with visual horse previews and stat cards
 - local player profile with saved horse selection and match preferences
 - owned horse instances with names, XP, bond, equipment slots, and match record placeholders
+- stable UI for renaming owned horses plus visible record and equipment slots
 - mode selection for Kokpar, Kok-boru, Training, and Online Room mock
 - local Online Room mock lobby with side selection, ready state, and fake connected players
 

@@ -166,6 +166,27 @@ export default function App() {
     );
   }
 
+  function renameHorse(horseId, name) {
+    const trimmedName = name.trim().slice(0, 24);
+    if (!trimmedName) return;
+
+    setProfile((currentProfile) => {
+      const renamedHorses = currentProfile.ownedHorses.map((horse) =>
+        horse.id === horseId ? { ...horse, name: trimmedName } : horse
+      );
+      const nextProfile = savePlayerProfile({
+        ...currentProfile,
+        ownedHorses: renamedHorses
+      });
+
+      if (settings.horseId === horseId) {
+        setSettings((currentSettings) => ({ ...currentSettings, horseName: trimmedName }));
+      }
+
+      return nextProfile;
+    });
+  }
+
   function startMatch() {
     setHud(makeInitialHud(settings));
     setReady(false);
@@ -194,7 +215,15 @@ export default function App() {
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
-      {isSetup && <MatchSetup profile={profile} settings={settings} onSettingChange={updateSetting} onStart={startMatch} />}
+      {isSetup && (
+        <MatchSetup
+          profile={profile}
+          settings={settings}
+          onHorseRename={renameHorse}
+          onSettingChange={updateSetting}
+          onStart={startMatch}
+        />
+      )}
 
       {activeSettings && !ready && <div className="loading">Готовим степь, коней и казаны...</div>}
       {sceneError && (

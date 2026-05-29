@@ -9,7 +9,7 @@ function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
 }
 
-export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
+export function MatchSetup({ profile, settings, onHorseRename, onSettingChange, onStart }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -48,6 +48,7 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
           ownedHorses={profile.ownedHorses}
           horseId={settings.horseId}
           onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
+          onHorseRename={onHorseRename}
         />
 
         <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
