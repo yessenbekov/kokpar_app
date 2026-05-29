@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import { CircleDot, Clock3, Play, Trophy, Users } from "lucide-react";
+import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
+import { MockOnlineLobby } from "./MockOnlineLobby.jsx";
+import { ModeSelector } from "./ModeSelector.jsx";
 
 function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
@@ -7,6 +11,15 @@ function formatCoins(value) {
 
 export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
   const ownedCount = profile.ownedHorses.length;
+  const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
+  const selectedMode = gameModeById(settings.modeId);
+  const onlineMode = selectedMode.id === "online_room";
+  const [onlineReady, setOnlineReady] = useState(false);
+  const canStart = !onlineMode || onlineReady;
+
+  useEffect(() => {
+    setOnlineReady(false);
+  }, [settings.modeId, settings.teamSide, settings.horseId]);
 
   return (
     <section className="setup" aria-label="Настройки матча">
@@ -37,6 +50,8 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
           onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
         />
 
+        <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
+
         <div className="match-options">
           <div className="setting-group" aria-label="Тип цели">
             <div className="setting-title">
@@ -47,6 +62,7 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
               <button
                 className={settings.goalType === "circle" ? "choice active" : "choice"}
                 type="button"
+                disabled={selectedMode.goalLocked}
                 onClick={() => onSettingChange("goalType", "circle")}
               >
                 <strong>Круг</strong>
@@ -55,6 +71,7 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
               <button
                 className={settings.goalType === "kazan" ? "choice active" : "choice"}
                 type="button"
+                disabled={selectedMode.goalLocked}
                 onClick={() => onSettingChange("goalType", "kazan")}
               >
                 <strong>Казан</strong>
@@ -102,9 +119,20 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
           </div>
         </div>
 
-        <button className="start-button" type="button" onClick={onStart}>
+        {onlineMode && (
+          <MockOnlineLobby
+            profile={profile}
+            selectedHorse={selectedHorse}
+            settings={settings}
+            ready={onlineReady}
+            onReadyChange={setOnlineReady}
+            onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
+          />
+        )}
+
+        <button className="start-button" type="button" onClick={onStart} disabled={!canStart}>
           <Play size={19} fill="currentColor" strokeWidth={2.4} />
-          <span>Начать матч</span>
+          <span>{canStart ? selectedMode.startLabel : "Нужно быть готовым"}</span>
         </button>
       </div>
     </section>

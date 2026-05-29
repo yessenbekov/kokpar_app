@@ -34,12 +34,15 @@ npm run generate:models
 
 The pre-match screen now works as the first stable/garage pass. Before a match, choose:
 
+- mode: Kokpar, Kok-boru, Training, or Online Room mock lobby
 - goal type: ground circle or raised kazan
 - horse type: Argymak, Zhuyrik, or Auyr At
 - team size: 3v3, 4v4, or 5v5
 - match time: 2, 3, or 5 minutes
 
-The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows the saved player profile, named owned horses, owned horse count, each horse's role, profile tags, visual coat preview, XP, and gameplay ratings. Horse choice and match preferences are saved locally between sessions. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
+The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows the saved player profile, named owned horses, owned horse count, each horse's role, profile tags, visual coat preview, XP, and gameplay ratings. Horse choice, mode choice, team side, and match preferences are saved locally between sessions. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
+
+The Online Room mode is currently a local mock lobby. It lets the player choose a side, see fake connected players, toggle ready, and launch a mock match. It is a UI/data-flow prototype before real networking.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
@@ -58,6 +61,7 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 ## Project structure
 
 - `src/App.jsx`: React application shell and game lifecycle wiring
+- `src/app/gameModes.js`: mode definitions for Kokpar, Kok-boru, Training, and Online Room
 - `src/app/matchConfig.js`: match settings and initial HUD state
 - `src/app/playerProfile.js`: local player profile, named owned horses, equipment slots, and saved match preferences
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
@@ -90,8 +94,8 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 - Add real horse animation blending and production sound
 - Expand the stable/garage with accessories and rider kit
 - Add post-match rewards and profile progression
-- Add mode selection for kokpar, kok-boru, wild kokpar, training, and tournament
-- Add hosted online lobby flow: create room, join with saved horse, choose side, ready up, start match
+- Expand mode selection with wild kokpar and tournament
+- Replace the hosted online lobby mock with real private-room networking
 - Add team selection and richer match settings
 - Replace starter low-poly GLB files with production horse/rider/serke assets
 - Add tournament mode and persistent scores

@@ -1,4 +1,5 @@
 import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { DEFAULT_MODE_ID, gameModeById } from "./gameModes.js";
 
 const PROFILE_STORAGE_KEY = "kokpar.playerProfile.v1";
 const HORSE_IDS = new Set(HORSE_TYPES.map((horse) => horse.id));
@@ -33,9 +34,11 @@ export const DEFAULT_PLAYER_PROFILE = {
   ownedHorses: DEFAULT_OWNED_HORSES,
   stableCapacity: 6,
   matchPreferences: {
+    modeId: DEFAULT_MODE_ID,
     goalType: "circle",
     teamSize: 3,
-    matchMinutes: 2
+    matchMinutes: 2,
+    teamSide: "blue"
   }
 };
 
@@ -117,10 +120,14 @@ function sanitizeOwnedHorses(value, legacyOwnedHorseTypes) {
 }
 
 function sanitizeMatchPreferences(value = {}) {
+  const mode = gameModeById(value.modeId);
+
   return {
-    goalType: value.goalType === "kazan" ? "kazan" : "circle",
+    modeId: mode.id,
+    goalType: mode.goalLocked ? mode.defaultGoalType : value.goalType === "kazan" ? "kazan" : mode.defaultGoalType,
     teamSize: [3, 4, 5].includes(Number(value.teamSize)) ? Number(value.teamSize) : 3,
-    matchMinutes: [2, 3, 5].includes(Number(value.matchMinutes)) ? Number(value.matchMinutes) : 2
+    matchMinutes: [2, 3, 5].includes(Number(value.matchMinutes)) ? Number(value.matchMinutes) : 2,
+    teamSide: value.teamSide === "red" ? "red" : "blue"
   };
 }
 

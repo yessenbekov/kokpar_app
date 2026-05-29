@@ -213,7 +213,15 @@ button {
   background: rgba(255, 247, 220, 0.98);
 }
 
+.choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .choice:focus-visible,
+.mode-choice:focus-visible,
+.team-choice:focus-visible,
+.ready-button:focus-visible,
 .stable-card:focus-visible,
 .start-button:focus-visible {
   outline: 3px solid rgba(23, 109, 159, 0.34);
@@ -240,6 +248,63 @@ button {
   margin-top: 4px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.mode-group {
+  margin-top: 17px;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.mode-choice {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 62px;
+  padding: 10px;
+  border: 1px solid rgba(76, 54, 34, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.78);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mode-choice:hover {
+  background: rgba(255, 247, 220, 0.98);
+}
+
+.mode-choice.active {
+  border-color: rgba(23, 109, 159, 0.62);
+  background: rgba(218, 239, 248, 0.9);
+  box-shadow: inset 0 0 0 2px rgba(23, 109, 159, 0.16);
+}
+
+.mode-choice span,
+.mode-choice strong,
+.mode-choice small {
+  display: block;
+  min-width: 0;
+}
+
+.mode-choice strong {
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode-choice small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
 }
 
 .stable-layout {
@@ -615,6 +680,163 @@ button {
   margin-top: 0;
 }
 
+.online-lobby {
+  display: grid;
+  gap: 11px;
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid rgba(76, 54, 34, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.62);
+}
+
+.lobby-topline,
+.lobby-summary,
+.team-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.lobby-topline {
+  justify-content: space-between;
+  color: #3e2c1d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.lobby-topline span,
+.lobby-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lobby-summary span {
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid rgba(76, 54, 34, 0.13);
+  border-radius: 6px;
+  background: rgba(255, 248, 229, 0.72);
+  color: #5b432b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.team-choice,
+.ready-button {
+  border: 1px solid rgba(76, 54, 34, 0.18);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.team-choice {
+  flex: 1 1 120px;
+  min-height: 38px;
+  background: rgba(255, 253, 244, 0.78);
+}
+
+.team-choice.blue.active {
+  border-color: rgba(23, 109, 159, 0.55);
+  background: rgba(218, 239, 248, 0.92);
+}
+
+.team-choice.red.active {
+  border-color: rgba(187, 60, 49, 0.52);
+  background: rgba(251, 226, 221, 0.92);
+}
+
+.lobby-teams {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lobby-team {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(76, 54, 34, 0.13);
+  border-radius: 8px;
+  background: rgba(255, 248, 229, 0.62);
+}
+
+.lobby-team > strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.lobby-team.blue > strong {
+  color: #176d9f;
+}
+
+.lobby-team.red > strong {
+  color: #bb3c31;
+}
+
+.lobby-team ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lobby-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(255, 253, 244, 0.7);
+}
+
+.lobby-player.current {
+  box-shadow: inset 0 0 0 2px rgba(23, 109, 159, 0.14);
+}
+
+.lobby-player span,
+.lobby-player strong,
+.lobby-player small {
+  display: block;
+  min-width: 0;
+}
+
+.lobby-player strong {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lobby-player small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ready-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  background: rgba(255, 253, 244, 0.78);
+}
+
+.ready-button.active {
+  border-color: rgba(23, 109, 159, 0.55);
+  background: #176d9f;
+  color: white;
+}
+
 .start-button {
   display: flex;
   align-items: center;
@@ -634,6 +856,12 @@ button {
 
 .start-button:hover {
   background: #145f8b;
+}
+
+.start-button:disabled {
+  cursor: not-allowed;
+  background: rgba(95, 83, 66, 0.54);
+  box-shadow: none;
 }
 
 .hud {
@@ -1238,6 +1466,15 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .mode-grid,
+  .lobby-teams {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-choice {
+    min-height: 54px;
+  }
+
   .stable-layout,
   .stable-detail-head,
   .stable-stats,
@@ -1393,7 +1630,7 @@ button {
   .setup-panel.stable-panel {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(215px, 0.55fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     gap: 10px 12px;
     width: min(980px, 100%);
   }
@@ -1437,9 +1674,33 @@ button {
     margin-top: 2px;
   }
 
+  .mode-group {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+
+  .mode-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .mode-choice {
+    min-height: 42px;
+    padding: 7px 8px;
+  }
+
+  .mode-choice strong {
+    font-size: 12px;
+  }
+
+  .mode-choice small {
+    display: none;
+  }
+
   .stable-layout {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     grid-template-columns: minmax(230px, 0.82fr) minmax(0, 1.18fr);
     gap: 10px;
     min-height: 0;
@@ -1592,7 +1853,7 @@ button {
 
   .match-options {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     grid-template-columns: 1fr;
     align-content: start;
     gap: 10px;
@@ -1603,9 +1864,28 @@ button {
     border-left: 1px solid rgba(76, 54, 34, 0.13);
   }
 
+  .online-lobby {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    padding: 10px;
+  }
+
+  .lobby-topline,
+  .lobby-summary {
+    gap: 6px;
+  }
+
+  .lobby-teams {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lobby-player {
+    min-height: 34px;
+    padding: 6px 7px;
+  }
+
   .start-button {
     grid-column: 1 / -1;
-    grid-row: 3;
     min-height: 44px;
     margin-top: 0;
   }

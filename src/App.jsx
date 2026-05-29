@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { readPlayerProfile, savePlayerProfile } from "./app/playerProfile.js";
 import { FieldRadar } from "./components/FieldRadar.jsx";
@@ -135,6 +136,12 @@ export default function App() {
   function updateSetting(key, value) {
     const nextSettings = { ...settings, [key]: value };
 
+    if (key === "modeId") {
+      const selectedMode = gameModeById(value);
+      nextSettings.modeId = selectedMode.id;
+      nextSettings.goalType = selectedMode.defaultGoalType;
+    }
+
     if (key === "horseId") {
       const selectedHorse = profile.ownedHorses.find((horse) => horse.id === value) ?? profile.ownedHorses[0];
       nextSettings.horseId = selectedHorse.id;
@@ -149,9 +156,11 @@ export default function App() {
         selectedHorseId: nextSettings.horseId,
         selectedHorseType: nextSettings.horseType,
         matchPreferences: {
+          modeId: nextSettings.modeId,
           goalType: nextSettings.goalType,
           teamSize: nextSettings.teamSize,
-          matchMinutes: nextSettings.matchMinutes
+          matchMinutes: nextSettings.matchMinutes,
+          teamSide: nextSettings.teamSide
         }
       })
     );

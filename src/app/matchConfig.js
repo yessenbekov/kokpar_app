@@ -1,11 +1,14 @@
 import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "../game/horseTypes.js";
+import { DEFAULT_MODE_ID, gameModeById } from "./gameModes.js";
 import { ownedHorseById, selectedHorseFromProfile } from "./playerProfile.js";
 
 export const DEFAULT_SETTINGS = {
+  modeId: DEFAULT_MODE_ID,
   goalType: "circle",
   teamSize: 3,
   matchMinutes: 2,
-  horseType: DEFAULT_HORSE_TYPE_ID
+  horseType: DEFAULT_HORSE_TYPE_ID,
+  teamSide: "blue"
 };
 
 function formatTimer(minutes) {
@@ -14,17 +17,20 @@ function formatTimer(minutes) {
 
 function settingsFromProfile(profile = {}) {
   const preferences = profile.matchPreferences ?? {};
+  const mode = gameModeById(preferences.modeId);
   const selectedHorse = selectedHorseFromProfile(profile);
 
   return {
-    goalType: preferences.goalType === "kazan" ? "kazan" : DEFAULT_SETTINGS.goalType,
+    modeId: mode.id,
+    goalType: mode.goalLocked ? mode.defaultGoalType : preferences.goalType === "kazan" ? "kazan" : mode.defaultGoalType,
     teamSize: [3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
     matchMinutes: [2, 3, 5].includes(Number(preferences.matchMinutes))
       ? Number(preferences.matchMinutes)
       : DEFAULT_SETTINGS.matchMinutes,
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
-    horseName: selectedHorse.name
+    horseName: selectedHorse.name,
+    teamSide: preferences.teamSide === "red" ? "red" : "blue"
   };
 }
 
@@ -57,6 +63,7 @@ export function makeInitialHud(settings = DEFAULT_SETTINGS) {
 export function readUrlSettings(profile) {
   const profileSettings = settingsFromProfile(profile);
   const params = new URLSearchParams(window.location.search);
+  const mode = gameModeById(params.get("mode") ?? params.get("modeId") ?? profileSettings.modeId);
   const goalParam = params.get("goal");
   const horseIdParam = params.get("horseId");
   const horseParam = params.get("horse");
@@ -77,12 +84,20 @@ export function readUrlSettings(profile) {
         };
 
   return {
-    goalType: params.has("goal") ? (goalParam === "kazan" ? "kazan" : "circle") : profileSettings.goalType,
+    modeId: mode.id,
+    goalType: mode.goalLocked
+      ? mode.defaultGoalType
+      : params.has("goal")
+        ? goalParam === "kazan"
+          ? "kazan"
+          : "circle"
+        : profileSettings.goalType,
     teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
     matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : profileSettings.matchMinutes,
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
-    horseName: selectedHorse.name
+    horseName: selectedHorse.name,
+    teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide
   };
 }
 

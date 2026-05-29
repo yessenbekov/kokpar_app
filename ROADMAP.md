@@ -87,6 +87,8 @@ Already done:
 - first stable/garage-style horse selection screen with visual horse previews and stat cards
 - local player profile with saved horse selection and match preferences
 - owned horse instances with names, XP, bond, equipment slots, and match record placeholders
+- mode selection for Kokpar, Kok-boru, Training, and Online Room mock
+- local Online Room mock lobby with side selection, ready state, and fake connected players
 
 Exit criteria:
 
@@ -286,10 +288,10 @@ Systems needed:
 - equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet (horse-side starter slots done)
 - horse naming and per-horse progression (starter horse instances with XP/bond done)
 - unlock/progression model
-- mode selection menu
+- mode selection menu (first four modes done)
 - network lobby browser
 - hosted lobby creation with match size, rules, goal type, and timer settings
-- team selection inside a lobby before match start
+- team selection inside a lobby before match start (local mock done)
 - server-side room state, ready checks, and match start synchronization
 - balance rules so upgrades create variety without pay-to-win feeling
 
@@ -322,7 +324,7 @@ Design constraints:
 
 Prototype milestones:
 
-- local lobby mock screen with host/join/team selection, no network
+- local lobby mock screen with host/join/team selection, no network (done)
 - simulated network lobby with fake connected players
 - real private-room networking for small 1v1 or 2v2 tests
 - server-authoritative match state for possession, collisions, scoring, and out-of-bounds
