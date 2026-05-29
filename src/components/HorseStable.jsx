@@ -59,7 +59,7 @@ function HorseToken({ horse }) {
   );
 }
 
-export function HorseStable({ horseType, onHorseChange }) {
+export function HorseStable({ horseType, ownedHorseTypes = HORSE_TYPES.map((horse) => horse.id), onHorseChange }) {
   const selectedHorse = horseTypeById(horseType);
   const statRows = statRowsFor(selectedHorse);
 
@@ -71,21 +71,27 @@ export function HorseStable({ horseType, onHorseChange }) {
           <span>Лошадь</span>
         </div>
         <div className="stable-horse-list">
-          {HORSE_TYPES.map((horse) => (
-            <button
-              className={selectedHorse.id === horse.id ? "stable-card active" : "stable-card"}
-              type="button"
-              key={horse.id}
-              onClick={() => onHorseChange(horse.id)}
-            >
-              <HorseToken horse={horse} />
-              <span className="stable-card-copy">
-                <strong>{horse.name}</strong>
-                <span>{horse.role}</span>
-              </span>
-              <span className="horse-tier">{horse.tier}</span>
-            </button>
-          ))}
+          {HORSE_TYPES.map((horse) => {
+            const owned = ownedHorseTypes.includes(horse.id);
+            const active = selectedHorse.id === horse.id;
+
+            return (
+              <button
+                className={`${active ? "stable-card active" : "stable-card"}${owned ? "" : " locked"}`}
+                type="button"
+                key={horse.id}
+                disabled={!owned}
+                onClick={() => onHorseChange(horse.id)}
+              >
+                <HorseToken horse={horse} />
+                <span className="stable-card-copy">
+                  <strong>{horse.name}</strong>
+                  <span>{owned ? horse.role : "Закрыто"}</span>
+                </span>
+                <span className="horse-tier">{horse.tier}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

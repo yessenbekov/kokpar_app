@@ -39,7 +39,7 @@ The pre-match screen now works as the first stable/garage pass. Before a match, 
 - team size: 3v3, 4v4, or 5v5
 - match time: 2, 3, or 5 minutes
 
-The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows each horse's role, profile tags, visual coat preview, and gameplay ratings. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
+The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows the saved player profile, owned horse count, each horse's role, profile tags, visual coat preview, and gameplay ratings. Horse choice and match preferences are saved locally between sessions. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
@@ -59,6 +59,7 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 
 - `src/App.jsx`: React application shell and game lifecycle wiring
 - `src/app/matchConfig.js`: match settings and initial HUD state
+- `src/app/playerProfile.js`: local player profile, owned horses, and saved match preferences
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
 - `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring
@@ -88,7 +89,7 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 - Continue splitting the match runtime into arena, rules, AI, and camera systems
 - Add real horse animation blending and production sound
 - Expand the stable/garage with accessories and rider kit
-- Add saved player profile and selected-horse persistence
+- Add post-match rewards and profile progression
 - Add mode selection for kokpar, kok-boru, wild kokpar, training, and tournament
 - Add team selection and richer match settings
 - Replace starter low-poly GLB files with production horse/rider/serke assets

@@ -1,7 +1,13 @@
 import { CircleDot, Clock3, Play, Trophy, Users } from "lucide-react";
 import { HorseStable } from "./HorseStable.jsx";
 
-export function MatchSetup({ settings, onSettingChange, onStart }) {
+function formatCoins(value) {
+  return new Intl.NumberFormat("ru-RU").format(value);
+}
+
+export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
+  const ownedCount = profile.ownedHorseTypes.length;
+
   return (
     <section className="setup" aria-label="Настройки матча">
       <div className="setup-panel stable-panel">
@@ -10,10 +16,23 @@ export function MatchSetup({ settings, onSettingChange, onStart }) {
             <p className="label">Кокпар 3D</p>
             <h1>Конюшня</h1>
           </div>
+          <div className="profile-strip" aria-label="Профиль игрока">
+            <span className="profile-avatar">{profile.riderName.slice(0, 1)}</span>
+            <span className="profile-name">
+              <span>Профиль</span>
+              <strong>{profile.riderName}</strong>
+            </span>
+            <span className="profile-chip">Ур. {profile.level}</span>
+            <span className="profile-chip">{formatCoins(profile.coins)} күміс</span>
+            <span className="profile-chip">
+              {ownedCount}/{profile.stableCapacity}
+            </span>
+          </div>
           <Trophy size={30} strokeWidth={2.2} />
         </div>
 
         <HorseStable
+          ownedHorseTypes={profile.ownedHorseTypes}
           horseType={settings.horseType}
           onHorseChange={(horseType) => onSettingChange("horseType", horseType)}
         />

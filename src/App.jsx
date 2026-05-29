@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
+import { readPlayerProfile, savePlayerProfile } from "./app/playerProfile.js";
 import { FieldRadar } from "./components/FieldRadar.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
@@ -12,9 +13,12 @@ export default function App() {
   const mountRef = useRef(null);
   const gameRef = useRef(null);
   const joystickRef = useRef(null);
+  const initialProfileRef = useRef(null);
+  if (!initialProfileRef.current) initialProfileRef.current = readPlayerProfile();
   const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
-  const [settings, setSettings] = useState(() => readUrlSettings());
-  const [activeSettings, setActiveSettings] = useState(() => (shouldAutoStart() ? readUrlSettings() : null));
+  const [profile, setProfile] = useState(() => initialProfileRef.current);
+  const [settings, setSettings] = useState(() => readUrlSettings(initialProfileRef.current));
+  const [activeSettings, setActiveSettings] = useState(() => (shouldAutoStart() ? readUrlSettings(initialProfileRef.current) : null));
   const [hud, setHud] = useState(() => makeInitialHud());
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
@@ -129,7 +133,20 @@ export default function App() {
   }, [activeSettings]);
 
   function updateSetting(key, value) {
-    setSettings((current) => ({ ...current, [key]: value }));
+    const nextSettings = { ...settings, [key]: value };
+
+    setSettings(nextSettings);
+    setProfile((currentProfile) =>
+      savePlayerProfile({
+        ...currentProfile,
+        selectedHorseType: nextSettings.horseType,
+        matchPreferences: {
+          goalType: nextSettings.goalType,
+          teamSize: nextSettings.teamSize,
+          matchMinutes: nextSettings.matchMinutes
+        }
+      })
+    );
   }
 
   function startMatch() {
@@ -160,7 +177,7 @@ export default function App() {
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
-      {isSetup && <MatchSetup settings={settings} onSettingChange={updateSetting} onStart={startMatch} />}
+      {isSetup && <MatchSetup profile={profile} settings={settings} onSettingChange={updateSetting} onStart={startMatch} />}
 
       {activeSettings && !ready && <div className="loading">Готовим степь, коней и казаны...</div>}
       {sceneError && (

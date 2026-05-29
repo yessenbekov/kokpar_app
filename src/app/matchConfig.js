@@ -11,6 +11,19 @@ function formatTimer(minutes) {
   return `${String(minutes).padStart(2, "0")}:00`;
 }
 
+function settingsFromProfile(profile = {}) {
+  const preferences = profile.matchPreferences ?? {};
+
+  return {
+    goalType: preferences.goalType === "kazan" ? "kazan" : DEFAULT_SETTINGS.goalType,
+    teamSize: [3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
+    matchMinutes: [2, 3, 5].includes(Number(preferences.matchMinutes))
+      ? Number(preferences.matchMinutes)
+      : DEFAULT_SETTINGS.matchMinutes,
+    horseType: horseTypeById(profile.selectedHorseType).id
+  };
+}
+
 export function makeInitialHud(settings = DEFAULT_SETTINGS) {
   const horseType = horseTypeById(settings.horseType);
 
@@ -37,7 +50,8 @@ export function makeInitialHud(settings = DEFAULT_SETTINGS) {
   };
 }
 
-export function readUrlSettings() {
+export function readUrlSettings(profile) {
+  const profileSettings = settingsFromProfile(profile);
   const params = new URLSearchParams(window.location.search);
   const goalParam = params.get("goal");
   const horseParam = params.get("horse");
@@ -45,10 +59,10 @@ export function readUrlSettings() {
   const matchMinutesParam = Number(params.get("minutes") ?? params.get("time"));
 
   return {
-    goalType: goalParam === "kazan" ? "kazan" : "circle",
-    teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : DEFAULT_SETTINGS.teamSize,
-    matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : DEFAULT_SETTINGS.matchMinutes,
-    horseType: horseTypeById(horseParam).id
+    goalType: params.has("goal") ? (goalParam === "kazan" ? "kazan" : "circle") : profileSettings.goalType,
+    teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
+    matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : profileSettings.matchMinutes,
+    horseType: params.has("horse") ? horseTypeById(horseParam).id : profileSettings.horseType
   };
 }
 
