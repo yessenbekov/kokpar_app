@@ -14,7 +14,7 @@ export function createRider(config) {
   return {
     ...config,
     horseType: horseType.id,
-    horseName: horseType.name,
+    horseName: config.horseName ?? horseType.name,
     vx: 0,
     vz: 0,
     rotation: 0,

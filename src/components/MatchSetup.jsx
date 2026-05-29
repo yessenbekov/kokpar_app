@@ -6,7 +6,7 @@ function formatCoins(value) {
 }
 
 export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
-  const ownedCount = profile.ownedHorseTypes.length;
+  const ownedCount = profile.ownedHorses.length;
 
   return (
     <section className="setup" aria-label="Настройки матча">
@@ -32,9 +32,9 @@ export function MatchSetup({ profile, settings, onSettingChange, onStart }) {
         </div>
 
         <HorseStable
-          ownedHorseTypes={profile.ownedHorseTypes}
-          horseType={settings.horseType}
-          onHorseChange={(horseType) => onSettingChange("horseType", horseType)}
+          ownedHorses={profile.ownedHorses}
+          horseId={settings.horseId}
+          onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
         />
 
         <div className="match-options">

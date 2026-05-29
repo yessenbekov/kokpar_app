@@ -529,6 +529,39 @@ button {
   font-weight: 800;
 }
 
+.horse-progress {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 54px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 15px;
+  color: #3e2c1d;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.horse-progress i {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(67, 42, 18, 0.13);
+  font-style: normal;
+}
+
+.horse-progress b {
+  display: block;
+  width: var(--value);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #176d9f, #d9a12e);
+}
+
+.horse-progress strong {
+  text-align: right;
+  font-size: 12px;
+}
+
 .stable-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1228,6 +1261,15 @@ button {
     grid-template-columns: 88px minmax(0, 1fr) 30px;
   }
 
+  .horse-progress {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .horse-progress strong {
+    text-align: left;
+  }
+
   .choice {
     min-height: 50px;
   }
@@ -1533,6 +1575,13 @@ button {
   .stable-stats {
     gap: 7px 10px;
     margin-top: 11px;
+  }
+
+  .horse-progress {
+    grid-template-columns: 118px minmax(0, 1fr) 48px;
+    gap: 7px;
+    margin-top: 10px;
+    font-size: 11px;
   }
 
   .stable-stat {

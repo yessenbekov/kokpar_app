@@ -1,5 +1,5 @@
 import { Gauge } from "lucide-react";
-import { HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { horseTypeById } from "../game/horseTypes.js";
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -59,9 +59,12 @@ function HorseToken({ horse }) {
   );
 }
 
-export function HorseStable({ horseType, ownedHorseTypes = HORSE_TYPES.map((horse) => horse.id), onHorseChange }) {
-  const selectedHorse = horseTypeById(horseType);
+export function HorseStable({ horseId, ownedHorses = [], onHorseChange }) {
+  const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
+  const selectedOwnedHorse = stableHorses.find((horse) => horse.id === horseId) ?? stableHorses[0];
+  const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
   const statRows = statRowsFor(selectedHorse);
+  const xpProgress = selectedOwnedHorse ? clamp(selectedOwnedHorse.xp / 100, 0, 1) : 0;
 
   return (
     <div className="stable-layout">
@@ -71,22 +74,23 @@ export function HorseStable({ horseType, ownedHorseTypes = HORSE_TYPES.map((hors
           <span>Лошадь</span>
         </div>
         <div className="stable-horse-list">
-          {HORSE_TYPES.map((horse) => {
-            const owned = ownedHorseTypes.includes(horse.id);
-            const active = selectedHorse.id === horse.id;
+          {stableHorses.map((ownedHorse) => {
+            const horse = horseTypeById(ownedHorse.typeId);
+            const active = selectedOwnedHorse.id === ownedHorse.id;
 
             return (
               <button
-                className={`${active ? "stable-card active" : "stable-card"}${owned ? "" : " locked"}`}
+                className={active ? "stable-card active" : "stable-card"}
                 type="button"
-                key={horse.id}
-                disabled={!owned}
-                onClick={() => onHorseChange(horse.id)}
+                key={ownedHorse.id}
+                onClick={() => onHorseChange(ownedHorse.id)}
               >
                 <HorseToken horse={horse} />
                 <span className="stable-card-copy">
-                  <strong>{horse.name}</strong>
-                  <span>{owned ? horse.role : "Закрыто"}</span>
+                  <strong>{ownedHorse.name}</strong>
+                  <span>
+                    {horse.name} · Ур. {ownedHorse.level}
+                  </span>
                 </span>
                 <span className="horse-tier">{horse.tier}</span>
               </button>
@@ -95,19 +99,29 @@ export function HorseStable({ horseType, ownedHorseTypes = HORSE_TYPES.map((hors
         </div>
       </div>
 
-      <section className="stable-detail" style={paletteStyle(selectedHorse)} aria-label={selectedHorse.name}>
+      <section className="stable-detail" style={paletteStyle(selectedHorse)} aria-label={selectedOwnedHorse.name}>
         <div className="stable-detail-head">
           <HorsePreview horse={selectedHorse} />
           <div className="stable-copy">
-            <p className="label">{selectedHorse.role}</p>
-            <h2>{selectedHorse.name}</h2>
+            <p className="label">
+              {selectedHorse.role} · {selectedHorse.name}
+            </p>
+            <h2>{selectedOwnedHorse.name}</h2>
             <p>{selectedHorse.description}</p>
             <div className="horse-tags" aria-label="Профиль лошади">
               <span>{selectedHorse.stable.line}</span>
-              <span>{selectedHorse.stable.temperament}</span>
-              <span>{selectedHorse.stable.specialty}</span>
+              <span>Ур. {selectedOwnedHorse.level}</span>
+              <span>Связь {selectedOwnedHorse.bond}</span>
             </div>
           </div>
+        </div>
+
+        <div className="horse-progress" aria-label="Прогресс лошади">
+          <span>Опыт до следующего уровня</span>
+          <i>
+            <b style={{ "--value": `${Math.round(xpProgress * 100)}%` }} />
+          </i>
+          <strong>{selectedOwnedHorse.xp}/100</strong>
         </div>
 
         <div className="stable-stats" aria-label="Характеристики лошади">

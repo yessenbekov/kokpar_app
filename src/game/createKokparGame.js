@@ -145,7 +145,7 @@ const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", 
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
 const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null) {
   const riders = [];
   const size = clamp(Math.round(teamSize), 1, 5);
 
@@ -161,7 +161,8 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID) 
         x: blueSpot[0],
         z: blueSpot[1],
         color: i === 0 ? COLORS.blue : COLORS.blueAlt,
-        horseType: i === 0 ? playerHorseType : AI_HORSE_ROTATION[i]
+        horseType: i === 0 ? playerHorseType : AI_HORSE_ROTATION[i],
+        horseName: i === 0 ? playerHorseName : null
       })
     );
 
@@ -594,7 +595,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     goalType: options.goalType === "kazan" ? "kazan" : "circle",
     teamSize: clamp(Math.round(Number(options.teamSize) || 3), 1, 5),
     matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60),
-    horseType: horseTypeById(options.horseType).id
+    horseType: horseTypeById(options.horseType).id,
+    horseName: typeof options.horseName === "string" && options.horseName.trim() ? options.horseName.trim() : null
   };
   const playerHorseType = horseTypeById(gameSettings.horseType);
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
@@ -645,7 +647,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName);
   const player = riders[0];
 
   function setRiderGroup(rider, nextGroup) {
@@ -999,7 +1001,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         player.stamina >= 0.2 &&
         kokpar.holder !== player,
       cameraMode: currentCameraMode().label,
-      horseName: playerHorseType.name,
+      horseName: player.horseName ?? gameSettings.horseName ?? playerHorseType.name,
       carry: carryStatusText(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,

@@ -135,10 +135,18 @@ export default function App() {
   function updateSetting(key, value) {
     const nextSettings = { ...settings, [key]: value };
 
+    if (key === "horseId") {
+      const selectedHorse = profile.ownedHorses.find((horse) => horse.id === value) ?? profile.ownedHorses[0];
+      nextSettings.horseId = selectedHorse.id;
+      nextSettings.horseType = selectedHorse.typeId;
+      nextSettings.horseName = selectedHorse.name;
+    }
+
     setSettings(nextSettings);
     setProfile((currentProfile) =>
       savePlayerProfile({
         ...currentProfile,
+        selectedHorseId: nextSettings.horseId,
         selectedHorseType: nextSettings.horseType,
         matchPreferences: {
           goalType: nextSettings.goalType,

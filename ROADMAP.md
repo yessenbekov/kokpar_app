@@ -86,6 +86,7 @@ Already done:
 - first horse class pass with selectable Argymak, Zhuyrik, and Auyr At handling profiles
 - first stable/garage-style horse selection screen with visual horse previews and stat cards
 - local player profile with saved horse selection and match preferences
+- owned horse instances with names, XP, bond, equipment slots, and match record placeholders
 
 Exit criteria:
 
@@ -282,8 +283,8 @@ Systems needed:
 - horse stats: speed, acceleration, turn, stamina, strength, recovery, temperament (first gameplay stats done)
 - stable/garage UI (first horse selection and stat card done)
 - saved player profile (local profile and selected horse persistence done)
-- equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet
-- horse naming and per-horse progression
+- equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet (horse-side starter slots done)
+- horse naming and per-horse progression (starter horse instances with XP/bond done)
 - unlock/progression model
 - mode selection menu
 - network lobby browser

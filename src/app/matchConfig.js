@@ -1,4 +1,5 @@
 import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "../game/horseTypes.js";
+import { ownedHorseById, selectedHorseFromProfile } from "./playerProfile.js";
 
 export const DEFAULT_SETTINGS = {
   goalType: "circle",
@@ -13,6 +14,7 @@ function formatTimer(minutes) {
 
 function settingsFromProfile(profile = {}) {
   const preferences = profile.matchPreferences ?? {};
+  const selectedHorse = selectedHorseFromProfile(profile);
 
   return {
     goalType: preferences.goalType === "kazan" ? "kazan" : DEFAULT_SETTINGS.goalType,
@@ -20,7 +22,9 @@ function settingsFromProfile(profile = {}) {
     matchMinutes: [2, 3, 5].includes(Number(preferences.matchMinutes))
       ? Number(preferences.matchMinutes)
       : DEFAULT_SETTINGS.matchMinutes,
-    horseType: horseTypeById(profile.selectedHorseType).id
+    horseId: selectedHorse.id,
+    horseType: selectedHorse.typeId,
+    horseName: selectedHorse.name
   };
 }
 
@@ -41,7 +45,7 @@ export function makeInitialHud(settings = DEFAULT_SETTINGS) {
     bodyCheckActive: false,
     bodyCheckReady: false,
     cameraMode: "Обзор",
-    horseName: horseType.name,
+    horseName: settings.horseName ?? horseType.name,
     carry: "Кокпар на поле",
     message: "Загрузка матча",
     submessage: "Готовим поле.",
@@ -54,15 +58,31 @@ export function readUrlSettings(profile) {
   const profileSettings = settingsFromProfile(profile);
   const params = new URLSearchParams(window.location.search);
   const goalParam = params.get("goal");
+  const horseIdParam = params.get("horseId");
   const horseParam = params.get("horse");
   const teamSizeParam = Number(params.get("teamSize") ?? params.get("players"));
   const matchMinutesParam = Number(params.get("minutes") ?? params.get("time"));
+  const selectedHorse = horseIdParam
+    ? ownedHorseById(profile, horseIdParam)
+    : params.has("horse")
+      ? (profile?.ownedHorses ?? []).find((horse) => horse.typeId === horseTypeById(horseParam).id) ?? {
+          id: profileSettings.horseId,
+          typeId: horseTypeById(horseParam).id,
+          name: horseTypeById(horseParam).name
+        }
+      : {
+          id: profileSettings.horseId,
+          typeId: profileSettings.horseType,
+          name: profileSettings.horseName
+        };
 
   return {
     goalType: params.has("goal") ? (goalParam === "kazan" ? "kazan" : "circle") : profileSettings.goalType,
     teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
     matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : profileSettings.matchMinutes,
-    horseType: params.has("horse") ? horseTypeById(horseParam).id : profileSettings.horseType
+    horseId: selectedHorse.id,
+    horseType: selectedHorse.typeId,
+    horseName: selectedHorse.name
   };
 }
 
