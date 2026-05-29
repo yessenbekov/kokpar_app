@@ -263,7 +263,7 @@ Product direction:
 
 - a player starts with a basic horse and rider kit
 - the main menu becomes a stable/garage, not a static setup screen
-- horses are selectable objects with stats and visual identity
+- horses are persistent owned objects with names, stats, visual identity, progression, and equipment
 - equipment and accessories affect either cosmetics only or carefully tuned gameplay stats
 - match modes become queues, similar to a battle selection screen
 
@@ -274,7 +274,7 @@ Candidate modes:
 - Wild kokpar: more chaotic open-field mode with fewer formal restrictions
 - Training: free ride, pickup, throw, and body-check practice
 - Tournament: offline bracket/league against AI teams
-- Online team mode: long-term goal after core gameplay is proven
+- Online hosted team mode: player joins created network games with their saved horse
 
 Systems needed:
 
@@ -283,9 +283,13 @@ Systems needed:
 - stable/garage UI (first horse selection and stat card done)
 - saved player profile (local profile and selected horse persistence done)
 - equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet
+- horse naming and per-horse progression
 - unlock/progression model
 - mode selection menu
-- saved player profile
+- network lobby browser
+- hosted lobby creation with match size, rules, goal type, and timer settings
+- team selection inside a lobby before match start
+- server-side room state, ready checks, and match start synchronization
 - balance rules so upgrades create variety without pay-to-win feeling
 
 Exit criteria:
@@ -294,6 +298,34 @@ Exit criteria:
 - player can enter at least two modes from a menu
 - selected horse and kit appear in the match
 - progression direction is documented before any real-money monetization is considered
+
+### Online Hosted Team Mode
+
+Purpose: make a social multiplayer mode where players bring their own stable horse into a hosted kokpar match.
+
+Player flow:
+
+1. Player owns a horse in the stable, gives it a name, equips tack/accessories, and improves it through progression.
+2. Host creates an online game room and chooses match rules: mode, goal type, player count, timer, field/arena, and whether upgrades are enabled or normalized.
+3. Other players browse or receive the room, connect with their selected stable horse, and wait in the lobby.
+4. Connected players choose a side/team. The lobby shows team balance, selected horses, rider names, and ready status.
+5. When enough players are connected and ready, the host/server starts the match.
+6. The match uses each player's selected horse identity and allowed stats/equipment, then reports results back to the profile/progression system.
+
+Design constraints:
+
+- the saved horse should feel personal: name, look, tack, progression, and match history matter
+- matchmaking must support fair play: ranked modes may normalize stats, casual/private rooms can allow full progression
+- lobby UI must make teams, player count, and readiness clear before the game starts
+- disconnect/reconnect and host migration need a later technical plan before real online testing
+
+Prototype milestones:
+
+- local lobby mock screen with host/join/team selection, no network
+- simulated network lobby with fake connected players
+- real private-room networking for small 1v1 or 2v2 tests
+- server-authoritative match state for possession, collisions, scoring, and out-of-bounds
+- progression rewards after online match completion
 
 ## Immediate Next Steps
 
