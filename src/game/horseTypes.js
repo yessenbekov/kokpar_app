@@ -6,6 +6,12 @@ export const HORSE_TYPES = [
     name: "Арғымақ",
     role: "Баланс",
     description: "Ровная скорость, поворот и борьба.",
+    tier: "I",
+    stable: {
+      line: "Стартовая линия",
+      temperament: "Ровный",
+      specialty: "Контроль серке"
+    },
     stats: {
       speed: 1,
       acceleration: 1,
@@ -31,6 +37,12 @@ export const HORSE_TYPES = [
     name: "Жүйрік",
     role: "Скорость",
     description: "Быстро разгоняется, но слабее в силовой борьбе.",
+    tier: "I",
+    stable: {
+      line: "Спринтер",
+      temperament: "Горячий",
+      specialty: "Рывок к серке"
+    },
     stats: {
       speed: 1.11,
       acceleration: 1.14,
@@ -56,6 +68,12 @@ export const HORSE_TYPES = [
     name: "Ауыр ат",
     role: "Сила",
     description: "Тяжелее и сильнее в контакте, но медленнее.",
+    tier: "I",
+    stable: {
+      line: "Силовая линия",
+      temperament: "Упрямый",
+      specialty: "Борьба верхом"
+    },
     stats: {
       speed: 0.92,
       acceleration: 0.88,

@@ -84,6 +84,7 @@ Already done:
 - first action pose pass for ground pickup, mounted pulling, and throw release
 - first locomotion pass for idle, trot, gallop, turning, and braking poses
 - first horse class pass with selectable Argymak, Zhuyrik, and Auyr At handling profiles
+- first stable/garage-style horse selection screen with visual horse previews and stat cards
 
 Exit criteria:
 
@@ -278,6 +279,7 @@ Systems needed:
 
 - horse roster data model (first three selectable classes done in prototype)
 - horse stats: speed, acceleration, turn, stamina, strength, recovery, temperament (first gameplay stats done)
+- stable/garage UI (first horse selection and stat card done)
 - equipment slots: saddle, bridle, blanket, leg wraps, rider uniform, helmet
 - unlock/progression model
 - mode selection menu
