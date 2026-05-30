@@ -44,6 +44,12 @@ The first horse-class pass gives the player three handling profiles: balanced, f
 
 The Online Room mode is currently a local mock lobby. It lets the player choose a side, see fake connected players, toggle ready, and launch a mock match. It is a UI/data-flow prototype before real networking.
 
+## Data storage
+
+Profile data currently persists in the browser through `src/app/profileStore.js`, using `localStorage` under `kokpar.playerProfile.v1`. The store exposes `read`, `save`, and `update`, so the game now talks to a single persistence boundary instead of writing to browser storage directly.
+
+The next backend step is to replace or wrap this local store with a server-backed profile store for accounts, stable horses, XP, coins, equipment, and match history. Realtime rooms and authoritative online match state should come after that profile backend is stable.
+
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
 After a successful goal, the camera holds briefly on the target before the next start countdown.
@@ -63,7 +69,8 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 - `src/App.jsx`: React application shell and game lifecycle wiring
 - `src/app/gameModes.js`: mode definitions for Kokpar, Kok-boru, Training, and Online Room
 - `src/app/matchConfig.js`: match settings and initial HUD state
-- `src/app/playerProfile.js`: local player profile, named owned horses, equipment slots, and saved match preferences
+- `src/app/playerProfile.js`: player profile shape, owned horses, equipment slots, and validation
+- `src/app/profileStore.js`: local persistence boundary for profile data, ready to swap toward a backend adapter
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
 - `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring

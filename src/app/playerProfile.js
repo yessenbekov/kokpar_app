@@ -1,7 +1,6 @@
 import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
 import { DEFAULT_MODE_ID, gameModeById } from "./gameModes.js";
 
-const PROFILE_STORAGE_KEY = "kokpar.playerProfile.v1";
 const HORSE_IDS = new Set(HORSE_TYPES.map((horse) => horse.id));
 const DEFAULT_OWNED_HORSES = [
   createOwnedHorse({
@@ -161,27 +160,4 @@ export function selectedHorseFromProfile(profile) {
 export function ownedHorseById(profile, horseId) {
   const safeProfile = sanitizePlayerProfile(profile);
   return safeProfile.ownedHorses.find((horse) => horse.id === horseId) ?? selectedHorseFromProfile(safeProfile);
-}
-
-export function readPlayerProfile() {
-  if (typeof window === "undefined") return DEFAULT_PLAYER_PROFILE;
-
-  try {
-    const storedProfile = window.localStorage.getItem(PROFILE_STORAGE_KEY);
-    return sanitizePlayerProfile(storedProfile ? JSON.parse(storedProfile) : DEFAULT_PLAYER_PROFILE);
-  } catch {
-    return DEFAULT_PLAYER_PROFILE;
-  }
-}
-
-export function savePlayerProfile(profile) {
-  const nextProfile = sanitizePlayerProfile(profile);
-
-  try {
-    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(nextProfile));
-  } catch {
-    // Safari private mode can reject localStorage writes; the in-memory profile still works.
-  }
-
-  return nextProfile;
 }

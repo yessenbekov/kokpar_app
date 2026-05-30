@@ -88,6 +88,7 @@ Already done:
 - local player profile with saved horse selection and match preferences
 - owned horse instances with names, XP, bond, equipment slots, and match record placeholders
 - stable UI for renaming owned horses plus visible record and equipment slots
+- profile persistence boundary with a local `profileStore` adapter, ready for a future server adapter
 - mode selection for Kokpar, Kok-boru, Training, and Online Room mock
 - local Online Room mock lobby with side selection, ready state, and fake connected players
 
@@ -146,6 +147,25 @@ Exit criteria:
 - match flow matches the chosen kokpar format
 - every reset has a clear reason
 - rules can be explained in one screen
+
+## Phase 2.5: Profile Backend Foundation
+
+Purpose: move progression from one browser into an account-backed player profile.
+
+Tasks:
+
+- keep all profile reads and writes behind the profile store boundary
+- add server-backed accounts and authenticated player profiles
+- persist owned horses, XP, levels, bond, coins, equipment, and match history
+- keep local storage as a guest/offline fallback
+- add API-level validation so client-side edits cannot mint progress or items
+- connect the online room mock to real hosted lobbies after profile persistence works
+
+Exit criteria:
+
+- a player can log in on another device and see the same stable
+- match rewards update through the backend, not direct browser edits
+- lobbies know each player's selected horse and team side
 
 ## Phase 3: Visual Upgrade Inside Three.js
 

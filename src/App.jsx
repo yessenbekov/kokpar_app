@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
-import { readPlayerProfile, savePlayerProfile } from "./app/playerProfile.js";
+import { playerProfileStore } from "./app/profileStore.js";
 import { FieldRadar } from "./components/FieldRadar.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
@@ -15,7 +15,7 @@ export default function App() {
   const gameRef = useRef(null);
   const joystickRef = useRef(null);
   const initialProfileRef = useRef(null);
-  if (!initialProfileRef.current) initialProfileRef.current = readPlayerProfile();
+  if (!initialProfileRef.current) initialProfileRef.current = playerProfileStore.read();
   const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
   const [profile, setProfile] = useState(() => initialProfileRef.current);
   const [settings, setSettings] = useState(() => readUrlSettings(initialProfileRef.current));
@@ -151,7 +151,7 @@ export default function App() {
 
     setSettings(nextSettings);
     setProfile((currentProfile) =>
-      savePlayerProfile({
+      playerProfileStore.save({
         ...currentProfile,
         selectedHorseId: nextSettings.horseId,
         selectedHorseType: nextSettings.horseType,
@@ -174,7 +174,7 @@ export default function App() {
       const renamedHorses = currentProfile.ownedHorses.map((horse) =>
         horse.id === horseId ? { ...horse, name: trimmedName } : horse
       );
-      const nextProfile = savePlayerProfile({
+      const nextProfile = playerProfileStore.save({
         ...currentProfile,
         ownedHorses: renamedHorses
       });
