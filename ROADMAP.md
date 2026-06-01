@@ -89,6 +89,7 @@ Already done:
 - owned horse instances with names, XP, bond, equipment slots, and match record placeholders
 - stable UI for renaming owned horses plus visible record and equipment slots
 - profile persistence boundary with a local `profileStore` adapter, ready for a future server adapter
+- Supabase env template, profile database migration, browser client, and async profile store adapter
 - mode selection for Kokpar, Kok-boru, Training, and Online Room mock
 - local Online Room mock lobby with side selection, ready state, and fake connected players
 
@@ -155,7 +156,7 @@ Purpose: move progression from one browser into an account-backed player profile
 Tasks:
 
 - keep all profile reads and writes behind the profile store boundary
-- add server-backed accounts and authenticated player profiles
+- add server-backed accounts and authenticated player profiles (schema and adapter started)
 - persist owned horses, XP, levels, bond, coins, equipment, and match history
 - keep local storage as a guest/offline fallback
 - add API-level validation so client-side edits cannot mint progress or items

@@ -13,6 +13,8 @@ npm run dev
 
 Open the local URL printed by Vite.
 
+For Supabase-backed profile work, copy `.env.example` to `.env.local` and fill in the project URL and publishable key. `.env.local` is ignored by git.
+
 To regenerate the starter low-poly GLB assets:
 
 ```bash
@@ -48,7 +50,9 @@ The Online Room mode is currently a local mock lobby. It lets the player choose 
 
 Profile data currently persists in the browser through `src/app/profileStore.js`, using `localStorage` under `kokpar.playerProfile.v1`. The store exposes `read`, `save`, and `update`, so the game now talks to a single persistence boundary instead of writing to browser storage directly.
 
-The next backend step is to replace or wrap this local store with a server-backed profile store for accounts, stable horses, XP, coins, equipment, and match history. Realtime rooms and authoritative online match state should come after that profile backend is stable.
+Supabase groundwork lives in `src/app/supabaseClient.js`, `src/app/supabaseProfileStore.js`, and `supabase/migrations/001_player_profile.sql`. The async Supabase store is ready for the upcoming auth/profile UI step, but the active game still uses the local store until sign-in is added.
+
+Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. Realtime rooms and authoritative online match state should come after the profile backend is stable.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
@@ -71,6 +75,8 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 - `src/app/matchConfig.js`: match settings and initial HUD state
 - `src/app/playerProfile.js`: player profile shape, owned horses, equipment slots, and validation
 - `src/app/profileStore.js`: local persistence boundary for profile data, ready to swap toward a backend adapter
+- `src/app/supabaseClient.js`: browser Supabase client configured through Vite env vars
+- `src/app/supabaseProfileStore.js`: async profile adapter for Supabase-backed accounts
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
 - `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring
@@ -80,6 +86,7 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 - `src/game/constants.js`: world and tuning constants
 - `src/styles/app.css`: layout and HUD styles
 - `scripts/generate-model-assets.mjs`: starter GLB asset generator
+- `supabase/migrations/*`: database schema for profile/backend work
 - `public/models/manifest.json`: model paths and transform settings
 - `public/models/*`: folders for horse, rider, and serke GLB assets
 - `REFERENCES.md`: gameplay and visual references for future iterations
