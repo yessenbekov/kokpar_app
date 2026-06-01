@@ -7,6 +7,8 @@ const signedOutState = {
   status: isSupabaseConfigured ? "signed-out" : "unconfigured",
   syncStatus: "local",
   email: "",
+  phone: "",
+  phoneChannel: "sms",
   message: isSupabaseConfigured ? "Гостевой профиль" : "Supabase не настроен",
   error: ""
 };
@@ -35,6 +37,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       status: "signed-in",
       syncStatus: "syncing",
       email: user.email ?? "",
+      phone: user.phone ?? "",
+      phoneChannel: "sms",
       message: "Синхронизация",
       error: ""
     });
@@ -52,6 +56,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         status: "signed-in",
         syncStatus: "synced",
         email: user.email ?? "",
+        phone: user.phone ?? "",
+        phoneChannel: "sms",
         message: result.status === "missing" ? "Локальный профиль перенесен" : "Профиль синхронизирован",
         error: ""
       });
@@ -60,6 +66,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         status: "signed-in",
         syncStatus: "error",
         email: user.email ?? "",
+        phone: user.phone ?? "",
+        phoneChannel: "sms",
         message: "Локальный профиль активен",
         error: error instanceof Error ? error.message : "Ошибка синхронизации"
       });
@@ -122,6 +130,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       status: "sending",
       syncStatus: "sending",
       email: cleanEmail,
+      phone: "",
+      phoneChannel: "sms",
       message: "Отправляем ссылку",
       error: ""
     }));
@@ -139,6 +149,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         status: "error",
         syncStatus: "error",
         email: cleanEmail,
+        phone: "",
+        phoneChannel: "sms",
         message: "Гостевой профиль активен",
         error: error.message
       });
@@ -149,9 +161,101 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       status: "signed-out",
       syncStatus: "sent",
       email: cleanEmail,
+      phone: "",
+      phoneChannel: "sms",
       message: "Ссылка отправлена",
       error: ""
     });
+  }
+
+  async function signInWithPhone(phone, channel = "sms") {
+    if (!supabase) {
+      setAuthState({ ...signedOutState, status: "unconfigured", syncStatus: "error", error: "Supabase не настроен" });
+      return;
+    }
+
+    const cleanPhone = phone.trim();
+    if (!cleanPhone) return;
+    const otpChannel = channel === "whatsapp" ? "whatsapp" : "sms";
+
+    setAuthState((current) => ({
+      ...current,
+      status: "sending",
+      syncStatus: "sending",
+      email: "",
+      phone: cleanPhone,
+      phoneChannel: otpChannel,
+      message: otpChannel === "whatsapp" ? "Отправляем WhatsApp" : "Отправляем SMS",
+      error: ""
+    }));
+
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: cleanPhone,
+      options: {
+        channel: otpChannel
+      }
+    });
+
+    if (error) {
+      setAuthState({
+        ...signedOutState,
+        status: "error",
+        syncStatus: "error",
+        email: "",
+        phone: cleanPhone,
+        phoneChannel: otpChannel,
+        message: "Гостевой профиль активен",
+        error: error.message
+      });
+      return;
+    }
+
+    setAuthState({
+      status: "signed-out",
+      syncStatus: "phone-sent",
+      email: "",
+      phone: cleanPhone,
+      phoneChannel: otpChannel,
+      message: otpChannel === "whatsapp" ? "Код отправлен в WhatsApp" : "Код отправлен по SMS",
+      error: ""
+    });
+  }
+
+  async function verifyPhoneOtp(phone, token) {
+    if (!supabase) return;
+
+    const cleanPhone = phone.trim();
+    const cleanToken = token.trim();
+    if (!cleanPhone || !cleanToken) return;
+
+    setAuthState((current) => ({
+      ...current,
+      status: "verifying",
+      syncStatus: "verifying",
+      phone: cleanPhone,
+      phoneChannel: authState.phoneChannel ?? "sms",
+      message: "Проверяем код",
+      error: ""
+    }));
+
+    const { error } = await supabase.auth.verifyOtp({
+      phone: cleanPhone,
+      token: cleanToken,
+      type: "sms"
+    });
+
+    if (error) {
+      setAuthState({
+        ...signedOutState,
+        status: "error",
+        syncStatus: "error",
+        email: "",
+        phone: cleanPhone,
+        phoneChannel: authState.phoneChannel ?? "sms",
+        message: "Код не подошел",
+        error: error.message
+      });
+    }
   }
 
   async function signOut() {
@@ -182,6 +286,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
   return {
     authState,
     signInWithEmail,
+    signInWithPhone,
+    verifyPhoneOtp,
     signOut,
     syncProfile
   };

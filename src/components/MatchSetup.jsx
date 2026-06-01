@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CircleDot, Clock3, LogOut, Mail, Play, Trophy, Users } from "lucide-react";
+import { CircleDot, Clock3, LogIn, LogOut, Play, Trophy, Users } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { MockOnlineLobby } from "./MockOnlineLobby.jsx";
@@ -9,19 +9,8 @@ function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
 }
 
-function AuthPanel({ auth, onEmailSignIn, onSignOut }) {
-  const [email, setEmail] = useState(auth.email ?? "");
+function AccountPanel({ auth, onBackToLogin, onSignOut }) {
   const signedIn = auth.status === "signed-in";
-  const busy = auth.status === "loading" || auth.status === "sending" || auth.syncStatus === "syncing";
-
-  useEffect(() => {
-    if (auth.email) setEmail(auth.email);
-  }, [auth.email]);
-
-  function submitEmail(event) {
-    event.preventDefault();
-    onEmailSignIn(email);
-  }
 
   return (
     <div className={signedIn ? "auth-panel signed-in" : "auth-panel"} aria-label="Аккаунт">
@@ -37,28 +26,16 @@ function AuthPanel({ auth, onEmailSignIn, onSignOut }) {
           <span>Выйти</span>
         </button>
       ) : (
-        <form className="auth-form" onSubmit={submitEmail}>
-          <input
-            aria-label="Email для входа"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={busy}
-          />
-          <button type="submit" disabled={busy || !email.trim()}>
-            <Mail size={15} strokeWidth={2.5} />
-            <span>{auth.status === "sending" ? "..." : "Войти"}</span>
-          </button>
-        </form>
+        <button className="auth-action" type="button" onClick={onBackToLogin}>
+          <LogIn size={15} strokeWidth={2.5} />
+          <span>Вход</span>
+        </button>
       )}
     </div>
   );
 }
 
-export function MatchSetup({ profile, settings, auth, onEmailSignIn, onSignOut, onHorseRename, onSettingChange, onStart }) {
+export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onSettingChange, onStart }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -91,7 +68,7 @@ export function MatchSetup({ profile, settings, auth, onEmailSignIn, onSignOut, 
                 {ownedCount}/{profile.stableCapacity}
               </span>
             </span>
-            <AuthPanel auth={auth} onEmailSignIn={onEmailSignIn} onSignOut={onSignOut} />
+            <AccountPanel auth={auth} onBackToLogin={onBackToLogin} onSignOut={onSignOut} />
           </div>
           <Trophy size={30} strokeWidth={2.2} />
         </div>

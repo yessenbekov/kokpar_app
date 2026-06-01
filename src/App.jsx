@@ -3,6 +3,7 @@ import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { playerProfileStore } from "./app/profileStore.js";
 import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
+import { AuthGate } from "./components/AuthGate.jsx";
 import { FieldRadar } from "./components/FieldRadar.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
@@ -25,7 +26,10 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
   const [feedbackEnabled, setFeedbackEnabled] = useState(true);
-  const { authState, signInWithEmail, signOut, syncProfile } = useSupabaseProfile({ onProfileLoaded: loadSyncedProfile });
+  const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
+  const { authState, signInWithEmail, signInWithPhone, verifyPhoneOtp, signOut, syncProfile } = useSupabaseProfile({
+    onProfileLoaded: loadSyncedProfile
+  });
 
   function loadSyncedProfile(nextProfile) {
     setProfile(nextProfile);
@@ -61,6 +65,10 @@ export default function App() {
       gameRef.current = null;
     };
   }, [activeSettings]);
+
+  useEffect(() => {
+    if (authState.status === "signed-in") setSetupEntered(true);
+  }, [authState.status]);
 
   function setGameTouchInput(input) {
     gameRef.current?.setTouchInput?.(input);
@@ -222,19 +230,39 @@ export default function App() {
     gameRef.current?.setFeedbackEnabled?.(enabled);
   }
 
+  async function handleSignOut() {
+    await signOut();
+    if (!activeSettings) setSetupEntered(false);
+  }
+
+  function backToLogin() {
+    setSetupEntered(false);
+  }
+
   const isSetup = !activeSettings;
+  const showAuthGate = isSetup && !setupEntered && authState.status !== "signed-in";
 
   return (
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
-      {isSetup && (
+      {showAuthGate && (
+        <AuthGate
+          auth={authState}
+          onEmailSignIn={signInWithEmail}
+          onPhoneSignIn={signInWithPhone}
+          onPhoneVerify={verifyPhoneOtp}
+          onGuestContinue={() => setSetupEntered(true)}
+        />
+      )}
+
+      {isSetup && !showAuthGate && (
         <MatchSetup
           profile={profile}
           settings={settings}
           auth={authState}
-          onEmailSignIn={signInWithEmail}
-          onSignOut={signOut}
+          onBackToLogin={backToLogin}
+          onSignOut={handleSignOut}
           onHorseRename={renameHorse}
           onSettingChange={updateSetting}
           onStart={startMatch}
