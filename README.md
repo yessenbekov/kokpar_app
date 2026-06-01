@@ -52,7 +52,7 @@ Profile data currently persists in the browser through `src/app/profileStore.js`
 
 Supabase groundwork lives in `src/app/supabaseClient.js`, `src/app/supabaseProfileStore.js`, `src/app/useSupabaseProfile.js`, and `supabase/migrations/001_player_profile.sql`. The active game keeps local storage as the guest fallback and switches to Supabase profile sync after sign-in.
 
-Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. The first screen includes email magic-link sign-in, phone OTP through SMS or WhatsApp, and guest play; guests keep using local storage, while signed-in players load and save the stable profile through Supabase. WhatsApp OTP requires phone auth with a Twilio WhatsApp sender configured in Supabase. Realtime rooms and authoritative online match state should come after the profile backend is stable.
+Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. The first screen prioritizes phone OTP with WhatsApp as the default channel, keeps SMS and email as fallback options, and allows guest play; guests keep using local storage, while signed-in players load and save the stable profile through Supabase. WhatsApp OTP requires phone auth with a Twilio WhatsApp sender configured in Supabase. Realtime rooms and authoritative online match state should come after the profile backend is stable.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
