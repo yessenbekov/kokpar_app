@@ -77,8 +77,7 @@ export function createSupabaseProfileStore({ client = supabase } = {}) {
       if (profileError) throw profileError;
 
       if (!profileRow) {
-        const profile = await store.save(DEFAULT_PLAYER_PROFILE);
-        return { status: "created", profile };
+        return { status: "missing", profile: sanitizePlayerProfile(DEFAULT_PLAYER_PROFILE) };
       }
 
       const { data: horseRows, error: horsesError } = await client

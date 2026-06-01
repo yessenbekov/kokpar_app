@@ -50,9 +50,9 @@ The Online Room mode is currently a local mock lobby. It lets the player choose 
 
 Profile data currently persists in the browser through `src/app/profileStore.js`, using `localStorage` under `kokpar.playerProfile.v1`. The store exposes `read`, `save`, and `update`, so the game now talks to a single persistence boundary instead of writing to browser storage directly.
 
-Supabase groundwork lives in `src/app/supabaseClient.js`, `src/app/supabaseProfileStore.js`, and `supabase/migrations/001_player_profile.sql`. The async Supabase store is ready for the upcoming auth/profile UI step, but the active game still uses the local store until sign-in is added.
+Supabase groundwork lives in `src/app/supabaseClient.js`, `src/app/supabaseProfileStore.js`, `src/app/useSupabaseProfile.js`, and `supabase/migrations/001_player_profile.sql`. The active game keeps local storage as the guest fallback and switches to Supabase profile sync after sign-in.
 
-Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. Realtime rooms and authoritative online match state should come after the profile backend is stable.
+Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. The setup screen includes email magic-link sign-in; guests keep using local storage, while signed-in players load and save the stable profile through Supabase. Realtime rooms and authoritative online match state should come after the profile backend is stable.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
@@ -77,6 +77,7 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 - `src/app/profileStore.js`: local persistence boundary for profile data, ready to swap toward a backend adapter
 - `src/app/supabaseClient.js`: browser Supabase client configured through Vite env vars
 - `src/app/supabaseProfileStore.js`: async profile adapter for Supabase-backed accounts
+- `src/app/useSupabaseProfile.js`: auth/session and profile sync hook
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
 - `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring

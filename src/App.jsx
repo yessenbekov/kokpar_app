@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { playerProfileStore } from "./app/profileStore.js";
+import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
 import { FieldRadar } from "./components/FieldRadar.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
@@ -24,6 +25,12 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
   const [feedbackEnabled, setFeedbackEnabled] = useState(true);
+  const { authState, signInWithEmail, signOut, syncProfile } = useSupabaseProfile({ onProfileLoaded: loadSyncedProfile });
+
+  function loadSyncedProfile(nextProfile) {
+    setProfile(nextProfile);
+    setSettings(readUrlSettings(nextProfile));
+  }
 
   useEffect(() => {
     if (!mountRef.current || !activeSettings) return undefined;
@@ -151,7 +158,7 @@ export default function App() {
 
     setSettings(nextSettings);
     setProfile((currentProfile) =>
-      playerProfileStore.save({
+      saveProfile({
         ...currentProfile,
         selectedHorseId: nextSettings.horseId,
         selectedHorseType: nextSettings.horseType,
@@ -166,6 +173,12 @@ export default function App() {
     );
   }
 
+  function saveProfile(nextProfile) {
+    const savedProfile = playerProfileStore.save(nextProfile);
+    syncProfile(savedProfile);
+    return savedProfile;
+  }
+
   function renameHorse(horseId, name) {
     const trimmedName = name.trim().slice(0, 24);
     if (!trimmedName) return;
@@ -174,7 +187,7 @@ export default function App() {
       const renamedHorses = currentProfile.ownedHorses.map((horse) =>
         horse.id === horseId ? { ...horse, name: trimmedName } : horse
       );
-      const nextProfile = playerProfileStore.save({
+      const nextProfile = saveProfile({
         ...currentProfile,
         ownedHorses: renamedHorses
       });
@@ -219,6 +232,9 @@ export default function App() {
         <MatchSetup
           profile={profile}
           settings={settings}
+          auth={authState}
+          onEmailSignIn={signInWithEmail}
+          onSignOut={signOut}
           onHorseRename={renameHorse}
           onSettingChange={updateSetting}
           onStart={startMatch}

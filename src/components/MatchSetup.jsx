@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CircleDot, Clock3, Play, Trophy, Users } from "lucide-react";
+import { CircleDot, Clock3, LogOut, Mail, Play, Trophy, Users } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { MockOnlineLobby } from "./MockOnlineLobby.jsx";
@@ -9,7 +9,56 @@ function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
 }
 
-export function MatchSetup({ profile, settings, onHorseRename, onSettingChange, onStart }) {
+function AuthPanel({ auth, onEmailSignIn, onSignOut }) {
+  const [email, setEmail] = useState(auth.email ?? "");
+  const signedIn = auth.status === "signed-in";
+  const busy = auth.status === "loading" || auth.status === "sending" || auth.syncStatus === "syncing";
+
+  useEffect(() => {
+    if (auth.email) setEmail(auth.email);
+  }, [auth.email]);
+
+  function submitEmail(event) {
+    event.preventDefault();
+    onEmailSignIn(email);
+  }
+
+  return (
+    <div className={signedIn ? "auth-panel signed-in" : "auth-panel"} aria-label="Аккаунт">
+      <div className="auth-copy">
+        <span>{signedIn ? "Supabase" : "Гость"}</span>
+        <strong>{signedIn ? auth.email : auth.message}</strong>
+        {(auth.error || signedIn) && <small>{auth.error || auth.message}</small>}
+      </div>
+
+      {signedIn ? (
+        <button className="auth-action" type="button" onClick={onSignOut}>
+          <LogOut size={15} strokeWidth={2.5} />
+          <span>Выйти</span>
+        </button>
+      ) : (
+        <form className="auth-form" onSubmit={submitEmail}>
+          <input
+            aria-label="Email для входа"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            disabled={busy}
+          />
+          <button type="submit" disabled={busy || !email.trim()}>
+            <Mail size={15} strokeWidth={2.5} />
+            <span>{auth.status === "sending" ? "..." : "Войти"}</span>
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+export function MatchSetup({ profile, settings, auth, onEmailSignIn, onSignOut, onHorseRename, onSettingChange, onStart }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -29,17 +78,20 @@ export function MatchSetup({ profile, settings, onHorseRename, onSettingChange, 
             <p className="label">Кокпар 3D</p>
             <h1>Конюшня</h1>
           </div>
-          <div className="profile-strip" aria-label="Профиль игрока">
-            <span className="profile-avatar">{profile.riderName.slice(0, 1)}</span>
-            <span className="profile-name">
-              <span>Профиль</span>
-              <strong>{profile.riderName}</strong>
+          <div className="profile-stack">
+            <span className="profile-strip" aria-label="Профиль игрока">
+              <span className="profile-avatar">{profile.riderName.slice(0, 1)}</span>
+              <span className="profile-name">
+                <span>Профиль</span>
+                <strong>{profile.riderName}</strong>
+              </span>
+              <span className="profile-chip">Ур. {profile.level}</span>
+              <span className="profile-chip">{formatCoins(profile.coins)} күміс</span>
+              <span className="profile-chip">
+                {ownedCount}/{profile.stableCapacity}
+              </span>
             </span>
-            <span className="profile-chip">Ур. {profile.level}</span>
-            <span className="profile-chip">{formatCoins(profile.coins)} күміс</span>
-            <span className="profile-chip">
-              {ownedCount}/{profile.stableCapacity}
-            </span>
+            <AuthPanel auth={auth} onEmailSignIn={onEmailSignIn} onSignOut={onSignOut} />
           </div>
           <Trophy size={30} strokeWidth={2.2} />
         </div>
