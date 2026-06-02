@@ -131,6 +131,16 @@ button {
   font-weight: 850;
 }
 
+.auth-method-tabs button small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.auth-method-tabs button.is-upcoming {
+  color: rgba(62, 44, 29, 0.72);
+}
+
 .auth-method-tabs button.active,
 .auth-channel-toggle button.active {
   border-color: rgba(23, 109, 159, 0.5);
@@ -146,6 +156,43 @@ button {
 .auth-phone-stack {
   display: grid;
   gap: 8px;
+}
+
+.auth-coming-soon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 66px;
+  padding: 12px;
+  border: 1px solid rgba(76, 54, 34, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.68);
+  color: #3e2c1d;
+}
+
+.auth-coming-soon div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.auth-coming-soon strong,
+.auth-coming-soon span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-coming-soon strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.auth-coming-soon span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .auth-gate-form input,

@@ -8,7 +8,7 @@ const signedOutState = {
   syncStatus: "local",
   email: "",
   phone: "",
-  phoneChannel: "whatsapp",
+  phoneChannel: "sms",
   message: isSupabaseConfigured ? "Гостевой профиль" : "Supabase не настроен",
   error: ""
 };
@@ -38,7 +38,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       syncStatus: "syncing",
       email: user.email ?? "",
       phone: user.phone ?? "",
-      phoneChannel: "whatsapp",
+      phoneChannel: "sms",
       message: "Синхронизация",
       error: ""
     });
@@ -57,7 +57,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         syncStatus: "synced",
         email: user.email ?? "",
         phone: user.phone ?? "",
-        phoneChannel: "whatsapp",
+        phoneChannel: "sms",
         message: result.status === "missing" ? "Локальный профиль перенесен" : "Профиль синхронизирован",
         error: ""
       });
@@ -67,7 +67,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         syncStatus: "error",
         email: user.email ?? "",
         phone: user.phone ?? "",
-        phoneChannel: "whatsapp",
+        phoneChannel: "sms",
         message: "Локальный профиль активен",
         error: error instanceof Error ? error.message : "Ошибка синхронизации"
       });
@@ -131,7 +131,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       syncStatus: "sending",
       email: cleanEmail,
       phone: "",
-      phoneChannel: "whatsapp",
+      phoneChannel: "sms",
       message: "Отправляем ссылку",
       error: ""
     }));
@@ -150,7 +150,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         syncStatus: "error",
         email: cleanEmail,
         phone: "",
-        phoneChannel: "whatsapp",
+        phoneChannel: "sms",
         message: "Гостевой профиль активен",
         error: error.message
       });
@@ -162,13 +162,13 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       syncStatus: "sent",
       email: cleanEmail,
       phone: "",
-      phoneChannel: "whatsapp",
+      phoneChannel: "sms",
       message: "Ссылка отправлена",
       error: ""
     });
   }
 
-  async function signInWithPhone(phone, channel = "whatsapp") {
+  async function signInWithPhone(phone, channel = "sms") {
     if (!supabase) {
       setAuthState({ ...signedOutState, status: "unconfigured", syncStatus: "error", error: "Supabase не настроен" });
       return;
@@ -233,7 +233,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       status: "verifying",
       syncStatus: "verifying",
       phone: cleanPhone,
-      phoneChannel: authState.phoneChannel ?? "whatsapp",
+      phoneChannel: authState.phoneChannel ?? "sms",
       message: "Проверяем код",
       error: ""
     }));
@@ -251,7 +251,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         syncStatus: "error",
         email: "",
         phone: cleanPhone,
-        phoneChannel: authState.phoneChannel ?? "whatsapp",
+        phoneChannel: authState.phoneChannel ?? "sms",
         message: "Код не подошел",
         error: error.message
       });

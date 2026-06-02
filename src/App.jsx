@@ -27,7 +27,7 @@ export default function App() {
   const [sceneError, setSceneError] = useState("");
   const [feedbackEnabled, setFeedbackEnabled] = useState(true);
   const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
-  const { authState, signInWithEmail, signInWithPhone, verifyPhoneOtp, signOut, syncProfile } = useSupabaseProfile({
+  const { authState, signInWithEmail, signOut, syncProfile } = useSupabaseProfile({
     onProfileLoaded: loadSyncedProfile
   });
 
@@ -250,8 +250,6 @@ export default function App() {
         <AuthGate
           auth={authState}
           onEmailSignIn={signInWithEmail}
-          onPhoneSignIn={signInWithPhone}
-          onPhoneVerify={verifyPhoneOtp}
           onGuestContinue={() => setSetupEntered(true)}
         />
       )}

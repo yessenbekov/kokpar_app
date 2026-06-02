@@ -90,7 +90,7 @@ Already done:
 - stable UI for renaming owned horses plus visible record and equipment slots
 - profile persistence boundary with a local `profileStore` adapter, ready for a future server adapter
 - Supabase env template, profile database migration, browser client, and async profile store adapter
-- first-screen phone-first auth with WhatsApp default, SMS/email fallbacks, guest mode, and signed-in profile sync through Supabase
+- first-screen MVP auth with email magic links, guest mode, signed-in profile sync through Supabase, and WhatsApp marked as a later production channel
 - mode selection for Kokpar, Kok-boru, Training, and Online Room mock
 - local Online Room mock lobby with side selection, ready state, and fake connected players
 

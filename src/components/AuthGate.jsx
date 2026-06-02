@@ -1,37 +1,18 @@
 import { useEffect, useState } from "react";
-import { Mail, MessageSquareText, Play, Smartphone, UserRound } from "lucide-react";
+import { Mail, Play, Smartphone, UserRound } from "lucide-react";
 
-export function AuthGate({ auth, onEmailSignIn, onPhoneSignIn, onPhoneVerify, onGuestContinue }) {
-  const [method, setMethod] = useState("phone");
+export function AuthGate({ auth, onEmailSignIn, onGuestContinue }) {
+  const [method, setMethod] = useState("email");
   const [email, setEmail] = useState(auth.email ?? "");
-  const [phone, setPhone] = useState(auth.phone ?? "");
-  const [phoneChannel, setPhoneChannel] = useState(auth.phoneChannel ?? "whatsapp");
-  const [phoneCode, setPhoneCode] = useState("");
   const busy = ["loading", "sending", "verifying"].includes(auth.status) || auth.syncStatus === "syncing";
-  const phoneCodeSent = auth.syncStatus === "phone-sent" && method === "phone";
 
   useEffect(() => {
     if (auth.email) setEmail(auth.email);
-    if (auth.phone) {
-      setPhone(auth.phone);
-      setPhoneChannel(auth.phoneChannel ?? "whatsapp");
-      setMethod("phone");
-    }
-  }, [auth.email, auth.phone, auth.phoneChannel]);
+  }, [auth.email]);
 
   function submitEmail(event) {
     event.preventDefault();
     onEmailSignIn(email);
-  }
-
-  function submitPhone(event) {
-    event.preventDefault();
-    onPhoneSignIn(phone, phoneChannel);
-  }
-
-  function submitPhoneCode(event) {
-    event.preventDefault();
-    onPhoneVerify(phone, phoneCode);
   }
 
   return (
@@ -43,13 +24,18 @@ export function AuthGate({ auth, onEmailSignIn, onPhoneSignIn, onPhoneVerify, on
         </div>
 
         <div className="auth-method-tabs" role="tablist" aria-label="Способ входа">
-          <button className={method === "phone" ? "active" : ""} type="button" onClick={() => setMethod("phone")}>
-            <Smartphone size={16} strokeWidth={2.5} />
-            <span>Телефон</span>
-          </button>
           <button className={method === "email" ? "active" : ""} type="button" onClick={() => setMethod("email")}>
             <Mail size={16} strokeWidth={2.5} />
             <span>Email</span>
+          </button>
+          <button
+            className={method === "phone" ? "active is-upcoming" : "is-upcoming"}
+            type="button"
+            onClick={() => setMethod("phone")}
+          >
+            <Smartphone size={16} strokeWidth={2.5} />
+            <span>WhatsApp</span>
+            <small>позже</small>
           </button>
         </div>
 
@@ -71,54 +57,12 @@ export function AuthGate({ auth, onEmailSignIn, onPhoneSignIn, onPhoneVerify, on
             </button>
           </form>
         ) : (
-          <div className="auth-phone-stack">
-            <div className="auth-channel-toggle" aria-label="Канал кода">
-              <button
-                className={phoneChannel === "whatsapp" ? "active" : ""}
-                type="button"
-                onClick={() => setPhoneChannel("whatsapp")}
-              >
-                WhatsApp
-              </button>
-              <button className={phoneChannel === "sms" ? "active" : ""} type="button" onClick={() => setPhoneChannel("sms")}>
-                SMS
-              </button>
+          <div className="auth-coming-soon" role="status">
+            <Smartphone size={18} strokeWidth={2.5} />
+            <div>
+              <strong>WhatsApp вход позже</strong>
+              <span>Сейчас надежный MVP-путь: email или гостевой профиль.</span>
             </div>
-
-            <form className="auth-gate-form" onSubmit={submitPhone}>
-              <input
-                aria-label="Телефон для входа"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="+77010000000"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                disabled={busy}
-              />
-              <button type="submit" disabled={busy || !phone.trim()}>
-                <MessageSquareText size={17} strokeWidth={2.5} />
-                <span>{auth.status === "sending" ? "..." : "Код"}</span>
-              </button>
-            </form>
-
-            {phoneCodeSent && (
-              <form className="auth-gate-form" onSubmit={submitPhoneCode}>
-                <input
-                  aria-label="Код из SMS"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder="код"
-                  value={phoneCode}
-                  onChange={(event) => setPhoneCode(event.target.value)}
-                  disabled={busy}
-                />
-                <button type="submit" disabled={busy || !phoneCode.trim()}>
-                  <span>{auth.status === "verifying" ? "..." : "OK"}</span>
-                </button>
-              </form>
-            )}
           </div>
         )}
 
