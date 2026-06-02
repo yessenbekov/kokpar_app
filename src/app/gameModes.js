@@ -32,10 +32,10 @@ export const GAME_MODES = [
     id: "online_room",
     name: "Онлайн комната",
     role: "Лобби",
-    description: "Mock-лобби: создать комнату, выбрать сторону и готовность.",
+    description: "Supabase-лобби: создать комнату, подключиться по коду, выбрать сторону и готовность.",
     defaultGoalType: "kazan",
     goalLocked: false,
-    startLabel: "Старт mock-матча"
+    startLabel: "Старт тест-матча"
   }
 ];
 

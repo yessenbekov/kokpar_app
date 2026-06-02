@@ -91,8 +91,8 @@ Already done:
 - profile persistence boundary with a local `profileStore` adapter, ready for a future server adapter
 - Supabase env template, profile database migration, browser client, and async profile store adapter
 - first-screen MVP auth with email magic links, guest mode, signed-in profile sync through Supabase, and WhatsApp marked as a later production channel
-- mode selection for Kokpar, Kok-boru, Training, and Online Room mock
-- local Online Room mock lobby with side selection, ready state, and fake connected players
+- mode selection for Kokpar, Kok-boru, Training, and Online Room
+- first Supabase Online Room lobby with create/join code, side selection, ready state, and realtime player updates
 
 Exit criteria:
 
@@ -161,7 +161,7 @@ Tasks:
 - persist owned horses, XP, levels, bond, coins, equipment, and match history
 - keep local storage as a guest/offline fallback
 - add API-level validation so client-side edits cannot mint progress or items
-- connect the online room mock to real hosted lobbies after profile persistence works
+- evolve Supabase online room lobbies into synchronized hosted matches after lobby testing
 
 Exit criteria:
 
@@ -314,7 +314,7 @@ Systems needed:
 - mode selection menu (first four modes done)
 - network lobby browser
 - hosted lobby creation with match size, rules, goal type, and timer settings
-- team selection inside a lobby before match start (local mock done)
+- team selection inside a lobby before match start (Supabase lobby done)
 - server-side room state, ready checks, and match start synchronization
 - balance rules so upgrades create variety without pay-to-win feeling
 
@@ -348,8 +348,8 @@ Design constraints:
 Prototype milestones:
 
 - local lobby mock screen with host/join/team selection, no network (done)
-- simulated network lobby with fake connected players
-- real private-room networking for small 1v1 or 2v2 tests
+- real Supabase private-room lobby with create/join/team/ready state (done)
+- real private-room networking for small 1v1 or 2v2 match tests
 - server-authoritative match state for possession, collisions, scoring, and out-of-bounds
 - progression rewards after online match completion
 

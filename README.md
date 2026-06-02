@@ -36,7 +36,7 @@ npm run generate:models
 
 The pre-match screen now works as the first stable/garage pass. Before a match, choose:
 
-- mode: Kokpar, Kok-boru, Training, or Online Room mock lobby
+- mode: Kokpar, Kok-boru, Training, or Supabase-backed Online Room lobby
 - goal type: ground circle or raised kazan
 - horse type: Argymak, Zhuyrik, or Auyr At
 - team size: 3v3, 4v4, or 5v5
@@ -44,7 +44,7 @@ The pre-match screen now works as the first stable/garage pass. Before a match, 
 
 The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows the saved player profile, named owned horses, owned horse count, each horse's role, profile tags, visual coat preview, XP, gameplay ratings, match record, and equipment slots. Owned horses can be renamed in the stable. Horse choice, horse names, mode choice, team side, and match preferences are saved locally between sessions. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
 
-The Online Room mode is currently a local mock lobby. It lets the player choose a side, see fake connected players, toggle ready, and launch a mock match. It is a UI/data-flow prototype before real networking.
+The Online Room mode now has a first Supabase-backed lobby pass. Signed-in players can create a room, share a room code, join a room, choose a side, and toggle readiness. It still launches a local test match after the lobby; authoritative online match simulation is the next networking milestone.
 
 ## Data storage
 
@@ -52,7 +52,7 @@ Profile data currently persists in the browser through `src/app/profileStore.js`
 
 Supabase groundwork lives in `src/app/supabaseClient.js`, `src/app/supabaseProfileStore.js`, `src/app/useSupabaseProfile.js`, and `supabase/migrations/001_player_profile.sql`. The active game keeps local storage as the guest fallback and switches to Supabase profile sync after sign-in.
 
-Run the SQL migration in the Supabase SQL editor to create `player_profiles` and `owned_horses` with RLS policies. The first screen now keeps the MVP auth path focused on email magic links plus guest play; guests keep using local storage, while signed-in players load and save the stable profile through Supabase. WhatsApp phone login is intentionally parked for a production provider path, most likely Supabase Send SMS Hook plus Meta WhatsApp Cloud API, so the active UI does not depend on Twilio. Realtime rooms and authoritative online match state should come after the profile backend is stable.
+Run the SQL migrations in the Supabase SQL editor to create `player_profiles`, `owned_horses`, `online_rooms`, and `online_room_players` with RLS policies. The first screen now keeps the MVP auth path focused on email magic links plus guest play; guests keep using local storage, while signed-in players load and save the stable profile through Supabase. WhatsApp phone login is intentionally parked for a production provider path, most likely Supabase Send SMS Hook plus Meta WhatsApp Cloud API, so the active UI does not depend on Twilio. Realtime rooms are now the first live online layer; authoritative online match state should come after the lobby is stable.
 
 Scoring requires a throw: carry the serke near the selected target, hold `Space` to build power, and release to throw. Riding into the circle or kazan is not enough.
 While charging, a throw arc and landing marker preview the approximate path and respond to throw-angle input.
@@ -78,6 +78,7 @@ Defenders can attempt a timed body check: a clean high-speed hit can dislodge th
 - `src/app/supabaseClient.js`: browser Supabase client configured through Vite env vars
 - `src/app/supabaseProfileStore.js`: async profile adapter for Supabase-backed accounts
 - `src/app/useSupabaseProfile.js`: auth/session and profile sync hook
+- `src/app/onlineRooms.js`: Supabase room creation, joining, player updates, and realtime subscriptions
 - `src/components/*`: stable setup menu, match HUD, field radar, and touch controls
 - `src/game/assets.js`: optional GLB/GLTF asset loading pipeline
 - `src/game/createKokparGame.js`: Three.js match runtime, controls, AI, and scoring
@@ -110,7 +111,7 @@ Current model convention: local `+X` faces forward, local `+Y` is up, and the ri
 - Expand the stable/garage with accessories and rider kit
 - Add post-match rewards and profile progression
 - Expand mode selection with wild kokpar and tournament
-- Replace the hosted online lobby mock with real private-room networking
+- Turn online room lobbies into authoritative synchronized matches
 - Add team selection and richer match settings
 - Replace starter low-poly GLB files with production horse/rider/serke assets
 - Add tournament mode and persistent scores

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, CircleDot, Clock3, Cloud, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Play, Trophy, Users } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
-import { MockOnlineLobby } from "./MockOnlineLobby.jsx";
 import { ModeSelector } from "./ModeSelector.jsx";
+import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 
 function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
@@ -236,13 +236,15 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
         </div>
 
         {onlineMode && (
-          <MockOnlineLobby
+          <OnlineRoomLobby
+            auth={auth}
             profile={profile}
             selectedHorse={selectedHorse}
             settings={settings}
             ready={onlineReady}
             onReadyChange={setOnlineReady}
             onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
+            onBackToLogin={onBackToLogin}
           />
         )}
 
