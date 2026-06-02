@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
+import { onlineMatchStore } from "./onlineMatches.js";
 
 const ROOM_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
@@ -27,6 +28,7 @@ function roomFromRow(row) {
     code: row.code,
     hostUserId: row.host_user_id,
     status: row.status,
+    onlineMatchId: row.online_match_id ?? null,
     modeId: row.mode_id,
     goalType: row.goal_type,
     teamSize: row.team_size,
@@ -205,9 +207,19 @@ export const onlineRoomStore = {
     if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
 
     const user = await currentUser();
+    const currentRoom = await fetchRoom(roomId);
+    if (!currentRoom.room) throw new Error("Комната не найдена");
+    if (currentRoom.room.hostUserId !== user.id) throw new Error("Только хост может запустить комнату");
+
+    let onlineMatchId = currentRoom.room.onlineMatchId;
+    if (!onlineMatchId) {
+      const { match } = await onlineMatchStore.createFromRoom(currentRoom);
+      onlineMatchId = match.id;
+    }
+
     const { error } = await supabase
       .from("online_rooms")
-      .update({ status: "starting" })
+      .update({ status: "starting", online_match_id: onlineMatchId })
       .eq("id", roomId)
       .eq("host_user_id", user.id);
 

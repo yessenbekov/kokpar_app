@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
+import { onlineMatchStore } from "./app/onlineMatches.js";
 import { playerProfileStore } from "./app/profileStore.js";
 import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
 import { AuthGate } from "./components/AuthGate.jsx";
@@ -42,7 +43,15 @@ export default function App() {
     const gameSettings = {
       ...activeSettings,
       matchSeconds: activeSettings.matchMinutes * 60,
-      feedbackEnabled
+      feedbackEnabled,
+      onMatchEvent:
+        activeSettings.onlineMatchId && activeSettings.onlineIsHost !== false
+          ? (event) => {
+              onlineMatchStore.recordEvent(activeSettings.onlineMatchId, event).catch((error) => {
+                console.warn("online match event failed", error);
+              });
+            }
+          : null
     };
 
     try {

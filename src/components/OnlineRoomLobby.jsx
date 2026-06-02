@@ -81,7 +81,12 @@ export function OnlineRoomLobby({
       goalType: room?.goalType ?? settings.goalType,
       teamSize: room?.teamSize ?? settings.teamSize,
       matchMinutes: room?.matchMinutes ?? settings.matchMinutes,
-      teamSide: currentPlayer?.team ?? settings.teamSide
+      teamSide: currentPlayer?.team ?? settings.teamSide,
+      onlineRoomId: room?.id ?? "",
+      onlineRoomCode: room?.code ?? "",
+      onlineMatchId: room?.onlineMatchId ?? "",
+      onlineIsHost: isHost,
+      onlinePlayerCount: players.length
     };
   }
 
@@ -129,10 +134,11 @@ export function OnlineRoomLobby({
       playerReady,
       playersCount: players.length,
       readyCount,
+      onlineMatchId: room?.onlineMatchId ?? "",
       roomCode: room?.code ?? "",
       status: room?.status ?? "idle"
     });
-  }, [allReady, canHostStart, isHost, onLobbyStateChange, playerReady, players.length, readyCount, room?.code, room?.status]);
+  }, [allReady, canHostStart, isHost, onLobbyStateChange, playerReady, players.length, readyCount, room?.code, room?.onlineMatchId, room?.status]);
 
   useEffect(() => {
     if (!currentPlayer) {
@@ -176,11 +182,11 @@ export function OnlineRoomLobby({
   }, [room?.id, currentUserId, currentPlayer?.horseId, currentPlayer?.horseName, currentPlayer?.horseType, currentPlayer?.riderName, profile.riderName, selectedHorse.id, selectedHorse.name, selectedHorse.typeId]);
 
   useEffect(() => {
-    if (!room?.id || room.status !== "starting" || startedRoomRef.current === room.id) return;
+    if (!room?.id || room.status !== "starting" || !room.onlineMatchId || startedRoomRef.current === room.id) return;
 
     startedRoomRef.current = room.id;
     onRoomStart?.(roomMatchSettings());
-  }, [room?.id, room?.status, currentPlayer?.team, settings.goalType, settings.matchMinutes, settings.modeId, settings.teamSide, settings.teamSize]);
+  }, [room?.id, room?.onlineMatchId, room?.status, currentPlayer?.team, isHost, players.length, settings.goalType, settings.matchMinutes, settings.modeId, settings.teamSide, settings.teamSize]);
 
   useEffect(() => {
     if (!startRequest || !canHostStart || !room?.id) return undefined;

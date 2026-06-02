@@ -93,6 +93,7 @@ Already done:
 - first-screen MVP auth with email magic links, guest mode, signed-in profile sync through Supabase, and WhatsApp marked as a later production channel
 - mode selection for Kokpar, Kok-boru, Training, and Online Room
 - first Supabase Online Room lobby with create/join code, invite link, side selection, ready state, realtime player updates, and synchronized test-match start
+- online match records with lobby player snapshots and a first host-written event log for start, out-of-bounds, goals, and match finish
 
 Exit criteria:
 
@@ -349,6 +350,7 @@ Prototype milestones:
 
 - local lobby mock screen with host/join/team selection, no network (done)
 - real Supabase private-room lobby with create/join/team/ready state (done)
+- online match shell with player snapshot and basic event log (done)
 - real private-room networking for small 1v1 or 2v2 match tests
 - server-authoritative match state for possession, collisions, scoring, and out-of-bounds
 - progression rewards after online match completion

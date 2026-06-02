@@ -596,7 +596,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     teamSize: clamp(Math.round(Number(options.teamSize) || 3), 1, 5),
     matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60),
     horseType: horseTypeById(options.horseType).id,
-    horseName: typeof options.horseName === "string" && options.horseName.trim() ? options.horseName.trim() : null
+    horseName: typeof options.horseName === "string" && options.horseName.trim() ? options.horseName.trim() : null,
+    onMatchEvent: typeof options.onMatchEvent === "function" ? options.onMatchEvent : null
   };
   const playerHorseType = horseTypeById(gameSettings.horseType);
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
@@ -785,6 +786,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     message: "На старт",
     submessage: "Всадники за линией. Жди свистка.",
     messageTime: ROUND_COUNTDOWN_SECONDS,
+    startedEventSent: false,
+    finishEventSent: false,
     duelMode: false,
     duelRiders: new Set()
   };
@@ -1010,6 +1013,22 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
   }
 
+  function emitMatchEvent(type, payload = {}) {
+    if (!gameSettings.onMatchEvent) return;
+
+    gameSettings.onMatchEvent({
+      type,
+      phase: match.phase,
+      score: {
+        blue: match.blue,
+        red: match.red
+      },
+      timer: formatTime(match.time),
+      remainingSeconds: Math.max(0, Math.round(match.time)),
+      ...payload
+    });
+  }
+
   function updateStadiumPresentation() {
     const status =
       match.phase === "goal"
@@ -1068,6 +1087,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.goalPause = 0;
     match.goalTeam = null;
     match.goalScorer = null;
+    if (!match.startedEventSent) {
+      match.startedEventSent = true;
+      emitMatchEvent("match_started", {
+        goalType: gameSettings.goalType,
+        teamSize: gameSettings.teamSize
+      });
+    }
     kokpar.looseCooldown = 0.2;
     riders.forEach((rider) => {
       rider.grabCooldown = 0.15;
@@ -1281,6 +1307,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   function startCenterDuel() {
     feedback.outOfBounds();
+    emitMatchEvent("out_of_bounds", {
+      x: Number(kokpar.x.toFixed(2)),
+      z: Number(kokpar.z.toFixed(2)),
+      holderTeam: kokpar.holder?.team ?? null,
+      flightTeam: kokpar.flightTeam ?? null
+    });
     const blueDuelRider =
       riders.find((rider) => rider.team === TEAM.blue && rider.human) ??
       riders.find((rider) => rider.team === TEAM.blue);
@@ -1333,6 +1365,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.goalPause = GOAL_CELEBRATION_SECONDS;
     match.goalTeam = team;
     match.goalScorer = kokpar.flightScorer;
+    emitMatchEvent("goal", {
+      team,
+      scorer: match.goalScorer?.name ?? null,
+      goalType: gameSettings.goalType
+    });
 
     const target = scoringGoalFor(team);
     kokpar.x = clamp(kokpar.x, target.x - scoreRadius * 0.5, target.x + scoreRadius * 0.5);
@@ -1608,6 +1645,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.red = 0;
     match.time = gameSettings.matchSeconds;
     match.over = false;
+    match.startedEventSent = false;
+    match.finishEventSent = false;
     resetPositions();
     beginCountdown("Новый матч", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   }
@@ -3310,6 +3349,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
           match.time = 0;
           match.over = true;
           const winner = match.blue === match.red ? "Ничья" : match.blue > match.red ? "Синие победили" : "Красные победили";
+          if (!match.finishEventSent) {
+            match.finishEventSent = true;
+            emitMatchEvent("match_finished", { winner });
+          }
           showMessage(winner, "Можно начать новый матч.", 999);
         }
 

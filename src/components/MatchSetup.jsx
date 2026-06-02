@@ -129,6 +129,7 @@ const EMPTY_ONLINE_STATE = {
   playerReady: false,
   playersCount: 0,
   readyCount: 0,
+  onlineMatchId: "",
   roomCode: "",
   status: "idle"
 };
