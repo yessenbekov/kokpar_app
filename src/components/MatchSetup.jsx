@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CircleDot, Clock3, LogIn, LogOut, Play, Trophy, Users } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CircleDot, Clock3, Cloud, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Play, Trophy, Users } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { MockOnlineLobby } from "./MockOnlineLobby.jsx";
@@ -9,28 +9,114 @@ function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
 }
 
+function accountView(auth) {
+  if (auth.status === "signed-in") {
+    if (auth.syncStatus === "syncing") {
+      return {
+        mode: "syncing",
+        label: "Синхронизация",
+        title: auth.email || "Аккаунт Supabase",
+        detail: "Обновляем облачный профиль",
+        icon: LoaderCircle
+      };
+    }
+
+    if (auth.syncStatus === "error") {
+      return {
+        mode: "error",
+        label: "Ошибка",
+        title: auth.email || "Аккаунт Supabase",
+        detail: auth.error || "Пока сохраняем локально",
+        icon: AlertTriangle
+      };
+    }
+
+    return {
+      mode: "cloud",
+      label: "Облако",
+      title: auth.email || "Аккаунт Supabase",
+      detail: auth.message || "Профиль сохранен в Supabase",
+      icon: Cloud
+    };
+  }
+
+  if (auth.syncStatus === "sent") {
+    return {
+      mode: "pending",
+      label: "Письмо",
+      title: auth.email || "Magic link отправлен",
+      detail: "Открой ссылку из email, затем вернись в игру",
+      icon: Mail
+    };
+  }
+
+  if (auth.status === "unconfigured") {
+    return {
+      mode: "local",
+      label: "Локально",
+      title: "Гостевой профиль",
+      detail: "Supabase не настроен",
+      icon: HardDrive
+    };
+  }
+
+  if (auth.error) {
+    return {
+      mode: "error",
+      label: "Ошибка",
+      title: "Гостевой профиль",
+      detail: auth.error,
+      icon: AlertTriangle
+    };
+  }
+
+  return {
+    mode: "local",
+    label: "Локально",
+    title: auth.message || "Гостевой профиль",
+    detail: "Вход через email сохранит конюшню в облаке",
+    icon: HardDrive
+  };
+}
+
 function AccountPanel({ auth, onBackToLogin, onSignOut }) {
   const signedIn = auth.status === "signed-in";
+  const view = accountView(auth);
+  const AccountIcon = view.icon;
 
   return (
-    <div className={signedIn ? "auth-panel signed-in" : "auth-panel"} aria-label="Аккаунт">
+    <div className={`auth-panel ${view.mode}${signedIn ? " signed-in" : ""}`} aria-label="Аккаунт">
       <div className="auth-copy">
-        <span>{signedIn ? "Supabase" : "Гость"}</span>
-        <strong>{signedIn ? auth.email : auth.message}</strong>
-        {(auth.error || signedIn) && <small>{auth.error || auth.message}</small>}
+        <span className="auth-provider">
+          <AccountIcon size={14} strokeWidth={2.6} />
+          <span>{view.label}</span>
+        </span>
+        <strong>{view.title}</strong>
+        <small>{view.detail}</small>
       </div>
 
-      {signedIn ? (
-        <button className="auth-action" type="button" onClick={onSignOut}>
-          <LogOut size={15} strokeWidth={2.5} />
-          <span>Выйти</span>
-        </button>
-      ) : (
-        <button className="auth-action" type="button" onClick={onBackToLogin}>
-          <LogIn size={15} strokeWidth={2.5} />
-          <span>Вход</span>
-        </button>
-      )}
+      <div className="auth-actions">
+        <span className={`sync-pill ${view.mode}`}>
+          {view.mode === "cloud" && <CheckCircle2 size={13} strokeWidth={2.7} />}
+          {view.mode === "syncing" && <LoaderCircle size={13} strokeWidth={2.7} />}
+          {view.mode === "pending" && <Mail size={13} strokeWidth={2.7} />}
+          {view.mode === "error" && <AlertTriangle size={13} strokeWidth={2.7} />}
+          {view.mode === "local" && <HardDrive size={13} strokeWidth={2.7} />}
+          <span>{view.label}</span>
+        </span>
+
+        {signedIn ? (
+          <button className="auth-action" type="button" onClick={onSignOut}>
+            <LogOut size={15} strokeWidth={2.5} />
+            <span>Выйти</span>
+          </button>
+        ) : (
+          <button className="auth-action" type="button" onClick={onBackToLogin}>
+            <LogIn size={15} strokeWidth={2.5} />
+            <span>{auth.syncStatus === "sent" ? "Другой email" : "Вход"}</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

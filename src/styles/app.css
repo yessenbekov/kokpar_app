@@ -359,7 +359,7 @@ button {
 
 .auth-panel {
   display: grid;
-  grid-template-columns: minmax(118px, 1fr) minmax(190px, 1.25fr);
+  grid-template-columns: minmax(165px, 1fr) minmax(118px, auto);
   gap: 8px;
   align-items: center;
   min-width: 0;
@@ -374,18 +374,35 @@ button {
   background: rgba(218, 239, 248, 0.62);
 }
 
+.auth-panel.cloud {
+  border-color: rgba(23, 109, 159, 0.34);
+}
+
+.auth-panel.pending {
+  border-color: rgba(169, 120, 36, 0.32);
+  background: rgba(255, 244, 205, 0.68);
+}
+
+.auth-panel.error {
+  border-color: rgba(170, 70, 45, 0.32);
+  background: rgba(255, 229, 220, 0.68);
+}
+
 .auth-copy {
   min-width: 0;
 }
 
-.auth-copy span,
 .auth-copy strong,
 .auth-copy small {
   display: block;
   min-width: 0;
 }
 
-.auth-copy span {
+.auth-provider {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
   color: var(--muted);
   font-size: 10px;
   font-weight: 850;
@@ -411,6 +428,58 @@ button {
   color: var(--muted);
   font-size: 11px;
   font-weight: 750;
+}
+
+.auth-actions {
+  display: grid;
+  justify-items: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(76, 54, 34, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 253, 244, 0.72);
+  color: #5b432b;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.sync-pill.cloud {
+  border-color: rgba(23, 109, 159, 0.34);
+  background: rgba(218, 239, 248, 0.86);
+  color: #176d9f;
+}
+
+.sync-pill.pending {
+  border-color: rgba(169, 120, 36, 0.34);
+  background: rgba(255, 239, 189, 0.9);
+  color: #795717;
+}
+
+.sync-pill.error {
+  border-color: rgba(170, 70, 45, 0.34);
+  background: rgba(255, 225, 216, 0.9);
+  color: #9a3d29;
+}
+
+.sync-pill.syncing svg {
+  animation: sync-spin 1s linear infinite;
+}
+
+@keyframes sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .auth-form {
@@ -2135,7 +2204,7 @@ button {
   }
 
   .auth-panel {
-    grid-template-columns: minmax(96px, 0.82fr) minmax(164px, 1fr);
+    grid-template-columns: minmax(160px, 1fr) minmax(108px, auto);
     padding: 6px;
   }
 
