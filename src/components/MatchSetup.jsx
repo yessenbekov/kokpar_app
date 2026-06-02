@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, CircleDot, Clock3, Cloud, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Play, Trophy, Users } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
@@ -121,17 +121,58 @@ function AccountPanel({ auth, onBackToLogin, onSignOut }) {
   );
 }
 
+const EMPTY_ONLINE_STATE = {
+  allReady: false,
+  canStart: false,
+  hasRoom: false,
+  isHost: false,
+  playerReady: false,
+  playersCount: 0,
+  readyCount: 0,
+  roomCode: "",
+  status: "idle"
+};
+
+function sameOnlineState(left, right) {
+  return Object.keys(EMPTY_ONLINE_STATE).every((key) => left[key] === right[key]);
+}
+
+function onlineStartLabel(lobbyState) {
+  if (!lobbyState.hasRoom) return "Создай или войди в комнату";
+  if (lobbyState.status === "starting") return "Стартуем";
+  if (!lobbyState.isHost) return "Ждем хоста";
+  if (!lobbyState.allReady) return "Все должны быть готовы";
+  return "Запустить комнату";
+}
+
 export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onSettingChange, onStart }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
   const onlineMode = selectedMode.id === "online_room";
   const [onlineReady, setOnlineReady] = useState(false);
-  const canStart = !onlineMode || onlineReady;
+  const [onlineStartRequest, setOnlineStartRequest] = useState(0);
+  const [onlineLobbyState, setOnlineLobbyState] = useState(EMPTY_ONLINE_STATE);
+  const canStart = !onlineMode || onlineLobbyState.canStart;
+  const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
+
+  const handleOnlineLobbyStateChange = useCallback((nextState) => {
+    setOnlineLobbyState((currentState) => (sameOnlineState(currentState, nextState) ? currentState : nextState));
+  }, []);
 
   useEffect(() => {
     setOnlineReady(false);
+    setOnlineLobbyState(EMPTY_ONLINE_STATE);
   }, [settings.modeId, settings.teamSide, settings.horseId]);
+
+  function handleStart() {
+    if (onlineMode) {
+      setOnlineStartRequest((request) => request + 1);
+      return;
+    }
+
+    onStart();
+  }
 
   return (
     <section className="setup" aria-label="Настройки матча">
@@ -242,15 +283,18 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             selectedHorse={selectedHorse}
             settings={settings}
             ready={onlineReady}
+            startRequest={onlineStartRequest}
             onReadyChange={setOnlineReady}
             onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
             onBackToLogin={onBackToLogin}
+            onLobbyStateChange={handleOnlineLobbyStateChange}
+            onRoomStart={onStart}
           />
         )}
 
-        <button className="start-button" type="button" onClick={onStart} disabled={!canStart}>
+        <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
           <Play size={19} fill="currentColor" strokeWidth={2.4} />
-          <span>{canStart ? selectedMode.startLabel : "Нужно быть готовым"}</span>
+          <span>{startLabel}</span>
         </button>
       </div>
     </section>

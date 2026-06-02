@@ -1212,6 +1212,20 @@ button {
   letter-spacing: 0.08em;
 }
 
+.lobby-host-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid rgba(23, 109, 159, 0.28);
+  border-radius: 999px;
+  background: rgba(218, 239, 248, 0.78);
+  color: #176d9f;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .lobby-summary span {
   min-height: 28px;
   padding: 0 8px;

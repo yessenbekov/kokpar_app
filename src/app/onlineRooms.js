@@ -201,6 +201,21 @@ export const onlineRoomStore = {
     return fetchRoom(roomId);
   },
 
+  async start(roomId) {
+    if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
+
+    const user = await currentUser();
+    const { error } = await supabase
+      .from("online_rooms")
+      .update({ status: "starting" })
+      .eq("id", roomId)
+      .eq("host_user_id", user.id);
+
+    if (error) throw queryError(error, "Не удалось запустить комнату");
+
+    return fetchRoom(roomId);
+  },
+
   async leave(room) {
     if (!isSupabaseConfigured || !supabase || !room) return;
 

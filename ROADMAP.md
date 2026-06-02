@@ -92,7 +92,7 @@ Already done:
 - Supabase env template, profile database migration, browser client, and async profile store adapter
 - first-screen MVP auth with email magic links, guest mode, signed-in profile sync through Supabase, and WhatsApp marked as a later production channel
 - mode selection for Kokpar, Kok-boru, Training, and Online Room
-- first Supabase Online Room lobby with create/join code, invite link, side selection, ready state, and realtime player updates
+- first Supabase Online Room lobby with create/join code, invite link, side selection, ready state, realtime player updates, and synchronized test-match start
 
 Exit criteria:
 

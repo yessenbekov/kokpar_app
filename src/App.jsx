@@ -208,11 +208,13 @@ export default function App() {
     });
   }
 
-  function startMatch() {
-    setHud(makeInitialHud(settings));
+  function startMatch(settingsOverride) {
+    const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
+
+    setHud(makeInitialHud(matchSettings));
     setReady(false);
     setSceneError("");
-    setActiveSettings({ ...settings });
+    setActiveSettings({ ...matchSettings });
   }
 
   function openSettings() {

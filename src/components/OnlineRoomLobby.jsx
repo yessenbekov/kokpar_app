@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CircleDot, Clipboard, Crown, DoorOpen, Link2, LogIn, Plus, Radio, RefreshCw, Shield, Users } from "lucide-react";
 import { onlineRoomStore } from "../app/onlineRooms.js";
 
@@ -42,9 +42,12 @@ export function OnlineRoomLobby({
   selectedHorse,
   settings,
   ready,
+  startRequest,
   onReadyChange,
   onTeamChange,
-  onBackToLogin
+  onBackToLogin,
+  onLobbyStateChange,
+  onRoomStart
 }) {
   const [room, setRoom] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -53,6 +56,7 @@ export function OnlineRoomLobby({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
+  const startedRoomRef = useRef("");
 
   const signedIn = auth.status === "signed-in";
   const currentPlayer = useMemo(
@@ -66,6 +70,20 @@ export function OnlineRoomLobby({
   const redPlayers = players.filter((player) => player.team === "red");
   const readyCount = players.filter((player) => player.ready).length;
   const canCopy = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.writeText);
+  const isHost = Boolean(room && currentUserId && room.hostUserId === currentUserId);
+  const allReady = players.length > 0 && players.every((player) => player.ready);
+  const canHostStart = Boolean(room && room.status === "lobby" && isHost && allReady && currentPlayer);
+
+  function roomMatchSettings() {
+    return {
+      ...settings,
+      modeId: room?.modeId ?? settings.modeId,
+      goalType: room?.goalType ?? settings.goalType,
+      teamSize: room?.teamSize ?? settings.teamSize,
+      matchMinutes: room?.matchMinutes ?? settings.matchMinutes,
+      teamSide: currentPlayer?.team ?? settings.teamSide
+    };
+  }
 
   function hydrate(nextState) {
     if (nextState.error) {
@@ -101,6 +119,20 @@ export function OnlineRoomLobby({
       unsubscribe();
     };
   }, [room?.id]);
+
+  useEffect(() => {
+    onLobbyStateChange?.({
+      allReady,
+      canStart: canHostStart,
+      hasRoom: Boolean(room),
+      isHost,
+      playerReady,
+      playersCount: players.length,
+      readyCount,
+      roomCode: room?.code ?? "",
+      status: room?.status ?? "idle"
+    });
+  }, [allReady, canHostStart, isHost, onLobbyStateChange, playerReady, players.length, readyCount, room?.code, room?.status]);
 
   useEffect(() => {
     if (!currentPlayer) {
@@ -142,6 +174,26 @@ export function OnlineRoomLobby({
       active = false;
     };
   }, [room?.id, currentUserId, currentPlayer?.horseId, currentPlayer?.horseName, currentPlayer?.horseType, currentPlayer?.riderName, profile.riderName, selectedHorse.id, selectedHorse.name, selectedHorse.typeId]);
+
+  useEffect(() => {
+    if (!room?.id || room.status !== "starting" || startedRoomRef.current === room.id) return;
+
+    startedRoomRef.current = room.id;
+    onRoomStart?.(roomMatchSettings());
+  }, [room?.id, room?.status, currentPlayer?.team, settings.goalType, settings.matchMinutes, settings.modeId, settings.teamSide, settings.teamSize]);
+
+  useEffect(() => {
+    if (!startRequest || !canHostStart || !room?.id) return undefined;
+
+    let active = true;
+    runRoomAction(() => onlineRoomStore.start(room.id)).then(() => {
+      if (active) setCopied("");
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [startRequest]);
 
   async function runRoomAction(action) {
     setBusy(true);
@@ -201,6 +253,7 @@ export function OnlineRoomLobby({
       setPlayers([]);
       setCurrentUserId("");
       setJoinCode("");
+      startedRoomRef.current = "";
       onReadyChange(false);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Ошибка выхода из комнаты");
@@ -249,6 +302,7 @@ export function OnlineRoomLobby({
           {room ? (
             <>
               Комната <b className="lobby-code">{room.code}</b>
+              {isHost && <span className="lobby-host-chip">host</span>}
             </>
           ) : (
             "Supabase комната"
@@ -305,7 +359,7 @@ export function OnlineRoomLobby({
               <Link2 size={15} strokeWidth={2.5} />
               <span>Ссылка</span>
             </button>
-            <span>Готовы {readyCount}/{players.length}</span>
+            <span>{room.status === "starting" ? "Стартуем" : `Готовы ${readyCount}/${players.length}`}</span>
           </div>
 
           <div className="team-pick" aria-label="Выбор стороны">
