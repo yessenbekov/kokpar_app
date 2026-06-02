@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, CircleDot, DoorOpen, LogIn, Plus, Radio, RefreshCw, Shield, Users } from "lucide-react";
+import { Check, CircleDot, Clipboard, Crown, DoorOpen, Link2, LogIn, Plus, Radio, RefreshCw, Shield, Users } from "lucide-react";
 import { onlineRoomStore } from "../app/onlineRooms.js";
 
 function goalLabel(goalType) {
@@ -10,13 +10,27 @@ function teamLabel(team) {
   return team === "red" ? "Қызыл" : "Көк";
 }
 
-function LobbyPlayer({ player, current }) {
+function roomCodeFromUrl() {
+  if (typeof window === "undefined") return "";
+  return onlineRoomStore.normalizeCode(new URLSearchParams(window.location.search).get("room"));
+}
+
+function inviteLink(room) {
+  if (!room || typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  url.searchParams.set("mode", "online_room");
+  url.searchParams.set("room", room.code);
+  return url.toString();
+}
+
+function LobbyPlayer({ player, current, host }) {
   return (
     <li className={current ? "lobby-player current" : "lobby-player"}>
       <span>
         <strong>{player.riderName}</strong>
         <small>{player.horseName}</small>
       </span>
+      {host && <Crown size={15} strokeWidth={2.5} />}
       {player.ready && <Check size={15} strokeWidth={2.5} />}
     </li>
   );
@@ -35,9 +49,10 @@ export function OnlineRoomLobby({
   const [room, setRoom] = useState(null);
   const [players, setPlayers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState("");
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState(() => roomCodeFromUrl());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState("");
 
   const signedIn = auth.status === "signed-in";
   const currentPlayer = useMemo(
@@ -49,6 +64,8 @@ export function OnlineRoomLobby({
   const capacity = roomSettings.teamSize * 2;
   const bluePlayers = players.filter((player) => player.team === "blue");
   const redPlayers = players.filter((player) => player.team === "red");
+  const readyCount = players.filter((player) => player.ready).length;
+  const canCopy = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.writeText);
 
   function hydrate(nextState) {
     if (nextState.error) {
@@ -129,6 +146,7 @@ export function OnlineRoomLobby({
   async function runRoomAction(action) {
     setBusy(true);
     setError("");
+    setCopied("");
 
     try {
       const nextState = await action();
@@ -175,6 +193,7 @@ export function OnlineRoomLobby({
   async function leaveRoom() {
     setBusy(true);
     setError("");
+    setCopied("");
 
     try {
       await onlineRoomStore.leave(room);
@@ -187,6 +206,20 @@ export function OnlineRoomLobby({
       setError(nextError instanceof Error ? nextError.message : "Ошибка выхода из комнаты");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function copyText(value, label) {
+    if (!value) return;
+
+    try {
+      if (!canCopy) throw new Error("Буфер обмена недоступен");
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      setError("");
+    } catch (nextError) {
+      setCopied("");
+      setError(nextError instanceof Error ? nextError.message : "Не удалось скопировать");
     }
   }
 
@@ -263,6 +296,18 @@ export function OnlineRoomLobby({
         </div>
       ) : (
         <>
+          <div className="lobby-share">
+            <button type="button" onClick={() => copyText(room.code, "Код скопирован")} disabled={busy}>
+              <Clipboard size={15} strokeWidth={2.5} />
+              <span>Код</span>
+            </button>
+            <button type="button" onClick={() => copyText(inviteLink(room), "Ссылка скопирована")} disabled={busy}>
+              <Link2 size={15} strokeWidth={2.5} />
+              <span>Ссылка</span>
+            </button>
+            <span>Готовы {readyCount}/{players.length}</span>
+          </div>
+
           <div className="team-pick" aria-label="Выбор стороны">
             {["blue", "red"].map((team) => (
               <button
@@ -282,7 +327,12 @@ export function OnlineRoomLobby({
               <strong>Көк команда</strong>
               <ul>
                 {bluePlayers.map((player) => (
-                  <LobbyPlayer player={player} current={player.userId === currentUserId} key={player.userId} />
+                  <LobbyPlayer
+                    player={player}
+                    current={player.userId === currentUserId}
+                    host={player.userId === room.hostUserId}
+                    key={player.userId}
+                  />
                 ))}
               </ul>
             </div>
@@ -290,7 +340,12 @@ export function OnlineRoomLobby({
               <strong>Қызыл команда</strong>
               <ul>
                 {redPlayers.map((player) => (
-                  <LobbyPlayer player={player} current={player.userId === currentUserId} key={player.userId} />
+                  <LobbyPlayer
+                    player={player}
+                    current={player.userId === currentUserId}
+                    host={player.userId === room.hostUserId}
+                    key={player.userId}
+                  />
                 ))}
               </ul>
             </div>
@@ -307,6 +362,13 @@ export function OnlineRoomLobby({
             </button>
           </div>
         </>
+      )}
+
+      {copied && (
+        <div className="lobby-status success" role="status">
+          <Check size={14} strokeWidth={2.6} />
+          <span>{copied}</span>
+        </div>
       )}
 
       {error && (

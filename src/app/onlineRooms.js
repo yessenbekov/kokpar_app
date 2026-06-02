@@ -222,7 +222,7 @@ export const onlineRoomStore = {
     const channel = supabase
       .channel(`online-room:${roomId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "online_rooms", filter: `id=eq.${roomId}` }, refresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "online_room_players" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "online_room_players", filter: `room_id=eq.${roomId}` }, refresh)
       .subscribe();
 
     return () => {

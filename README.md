@@ -44,7 +44,7 @@ The pre-match screen now works as the first stable/garage pass. Before a match, 
 
 The first horse-class pass gives the player three handling profiles: balanced, fast, and heavy. The stable view shows the saved player profile, named owned horses, owned horse count, each horse's role, profile tags, visual coat preview, XP, gameplay ratings, match record, and equipment slots. Owned horses can be renamed in the stable. Horse choice, horse names, mode choice, team side, and match preferences are saved locally between sessions. Horse choice affects speed, acceleration, turn, stamina drain/recovery, carrying speed, tackle strength, stability, and contest power.
 
-The Online Room mode now has a first Supabase-backed lobby pass. Signed-in players can create a room, share a room code, join a room, choose a side, and toggle readiness. It still launches a local test match after the lobby; authoritative online match simulation is the next networking milestone.
+The Online Room mode now has a first Supabase-backed lobby pass. Signed-in players can create a room, copy a room code or invite link, join a room, choose a side, and toggle readiness. It still launches a local test match after the lobby; authoritative online match simulation is the next networking milestone.
 
 ## Data storage
 

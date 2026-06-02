@@ -592,6 +592,7 @@ button {
 .auth-action:focus-visible,
 .lobby-join-form button:focus-visible,
 .lobby-join-form input:focus-visible,
+.lobby-share button:focus-visible,
 .auth-gate-form button:focus-visible,
 .auth-gate-form input:focus-visible,
 .auth-method-tabs button:focus-visible,
@@ -1338,6 +1339,46 @@ button {
   color: #9a3d29;
 }
 
+.lobby-status.success {
+  border-color: rgba(31, 122, 71, 0.28);
+  background: rgba(224, 244, 222, 0.72);
+  color: #1f7a47;
+}
+
+.lobby-share {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 92px)) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.lobby-share button,
+.lobby-share > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid rgba(76, 54, 34, 0.14);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.lobby-share button {
+  background: rgba(255, 247, 220, 0.94);
+  color: #3e2c1d;
+  cursor: pointer;
+}
+
+.lobby-share > span {
+  padding: 0 9px;
+  background: rgba(255, 253, 244, 0.68);
+  color: #5b432b;
+}
+
 .lobby-teams {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1384,6 +1425,10 @@ button {
   padding: 7px 8px;
   border-radius: 7px;
   background: rgba(255, 253, 244, 0.7);
+}
+
+.lobby-player > svg {
+  flex: 0 0 auto;
 }
 
 .lobby-player.current {
@@ -1433,6 +1478,7 @@ button {
 
 .ready-button:disabled,
 .team-choice:disabled,
+.lobby-share button:disabled,
 .lobby-join-form button:disabled,
 .lobby-join-form input:disabled {
   cursor: not-allowed;
@@ -2100,7 +2146,8 @@ button {
   }
 
   .lobby-actions.two,
-  .lobby-join-form {
+  .lobby-join-form,
+  .lobby-share {
     grid-template-columns: 1fr;
   }
 
