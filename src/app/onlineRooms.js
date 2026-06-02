@@ -51,11 +51,17 @@ function playerFromRow(row) {
   };
 }
 
+function queryError(error, fallback) {
+  if (!error) return new Error(fallback);
+  if (error instanceof Error) return error;
+  return new Error(error.message ?? error.details ?? error.hint ?? fallback);
+}
+
 async function currentUser() {
   if (!supabase) throw new Error("Supabase не настроен");
 
   const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
+  if (error) throw queryError(error, "Не удалось проверить аккаунт");
   if (!data.user) throw new Error("Нужно войти в аккаунт");
 
   return data.user;
@@ -82,14 +88,14 @@ async function upsertPlayer(roomId, user, profile, selectedHorse, teamSide) {
     { onConflict: "room_id,user_id" }
   );
 
-  if (error) throw error;
+  if (error) throw queryError(error, "Не удалось добавить игрока в комнату");
 }
 
 async function fetchRoom(roomId) {
   if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
 
   const { data: roomRow, error: roomError } = await supabase.from("online_rooms").select("*").eq("id", roomId).maybeSingle();
-  if (roomError) throw roomError;
+  if (roomError) throw queryError(roomError, "Не удалось загрузить комнату");
   if (!roomRow) return { room: null, players: [] };
 
   const { data: playerRows, error: playersError } = await supabase
@@ -98,7 +104,7 @@ async function fetchRoom(roomId) {
     .eq("room_id", roomId)
     .order("joined_at", { ascending: true });
 
-  if (playersError) throw playersError;
+  if (playersError) throw queryError(playersError, "Не удалось загрузить игроков комнаты");
 
   return {
     room: roomFromRow(roomRow),
@@ -140,7 +146,7 @@ export const onlineRoomStore = {
       if (error.code !== "23505") break;
     }
 
-    if (!roomRow) throw lastError ?? new Error("Не удалось создать комнату");
+    if (!roomRow) throw queryError(lastError, "Не удалось создать комнату");
 
     await upsertPlayer(roomRow.id, user, profile, selectedHorse, settings.teamSide);
     return { ...(await fetchRoom(roomRow.id)), currentUserId: user.id };
@@ -160,7 +166,7 @@ export const onlineRoomStore = {
       .eq("status", "lobby")
       .maybeSingle();
 
-    if (roomError) throw roomError;
+    if (roomError) throw queryError(roomError, "Не удалось найти комнату");
     if (!roomRow) throw new Error("Комната не найдена");
 
     const currentRoom = await fetchRoom(roomRow.id);
@@ -190,7 +196,7 @@ export const onlineRoomStore = {
     if (Object.keys(row).length === 0) return fetchRoom(roomId);
 
     const { error } = await supabase.from("online_room_players").update(row).eq("room_id", roomId).eq("user_id", user.id);
-    if (error) throw error;
+    if (error) throw queryError(error, "Не удалось обновить игрока комнаты");
 
     return fetchRoom(roomId);
   },
@@ -202,12 +208,12 @@ export const onlineRoomStore = {
 
     if (room.hostUserId === user.id) {
       const { error } = await supabase.from("online_rooms").delete().eq("id", room.id).eq("host_user_id", user.id);
-      if (error) throw error;
+      if (error) throw queryError(error, "Не удалось закрыть комнату");
       return;
     }
 
     const { error } = await supabase.from("online_room_players").delete().eq("room_id", room.id).eq("user_id", user.id);
-    if (error) throw error;
+    if (error) throw queryError(error, "Не удалось выйти из комнаты");
   },
 
   subscribe(roomId, onChange) {

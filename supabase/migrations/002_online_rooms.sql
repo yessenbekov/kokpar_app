@@ -95,44 +95,21 @@ create policy "Room players are visible to authenticated users"
 on public.online_room_players
 for select
 to authenticated
-using (
-  exists (
-    select 1
-    from public.online_rooms r
-    where r.id = online_room_players.room_id
-      and r.status in ('lobby', 'starting')
-  )
-);
+using (true);
 
 drop policy if exists "Users can join lobby rooms" on public.online_room_players;
 create policy "Users can join lobby rooms"
 on public.online_room_players
 for insert
 to authenticated
-with check (
-  auth.uid() = user_id
-  and exists (
-    select 1
-    from public.online_rooms r
-    where r.id = room_id
-      and r.status = 'lobby'
-  )
-);
+with check (auth.uid() = user_id);
 
 drop policy if exists "Users can update own lobby player" on public.online_room_players;
 create policy "Users can update own lobby player"
 on public.online_room_players
 for update
 to authenticated
-using (
-  auth.uid() = user_id
-  and exists (
-    select 1
-    from public.online_rooms r
-    where r.id = room_id
-      and r.status = 'lobby'
-  )
-)
+using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
 drop policy if exists "Users can leave rooms" on public.online_room_players;
