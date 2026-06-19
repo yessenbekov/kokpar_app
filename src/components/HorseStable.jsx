@@ -1,0 +1,321 @@
+import { useEffect, useState } from "react";
+import { Check, Gauge, Pencil, Plus, Trash2, X } from "lucide-react";
+import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function ratingFor(score) {
+  return Math.round(clamp(score * 72, 45, 96));
+}
+
+function statRowsFor(horse) {
+  const stats = horse.stats;
+
+  return [
+    { label: "Скорость", score: stats.speed },
+    { label: "Разгон", score: stats.acceleration },
+    { label: "Контроль", score: (stats.turn + stats.grip + stats.brake) / 3 },
+    { label: "Сила", score: (stats.contestPower + stats.tacklePower + stats.bodyCheckPower + stats.stability) / 4 },
+    { label: "Выносливость", score: (1 / stats.staminaDrain + stats.staminaRecovery) / 2 },
+    { label: "Серке", score: (stats.carrySpeed + stats.contestPower) / 2 }
+  ];
+}
+
+function paletteStyle(horse) {
+  const palette = horse.palette.blue;
+
+  return {
+    "--coat": palette.coat,
+    "--dark": palette.dark,
+    "--muzzle": palette.muzzle,
+    "--mark": palette.marking
+  };
+}
+
+function HorsePreview({ horse }) {
+  return (
+    <div className="horse-portrait" style={paletteStyle(horse)} aria-hidden="true">
+      <span className="horse-preview-shadow" />
+      <span className="horse-preview-leg front" />
+      <span className="horse-preview-leg back" />
+      <span className="horse-preview-body" />
+      <span className="horse-preview-neck" />
+      <span className="horse-preview-head" />
+      <span className="horse-preview-mane" />
+      <span className="horse-preview-tail" />
+      <span className="horse-preview-mark" />
+    </div>
+  );
+}
+
+function HorseToken({ horse }) {
+  return (
+    <span className="horse-token" style={paletteStyle(horse)} aria-hidden="true">
+      <span className="horse-token-body" />
+      <span className="horse-token-head" />
+      <span className="horse-token-mark" />
+    </span>
+  );
+}
+
+const EQUIPMENT_LABELS = [
+  ["saddle", "Седло"],
+  ["bridle", "Узда"],
+  ["blanket", "Попона"],
+  ["legWraps", "Бинты"]
+];
+
+function recordRowsFor(record = {}) {
+  return [
+    ["Матчи", record.matches ?? 0],
+    ["Победы", record.wins ?? 0],
+    ["Голы", record.goals ?? 0],
+    ["Отборы", record.steals ?? 0]
+  ];
+}
+
+export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onHorseChange, onHorseRename, onHorseCreate, onHorseDelete }) {
+  const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
+  const selectedOwnedHorse = stableHorses.find((horse) => horse.id === horseId) ?? stableHorses[0];
+  const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
+  const equipment = selectedOwnedHorse?.equipment ?? {};
+  const statRows = statRowsFor(selectedHorse);
+  const xpProgress = selectedOwnedHorse ? clamp(selectedOwnedHorse.xp / 100, 0, 1) : 0;
+  const recordRows = recordRowsFor(selectedOwnedHorse?.record);
+  const canAddMore = stableHorses.length < stableCapacity;
+  const canDelete = stableHorses.length > 1;
+
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState(selectedOwnedHorse?.name ?? "");
+  const [creating, setCreating] = useState(false);
+  const [createTypeId, setCreateTypeId] = useState(DEFAULT_HORSE_TYPE_ID);
+  const [createName, setCreateName] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    setEditing(false);
+    setDraftName(selectedOwnedHorse?.name ?? "");
+    setConfirmDelete(false);
+  }, [selectedOwnedHorse?.id, selectedOwnedHorse?.name]);
+
+  function submitName(event) {
+    event.preventDefault();
+    const nextName = draftName.trim();
+    if (!nextName || !selectedOwnedHorse) return;
+    onHorseRename?.(selectedOwnedHorse.id, nextName);
+    setEditing(false);
+  }
+
+  function submitCreate(event) {
+    event.preventDefault();
+    const name = createName.trim() || horseTypeById(createTypeId).name;
+    onHorseCreate?.(createTypeId, name);
+    setCreating(false);
+    setCreateName("");
+    setCreateTypeId(DEFAULT_HORSE_TYPE_ID);
+  }
+
+  function handleDelete() {
+    onHorseDelete?.(selectedOwnedHorse.id);
+    setConfirmDelete(false);
+  }
+
+  return (
+    <div className="stable-layout">
+      <div className="stable-roster setting-group" aria-label="Конюшня">
+        <div className="setting-title">
+          <Gauge size={17} strokeWidth={2.4} />
+          <span>Лошадь</span>
+        </div>
+        <div className="stable-horse-list">
+          {stableHorses.map((ownedHorse) => {
+            const horse = horseTypeById(ownedHorse.typeId);
+            const active = selectedOwnedHorse.id === ownedHorse.id;
+
+            return (
+              <button
+                className={active ? "stable-card active" : "stable-card"}
+                type="button"
+                key={ownedHorse.id}
+                onClick={() => onHorseChange(ownedHorse.id)}
+              >
+                <HorseToken horse={horse} />
+                <span className="stable-card-copy">
+                  <strong>{ownedHorse.name}</strong>
+                  <span>
+                    {horse.name} · Ур. {ownedHorse.level}
+                  </span>
+                </span>
+                <span className="horse-tier">{horse.tier}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {creating ? (
+          <form className="horse-create-form" onSubmit={submitCreate}>
+            <div className="horse-type-picker">
+              {HORSE_TYPES.map((ht) => (
+                <button
+                  key={ht.id}
+                  type="button"
+                  className={createTypeId === ht.id ? "horse-type-choice active" : "horse-type-choice"}
+                  onClick={() => setCreateTypeId(ht.id)}
+                >
+                  <HorseToken horse={ht} />
+                  <span>
+                    <strong>{ht.name}</strong>
+                    <small>{ht.role}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="horse-create-row">
+              <input
+                className="horse-create-input"
+                placeholder={horseTypeById(createTypeId).name}
+                maxLength={24}
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                aria-label="Имя новой лошади"
+                autoFocus
+              />
+              <button type="submit" aria-label="Создать лошадь">
+                <Check size={15} strokeWidth={2.7} />
+              </button>
+              <button
+                type="button"
+                aria-label="Отмена"
+                onClick={() => {
+                  setCreating(false);
+                  setCreateName("");
+                }}
+              >
+                <X size={15} strokeWidth={2.7} />
+              </button>
+            </div>
+          </form>
+        ) : (
+          canAddMore && (
+            <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Добавить лошадь</span>
+            </button>
+          )
+        )}
+      </div>
+
+      <section className="stable-detail" style={paletteStyle(selectedHorse)} aria-label={selectedOwnedHorse.name}>
+        <div className="stable-detail-head">
+          <HorsePreview horse={selectedHorse} />
+          <div className="stable-copy">
+            <p className="label">
+              {selectedHorse.role} · {selectedHorse.name}
+            </p>
+            <div className="horse-name-row">
+              {editing ? (
+                <form className="horse-name-form" onSubmit={submitName}>
+                  <input
+                    aria-label="Имя лошади"
+                    maxLength={24}
+                    onChange={(event) => setDraftName(event.target.value)}
+                    value={draftName}
+                  />
+                  <button type="submit" aria-label="Сохранить имя">
+                    <Check size={16} strokeWidth={2.7} />
+                  </button>
+                  <button type="button" aria-label="Отменить" onClick={() => setEditing(false)}>
+                    <X size={16} strokeWidth={2.7} />
+                  </button>
+                </form>
+              ) : (
+                <>
+                  <h2>{selectedOwnedHorse.name}</h2>
+                  <button className="horse-edit-button" type="button" aria-label="Переименовать" onClick={() => setEditing(true)}>
+                    <Pencil size={16} strokeWidth={2.4} />
+                  </button>
+                </>
+              )}
+            </div>
+            <p>{selectedHorse.description}</p>
+            <div className="horse-tags" aria-label="Профиль лошади">
+              <span>{selectedHorse.stable.line}</span>
+              <span>Ур. {selectedOwnedHorse.level}</span>
+              <span>Связь {selectedOwnedHorse.bond}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="horse-progress" aria-label="Прогресс лошади">
+          <span>Опыт до следующего уровня</span>
+          <i>
+            <b style={{ "--value": `${Math.round(xpProgress * 100)}%` }} />
+          </i>
+          <strong>{selectedOwnedHorse.xp}/100</strong>
+        </div>
+
+        <div className="stable-stats" aria-label="Характеристики лошади">
+          {statRows.map((row) => {
+            const rating = ratingFor(row.score);
+
+            return (
+              <div className="stable-stat" key={row.label}>
+                <span>{row.label}</span>
+                <i>
+                  <b style={{ "--value": `${rating}%` }} />
+                </i>
+                <strong>{rating}</strong>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="horse-meta-grid">
+          <div className="horse-record" aria-label="Статистика лошади">
+            <strong>Статистика</strong>
+            <div>
+              {recordRows.map(([label, value]) => (
+                <span key={label}>
+                  <small>{label}</small>
+                  <b>{value}</b>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="horse-equipment" aria-label="Снаряжение лошади">
+            <strong>Снаряжение</strong>
+            <div>
+              {EQUIPMENT_LABELS.map(([key, label]) => (
+                <span key={key}>
+                  <small>{label}</small>
+                  <b>{equipment[key] ?? "Пусто"}</b>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {canDelete &&
+          (confirmDelete ? (
+            <div className="horse-delete-confirm">
+              <span>Удалить {selectedOwnedHorse.name}?</span>
+              <button type="button" className="horse-delete-yes" onClick={handleDelete}>
+                Удалить
+              </button>
+              <button type="button" onClick={() => setConfirmDelete(false)}>
+                Отмена
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="horse-delete-trigger" onClick={() => setConfirmDelete(true)}>
+              <Trash2 size={14} strokeWidth={2.3} />
+              <span>Удалить лошадь</span>
+            </button>
+          ))}
+      </section>
+    </div>
+  );
+}
