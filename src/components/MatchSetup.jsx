@@ -5,6 +5,7 @@ import { HorseStable } from "./HorseStable.jsx";
 import { MatchHistory } from "./MatchHistory.jsx";
 import { ModeSelector } from "./ModeSelector.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
+import { Shop } from "./Shop.jsx";
 
 function formatCoins(value) {
   return new Intl.NumberFormat("ru-RU").format(value);
@@ -147,7 +148,7 @@ function onlineStartLabel(lobbyState) {
   return "Запустить комнату";
 }
 
-export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename }) {
+export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onEquipItem }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -157,6 +158,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [onlineLobbyState, setOnlineLobbyState] = useState(EMPTY_ONLINE_STATE);
   const [editingRider, setEditingRider] = useState(false);
   const [draftRiderName, setDraftRiderName] = useState(profile.riderName);
+  const [stableTab, setStableTab] = useState("stable");
   const canStart = !onlineMode || onlineLobbyState.canStart;
   const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
 
@@ -236,15 +238,42 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           <Trophy size={30} strokeWidth={2.2} />
         </div>
 
-        <HorseStable
-          ownedHorses={profile.ownedHorses}
-          stableCapacity={profile.stableCapacity}
-          horseId={settings.horseId}
-          onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
-          onHorseRename={onHorseRename}
-          onHorseCreate={onHorseCreate}
-          onHorseDelete={onHorseDelete}
-        />
+        <div className="stable-tabs">
+          <button
+            type="button"
+            className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"}
+            onClick={() => setStableTab("stable")}
+          >
+            Конюшня
+          </button>
+          <button
+            type="button"
+            className={stableTab === "shop" ? "stable-tab-btn active" : "stable-tab-btn"}
+            onClick={() => setStableTab("shop")}
+          >
+            Магазин
+          </button>
+        </div>
+
+        {stableTab === "stable" ? (
+          <HorseStable
+            ownedHorses={profile.ownedHorses}
+            stableCapacity={profile.stableCapacity}
+            horseId={settings.horseId}
+            onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
+            onHorseRename={onHorseRename}
+            onHorseCreate={onHorseCreate}
+            onHorseDelete={onHorseDelete}
+            onEquipItem={onEquipItem}
+          />
+        ) : (
+          <Shop
+            profile={profile}
+            selectedHorseId={settings.horseId}
+            onBuyItem={onBuyItem}
+            onBuyHorse={onBuyHorse}
+          />
+        )}
 
         <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
 

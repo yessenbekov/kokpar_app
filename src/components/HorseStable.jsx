@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, Gauge, Pencil, Plus, Trash2, X } from "lucide-react";
 import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { itemById } from "../app/shopItems.js";
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -76,7 +77,7 @@ function recordRowsFor(record = {}) {
   ];
 }
 
-export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onHorseChange, onHorseRename, onHorseCreate, onHorseDelete }) {
+export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onHorseChange, onHorseRename, onHorseCreate, onHorseDelete, onEquipItem }) {
   const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
   const selectedOwnedHorse = stableHorses.find((horse) => horse.id === horseId) ?? stableHorses[0];
   const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
@@ -288,12 +289,30 @@ export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onH
           <div className="horse-equipment" aria-label="Снаряжение лошади">
             <strong>Снаряжение</strong>
             <div>
-              {EQUIPMENT_LABELS.map(([key, label]) => (
-                <span key={key}>
-                  <small>{label}</small>
-                  <b>{equipment[key] ?? "Пусто"}</b>
-                </span>
-              ))}
+              {EQUIPMENT_LABELS.map(([key, label]) => {
+                const equippedId = equipment[key];
+                const equippedItem = equippedId ? itemById(equippedId) : null;
+                return (
+                  <span key={key}>
+                    <small>{label}</small>
+                    {equippedItem ? (
+                      <span className="equipment-slot-filled">
+                        <b title={equippedItem.name}>{equippedItem.name}</b>
+                        <button
+                          type="button"
+                          className="equip-remove-btn"
+                          aria-label={`Снять ${equippedItem.name}`}
+                          onClick={() => onEquipItem?.(selectedOwnedHorse.id, key, null)}
+                        >
+                          Снять
+                        </button>
+                      </span>
+                    ) : (
+                      <b>Пусто</b>
+                    )}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>

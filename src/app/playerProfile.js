@@ -8,25 +8,13 @@ const DEFAULT_OWNED_HORSES = [
     name: "Құлагер",
     typeId: "argymak",
     bond: 18
-  }),
-  createOwnedHorse({
-    id: "horse-zhelmaya",
-    name: "Желмая",
-    typeId: "zhuyrik",
-    bond: 12
-  }),
-  createOwnedHorse({
-    id: "horse-taiburyil",
-    name: "Тайбурыл",
-    typeId: "auyr",
-    bond: 10
   })
 ];
 
 export const DEFAULT_PLAYER_PROFILE = {
   riderName: "Шабандоз",
   level: 1,
-  coins: 1200,
+  coins: 600,
   reputation: 0,
   selectedHorseId: DEFAULT_OWNED_HORSES[0].id,
   selectedHorseType: DEFAULT_OWNED_HORSES[0].typeId,

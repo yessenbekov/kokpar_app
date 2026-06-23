@@ -8,6 +8,7 @@ import {
 } from "./contactSystem.js";
 import { createMatchFeedback } from "./feedback.js";
 import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "./horseTypes.js";
+import { applyEquipmentToStats } from "../app/shopItems.js";
 import {
   createContestIndicatorMesh,
   createGoalMesh,
@@ -184,6 +185,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const isSpectator = options.teamSide === "spectator";
   const playerTeam = options.teamSide === "red" ? TEAM.red : TEAM.blue;
   const playerHorseType = horseTypeById(gameSettings.horseType);
+  const playerEquipment = options.equipment ?? {};
+  const playerEffectiveStats = applyEquipmentToStats(playerHorseType.stats, playerEquipment);
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
   const isMobile = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
   const assetPipeline = createGameAssetPipeline();
@@ -281,6 +284,30 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam);
   const player = riders.find(r => r.human) ?? riders[0];
+
+  // Apply equipment bonuses to the human player's stats
+  if (player && player.human) {
+    const baseMaxSpeed = 19.5;
+    const baseAcceleration = 27;
+    const baseBrakePower = 44;
+    const baseTurnRate = 4.15;
+    const baseLateralGrip = 9.2;
+    const s = playerEffectiveStats;
+    player.maxSpeed = baseMaxSpeed * s.speed;
+    player.acceleration = baseAcceleration * s.acceleration;
+    player.brakePower = baseBrakePower * s.brake;
+    player.turnRate = baseTurnRate * s.turn;
+    player.lateralGrip = baseLateralGrip * s.grip;
+    player.staminaDrainMultiplier = s.staminaDrain;
+    player.staminaRecoveryMultiplier = s.staminaRecovery;
+    player.carrySpeedMultiplier = s.carrySpeed;
+    player.contestPowerMultiplier = s.contestPower;
+    player.tacklePowerMultiplier = s.tacklePower;
+    player.stabilityMultiplier = s.stability;
+    player.bodyCheckPowerMultiplier = s.bodyCheckPower;
+    player.bodyCheckLungeMultiplier = s.bodyCheckLunge;
+  }
+
   const remoteRider = isOnline && !isOnlineGuest && !isSpectator ? (riders.find(r => r.team !== player.team) ?? null) : null;
   let remoteRiderInput = { x: 0, z: 0, action: false };
   function getRemoteRiderInput() { return remoteRiderInput; }

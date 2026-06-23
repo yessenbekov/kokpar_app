@@ -15,7 +15,7 @@ function formatTimer(minutes) {
   return `${String(minutes).padStart(2, "0")}:00`;
 }
 
-function settingsFromProfile(profile = {}) {
+export function settingsFromProfile(profile = {}) {
   const preferences = profile.matchPreferences ?? {};
   const mode = gameModeById(preferences.modeId);
   const selectedHorse = selectedHorseFromProfile(profile);
@@ -30,6 +30,7 @@ function settingsFromProfile(profile = {}) {
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
     horseName: selectedHorse.name,
+    equipment: selectedHorse.equipment ?? {},
     teamSide: preferences.teamSide === "red" ? "red" : "blue"
   };
 }
@@ -97,6 +98,7 @@ export function readUrlSettings(profile) {
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
     horseName: selectedHorse.name,
+    equipment: selectedHorse.equipment ?? {},
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide
   };
 }

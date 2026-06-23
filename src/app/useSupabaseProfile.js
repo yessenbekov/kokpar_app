@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { newOwnedHorse } from "./playerProfile.js";
 import { playerProfileStore } from "./profileStore.js";
 import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
 import { supabaseProfileStore } from "./supabaseProfileStore.js";
@@ -16,10 +17,12 @@ const signedOutState = {
 export function useSupabaseProfile({ onProfileLoaded } = {}) {
   const onProfileLoadedRef = useRef(onProfileLoaded);
   const loadedUserIdRef = useRef("");
+  const pendingUserRef = useRef(null);
   const [authState, setAuthState] = useState(() => ({
     ...signedOutState,
     status: isSupabaseConfigured ? "loading" : "unconfigured",
-    message: isSupabaseConfigured ? "Проверяем вход" : signedOutState.message
+    message: isSupabaseConfigured ? "Проверяем вход" : signedOutState.message,
+    needsOnboarding: false
   }));
 
   useEffect(() => {
@@ -45,11 +48,25 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
 
     try {
       const result = await supabaseProfileStore.read();
-      const profile =
-        result.status === "missing"
-          ? await supabaseProfileStore.save(playerProfileStore.read())
-          : playerProfileStore.save(result.profile);
 
+      if (result.status === "missing") {
+        // New user — trigger onboarding instead of auto-saving
+        loadedUserIdRef.current = user.id;
+        pendingUserRef.current = user;
+        setAuthState({
+          status: "signed-in",
+          syncStatus: "synced",
+          email: user.email ?? "",
+          phone: user.phone ?? "",
+          phoneChannel: "sms",
+          message: "Добро пожаловать!",
+          error: "",
+          needsOnboarding: true
+        });
+        return;
+      }
+
+      const profile = playerProfileStore.save(result.profile);
       loadedUserIdRef.current = user.id;
       onProfileLoadedRef.current?.(profile);
       setAuthState({
@@ -58,8 +75,9 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         email: user.email ?? "",
         phone: user.phone ?? "",
         phoneChannel: "sms",
-        message: result.status === "missing" ? "Локальный профиль перенесен" : "Профиль синхронизирован",
-        error: ""
+        message: "Профиль синхронизирован",
+        error: "",
+        needsOnboarding: false
       });
     } catch (error) {
       setAuthState({
@@ -69,7 +87,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
         phone: user.phone ?? "",
         phoneChannel: "sms",
         message: "Локальный профиль активен",
-        error: error instanceof Error ? error.message : "Ошибка синхронизации"
+        error: error instanceof Error ? error.message : "Ошибка синхронизации",
+        needsOnboarding: false
       });
     }
   }, []);
@@ -401,8 +420,38 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
     }
   }, [authState.status]);
 
+  async function completeOnboarding(horseTypeId, horseName, riderName) {
+    const horse = newOwnedHorse(horseTypeId, horseName);
+    const baseProfile = playerProfileStore.read();
+    const newProfile = {
+      ...baseProfile,
+      riderName: typeof riderName === "string" && riderName.trim() ? riderName.trim().slice(0, 24) : baseProfile.riderName,
+      coins: 600,
+      ownedHorses: [horse],
+      selectedHorseId: horse.id,
+      selectedHorseType: horse.typeId
+    };
+
+    const savedProfile = playerProfileStore.save(newProfile);
+
+    if (supabase) {
+      try {
+        await supabaseProfileStore.save(savedProfile);
+      } catch (error) {
+        console.warn("completeOnboarding: failed to sync to Supabase", error);
+      }
+    }
+
+    onProfileLoadedRef.current?.(savedProfile);
+    setAuthState((current) => ({ ...current, needsOnboarding: false, message: "Добро пожаловать в конюшню!" }));
+  }
+
+  const needsOnboarding = authState.needsOnboarding ?? false;
+
   return {
     authState,
+    needsOnboarding,
+    completeOnboarding,
     signInWithPassword,
     signUp,
     resetPassword,

@@ -9,6 +9,7 @@ import { playerProfileStore } from "./app/profileStore.js";
 import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
 import { AuthGate } from "./components/AuthGate.jsx";
 import { FieldRadar } from "./components/FieldRadar.jsx";
+import { HorseOnboarding } from "./components/HorseOnboarding.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchReward } from "./components/MatchReward.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
@@ -35,7 +36,7 @@ export default function App() {
   const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
   const [matchReward, setMatchReward] = useState(null);
   const [syncStatus, setSyncStatus] = useState("idle");
-  const { authState, signInWithPassword, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({
+  const { authState, needsOnboarding, completeOnboarding, signInWithPassword, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({
     onProfileLoaded: loadSyncedProfile
   });
 
@@ -369,6 +370,51 @@ export default function App() {
     }));
   }
 
+  function handleBuyItem(horseId, slotKey, itemId, cost) {
+    const currentProfile = playerProfileStore.read();
+    if (currentProfile.coins < cost) return;
+
+    const updatedHorses = currentProfile.ownedHorses.map((horse) =>
+      horse.id === horseId
+        ? { ...horse, equipment: { ...horse.equipment, [slotKey]: itemId } }
+        : horse
+    );
+    const nextProfile = saveProfile({
+      ...currentProfile,
+      coins: currentProfile.coins - cost,
+      ownedHorses: updatedHorses
+    });
+    setProfile(nextProfile);
+  }
+
+  function handleBuyHorse(typeId, horseName, cost) {
+    const currentProfile = playerProfileStore.read();
+    if (currentProfile.coins < cost) return;
+    if (currentProfile.ownedHorses.length >= currentProfile.stableCapacity) return;
+
+    const horse = newOwnedHorse(typeId, horseName);
+    const nextProfile = saveProfile({
+      ...currentProfile,
+      coins: currentProfile.coins - cost,
+      ownedHorses: [...currentProfile.ownedHorses, horse]
+    });
+    setProfile(nextProfile);
+  }
+
+  function handleEquipItem(horseId, slotKey, itemId) {
+    const currentProfile = playerProfileStore.read();
+    const updatedHorses = currentProfile.ownedHorses.map((horse) =>
+      horse.id === horseId
+        ? { ...horse, equipment: { ...horse.equipment, [slotKey]: itemId } }
+        : horse
+    );
+    const nextProfile = saveProfile({
+      ...currentProfile,
+      ownedHorses: updatedHorses
+    });
+    setProfile(nextProfile);
+  }
+
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
 
@@ -420,6 +466,14 @@ export default function App() {
         />
       )}
 
+      {needsOnboarding && (
+        <HorseOnboarding
+          onComplete={(typeId, horseName, riderName) => {
+            completeOnboarding(typeId, horseName, riderName);
+          }}
+        />
+      )}
+
       {isSetup && !showAuthGate && (
         <MatchSetup
           profile={profile}
@@ -433,6 +487,9 @@ export default function App() {
           onHorseDelete={deleteHorse}
           onSettingChange={updateSetting}
           onStart={startMatch}
+          onBuyItem={handleBuyItem}
+          onBuyHorse={handleBuyHorse}
+          onEquipItem={handleEquipItem}
         />
       )}
 
