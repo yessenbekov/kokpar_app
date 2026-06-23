@@ -2625,9 +2625,8 @@ button {
     grid-template-columns: minmax(0, 1fr) 76px;
   }
 
-  .choice-grid.two,
-  .choice-grid.three {
-    grid-template-columns: 1fr;
+  .choice-grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .mode-grid,
@@ -2635,10 +2634,17 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .lobby-actions.two,
-  .lobby-join-form,
-  .lobby-share {
+  .lobby-actions.two {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .lobby-join-form {
     grid-template-columns: 1fr;
+  }
+
+  .team-pick {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .mode-choice {
@@ -2738,7 +2744,7 @@ button {
 
   .touch-controls {
     bottom: calc(14px + env(safe-area-inset-bottom));
-    height: 122px;
+    height: 132px;
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
   }
@@ -2749,43 +2755,52 @@ button {
   }
 
   .touch-joystick {
-    width: 122px;
-    height: 122px;
+    width: 132px;
+    height: 132px;
   }
 
   .touch-stick-base {
-    width: 66px;
-    height: 66px;
+    width: 72px;
+    height: 72px;
   }
 
   .touch-stick-knob {
-    width: 50px;
-    height: 50px;
+    width: 56px;
+    height: 56px;
     transform:
       translate(-50%, -50%)
-      translate(calc(var(--stick-x, 0) * 40px), calc(var(--stick-z, 0) * 40px));
+      translate(calc(var(--stick-x, 0) * 44px), calc(var(--stick-z, 0) * 44px));
   }
 
   .touch-button {
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 54px;
   }
 
   .touch-action {
-    width: 68px;
-    height: 68px;
+    width: 74px;
+    height: 74px;
   }
 
   .banner {
-    bottom: calc(154px + env(safe-area-inset-bottom));
+    bottom: calc(164px + env(safe-area-inset-bottom));
   }
 
   .radar {
-    top: 178px;
+    top: 186px;
     bottom: auto;
     left: 10px;
     width: 132px;
     padding: 5px;
+  }
+
+  .history-entry {
+    grid-template-columns: 20px 32px 1fr auto;
+    padding: 5px 8px;
+  }
+
+  .history-time {
+    display: none;
   }
 }
 
