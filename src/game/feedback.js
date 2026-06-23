@@ -94,6 +94,23 @@ export function createMatchFeedback(initialEnabled = true) {
       tone({ frequency: 310, endFrequency: 620, duration: 0.16, gain: 0.11, type: "triangle" });
       vibrate(12);
     },
+    pass() {
+      tone({ frequency: 560, endFrequency: 340, duration: 0.14, gain: 0.12, type: "triangle" });
+      tone({ frequency: 400, endFrequency: 240, duration: 0.10, gain: 0.07, type: "triangle", delay: 0.10 });
+      vibrate(8);
+    },
+    passCatch() {
+      tone({ frequency: 520, endFrequency: 800, duration: 0.13, gain: 0.14, type: "triangle" });
+      tone({ frequency: 700, endFrequency: 960, duration: 0.11, gain: 0.10, type: "triangle", delay: 0.10 });
+      vibrate([10, 10, 14]);
+    },
+    countdown(n) {
+      const freq = n === 1 ? 880 : n === 2 ? 660 : 500;
+      const dur = n === 1 ? 0.22 : 0.16;
+      const gain = n === 1 ? 0.20 : 0.15;
+      tone({ frequency: freq, endFrequency: freq * 0.94, duration: dur, gain, type: "sine" });
+      vibrate(n === 1 ? [22, 16, 22] : 16);
+    },
     outOfBounds() {
       tone({ frequency: 290, endFrequency: 180, duration: 0.16, gain: 0.15, type: "square" });
       tone({ frequency: 240, endFrequency: 145, duration: 0.19, gain: 0.13, type: "square", delay: 0.18 });

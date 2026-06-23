@@ -185,6 +185,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const playerTeam = options.teamSide === "red" ? TEAM.red : TEAM.blue;
   const playerHorseType = horseTypeById(gameSettings.horseType);
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
+  const isMobile = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
   const assetPipeline = createGameAssetPipeline();
   const feedback = createMatchFeedback(options.feedbackEnabled !== false);
   const scene = new THREE.Scene();
@@ -225,10 +226,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 260);
   camera.position.set(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.9;
@@ -240,7 +241,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const sun = new THREE.DirectionalLight("#ffe8a0", 3.6);
   sun.position.set(-32, 38, 26);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
   sun.shadow.camera.left = -80;
   sun.shadow.camera.right = 80;
   sun.shadow.camera.top = 70;
@@ -263,6 +264,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
   scene.add(ground);
   createGroundDetails(scene);
   const arenaPresentation = createArenaEnvironment(scene);
+
+  if (isMobile) {
+    scene.traverse((obj) => {
+      if (obj.isMesh) obj.castShadow = false;
+    });
+  }
 
   const blueGoal = createGoalMesh(COLORS.blue, gameSettings.goalType);
   blueGoal.position.set(goalFor(TEAM.blue).x, 0, goalFor(TEAM.blue).z);
@@ -424,7 +431,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     breakawayCooldown: 0,
     announcedFinal30: false,
     announcedFinal10: false,
-    lastPlayerTeamScore: 0
+    lastPlayerTeamScore: 0,
+    lastCountdownInt: ROUND_COUNTDOWN_SECONDS
   };
 
   let animationFrame = 0;
@@ -681,7 +689,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.vz = (dz / dist) * PASS_SPEED;
     kokpar.looseCooldown = 0.3;
 
-    feedback.show(`Пас → ${target.name}`);
+    feedback.pass();
+    showMessage(`Пас → ${target.name}`, "", 1.0);
     return true;
   }
 
@@ -757,7 +766,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
     };
   }
 
-  function publishHud() {
+  let lastHudTime = 0;
+  function publishHud(force = false) {
+    const now = performance.now();
+    if (!force && now - lastHudTime < 50) return;
+    lastHudTime = now;
     const isCountdown = match.phase === "countdown";
     const countdown = Math.max(1, Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS)));
     const mountedContest = isMountedContestParticipant(player);
@@ -867,7 +880,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.message = message;
     match.submessage = submessage;
     match.messageTime = seconds;
-    publishHud();
+    publishHud(true);
   }
 
   function beginCountdown(
@@ -877,6 +890,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   ) {
     match.phase = "countdown";
     match.countdown = ROUND_COUNTDOWN_SECONDS;
+    match.lastCountdownInt = ROUND_COUNTDOWN_SECONDS;
     match.goalPause = 0;
     match.goalTeam = null;
     match.goalScorer = null;
@@ -888,7 +902,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.vx = 0;
       rider.vz = 0;
     });
-    publishHud();
+    publishHud(true);
   }
 
   function startRound() {
@@ -1554,7 +1568,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
           kokpar.vy = 0;
           kokpar.vz = 0;
           kokpar.looseCooldown = 0;
-          if (pt === player) feedback.show("Поймал пас!");
+          if (pt === player) { feedback.passCatch(); showMessage("Поймал пас!", "", 1.0); }
           return;
         }
       }
@@ -2035,6 +2049,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
         }
 
         match.countdown -= dt;
+        const countdownInt = Math.ceil(clamp(match.countdown, 0, ROUND_COUNTDOWN_SECONDS));
+        if (countdownInt !== match.lastCountdownInt && countdownInt >= 1) {
+          feedback.countdown(countdownInt);
+          match.lastCountdownInt = countdownInt;
+        }
         if (match.countdown <= 0) {
           startRound();
         }
@@ -2201,7 +2220,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   resetPositions();
   beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   updateStadiumPresentation();
-  publishHud();
+  publishHud(true);
   animationFrame = requestAnimationFrame(frame);
 
   return {
