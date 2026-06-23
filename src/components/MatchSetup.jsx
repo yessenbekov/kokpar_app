@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Gavel, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
+import { Marketplace } from "./Marketplace.jsx";
 import { MatchHistory } from "./MatchHistory.jsx";
 import { ModeSelector } from "./ModeSelector.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
@@ -148,7 +149,7 @@ function onlineStartLabel(lobbyState) {
   return "Запустить комнату";
 }
 
-export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onEquipItem }) {
+export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onEquipItem, onListItem, onCancelListing, onPurchase, onEquipFromInventory }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -159,6 +160,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [editingRider, setEditingRider] = useState(false);
   const [draftRiderName, setDraftRiderName] = useState(profile.riderName);
   const [stableTab, setStableTab] = useState("stable");
+  const [listingDraft, setListingDraft] = useState(null);
   const canStart = !onlineMode || onlineLobbyState.canStart;
   const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
 
@@ -184,6 +186,22 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     e.preventDefault();
     onRiderRename?.(draftRiderName);
     setEditingRider(false);
+  }
+
+  function handleListEquipment(horseId, slotKey, itemId) {
+    setListingDraft({ itemType: "equipment", itemId, slotKey, horseId, defaultPrice: 200 });
+    setStableTab("market");
+  }
+
+  function handleListHorse(horseId) {
+    const horse = profile.ownedHorses.find((h) => h.id === horseId);
+    setListingDraft({ itemType: "horse", horseId, horseName: horse?.name, defaultPrice: 800 });
+    setStableTab("market");
+  }
+
+  async function handleListItem(itemType, itemId, slotKey, horseId, price) {
+    await onListItem?.(itemType, itemId, slotKey, horseId, price);
+    setListingDraft(null);
   }
 
   return (
@@ -253,25 +271,49 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           >
             Магазин
           </button>
+          <button
+            type="button"
+            className={stableTab === "market" ? "stable-tab-btn active" : "stable-tab-btn"}
+            onClick={() => setStableTab("market")}
+          >
+            <Gavel size={13} strokeWidth={2.4} />
+            Торги
+          </button>
         </div>
 
-        {stableTab === "stable" ? (
+        {stableTab === "stable" && (
           <HorseStable
             ownedHorses={profile.ownedHorses}
             stableCapacity={profile.stableCapacity}
             horseId={settings.horseId}
+            profile={profile}
             onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
             onHorseRename={onHorseRename}
             onHorseCreate={onHorseCreate}
             onHorseDelete={onHorseDelete}
             onEquipItem={onEquipItem}
+            onListEquipment={handleListEquipment}
+            onListHorse={handleListHorse}
+            onEquipFromInventory={onEquipFromInventory}
           />
-        ) : (
+        )}
+
+        {stableTab === "shop" && (
           <Shop
             profile={profile}
             selectedHorseId={settings.horseId}
             onBuyItem={onBuyItem}
             onBuyHorse={onBuyHorse}
+          />
+        )}
+
+        {stableTab === "market" && (
+          <Marketplace
+            profile={profile}
+            listingDraft={listingDraft}
+            onListItem={handleListItem}
+            onCancelListing={onCancelListing}
+            onPurchase={onPurchase}
           />
         )}
 

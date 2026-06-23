@@ -68,6 +68,13 @@ const EQUIPMENT_LABELS = [
   ["legWraps", "Бинты"]
 ];
 
+const SLOT_LABELS = {
+  saddle: "Седло",
+  bridle: "Узда",
+  blanket: "Попона",
+  legWraps: "Бинты"
+};
+
 function recordRowsFor(record = {}) {
   return [
     ["Матчи", record.matches ?? 0],
@@ -77,7 +84,85 @@ function recordRowsFor(record = {}) {
   ];
 }
 
-export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onHorseChange, onHorseRename, onHorseCreate, onHorseDelete, onEquipItem }) {
+function InventorySection({ inventory = [], horseId, onEquipFromInventory, onListEquipment }) {
+  const [equipPickerId, setEquipPickerId] = useState(null);
+
+  if (!inventory.length) return null;
+
+  return (
+    <div className="horse-inventory">
+      <strong>Инвентарь</strong>
+      {inventory.map((itemId) => {
+        const item = itemById(itemId);
+        if (!item) return null;
+        return (
+          <div className="inventory-item" key={itemId}>
+            <span className="inventory-item-info">
+              <b>{item.name}</b>
+              <small>{SLOT_LABELS[item.slot] ?? item.slot}</small>
+            </span>
+            <div className="inventory-item-actions">
+              {equipPickerId === itemId ? (
+                <span className="inventory-slot-picker">
+                  {EQUIPMENT_LABELS.map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className="horse-list-btn"
+                      onClick={() => {
+                        onEquipFromInventory?.(horseId, key, itemId);
+                        setEquipPickerId(null);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="horse-list-btn muted"
+                    onClick={() => setEquipPickerId(null)}
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="horse-list-btn"
+                  onClick={() => setEquipPickerId(itemId)}
+                >
+                  Надеть
+                </button>
+              )}
+              <button
+                type="button"
+                className="horse-list-btn sell"
+                onClick={() => onListEquipment?.(null, item.slot, itemId)}
+              >
+                На торги
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function HorseStable({
+  horseId,
+  ownedHorses = [],
+  stableCapacity = 6,
+  profile,
+  onHorseChange,
+  onHorseRename,
+  onHorseCreate,
+  onHorseDelete,
+  onEquipItem,
+  onListEquipment,
+  onListHorse,
+  onEquipFromInventory
+}) {
   const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
   const selectedOwnedHorse = stableHorses.find((horse) => horse.id === horseId) ?? stableHorses[0];
   const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
@@ -87,6 +172,7 @@ export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onH
   const recordRows = recordRowsFor(selectedOwnedHorse?.record);
   const canAddMore = stableHorses.length < stableCapacity;
   const canDelete = stableHorses.length > 1;
+  const inventory = profile?.inventory ?? [];
 
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState(selectedOwnedHorse?.name ?? "");
@@ -136,21 +222,32 @@ export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onH
             const active = selectedOwnedHorse.id === ownedHorse.id;
 
             return (
-              <button
-                className={active ? "stable-card active" : "stable-card"}
-                type="button"
-                key={ownedHorse.id}
-                onClick={() => onHorseChange(ownedHorse.id)}
-              >
-                <HorseToken horse={horse} />
-                <span className="stable-card-copy">
-                  <strong>{ownedHorse.name}</strong>
-                  <span>
-                    {horse.name} · Ур. {ownedHorse.level}
+              <div key={ownedHorse.id} className="stable-card-row">
+                <button
+                  className={active ? "stable-card active" : "stable-card"}
+                  type="button"
+                  onClick={() => onHorseChange(ownedHorse.id)}
+                >
+                  <HorseToken horse={horse} />
+                  <span className="stable-card-copy">
+                    <strong>{ownedHorse.name}</strong>
+                    <span>
+                      {horse.name} · Ур. {ownedHorse.level}
+                    </span>
                   </span>
-                </span>
-                <span className="horse-tier">{horse.tier}</span>
-              </button>
+                  <span className="horse-tier">{horse.tier}</span>
+                </button>
+                {canDelete && onListHorse && (
+                  <button
+                    type="button"
+                    className="horse-list-btn sell"
+                    title="Продать лошадь"
+                    onClick={(e) => { e.stopPropagation(); onListHorse(ownedHorse.id); }}
+                  >
+                    Продать
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>
@@ -306,6 +403,16 @@ export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onH
                         >
                           Снять
                         </button>
+                        {onListEquipment && (
+                          <button
+                            type="button"
+                            className="equip-list-btn"
+                            aria-label={`На торги ${equippedItem.name}`}
+                            onClick={() => onListEquipment(selectedOwnedHorse.id, key, equippedId)}
+                          >
+                            На торги
+                          </button>
+                        )}
                       </span>
                     ) : (
                       <b>Пусто</b>
@@ -316,6 +423,13 @@ export function HorseStable({ horseId, ownedHorses = [], stableCapacity = 6, onH
             </div>
           </div>
         </div>
+
+        <InventorySection
+          inventory={inventory}
+          horseId={selectedOwnedHorse.id}
+          onEquipFromInventory={onEquipFromInventory}
+          onListEquipment={onListEquipment}
+        />
 
         {canDelete &&
           (confirmDelete ? (

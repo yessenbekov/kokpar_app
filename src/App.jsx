@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
+import { createListing, cancelListing, purchaseListing } from "./app/marketplaceStore.js";
 import { onlineMatchStore } from "./app/onlineMatches.js";
 import { createOnlineMatchSync } from "./app/onlineMatchSync.js";
 import { matchHistoryStore } from "./app/matchHistoryStore.js";
-import { newOwnedHorse } from "./app/playerProfile.js";
+import { newOwnedHorse, sanitizePlayerProfile } from "./app/playerProfile.js";
 import { playerProfileStore } from "./app/profileStore.js";
+import { supabaseProfileStore } from "./app/supabaseProfileStore.js";
 import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
 import { AuthGate } from "./components/AuthGate.jsx";
 import { FieldRadar } from "./components/FieldRadar.jsx";
@@ -415,6 +417,79 @@ export default function App() {
     setProfile(nextProfile);
   }
 
+  async function handleListItem(itemType, itemId, slotKey, horseId, price) {
+    try {
+      await createListing(itemType, itemId, slotKey, horseId, price);
+      const currentProfile = playerProfileStore.read();
+      const nextProfile = sanitizePlayerProfile({
+        ...currentProfile,
+        ownedHorses: itemType === "equipment"
+          ? currentProfile.ownedHorses.map((h) =>
+              h.id === horseId
+                ? { ...h, equipment: { ...h.equipment, [slotKey]: null } }
+                : h
+            )
+          : currentProfile.ownedHorses.filter((h) => h.id !== horseId),
+        inventory: itemType === "equipment" && !horseId
+          ? (currentProfile.inventory ?? []).filter((id) => id !== itemId)
+          : currentProfile.inventory ?? []
+      });
+      playerProfileStore.save(nextProfile);
+      setProfile(nextProfile);
+      syncProfile(nextProfile);
+    } catch (err) {
+      console.warn("create_listing failed", err);
+      throw err;
+    }
+  }
+
+  async function handleCancelListing(listingId) {
+    try {
+      await cancelListing(listingId);
+      const result = await supabaseProfileStore.read();
+      if (result.profile) {
+        const updated = playerProfileStore.save(result.profile);
+        setProfile(updated);
+      }
+    } catch (err) {
+      console.warn("cancel_listing failed", err);
+      throw err;
+    }
+  }
+
+  async function handlePurchase(result, cost) {
+    const currentProfile = playerProfileStore.read();
+    const nextProfile = sanitizePlayerProfile({
+      ...currentProfile,
+      coins: Math.max(0, currentProfile.coins - cost),
+      inventory: result.item_type === "equipment"
+        ? [...(currentProfile.inventory ?? []), result.item_id]
+        : currentProfile.inventory ?? [],
+      ownedHorses: result.item_type === "horse"
+        ? [...currentProfile.ownedHorses, newOwnedHorse(result.horse_type_id, result.horse_name)]
+        : currentProfile.ownedHorses
+    });
+    playerProfileStore.save(nextProfile);
+    setProfile(nextProfile);
+    syncProfile(nextProfile);
+  }
+
+  function handleEquipFromInventory(horseId, slotKey, itemId) {
+    const currentProfile = playerProfileStore.read();
+    const nextProfile = sanitizePlayerProfile({
+      ...currentProfile,
+      inventory: (currentProfile.inventory ?? []).filter((id) => id !== itemId),
+      ownedHorses: currentProfile.ownedHorses.map((h) =>
+        h.id === horseId
+          ? { ...h, equipment: { ...h.equipment, [slotKey]: itemId } }
+          : h
+      )
+    });
+    playerProfileStore.save(nextProfile);
+    setProfile(nextProfile);
+    syncProfile(nextProfile);
+  }
+
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
 
@@ -490,6 +565,10 @@ export default function App() {
           onBuyItem={handleBuyItem}
           onBuyHorse={handleBuyHorse}
           onEquipItem={handleEquipItem}
+          onListItem={handleListItem}
+          onCancelListing={handleCancelListing}
+          onPurchase={handlePurchase}
+          onEquipFromInventory={handleEquipFromInventory}
         />
       )}
 

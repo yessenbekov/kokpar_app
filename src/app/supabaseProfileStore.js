@@ -10,6 +10,7 @@ function profileFromRows(profileRow, horseRows = []) {
     selectedHorseId: profileRow.selected_horse_id,
     selectedHorseType: profileRow.selected_horse_type,
     stableCapacity: profileRow.stable_capacity,
+    inventory: profileRow.inventory ?? [],
     matchPreferences: profileRow.match_preferences,
     ownedHorses: (horseRows ?? []).map((horse) => ({
       id: horse.id,
@@ -34,6 +35,7 @@ function profileRowFromProfile(profile, userId) {
     selected_horse_id: profile.selectedHorseId,
     selected_horse_type: profile.selectedHorseType,
     stable_capacity: profile.stableCapacity,
+    inventory: profile.inventory ?? [],
     match_preferences: profile.matchPreferences
   };
 }

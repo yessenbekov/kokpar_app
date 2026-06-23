@@ -20,6 +20,7 @@ export const DEFAULT_PLAYER_PROFILE = {
   selectedHorseType: DEFAULT_OWNED_HORSES[0].typeId,
   ownedHorses: DEFAULT_OWNED_HORSES,
   stableCapacity: 6,
+  inventory: [],
   matchPreferences: {
     modeId: DEFAULT_MODE_ID,
     goalType: "circle",
@@ -142,6 +143,7 @@ export function sanitizePlayerProfile(value = {}) {
     selectedHorseType: selectedHorse.typeId,
     ownedHorses,
     stableCapacity: Math.max(ownedHorses.length, Math.round(safeNumber(value.stableCapacity, DEFAULT_PLAYER_PROFILE.stableCapacity))),
+    inventory: Array.isArray(value?.inventory) ? value.inventory.filter((id) => typeof id === "string") : [],
     matchPreferences: sanitizeMatchPreferences(value.matchPreferences)
   };
 }
