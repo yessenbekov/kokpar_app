@@ -88,8 +88,10 @@ export function Shop({ profile, selectedHorseId, onBuyItem, onBuyHorse }) {
                   const canAfford = coins >= item.price;
 
                   return (
-                    <div key={item.id} className={isEquipped ? "shop-item-card equipped" : "shop-item-card"}>
-                      <div className="shop-item-tier">Ур. {item.tier}</div>
+                    <div key={item.id} className={isEquipped ? `shop-item-card tier-${item.tier} equipped` : `shop-item-card tier-${item.tier}`}>
+                      <span className={`item-tier-badge tier-${item.tier}`}>
+                        {item.tier === 1 ? "Бронза" : item.tier === 2 ? "Серебро" : "Золото"}
+                      </span>
                       <strong className="shop-item-name">{item.name}</strong>
                       <p className="shop-item-desc">{item.description}</p>
                       <div className="shop-item-footer">

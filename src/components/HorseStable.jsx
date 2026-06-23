@@ -234,6 +234,9 @@ export function HorseStable({
                     <span>
                       {horse.name} · Ур. {ownedHorse.level}
                     </span>
+                    <span className="stable-card-xp">
+                      <span className="stable-card-xp-fill" style={{ width: `${Math.round((ownedHorse.xp / 100) * 100)}%` }} />
+                    </span>
                   </span>
                   <span className="horse-tier">{horse.tier}</span>
                 </button>
@@ -393,7 +396,7 @@ export function HorseStable({
                   <span key={key}>
                     <small>{label}</small>
                     {equippedItem ? (
-                      <span className="equipment-slot-filled">
+                      <span className={`equipment-slot-filled equip-slot filled tier-${equippedItem.tier}`}>
                         <b title={equippedItem.name}>{equippedItem.name}</b>
                         <button
                           type="button"
