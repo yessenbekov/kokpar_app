@@ -1674,7 +1674,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
   }
 
-  function syncMeshes(time) {
+  function syncMeshes(time, dt) {
     const mountedContest = kokpar.contest.active && kokpar.contest.mode === "mounted";
     const contestParticipants =
       kokpar.contest.active
@@ -1688,6 +1688,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
     riders.forEach((rider) => {
       const speed = Math.hypot(rider.vx, rider.vz);
       const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
+
+      const mixer = rider.group.userData.mixer;
+      if (mixer && dt) {
+        mixer.timeScale = 0.25 + speedRatio * 1.75;
+        mixer.update(dt);
+      }
+
       const gaitPhase = rider.gaitPhase ?? time * (GAIT_PHASE_MIN_RATE + speed * GAIT_PHASE_SPEED_RATE);
       const idleBlend = clamp(1 - speedRatio / 0.16, 0, 1);
       const trotBlend = clamp(1 - Math.abs(speedRatio - 0.42) / 0.34, 0, 1);
@@ -2112,7 +2119,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
 
     match.messageTime = Math.max(0, match.messageTime - dt);
-    syncMeshes(time);
+    syncMeshes(time, dt);
     updateMatchCommentary();
     updateStadiumPresentation();
     updateCamera(dt);

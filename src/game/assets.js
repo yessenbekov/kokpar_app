@@ -14,7 +14,7 @@ const DEFAULT_MODEL_MANIFEST = {
 };
 
 const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket"];
-const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail"];
+const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail", "char"];
 const SERKE_MATERIAL_TOKENS = ["serke", "kokpar", "dummy", "hide"];
 const LEG_KEYS = ["fl", "fr", "bl", "br"];
 
@@ -329,8 +329,14 @@ export function createRiderModelInstance(assetPipeline, rider) {
   if (riderHorse) {
     addModelPart(group, riderHorse, "combined-rider-horse");
   } else {
-    addModelPart(group, horse, "horse");
+    const horsePart = addModelPart(group, horse, "horse");
     addModelPart(group, riderPrototype, "rider");
+
+    if (horsePart?.userData.animations?.length > 0) {
+      const mixer = new THREE.AnimationMixer(horsePart);
+      mixer.clipAction(horsePart.userData.animations[0]).play();
+      group.userData.mixer = mixer;
+    }
   }
 
   tintRiderModel(group, rider);

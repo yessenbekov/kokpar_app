@@ -6,16 +6,16 @@
     "Local orientation convention: forward is +X, up is +Y, origin is near the horse body center."
   ],
   "riderHorse": {
-    "path": "/models/horses/kokpar-rider-horse.glb",
+    "path": null,
     "scale": 1,
     "position": [0, 0, 0],
     "rotation": [0, 0, 0]
   },
   "horse": {
-    "path": null,
+    "path": "/models/horse.glb",
     "scale": 1,
     "position": [0, 0, 0],
-    "rotation": [0, 0, 0]
+    "rotation": [0, 1.5708, 0]
   },
   "rider": {
     "path": null,
