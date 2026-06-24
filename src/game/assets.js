@@ -13,8 +13,8 @@ const DEFAULT_MODEL_MANIFEST = {
   serke: null
 };
 
-const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket"];
-const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail", "char"];
+const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char"];
+const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail"];
 const SERKE_MATERIAL_TOKENS = ["serke", "kokpar", "dummy", "hide"];
 const LEG_KEYS = ["fl", "fr", "bl", "br"];
 
