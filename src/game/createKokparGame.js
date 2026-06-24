@@ -1691,7 +1691,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       const mixer = rider.group.userData.mixer;
       if (mixer && dt) {
-        mixer.timeScale = 0.25 + speedRatio * 1.75;
+        // Walk → trot → canter curve: slow at idle, up to 4× at full gallop
+        mixer.timeScale = 0.3 + speedRatio * speedRatio * 3.7;
         mixer.update(dt);
       }
 
@@ -1702,8 +1703,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const stopPose = clamp(rider.stopPose ?? 0, 0, 1);
       const turnPose = clamp(rider.turnPose ?? 0, 0, 1);
       const idleBreath = Math.sin(time * 2.2 + rider.aiPhase) * idleBlend;
+      // For GLB animated horses, amplify the gallop bounce so fast movement reads as running
+      const glbBounceScale = rider.group.userData.mixer ? 8 : 1;
       const gaitBounce =
-        Math.max(0, Math.sin(gaitPhase * 2)) * (0.03 + trotBlend * 0.07 + gallopBlend * 0.13);
+        Math.max(0, Math.sin(gaitPhase * 2)) * (0.03 + trotBlend * 0.07 + gallopBlend * 0.13) * glbBounceScale;
       const bob = idleBreath * 0.026 + gaitBounce - stopPose * 0.035;
       const bodyCheckState = contactSystem.bodyCheckPose(rider);
       const bodyCheckPose = Math.max(bodyCheckState.drive, bodyCheckState.windup * 0.7);
