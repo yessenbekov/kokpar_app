@@ -336,6 +336,31 @@ export function createRiderModelInstance(assetPipeline, rider) {
       const mixer = new THREE.AnimationMixer(horsePart);
       mixer.clipAction(horsePart.userData.animations[0]).play();
       group.userData.mixer = mixer;
+
+      // Replace GLB materials with solid team colors so horse is clearly identifiable.
+      // GLB textures from Meshy AI export as white; token-based tinting won't override them.
+      const horseMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.72 });
+      const saddleMat = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.6 });
+      horsePart.traverse((node) => {
+        if (!node.isMesh && !node.isSkinnedMesh) return;
+        node.material = horseMat;
+      });
+
+      // Simple procedural rider block sitting on top of the horse
+      const riderGroup = new THREE.Group();
+      const torsoMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.6 });
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.6, 0.5), torsoMat);
+      torso.position.set(0, 5.8, 0);
+      torso.castShadow = true;
+      riderGroup.add(torso);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 8), torsoMat);
+      head.position.set(0, 7.0, 0);
+      head.castShadow = true;
+      riderGroup.add(head);
+      const saddle = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.18, 0.7), saddleMat);
+      saddle.position.set(0, 5.0, 0);
+      riderGroup.add(saddle);
+      group.add(riderGroup);
     }
   }
 
