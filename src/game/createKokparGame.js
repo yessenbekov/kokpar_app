@@ -1703,10 +1703,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const stopPose = clamp(rider.stopPose ?? 0, 0, 1);
       const turnPose = clamp(rider.turnPose ?? 0, 0, 1);
       const idleBreath = Math.sin(time * 2.2 + rider.aiPhase) * idleBlend;
-      // For GLB animated horses, amplify the gallop bounce so fast movement reads as running
-      const glbBounceScale = rider.group.userData.mixer ? 8 : 1;
-      const gaitBounce =
-        Math.max(0, Math.sin(gaitPhase * 2)) * (0.03 + trotBlend * 0.07 + gallopBlend * 0.13) * glbBounceScale;
+      const isGlbHorse = !!rider.group.userData.mixer;
+      const glbBounceScale = isGlbHorse ? 8 : 1;
+      const walkWave = Math.max(0, Math.sin(gaitPhase * 2));
+      const gallopWave = Math.pow(Math.max(0, Math.sin(gaitPhase * 1.5 + 0.3)), 1.6);
+      const bounceWave = isGlbHorse
+        ? walkWave * (1 - gallopBlend) + gallopWave * gallopBlend
+        : walkWave;
+      const gaitBounce = bounceWave * (0.03 + trotBlend * 0.07 + gallopBlend * 0.13) * glbBounceScale;
       const bob = idleBreath * 0.026 + gaitBounce - stopPose * 0.035;
       const bodyCheckState = contactSystem.bodyCheckPose(rider);
       const bodyCheckPose = Math.max(bodyCheckState.drive, bodyCheckState.windup * 0.7);
@@ -1739,7 +1743,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const posePower = inContest ? clamp(contestPowerForRider(rider), 0, 1.25) : 0;
 
       rider.group.position.set(rider.x, Math.max(0, bob), rider.z);
+      rider.group.rotation.order = 'YXZ';
       rider.group.rotation.y = -rider.rotation;
+      rider.group.rotation.x = isGlbHorse ? -gallopBlend * 0.16 : 0;
       rider.group.rotation.z =
         (rider.lean ?? 0) +
         hitLean -
