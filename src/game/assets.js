@@ -366,6 +366,43 @@ export function createRiderModelInstance(assetPipeline, rider) {
         const n = node.name.toLowerCase();
         node.material = (n.includes("hair") || n.includes("mane")) ? hairMat : horseMat;
       });
+
+      const saddleX = 0.9;
+      const saddleY = 4.2;
+      const bodyMat = new THREE.MeshStandardMaterial({ color: "#f0e8d0", roughness: 0.65 });
+      const accentMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.45 });
+
+      const rider3D = new THREE.Group();
+      rider3D.position.set(saddleX, saddleY, 0);
+
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.88, 0.30), bodyMat);
+      torso.position.y = 0.44;
+      torso.castShadow = true;
+      rider3D.add(torso);
+
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.22, 6), bodyMat);
+      neck.position.y = 1.0;
+      rider3D.add(neck);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 6), bodyMat);
+      head.position.y = 1.28;
+      head.castShadow = true;
+      rider3D.add(head);
+
+      const helmet = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.18, 8), accentMat);
+      helmet.position.y = 1.46;
+      rider3D.add(helmet);
+
+      // Arms reaching forward (holding reins)
+      for (const side of [-1, 1]) {
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.55, 6), bodyMat);
+        arm.rotation.z = side * 0.55;
+        arm.position.set(side * 0.36, 0.62, 0.14);
+        rider3D.add(arm);
+      }
+
+      group.add(rider3D);
+      group.userData.rider3D = rider3D;
     }
   }
 
