@@ -333,20 +333,32 @@ export function createRiderModelInstance(assetPipeline, rider) {
     addModelPart(group, riderPrototype, "rider");
 
     if (horsePart?.userData.animations?.length > 0) {
+      // Strip XZ root motion so the animation doesn't fight the physics position
+      const srcClip = horsePart.userData.animations[0];
+      const filteredTracks = srcClip.tracks.filter((t) => {
+        const isRoot = /^(Align|RootNode|Root|Object_2)\./.test(t.name);
+        return !(isRoot && t.name.endsWith(".position"));
+      });
+      const clip = new THREE.AnimationClip(srcClip.name, srcClip.duration, filteredTracks);
+
       const mixer = new THREE.AnimationMixer(horsePart);
-      mixer.clipAction(horsePart.userData.animations[0]).play();
+      mixer.clipAction(clip).play();
       group.userData.mixer = mixer;
 
-      // Replace GLB materials with solid team colors so horse is clearly identifiable.
-      // GLB textures from Meshy AI export as white; token-based tinting won't override them.
-      const horseMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.72 });
+      // Force-replace materials with team colours (GLB textures bake to white and can't be tinted).
+      // Hair/mane gets a darker shade so it's visually distinct from the coat.
+      const coatColor = new THREE.Color(rider.color);
+      const hairColor = coatColor.clone().multiplyScalar(0.5);
+      const horseMat = new THREE.MeshStandardMaterial({ color: coatColor, roughness: 0.72 });
+      const hairMat  = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.85 });
       const saddleMat = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.6 });
       horsePart.traverse((node) => {
         if (!node.isMesh && !node.isSkinnedMesh) return;
-        node.material = horseMat;
+        const n = node.name.toLowerCase();
+        node.material = (n.includes("hair") || n.includes("mane")) ? hairMat : horseMat;
       });
 
-      // Simple procedural rider block sitting on top of the horse
+      // Procedural rider block on top of the horse
       const riderGroup = new THREE.Group();
       const torsoMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.6 });
       const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.6, 0.5), torsoMat);

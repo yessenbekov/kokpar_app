@@ -12,10 +12,10 @@
     "rotation": [0, 0, 0]
   },
   "horse": {
-    "path": "/models/horse.glb",
-    "scale": 3000,
-    "position": [0, 0.3, 0],
-    "rotation": [0, 1.5708, 0]
+    "path": "/models/horse_1.glb",
+    "scale": 0.044,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
   },
   "rider": {
     "path": null,
