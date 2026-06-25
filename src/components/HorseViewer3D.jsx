@@ -53,19 +53,15 @@ export function HorseViewer3D({ style }) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setClearColor(0x1c1208);
     container.appendChild(renderer.domElement);
-    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;";
+    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;cursor:grab;";
 
     const scene = new THREE.Scene();
-
     const camera = new THREE.PerspectiveCamera(42, w / h, 0.05, 50);
-    // Start with a reasonable position; will be adjusted after model loads
     camera.position.set(3.2, 1.6, -2.0);
     camera.lookAt(0, 1.0, 0);
 
-    // Bright warm ambient — no fog so the horse is fully visible
     scene.add(new THREE.AmbientLight(0xffd8a0, 3.5));
 
-    // Key light: strong, front-right-top, warm
     const key = new THREE.DirectionalLight(0xfff0c8, 9.0);
     key.position.set(4, 7, -4);
     key.castShadow = true;
@@ -79,17 +75,14 @@ export function HorseViewer3D({ style }) {
     key.shadow.bias = -0.002;
     scene.add(key);
 
-    // Cool fill from left
     const fill = new THREE.DirectionalLight(0x90b8e8, 2.5);
     fill.position.set(-5, 2, 2);
     scene.add(fill);
 
-    // Warm rim from behind (separates horse from background)
     const rim = new THREE.DirectionalLight(0xffaa40, 3.0);
     rim.position.set(-1, 5, 6);
     scene.add(rim);
 
-    // Ground
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(14, 14),
       new THREE.MeshStandardMaterial({ color: 0x1a1008, roughness: 1.0 })
@@ -97,6 +90,55 @@ export function HorseViewer3D({ style }) {
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
+
+    // Orbit state: spherical coords around the target
+    const orbit = { azimuth: -0.62, elevation: 0.28, dist: 4.5, targetY: 1.0 };
+
+    function applyOrbit() {
+      const x = orbit.dist * Math.cos(orbit.elevation) * Math.sin(orbit.azimuth);
+      const y = orbit.dist * Math.sin(orbit.elevation) + orbit.targetY;
+      const z = orbit.dist * Math.cos(orbit.elevation) * Math.cos(orbit.azimuth);
+      camera.position.set(x, y, z);
+      camera.lookAt(0, orbit.targetY, 0);
+    }
+
+    // Pointer drag handling
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function onPointerDown(e) {
+      dragging = true;
+      lastX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+      lastY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      renderer.domElement.style.cursor = "grabbing";
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const cx = e.clientX ?? e.touches?.[0]?.clientX ?? lastX;
+      const cy = e.clientY ?? e.touches?.[0]?.clientY ?? lastY;
+      const dx = cx - lastX;
+      const dy = cy - lastY;
+      lastX = cx;
+      lastY = cy;
+      orbit.azimuth -= dx * 0.008;
+      orbit.elevation = Math.max(-0.15, Math.min(Math.PI / 2.2, orbit.elevation - dy * 0.006));
+      applyOrbit();
+    }
+
+    function onPointerUp() {
+      dragging = false;
+      renderer.domElement.style.cursor = "grab";
+    }
+
+    const el = renderer.domElement;
+    el.addEventListener("mousedown", onPointerDown);
+    el.addEventListener("touchstart", onPointerDown, { passive: true });
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("touchmove", onPointerMove, { passive: true });
+    window.addEventListener("mouseup", onPointerUp);
+    window.addEventListener("touchend", onPointerUp);
 
     const clock = new THREE.Clock();
     let mixer = null;
@@ -110,7 +152,6 @@ export function HorseViewer3D({ style }) {
       model.scale.setScalar(1);
       model.updateMatrixWorld(true);
 
-      // Center horizontally, place hooves on ground
       const box = new THREE.Box3().setFromObject(model);
       const center = new THREE.Vector3();
       box.getCenter(center);
@@ -127,15 +168,17 @@ export function HorseViewer3D({ style }) {
 
       scene.add(model);
 
-      // Reframe camera to properly fit the horse (size is already in world units after scale)
       const horseHeight = size.y;
       const horseDepth  = size.z;
       const fovRad = camera.fov * (Math.PI / 180);
-      // Distance to see horseHeight at 85% of frame height
       const dist = (horseHeight / 0.85) / (2 * Math.tan(fovRad / 2));
-      // 3/4 front-right view; horse faces -Z (nose at -horseDepth/2)
-      camera.position.set(dist * 0.55, horseHeight * 0.52, -(horseDepth * 0.5 + dist * 0.72));
-      camera.lookAt(0, horseHeight * 0.48, 0);
+
+      orbit.dist    = dist * 1.05;
+      orbit.targetY = horseHeight * 0.48;
+      // Initial 3/4 front-right view
+      orbit.azimuth   = -0.62;
+      orbit.elevation = Math.atan2(horseHeight * 0.52, dist * 0.9);
+      applyOrbit();
 
       if (gltf.animations.length > 0) {
         const clip = stripRootMotion(cloneClip(pickViewerClip(gltf.animations)));
@@ -156,10 +199,14 @@ export function HorseViewer3D({ style }) {
     return () => {
       alive = false;
       cancelAnimationFrame(rafId);
+      el.removeEventListener("mousedown", onPointerDown);
+      el.removeEventListener("touchstart", onPointerDown);
+      window.removeEventListener("mousemove", onPointerMove);
+      window.removeEventListener("touchmove", onPointerMove);
+      window.removeEventListener("mouseup", onPointerUp);
+      window.removeEventListener("touchend", onPointerUp);
       renderer.dispose();
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
+      if (container.contains(el)) container.removeChild(el);
     };
   }, []);
 
