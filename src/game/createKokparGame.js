@@ -1689,17 +1689,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const speed = Math.hypot(rider.vx, rider.vz);
       const speedRatio = clamp(speed / Math.max(rider.maxSpeed, 1), 0, 1);
 
-      const mixer = rider.group.userData.mixer;
-      if (mixer && dt) {
-        // Walk → trot → canter curve: slow at idle, up to 4× at full gallop
-        mixer.timeScale = 0.3 + speedRatio * speedRatio * 3.7;
-        mixer.update(dt);
-      }
-
       const gaitPhase = rider.gaitPhase ?? time * (GAIT_PHASE_MIN_RATE + speed * GAIT_PHASE_SPEED_RATE);
       const idleBlend = clamp(1 - speedRatio / 0.16, 0, 1);
       const trotBlend = clamp(1 - Math.abs(speedRatio - 0.42) / 0.34, 0, 1);
       const gallopBlend = clamp((speedRatio - 0.46) / 0.46, 0, 1);
+
+      const mixer = rider.group.userData.mixer;
+      if (mixer && dt) {
+        const walkAction = rider.group.userData.walkAction;
+        const gallopAction = rider.group.userData.gallopAction;
+        if (walkAction && gallopAction) {
+          const ts = 0.4 + speedRatio * 1.6;
+          walkAction.setEffectiveWeight(1 - gallopBlend);
+          gallopAction.setEffectiveWeight(gallopBlend);
+          walkAction.setEffectiveTimeScale(ts);
+          gallopAction.setEffectiveTimeScale(ts);
+        } else {
+          mixer.timeScale = 0.3 + speedRatio * speedRatio * 3.7;
+        }
+        mixer.update(dt);
+      }
       const stopPose = clamp(rider.stopPose ?? 0, 0, 1);
       const turnPose = clamp(rider.turnPose ?? 0, 0, 1);
       const idleBreath = Math.sin(time * 2.2 + rider.aiPhase) * idleBlend;

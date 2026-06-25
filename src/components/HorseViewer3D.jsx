@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 
-const HORSE_GLB_PATH = "/models/horse_1.glb";
+const HORSE_GLB_PATH = "/models/horse_arabian.glb";
 const gltfLoader = new GLTFLoader();
 let cachedGltf = null;
 
@@ -22,6 +22,14 @@ function stripRootMotion(clip) {
     return !(isRoot && track.name.endsWith(".position"));
   });
   return clip;
+}
+
+function pickViewerClip(animations) {
+  return (
+    animations.find((a) => a.name.includes("Walk Forward")) ??
+    animations.find((a) => a.name.includes("Idle")) ??
+    animations[0]
+  );
 }
 
 export function HorseViewer3D({ style }) {
@@ -99,7 +107,7 @@ export function HorseViewer3D({ style }) {
       if (!alive) return;
 
       const model = cloneSkeleton(gltf.scene);
-      model.scale.setScalar(0.01);
+      model.scale.setScalar(1);
       model.updateMatrixWorld(true);
 
       // Center horizontally, place hooves on ground
@@ -130,7 +138,7 @@ export function HorseViewer3D({ style }) {
       camera.lookAt(0, horseHeight * 0.48, 0);
 
       if (gltf.animations.length > 0) {
-        const clip = stripRootMotion(cloneClip(gltf.animations[0]));
+        const clip = stripRootMotion(cloneClip(pickViewerClip(gltf.animations)));
         mixer = new THREE.AnimationMixer(model);
         mixer.clipAction(clip).play();
       }

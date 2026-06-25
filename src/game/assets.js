@@ -333,17 +333,29 @@ export function createRiderModelInstance(assetPipeline, rider) {
     addModelPart(group, riderPrototype, "rider");
 
     if (horsePart?.userData.animations?.length > 0) {
-      // Strip XZ root motion so the animation doesn't fight the physics position
-      const srcClip = horsePart.userData.animations[0];
-      const filteredTracks = srcClip.tracks.filter((t) => {
-        const isRoot = /^(Align|RootNode|Root|Object_2)\./.test(t.name);
-        return !(isRoot && t.name.endsWith(".position"));
-      });
-      const clip = new THREE.AnimationClip(srcClip.name, srcClip.duration, filteredTracks);
+      const anims = horsePart.userData.animations;
+      const walkSrc = anims.find((a) => a.name.includes("Walk Forward")) ?? anims[0];
+      const gallopSrc = anims.find((a) => /Gallop Forward/.test(a.name)) ?? walkSrc;
+
+      function stripXZ(src) {
+        const tracks = src.tracks.filter((t) => {
+          const isRoot = /^(Align|RootNode|Root|Object_2)\./.test(t.name);
+          return !(isRoot && t.name.endsWith(".position"));
+        });
+        return new THREE.AnimationClip(src.name, src.duration, tracks);
+      }
 
       const mixer = new THREE.AnimationMixer(horsePart);
-      mixer.clipAction(clip).play();
+      const walkAction = mixer.clipAction(stripXZ(walkSrc));
+      const gallopAction = mixer.clipAction(stripXZ(gallopSrc));
+      walkAction.play();
+      gallopAction.play();
+      walkAction.setEffectiveWeight(1);
+      gallopAction.setEffectiveWeight(0);
+
       group.userData.mixer = mixer;
+      group.userData.walkAction = walkAction;
+      group.userData.gallopAction = gallopAction;
 
       // Force-replace materials with team colours (GLB textures bake to white and can't be tinted).
       // Hair/mane gets a darker shade so it's visually distinct from the coat.
