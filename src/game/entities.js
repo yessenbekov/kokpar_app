@@ -436,53 +436,66 @@ function createGroundGoalMesh(color) {
 function createKazanGoalMesh(color) {
   const group = new THREE.Group();
 
-  // From the diagram: base 4.4m wide / 0.5m tall, opening 3.6m, inner hole 2m, total 1.2m
-  // Scale: GOAL_RADIUS=7.2 ≈ half the base width → use GOAL_RADIUS as reference
-  const ironMat = new THREE.MeshStandardMaterial({ color: "#1a1a1e", roughness: 0.80, metalness: 0.55 });
-  const innerMat = new THREE.MeshStandardMaterial({ color: "#e8dcc8", roughness: 0.65, metalness: 0.08 });
-  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.52, metalness: 0.22 });
+  const ironMat   = new THREE.MeshStandardMaterial({ color: "#1c1c20", roughness: 0.78, metalness: 0.58 });
+  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.50, metalness: 0.22 });
 
-  const BASE_R_BOT = GOAL_RADIUS * 0.92; // outer base radius (4.4m/2)
-  const BASE_R_TOP = GOAL_RADIUS * 0.42; // where pot sits (2m/2)
-  const POT_R_TOP  = GOAL_RADIUS * 0.75; // opening outer radius (3.6m/2)
-  const HOLE_R     = GOAL_RADIUS * 0.38; // inner opening (dark hole)
-  const BASE_H = 1.5;  // base platform height
-  const POT_H  = 2.1;  // bowl height above base
-  const TOP_Y  = BASE_H + POT_H; // 3.6 — top of the kazan
+  // Polygonal segments give the faceted look from the image
+  const POLY = 10;
 
-  // Ground disc (thin flat base under the platform)
-  const groundDisc = new THREE.Mesh(new THREE.CylinderGeometry(BASE_R_BOT, BASE_R_BOT, 0.08, 48), ironMat);
-  groundDisc.position.y = 0.04;
-  groundDisc.receiveShadow = true;
-  group.add(groundDisc);
+  const BASE_R_BOT = GOAL_RADIUS * 0.90;  // wide foot
+  const BASE_R_TOP = GOAL_RADIUS * 0.74;  // top of base (matches bowl outer edge)
+  const BASE_H     = 1.4;
 
-  // Trapezoidal base platform
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(BASE_R_TOP, BASE_R_BOT, BASE_H, 48), ironMat);
+  // Torus bowl: ring center radius + tube radius
+  // outer edge = BOWL_R + BOWL_TUBE, inner hole = BOWL_R - BOWL_TUBE
+  const BOWL_R    = GOAL_RADIUS * 0.54;
+  const BOWL_TUBE = GOAL_RADIUS * 0.22;
+  // Flatten the torus in world-Y: after rotation.x=PI/2, local-Z maps to world-Y
+  const BOWL_FLAT = 0.52;
+  const BOWL_HALF_H = BOWL_TUBE * BOWL_FLAT;
+  const BOWL_Y    = BASE_H + BOWL_HALF_H;
+
+  // Thin flat disc at ground level
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(BASE_R_BOT, BASE_R_BOT, 0.12, POLY),
+    ironMat
+  );
+  disc.position.y = 0.06;
+  disc.receiveShadow = true;
+  group.add(disc);
+
+  // Trapezoidal base (wide at bottom, narrower at top)
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(BASE_R_TOP, BASE_R_BOT, BASE_H, POLY),
+    ironMat
+  );
   base.position.y = BASE_H / 2;
   base.castShadow = true;
   base.receiveShadow = true;
   group.add(base);
 
-  // Bowl / pot body (truncated cone, wide at top)
-  const pot = new THREE.Mesh(new THREE.CylinderGeometry(POT_R_TOP, BASE_R_TOP, POT_H, 48), ironMat);
-  pot.position.y = BASE_H + POT_H / 2;
-  pot.castShadow = true;
-  pot.receiveShadow = true;
-  group.add(pot);
+  // Torus bowl flattened in Y (scale.z compresses world-Y after rotation.x=PI/2)
+  const bowl = new THREE.Mesh(
+    new THREE.TorusGeometry(BOWL_R, BOWL_TUBE, 24, 64),
+    ironMat
+  );
+  bowl.rotation.x = Math.PI / 2;
+  bowl.scale.z = BOWL_FLAT;
+  bowl.position.y = BOWL_Y;
+  bowl.castShadow = true;
+  bowl.receiveShadow = true;
+  group.add(bowl);
 
-  // Inner cream ring at the opening (visible from above)
-  const innerRing = new THREE.Mesh(new THREE.RingGeometry(HOLE_R, POT_R_TOP, 56), innerMat);
-  innerRing.rotation.x = -Math.PI / 2;
-  innerRing.position.y = TOP_Y + 0.01;
-  group.add(innerRing);
-
-  // Team-color accent torus around the top rim
-  const accentRing = new THREE.Mesh(new THREE.TorusGeometry(POT_R_TOP, 0.24, 10, 64), accentMat);
-  accentRing.name = "kazan_team_rim";
-  accentRing.rotation.x = Math.PI / 2;
-  accentRing.position.y = TOP_Y;
-  accentRing.castShadow = true;
-  group.add(accentRing);
+  // Team-colour accent band around the outer rim of the bowl
+  const accent = new THREE.Mesh(
+    new THREE.TorusGeometry(BOWL_R + BOWL_TUBE * 0.70, 0.20, 8, 64),
+    accentMat
+  );
+  accent.name = "kazan_team_rim";
+  accent.rotation.x = Math.PI / 2;
+  accent.position.y = BOWL_Y + BOWL_HALF_H * 0.35;
+  accent.castShadow = true;
+  group.add(accent);
 
   return group;
 }
