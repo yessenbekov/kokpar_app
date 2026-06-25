@@ -6,7 +6,7 @@ const TEAM_LANE_THREAT_RADIUS = 17;
 const TEAM_LANE_THREAT_LOOKAHEAD = 38;
 const START_LINE_Z = WORLD.height / 2;
 const START_LANE_DEPTH = 17;
-const START_LANE_FIELD_BUFFER = 0.8;
+const START_LANE_FIELD_BUFFER = 5.0;
 const START_TEAM_BOUNDARY_GAP = 2.4;
 
 export function createAISystem({
@@ -162,7 +162,7 @@ export function createAISystem({
 
     return {
       x: clamp(baseX + lateral, bounds.minX + 1.8, bounds.maxX - 1.8),
-      z: clamp(baseZ + depth, START_LINE_Z + 2.2, START_LINE_Z + START_LANE_DEPTH - 1.2)
+      z: clamp(baseZ + depth, START_LINE_Z + 5.4, START_LINE_Z + START_LANE_DEPTH - 1.2)
     };
   }
 
