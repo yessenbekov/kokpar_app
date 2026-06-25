@@ -339,7 +339,7 @@ export function createRiderModelInstance(assetPipeline, rider) {
 
       function stripXZ(src) {
         const tracks = src.tracks.filter((t) => {
-          const isRoot = /^(Align|RootNode|Root|Object_2)\./.test(t.name);
+          const isRoot = /^(Align|RootNode|Root|Object_2|Pelvis_01)\./.test(t.name);
           return !(isRoot && t.name.endsWith(".position"));
         });
         return new THREE.AnimationClip(src.name, src.duration, tracks);

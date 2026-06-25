@@ -18,7 +18,7 @@ function cloneClip(src) {
 
 function stripRootMotion(clip) {
   clip.tracks = clip.tracks.filter((track) => {
-    const isRoot = /^(Align|RootNode|Root|Object_2)\./.test(track.name);
+    const isRoot = /^(Align|RootNode|Root|Object_2|Pelvis_01)\./.test(track.name);
     return !(isRoot && track.name.endsWith(".position"));
   });
   return clip;
