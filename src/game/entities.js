@@ -435,62 +435,54 @@ function createGroundGoalMesh(color) {
 
 function createKazanGoalMesh(color) {
   const group = new THREE.Group();
-  const strawMaterial = new THREE.MeshStandardMaterial({ color: "#b79a62", roughness: 0.96 });
-  const rimMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.58 });
-  const tireMaterial = new THREE.MeshStandardMaterial({ color: "#202225", roughness: 0.76 });
-  const tireSideMaterial = new THREE.MeshStandardMaterial({ color: "#4b4f54", roughness: 0.82 });
-  const basinMaterial = new THREE.MeshStandardMaterial({
-    color: "#8f6d41",
-    roughness: 0.98,
-    transparent: true,
-    opacity: 0.74
-  });
 
-  const basin = new THREE.Mesh(new THREE.CylinderGeometry(GOAL_RADIUS * 0.58, GOAL_RADIUS * 0.68, 0.16, 48), basinMaterial);
-  basin.position.y = 0.08;
-  basin.receiveShadow = true;
-  group.add(basin);
+  // From the diagram: base 4.4m wide / 0.5m tall, opening 3.6m, inner hole 2m, total 1.2m
+  // Scale: GOAL_RADIUS=7.2 ≈ half the base width → use GOAL_RADIUS as reference
+  const ironMat = new THREE.MeshStandardMaterial({ color: "#1a1a1e", roughness: 0.80, metalness: 0.55 });
+  const innerMat = new THREE.MeshStandardMaterial({ color: "#e8dcc8", roughness: 0.65, metalness: 0.08 });
+  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.52, metalness: 0.22 });
 
-  const strawWall = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.72, 0.62, 12, 72), strawMaterial);
-  strawWall.name = "kazan_straw_wall";
-  strawWall.position.y = 0.72;
-  strawWall.rotation.x = Math.PI / 2;
-  strawWall.castShadow = true;
-  strawWall.receiveShadow = true;
-  group.add(strawWall);
+  const BASE_R_BOT = GOAL_RADIUS * 0.92; // outer base radius (4.4m/2)
+  const BASE_R_TOP = GOAL_RADIUS * 0.42; // where pot sits (2m/2)
+  const POT_R_TOP  = GOAL_RADIUS * 0.75; // opening outer radius (3.6m/2)
+  const HOLE_R     = GOAL_RADIUS * 0.38; // inner opening (dark hole)
+  const BASE_H = 1.5;  // base platform height
+  const POT_H  = 2.1;  // bowl height above base
+  const TOP_Y  = BASE_H + POT_H; // 3.6 — top of the kazan
 
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.52, 0.16, 10, 64), rimMaterial);
-  rim.name = "kazan_team_rim";
-  rim.position.y = 1.12;
-  rim.rotation.x = Math.PI / 2;
-  rim.castShadow = true;
-  group.add(rim);
+  // Ground disc (thin flat base under the platform)
+  const groundDisc = new THREE.Mesh(new THREE.CylinderGeometry(BASE_R_BOT, BASE_R_BOT, 0.08, 48), ironMat);
+  groundDisc.position.y = 0.04;
+  groundDisc.receiveShadow = true;
+  group.add(groundDisc);
 
-  const innerLip = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS * 0.36, 0.08, 8, 48), tireSideMaterial);
-  innerLip.position.y = 0.42;
-  innerLip.rotation.x = Math.PI / 2;
-  innerLip.receiveShadow = true;
-  group.add(innerLip);
+  // Trapezoidal base platform
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(BASE_R_TOP, BASE_R_BOT, BASE_H, 48), ironMat);
+  base.position.y = BASE_H / 2;
+  base.castShadow = true;
+  base.receiveShadow = true;
+  group.add(base);
 
-  for (let i = 0; i < 14; i += 1) {
-    const angle = (i / 14) * Math.PI * 2;
-    const tire = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.18, 8, 18), i % 2 === 0 ? tireMaterial : tireSideMaterial);
-    tire.name = "kazan_tire";
-    tire.position.set(Math.cos(angle) * GOAL_RADIUS * 0.8, 0.78, Math.sin(angle) * GOAL_RADIUS * 0.8);
-    tire.rotation.y = Math.PI / 2;
-    tire.rotation.z = angle;
-    tire.castShadow = true;
-    tire.receiveShadow = true;
-    group.add(tire);
-  }
+  // Bowl / pot body (truncated cone, wide at top)
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(POT_R_TOP, BASE_R_TOP, POT_H, 48), ironMat);
+  pot.position.y = BASE_H + POT_H / 2;
+  pot.castShadow = true;
+  pot.receiveShadow = true;
+  group.add(pot);
 
-  for (let i = 0; i < 8; i += 1) {
-    const angle = (i / 8) * Math.PI * 2;
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.55, 8), rimMaterial);
-    post.position.set(Math.cos(angle) * GOAL_RADIUS * 0.72, 0.78, Math.sin(angle) * GOAL_RADIUS * 0.72);
-    post.castShadow = true;
-    group.add(post);
-  }
+  // Inner cream ring at the opening (visible from above)
+  const innerRing = new THREE.Mesh(new THREE.RingGeometry(HOLE_R, POT_R_TOP, 56), innerMat);
+  innerRing.rotation.x = -Math.PI / 2;
+  innerRing.position.y = TOP_Y + 0.01;
+  group.add(innerRing);
+
+  // Team-color accent torus around the top rim
+  const accentRing = new THREE.Mesh(new THREE.TorusGeometry(POT_R_TOP, 0.24, 10, 64), accentMat);
+  accentRing.name = "kazan_team_rim";
+  accentRing.rotation.x = Math.PI / 2;
+  accentRing.position.y = TOP_Y;
+  accentRing.castShadow = true;
+  group.add(accentRing);
 
   return group;
 }
