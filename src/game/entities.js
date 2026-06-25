@@ -493,15 +493,6 @@ function createKazanGoalMesh(color) {
   bowl.receiveShadow = true;
   group.add(bowl);
 
-  // White inner opening (visible from above)
-  const innerDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(INNER_R, 48),
-    whiteMat
-  );
-  innerDisc.rotation.x = -Math.PI / 2;
-  innerDisc.position.y = BOWL_Y + BOWL_HALF_H - 0.05;
-  group.add(innerDisc);
-
   // Team-colour accent band around the outer base of the bowl
   const accent = new THREE.Mesh(
     new THREE.TorusGeometry(BASE_R_TOP + 0.04, 0.22, 8, 64),
