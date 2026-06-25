@@ -10,7 +10,8 @@ const DEFAULT_MODEL_MANIFEST = {
   riderHorse: null,
   horse: null,
   rider: null,
-  serke: null
+  serke: null,
+  kazan: null
 };
 
 const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char"];
@@ -294,7 +295,8 @@ export function createGameAssetPipeline() {
       horse: null,
       rider: null,
       riderHorse: null,
-      serke: null
+      serke: null,
+      kazan: null
     },
     ready: false,
     readyPromise: null
@@ -303,14 +305,15 @@ export function createGameAssetPipeline() {
   pipeline.readyPromise = loadManifest().then(async (manifest) => {
     pipeline.manifest = manifest;
 
-    const [riderHorse, horse, rider, serke] = await Promise.all([
+    const [riderHorse, horse, rider, serke, kazan] = await Promise.all([
       loadOptionalModel(manifest.riderHorse),
       loadOptionalModel(manifest.horse),
       loadOptionalModel(manifest.rider),
-      loadOptionalModel(manifest.serke)
+      loadOptionalModel(manifest.serke),
+      loadOptionalModel(manifest.kazan)
     ]);
 
-    pipeline.prototypes = { horse, rider, riderHorse, serke };
+    pipeline.prototypes = { horse, rider, riderHorse, serke, kazan };
     pipeline.ready = true;
     return pipeline;
   });
@@ -446,9 +449,38 @@ export function createSerkeModelInstance(assetPipeline) {
   return group;
 }
 
+export function createKazanModelInstance(assetPipeline, teamColor) {
+  const { kazan } = assetPipeline.prototypes;
+  if (!kazan) return null;
+
+  const group = new THREE.Group();
+  group.name = "GLB kazan";
+  group.userData.assetDriven = true;
+  const part = addModelPart(group, kazan, "kazan");
+
+  if (part && teamColor) {
+    const accent = new THREE.Color(teamColor);
+    part.traverse((node) => {
+      if (!node.isMesh && !node.isSkinnedMesh) return;
+      const src = materialSource(node, Array.isArray(node.material) ? node.material[0] : node.material);
+      if (["rim", "band", "ring", "team", "accent"].some((t) => src.includes(t))) {
+        if (Array.isArray(node.material)) {
+          node.material = node.material.map((m) => { const c = m.clone(); c.color.set(accent); return c; });
+        } else if (node.material) {
+          node.material = node.material.clone();
+          node.material.color.set(accent);
+        }
+      }
+    });
+  }
+
+  return group;
+}
+
 export const MODEL_ASSET_HINTS = {
   horse: "/models/horses/horse.glb",
   rider: "/models/riders/rider.glb",
   riderHorse: "/models/horses/rider-horse.glb",
-  serke: "/models/serke/serke.glb"
+  serke: "/models/serke/serke.glb",
+  kazan: "/models/kazan/kazan.glb"
 };

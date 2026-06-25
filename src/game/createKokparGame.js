@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS, MATCH_SECONDS, TEAM, WORLD, goalFor } from "./constants.js";
-import { createGameAssetPipeline, createRiderModelInstance, createSerkeModelInstance } from "./assets.js";
+import { createGameAssetPipeline, createKazanModelInstance, createRiderModelInstance, createSerkeModelInstance } from "./assets.js";
 import {
   BODY_CHECK_COOLDOWN_SECONDS,
   TEAM_GUARD_RADIUS,
@@ -274,11 +274,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
     });
   }
 
-  const blueGoal = createGoalMesh(COLORS.blue, gameSettings.goalType);
+  const blueKazanGlb = gameSettings.goalType === "kazan" ? createKazanModelInstance(assetPipeline, COLORS.blue) : null;
+  const redKazanGlb = gameSettings.goalType === "kazan" ? createKazanModelInstance(assetPipeline, COLORS.red) : null;
+
+  const blueGoal = createGoalMesh(COLORS.blue, gameSettings.goalType, blueKazanGlb);
   blueGoal.position.set(goalFor(TEAM.blue).x, 0, goalFor(TEAM.blue).z);
   scene.add(blueGoal);
 
-  const redGoal = createGoalMesh(COLORS.red, gameSettings.goalType);
+  const redGoal = createGoalMesh(COLORS.red, gameSettings.goalType, redKazanGlb);
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 

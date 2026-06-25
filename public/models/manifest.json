@@ -28,5 +28,11 @@
     "scale": 1,
     "position": [0, 0, 0],
     "rotation": [0, 0, 0]
+  },
+  "kazan": {
+    "path": null,
+    "scale": 1,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0]
   }
 }

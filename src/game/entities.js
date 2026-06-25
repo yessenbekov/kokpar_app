@@ -495,7 +495,8 @@ function createKazanGoalMesh(color) {
   return group;
 }
 
-export function createGoalMesh(color, goalType = "circle") {
+export function createGoalMesh(color, goalType = "circle", kazanGlb = null) {
+  if (goalType === "kazan" && kazanGlb) return kazanGlb;
   return goalType === "kazan" ? createKazanGoalMesh(color) : createGroundGoalMesh(color);
 }
 
