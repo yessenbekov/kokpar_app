@@ -458,18 +458,17 @@ export function createKazanModelInstance(assetPipeline, teamColor) {
   group.userData.assetDriven = true;
   const part = addModelPart(group, kazan, "kazan");
 
-  if (part && teamColor) {
-    const accent = new THREE.Color(teamColor);
+  if (part) {
+    const ironMat = new THREE.MeshStandardMaterial({ color: "#1a1a1c", roughness: 0.82, metalness: 0.55 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: teamColor ?? "#c8b89a", roughness: 0.55, metalness: 0.3 });
     part.traverse((node) => {
       if (!node.isMesh && !node.isSkinnedMesh) return;
+      node.castShadow = true;
+      node.receiveShadow = true;
       const src = materialSource(node, Array.isArray(node.material) ? node.material[0] : node.material);
-      if (["rim", "band", "ring", "team", "accent"].some((t) => src.includes(t))) {
-        if (Array.isArray(node.material)) {
-          node.material = node.material.map((m) => { const c = m.clone(); c.color.set(accent); return c; });
-        } else if (node.material) {
-          node.material = node.material.clone();
-          node.material.color.set(accent);
-        }
+      const hasOwnMat = node.material && (Array.isArray(node.material) ? node.material[0]?.color : node.material?.color);
+      if (!hasOwnMat) {
+        node.material = ["rim", "lip", "top", "inner"].some((t) => src.includes(t)) ? rimMat : ironMat;
       }
     });
   }
