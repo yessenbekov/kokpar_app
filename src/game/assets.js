@@ -357,34 +357,15 @@ export function createRiderModelInstance(assetPipeline, rider) {
       group.userData.walkAction = walkAction;
       group.userData.gallopAction = gallopAction;
 
-      // Force-replace materials with team colours (GLB textures bake to white and can't be tinted).
-      // Hair/mane gets a darker shade so it's visually distinct from the coat.
       const coatColor = new THREE.Color(rider.color);
       const hairColor = coatColor.clone().multiplyScalar(0.5);
       const horseMat = new THREE.MeshStandardMaterial({ color: coatColor, roughness: 0.72 });
       const hairMat  = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.85 });
-      const saddleMat = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.6 });
       horsePart.traverse((node) => {
         if (!node.isMesh && !node.isSkinnedMesh) return;
         const n = node.name.toLowerCase();
         node.material = (n.includes("hair") || n.includes("mane")) ? hairMat : horseMat;
       });
-
-      // Procedural rider block on top of the horse
-      const riderGroup = new THREE.Group();
-      const torsoMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.6 });
-      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.6, 0.5), torsoMat);
-      torso.position.set(0, 5.8, 0);
-      torso.castShadow = true;
-      riderGroup.add(torso);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 8), torsoMat);
-      head.position.set(0, 7.0, 0);
-      head.castShadow = true;
-      riderGroup.add(head);
-      const saddle = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.18, 0.7), saddleMat);
-      saddle.position.set(0, 5.0, 0);
-      riderGroup.add(saddle);
-      group.add(riderGroup);
     }
   }
 
