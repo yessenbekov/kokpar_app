@@ -309,43 +309,42 @@ export function HorseStable({
         )}
       </div>
 
-      <section className="stable-detail" style={paletteStyle(selectedHorse)} aria-label={selectedOwnedHorse.name}>
-        <div className="stable-detail-head">
+      <section className="stable-detail" aria-label={selectedOwnedHorse.name}>
+        {/* Hero 3D scene */}
+        <div className="horse-hero-scene">
           <HorseViewer3D />
-          <div className="stable-copy">
-            <p className="label">
-              {selectedHorse.role} · {selectedHorse.name}
-            </p>
-            <div className="horse-name-row">
-              {editing ? (
-                <form className="horse-name-form" onSubmit={submitName}>
-                  <input
-                    aria-label="Имя лошади"
-                    maxLength={24}
-                    onChange={(event) => setDraftName(event.target.value)}
-                    value={draftName}
-                  />
-                  <button type="submit" aria-label="Сохранить имя">
-                    <Check size={16} strokeWidth={2.7} />
-                  </button>
-                  <button type="button" aria-label="Отменить" onClick={() => setEditing(false)}>
-                    <X size={16} strokeWidth={2.7} />
-                  </button>
-                </form>
-              ) : (
-                <>
-                  <h2>{selectedOwnedHorse.name}</h2>
-                  <button className="horse-edit-button" type="button" aria-label="Переименовать" onClick={() => setEditing(true)}>
-                    <Pencil size={16} strokeWidth={2.4} />
-                  </button>
-                </>
-              )}
-            </div>
-            <p>{selectedHorse.description}</p>
-            <div className="horse-tags" aria-label="Профиль лошади">
-              <span>{selectedHorse.stable.line}</span>
-              <span>Ур. {selectedOwnedHorse.level}</span>
-              <span>Связь {selectedOwnedHorse.bond}</span>
+          <div className="horse-hero-overlay">
+            <p className="label">{selectedHorse.role} · {selectedHorse.name}</p>
+            {editing ? (
+              <form className="horse-name-form" onSubmit={submitName}>
+                <input
+                  aria-label="Имя лошади"
+                  maxLength={24}
+                  onChange={(event) => setDraftName(event.target.value)}
+                  value={draftName}
+                />
+                <button type="submit" aria-label="Сохранить имя">
+                  <Check size={16} strokeWidth={2.7} />
+                </button>
+                <button type="button" aria-label="Отменить" onClick={() => setEditing(false)}>
+                  <X size={16} strokeWidth={2.7} />
+                </button>
+              </form>
+            ) : (
+              <div className="horse-name-row">
+                <h2>{selectedOwnedHorse.name}</h2>
+                <button className="horse-edit-button" type="button" aria-label="Переименовать" onClick={() => setEditing(true)}>
+                  <Pencil size={16} strokeWidth={2.4} />
+                </button>
+              </div>
+            )}
+            <div className="horse-hero-footer">
+              <div className="horse-tags" aria-label="Профиль лошади">
+                <span>{selectedHorse.stable.line}</span>
+                <span>Ур. {selectedOwnedHorse.level}</span>
+                <span>Связь {selectedOwnedHorse.bond}</span>
+              </div>
+              <p>{selectedHorse.description}</p>
             </div>
           </div>
         </div>
