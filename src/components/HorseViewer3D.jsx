@@ -39,33 +39,27 @@ export function HorseViewer3D({ style }) {
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.3;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setClearColor(0x110b04);
+    renderer.setClearColor(0x1c1208);
     container.appendChild(renderer.domElement);
-    renderer.domElement.style.width = "100%";
-    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;";
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x110b04, 0.28);
 
     const camera = new THREE.PerspectiveCamera(42, w / h, 0.05, 50);
-    // 3/4 front-right view: horse faces -Z, nose at Z≈-1.2, tail at Z≈+1.2
-    camera.position.set(2.2, 1.7, -2.0);
-    camera.lookAt(0.1, 1.05, 0);
+    // Start with a reasonable position; will be adjusted after model loads
+    camera.position.set(3.2, 1.6, -2.0);
+    camera.lookAt(0, 1.0, 0);
 
-    // Ground plane for shadow
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 12),
-      new THREE.MeshStandardMaterial({ color: 0x1a1108, roughness: 1.0, metalness: 0 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    // Bright warm ambient — no fog so the horse is fully visible
+    scene.add(new THREE.AmbientLight(0xffd8a0, 3.5));
 
-    // Key light (upper front-right, warm)
-    const key = new THREE.DirectionalLight(0xfff0d0, 3.5);
-    key.position.set(5, 8, -4);
+    // Key light: strong, front-right-top, warm
+    const key = new THREE.DirectionalLight(0xfff0c8, 9.0);
+    key.position.set(4, 7, -4);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     key.shadow.camera.near = 0.5;
@@ -77,18 +71,24 @@ export function HorseViewer3D({ style }) {
     key.shadow.bias = -0.002;
     scene.add(key);
 
-    // Fill light (cool, left)
-    const fill = new THREE.DirectionalLight(0x8ab4e8, 0.9);
-    fill.position.set(-4, 3, 2);
+    // Cool fill from left
+    const fill = new THREE.DirectionalLight(0x90b8e8, 2.5);
+    fill.position.set(-5, 2, 2);
     scene.add(fill);
 
-    // Rim light (back glow)
-    const rim = new THREE.DirectionalLight(0xffcc66, 0.6);
-    rim.position.set(-1, 4, 6);
+    // Warm rim from behind (separates horse from background)
+    const rim = new THREE.DirectionalLight(0xffaa40, 3.0);
+    rim.position.set(-1, 5, 6);
     scene.add(rim);
 
-    // Ambient
-    scene.add(new THREE.AmbientLight(0x503020, 1.2));
+    // Ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(14, 14),
+      new THREE.MeshStandardMaterial({ color: 0x1a1008, roughness: 1.0 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
     const clock = new THREE.Clock();
     let mixer = null;
@@ -102,9 +102,12 @@ export function HorseViewer3D({ style }) {
       model.scale.setScalar(0.01);
       model.updateMatrixWorld(true);
 
+      // Center horizontally, place hooves on ground
       const box = new THREE.Box3().setFromObject(model);
       const center = new THREE.Vector3();
       box.getCenter(center);
+      const size = new THREE.Vector3();
+      box.getSize(size);
       model.position.set(-center.x, -box.min.y, -center.z);
 
       model.traverse((node) => {
@@ -115,6 +118,16 @@ export function HorseViewer3D({ style }) {
       });
 
       scene.add(model);
+
+      // Reframe camera to properly fit the horse
+      const horseHeight = size.y * 0.01;   // in world units (scale 0.01)
+      const horseDepth  = size.z * 0.01;
+      const fovRad = camera.fov * (Math.PI / 180);
+      // Distance to see horseHeight at 85% of frame height
+      const dist = (horseHeight / 0.85) / (2 * Math.tan(fovRad / 2));
+      // 3/4 front-right view; horse faces -Z (nose at -horseDepth/2)
+      camera.position.set(dist * 0.55, horseHeight * 0.52, -(horseDepth * 0.5 + dist * 0.72));
+      camera.lookAt(0, horseHeight * 0.48, 0);
 
       if (gltf.animations.length > 0) {
         const clip = stripRootMotion(cloneClip(gltf.animations[0]));
@@ -143,12 +156,12 @@ export function HorseViewer3D({ style }) {
   }, []);
 
   return (
-    <div ref={mountRef} style={{ width: "100%", height: "100%", ...style }}>
+    <div ref={mountRef} style={{ width: "100%", height: "100%", position: "relative", ...style }}>
       {loading && (
         <div style={{
           position: "absolute", inset: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "rgba(255,220,130,0.45)", fontSize: 12, pointerEvents: "none"
+          color: "rgba(255,210,130,0.5)", fontSize: 12, pointerEvents: "none"
         }}>
           загрузка...
         </div>
