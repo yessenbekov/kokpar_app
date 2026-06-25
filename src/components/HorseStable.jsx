@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, Gauge, Pencil, Plus, Trash2, X } from "lucide-react";
 import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
 import { itemById } from "../app/shopItems.js";
+import { HorseViewer3D } from "./HorseViewer3D.jsx";
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -310,7 +311,7 @@ export function HorseStable({
 
       <section className="stable-detail" style={paletteStyle(selectedHorse)} aria-label={selectedOwnedHorse.name}>
         <div className="stable-detail-head">
-          <HorsePreview horse={selectedHorse} />
+          <HorseViewer3D />
           <div className="stable-copy">
             <p className="label">
               {selectedHorse.role} · {selectedHorse.name}
