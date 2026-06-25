@@ -436,48 +436,55 @@ function createGroundGoalMesh(color) {
 function createKazanGoalMesh(color) {
   const group = new THREE.Group();
 
-  const ironMat   = new THREE.MeshStandardMaterial({ color: "#1c1c20", roughness: 0.78, metalness: 0.58 });
-  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.50, metalness: 0.22 });
+  const greenMat  = new THREE.MeshStandardMaterial({ color: "#1d5c22", roughness: 0.55, metalness: 0.10 });
+  const whiteMat  = new THREE.MeshStandardMaterial({ color: "#e8e8e8", roughness: 0.60, metalness: 0.05 });
+  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.48, metalness: 0.18 });
 
-  // Polygonal segments give the faceted look from the image
   const POLY = 10;
 
-  const BASE_R_BOT = GOAL_RADIUS * 0.90;  // wide foot
-  const BASE_R_TOP = GOAL_RADIUS * 0.74;  // top of base (matches bowl outer edge)
-  const BASE_H     = 1.4;
+  const BASE_R_BOT  = GOAL_RADIUS * 0.90;
+  const BASE_R_TOP  = GOAL_RADIUS * 0.74;
+  const BASE_H      = 1.4;
 
-  // Torus bowl: ring center radius + tube radius
-  // outer edge = BOWL_R + BOWL_TUBE, inner hole = BOWL_R - BOWL_TUBE
-  const BOWL_R    = GOAL_RADIUS * 0.54;
-  const BOWL_TUBE = GOAL_RADIUS * 0.22;
-  // Flatten the torus in world-Y: after rotation.x=PI/2, local-Z maps to world-Y
-  const BOWL_FLAT = 0.52;
+  const BOWL_R      = GOAL_RADIUS * 0.54;
+  const BOWL_TUBE   = GOAL_RADIUS * 0.22;
+  const BOWL_FLAT   = 0.52;
   const BOWL_HALF_H = BOWL_TUBE * BOWL_FLAT;
-  const BOWL_Y    = BASE_H + BOWL_HALF_H;
+  const BOWL_Y      = BASE_H + BOWL_HALF_H;
+  const INNER_R     = BOWL_R - BOWL_TUBE;
 
-  // Thin flat disc at ground level
+  // White flat disc at ground level
   const disc = new THREE.Mesh(
     new THREE.CylinderGeometry(BASE_R_BOT, BASE_R_BOT, 0.12, POLY),
-    ironMat
+    whiteMat
   );
   disc.position.y = 0.06;
   disc.receiveShadow = true;
   group.add(disc);
 
-  // Trapezoidal base (wide at bottom, narrower at top)
+  // White trapezoidal base
   const base = new THREE.Mesh(
     new THREE.CylinderGeometry(BASE_R_TOP, BASE_R_BOT, BASE_H, POLY),
-    ironMat
+    whiteMat
   );
   base.position.y = BASE_H / 2;
   base.castShadow = true;
   base.receiveShadow = true;
   group.add(base);
 
-  // Torus bowl flattened in Y (scale.z compresses world-Y after rotation.x=PI/2)
+  // White stripe at base-to-bowl junction
+  const stripe = new THREE.Mesh(
+    new THREE.CylinderGeometry(BASE_R_TOP + 0.08, BASE_R_TOP + 0.08, 0.28, POLY),
+    whiteMat
+  );
+  stripe.position.y = BASE_H + 0.06;
+  stripe.castShadow = true;
+  group.add(stripe);
+
+  // Green torus bowl (flattened in Y)
   const bowl = new THREE.Mesh(
     new THREE.TorusGeometry(BOWL_R, BOWL_TUBE, 24, 64),
-    ironMat
+    greenMat
   );
   bowl.rotation.x = Math.PI / 2;
   bowl.scale.z = BOWL_FLAT;
@@ -486,14 +493,23 @@ function createKazanGoalMesh(color) {
   bowl.receiveShadow = true;
   group.add(bowl);
 
-  // Team-colour accent band around the outer rim of the bowl
+  // White inner opening (visible from above)
+  const innerDisc = new THREE.Mesh(
+    new THREE.CircleGeometry(INNER_R, 48),
+    whiteMat
+  );
+  innerDisc.rotation.x = -Math.PI / 2;
+  innerDisc.position.y = BOWL_Y + BOWL_HALF_H - 0.05;
+  group.add(innerDisc);
+
+  // Team-colour accent band around the outer base of the bowl
   const accent = new THREE.Mesh(
-    new THREE.TorusGeometry(BOWL_R + BOWL_TUBE * 0.70, 0.20, 8, 64),
+    new THREE.TorusGeometry(BASE_R_TOP + 0.04, 0.22, 8, 64),
     accentMat
   );
   accent.name = "kazan_team_rim";
   accent.rotation.x = Math.PI / 2;
-  accent.position.y = BOWL_Y + BOWL_HALF_H * 0.35;
+  accent.position.y = BASE_H + 0.20;
   accent.castShadow = true;
   group.add(accent);
 
