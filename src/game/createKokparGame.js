@@ -63,7 +63,7 @@ const THROW_AIM_MAX_ANGLE = Math.PI * 0.18;
 const THROW_AIM_RATE = 1.18;
 const LOOSE_SERKE_HEIGHT = 0.72;
 const CARRIED_SERKE_HEIGHT = 1.78;
-const PASS_RADIUS = 16;
+const PASS_RADIUS = 7;
 const PASS_SPEED = 19;
 const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
@@ -1428,7 +1428,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
       };
     }
 
-    if (!kokpar.holder || rider.team !== kokpar.holder.team) return { visible: false };
+    if (!kokpar.holder || rider.team !== kokpar.holder.team) {
+      if (rider.human) {
+        return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.70, scale: 0.88, height: 5.4 };
+      }
+      return { visible: false };
+    }
 
     if (rider.aiRole === "protector") {
       return {
@@ -1463,6 +1468,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       };
     }
 
+    if (rider.human) {
+      return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.70, scale: 0.88, height: 5.4 };
+    }
     return { visible: false };
   }
 
