@@ -119,9 +119,9 @@ export function HorseViewer3D({ style }) {
 
       scene.add(model);
 
-      // Reframe camera to properly fit the horse
-      const horseHeight = size.y * 0.01;   // in world units (scale 0.01)
-      const horseDepth  = size.z * 0.01;
+      // Reframe camera to properly fit the horse (size is already in world units after scale)
+      const horseHeight = size.y;
+      const horseDepth  = size.z;
       const fovRad = camera.fov * (Math.PI / 180);
       // Distance to see horseHeight at 85% of frame height
       const dist = (horseHeight / 0.85) / (2 * Math.tan(fovRad / 2));
