@@ -70,7 +70,7 @@ export default function App() {
 
     try {
       gameRef.current = createKokparGame(mountRef.current, setHud, gameSettings);
-      setReady(true);
+      gameRef.current.assetsReadyPromise.then(() => setReady(true)).catch(() => setReady(true));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown WebGL error";
       setSceneError(message);

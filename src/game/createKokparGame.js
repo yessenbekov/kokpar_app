@@ -468,6 +468,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   let animationFrame = 0;
   let lastFrameTime = performance.now();
   let isDestroyed = false;
+  let assetsLoaded = false;
   const cameraDesired = new THREE.Vector3();
   const cameraLookAt = new THREE.Vector3();
   const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
@@ -632,7 +633,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     cycleCameraMode
   } = cameraSystem;
 
-  assetPipeline.readyPromise.then(() => {
+  const assetsReadyPromise = assetPipeline.readyPromise.then(() => {
     if (isDestroyed) return;
 
     riders.forEach((rider) => {
@@ -642,6 +643,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     const serkeModel = createSerkeModelInstance(assetPipeline);
     if (serkeModel) setKokparMesh(serkeModel);
+
+    assetsLoaded = true;
+    resetPositions();
+    beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
+    updateStadiumPresentation();
+    publishHud(true);
   });
 
   function contestStatusText() {
@@ -1395,6 +1402,20 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function riderRoleMarkerState(rider, inContest) {
     const tugEffort = rider.tugEffort ?? 0;
 
+    // Player's own horse always shows a white marker regardless of game state
+    if (rider.human) {
+      if (kokpar.holder === rider) {
+        return { visible: true, color: "#ffffff", core: "#ffe080", opacity: 0.97, scale: 1.28 + tugEffort * 0.18, height: 5.6 };
+      }
+      if (inContest) {
+        return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.92, scale: 1.12 + tugEffort * 0.18, height: 5.5 };
+      }
+      if (contactSystem.isBodyCheckActive(rider)) {
+        return { visible: true, color: "#ffffff", core: "#f0c347", opacity: 0.92, scale: 1.18, height: 5.5 };
+      }
+      return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.72, scale: 0.92, height: 5.6 };
+    }
+
     if (contactSystem.isBodyCheckActive(rider)) {
       return {
         visible: true,
@@ -1429,9 +1450,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
     }
 
     if (!kokpar.holder || rider.team !== kokpar.holder.team) {
-      if (rider.human) {
-        return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.70, scale: 0.88, height: 5.4 };
-      }
       return { visible: false };
     }
 
@@ -1468,9 +1486,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
       };
     }
 
-    if (rider.human) {
-      return { visible: true, color: "#ffffff", core: "#aaddff", opacity: 0.70, scale: 0.88, height: 5.4 };
-    }
     return { visible: false };
   }
 
@@ -2100,6 +2115,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const time = now / 1000;
     lastFrameTime = now;
 
+    if (!assetsLoaded) {
+      renderer.render(scene, camera);
+      animationFrame = requestAnimationFrame(frame);
+      return;
+    }
+
     if (!match.over) {
       if (match.phase === "countdown") {
         if (!match.duelMode) {
@@ -2277,13 +2298,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
   window.addEventListener("keyup", onKeyUp);
 
   resize();
-  resetPositions();
-  beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   updateStadiumPresentation();
-  publishHud(true);
   animationFrame = requestAnimationFrame(frame);
 
   return {
+    assetsReadyPromise,
     restart,
     cycleCameraMode,
     setTouchInput,
