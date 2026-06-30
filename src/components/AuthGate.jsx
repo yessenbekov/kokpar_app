@@ -57,8 +57,14 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
     <section className="setup auth-screen" aria-label="Вход">
       <div className="auth-gate-panel">
         <div className="auth-gate-brand">
-          <p className="label">Kokpar 3D</p>
-          <h1>{mode === "register" ? "Регистрация" : "Вход"}</h1>
+          <div className="auth-game-logo">
+            <span className="auth-logo-kk">КОКПАР</span>
+            <span className="auth-logo-3d">3D</span>
+          </div>
+          <p className="auth-game-tagline">Традиционная казахская конная игра</p>
+          <h2 className="auth-section-title">
+            {mode === "register" ? "Регистрация" : mode === "magic-link" ? "Войти по ссылке" : "Вход"}
+          </h2>
         </div>
 
         <div className="auth-method-tabs auth-gate-tabs" role="tablist" aria-label="Способ входа">
