@@ -37,20 +37,30 @@ function applyCoatToModel(model, coatId) {
   const preset = coatPresetById(coatId);
   const coatColor = new THREE.Color(preset.coat);
   const darkColor = new THREE.Color(preset.dark);
+  const muzzleColor = new THREE.Color(preset.muzzle);
 
   model.traverse((node) => {
     if (!node.isMesh && !node.isSkinnedMesh) return;
     const name = (node.name + " " + (node.material?.name ?? "")).toLowerCase();
-    const isDark = name.includes("hair") || name.includes("mane") || name.includes("tail") || name.includes("hoof") || name.includes("leg");
-    const target = isDark ? darkColor : coatColor;
+    const isMane = name.includes("hair") || name.includes("mane") || name.includes("tail");
+    const isHoof = name.includes("hoof") || name.includes("nail");
+    const isMuzzle = name.includes("muzzle") || name.includes("nose") || name.includes("mouth") || name.includes("lip");
+    const target = isMane || isHoof ? darkColor : isMuzzle ? muzzleColor : coatColor;
+
+    const applyToMat = (m) => {
+      if (!m) return;
+      // Clear albedo texture so our colour is the actual surface colour
+      m.map = null;
+      if (m.color) { m.color.copy(target); }
+      m.roughness = 0.75;
+      m.metalness = 0.0;
+      m.needsUpdate = true;
+    };
 
     if (Array.isArray(node.material)) {
-      node.material.forEach((m) => {
-        if (m?.color) { m.color.copy(target); m.needsUpdate = true; }
-      });
-    } else if (node.material?.color) {
-      node.material.color.copy(target);
-      node.material.needsUpdate = true;
+      node.material.forEach(applyToMat);
+    } else {
+      applyToMat(node.material);
     }
   });
 }
