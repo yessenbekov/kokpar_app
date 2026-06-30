@@ -190,6 +190,26 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
     group.add(sidePanel);
   }
 
+  // Нагрудник (breast collar) — team colour
+  const breastBand = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 1.48), uniformMaterial);
+  breastBand.position.set(1.88, 1.08, 0);
+  group.add(breastBand);
+
+  const breastTrim = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.36, 1.56), trimMaterial);
+  breastTrim.position.set(1.93, 1.08, 0);
+  group.add(breastTrim);
+
+  for (const z of [-0.71, 0.71]) {
+    const breastSideStrap = new THREE.Mesh(new THREE.BoxGeometry(1.94, 0.1, 0.09), uniformMaterial);
+    breastSideStrap.position.set(0.91, 1.08, z);
+    group.add(breastSideStrap);
+  }
+
+  const breastNeckStrap = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.09), uniformMaterial);
+  breastNeckStrap.position.set(2.02, 1.48, 0);
+  breastNeckStrap.rotation.z = -0.38;
+  group.add(breastNeckStrap);
+
   const bridle = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.035, 8, 24), tackMaterial);
   bridle.position.set(2.58, 1.45, -0.03);
   bridle.rotation.y = Math.PI / 2;
