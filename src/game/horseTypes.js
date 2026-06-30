@@ -27,10 +27,7 @@ export const HORSE_TYPES = [
       bodyCheckPower: 1,
       bodyCheckLunge: 1
     },
-    palette: {
-      blue: { coat: "#8a5c35", dark: "#2d1b13", muzzle: "#b87a45", marking: "#ead7bd" },
-      red: { coat: "#4f2b1a", dark: "#1d120d", muzzle: "#7a4a2e", marking: "#2a1810" }
-    }
+    palette: { coat: "#9b6030", dark: "#2e1608", muzzle: "#c8834c", marking: "#ecdcc0" }
   },
   {
     id: "zhuyrik",
@@ -58,10 +55,7 @@ export const HORSE_TYPES = [
       bodyCheckPower: 0.9,
       bodyCheckLunge: 1.08
     },
-    palette: {
-      blue: { coat: "#a86c37", dark: "#3a2013", muzzle: "#c98b52", marking: "#f0dfc2" },
-      red: { coat: "#6a351e", dark: "#20100a", muzzle: "#965733", marking: "#312016" }
-    }
+    palette: { coat: "#b8b0a0", dark: "#5a5650", muzzle: "#d4cec6", marking: "#f4f2ee" }
   },
   {
     id: "auyr",
@@ -89,10 +83,7 @@ export const HORSE_TYPES = [
       bodyCheckPower: 1.18,
       bodyCheckLunge: 0.94
     },
-    palette: {
-      blue: { coat: "#5c4635", dark: "#201812", muzzle: "#80604b", marking: "#d9c5aa" },
-      red: { coat: "#35231a", dark: "#160d09", muzzle: "#674231", marking: "#22130d" }
-    }
+    palette: { coat: "#28180e", dark: "#100a06", muzzle: "#5a3828", marking: "#7a5040" }
   }
 ];
 

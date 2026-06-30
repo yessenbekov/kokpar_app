@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
-import { COLORS, TEAM } from "./constants.js";
+import { COLORS } from "./constants.js";
 import { horseTypeById } from "./horseTypes.js";
 
 const MODEL_MANIFEST_URL = "/models/manifest.json";
@@ -135,8 +135,7 @@ function setMaterialColor(material, color) {
 }
 
 function horseColorForRider(rider) {
-  const horseType = horseTypeById(rider.horseType);
-  return horseType.palette[rider.team === TEAM.red ? "red" : "blue"].coat;
+  return horseTypeById(rider.horseType).palette.coat;
 }
 
 function tintRiderModel(root, rider) {
