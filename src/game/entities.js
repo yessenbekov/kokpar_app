@@ -210,6 +210,44 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   breastNeckStrap.rotation.z = -0.38;
   group.add(breastNeckStrap);
 
+  // Задняя попона (rump cloth) — team colour, flat on horse's back, visible from above
+  const rumpCloth = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.13, 1.42), uniformMaterial);
+  rumpCloth.position.set(-1.82, 2.04, 0);
+  rumpCloth.rotation.z = -0.02;
+  group.add(rumpCloth);
+
+  const rumpTrim = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.07, 1.52), trimMaterial);
+  rumpTrim.position.set(-1.82, 1.96, 0);
+  rumpTrim.rotation.z = -0.02;
+  group.add(rumpTrim);
+
+  // Боковые юбки чепрака — широкие панели по бокам, хорошо видны в изометрии
+  for (const z of [-0.82, 0.82]) {
+    const caparison = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.62, 0.1), uniformMaterial);
+    caparison.position.set(-0.55, 1.55, z);
+    caparison.rotation.z = -0.04;
+    group.add(caparison);
+
+    const caparison2 = new THREE.Mesh(new THREE.BoxGeometry(2.68, 0.07, 0.1), trimMaterial);
+    caparison2.position.set(-0.55, 1.23, z);
+    caparison2.rotation.z = -0.04;
+    group.add(caparison2);
+  }
+
+  // Султан (head plume) — team colour, tall vertical spike above head
+  const sultanStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.08, 0.85, 6), uniformMaterial);
+  sultanStalk.position.set(2.44, 2.32, 0);
+  group.add(sultanStalk);
+
+  const sultanPom = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), uniformMaterial);
+  sultanPom.position.set(2.44, 2.78, 0);
+  group.add(sultanPom);
+
+  const sultanRing = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.04, 6, 12), trimMaterial);
+  sultanRing.rotation.x = Math.PI / 2;
+  sultanRing.position.set(2.44, 1.92, 0);
+  group.add(sultanRing);
+
   const bridle = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.035, 8, 24), tackMaterial);
   bridle.position.set(2.58, 1.45, -0.03);
   bridle.rotation.y = Math.PI / 2;
