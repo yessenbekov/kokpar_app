@@ -49,8 +49,10 @@ function applyCoatToModel(model, coatId) {
 
     const applyToMat = (m) => {
       if (!m) return;
-      // Clear albedo texture so our colour is the actual surface colour
       m.map = null;
+      // Vertex colours (COLOR_0) multiply with material.color — disable them
+      // so the preset colour is the actual surface colour, not a tint.
+      m.vertexColors = false;
       if (m.color) { m.color.copy(target); }
       m.roughness = 0.75;
       m.metalness = 0.0;
