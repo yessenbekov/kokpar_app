@@ -10,7 +10,7 @@ function ratingFor(score) {
 }
 
 function paletteStyle(horse) {
-  const palette = horse.palette.blue;
+  const palette = horse.palette;
   return {
     "--coat": palette.coat,
     "--dark": palette.dark,

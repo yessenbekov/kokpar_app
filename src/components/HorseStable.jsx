@@ -26,7 +26,7 @@ function statRowsFor(horse) {
 }
 
 function paletteStyle(horse) {
-  const palette = horse.palette.blue;
+  const palette = horse.palette;
 
   return {
     "--coat": palette.coat,
