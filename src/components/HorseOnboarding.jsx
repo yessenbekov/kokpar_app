@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HORSE_TYPES } from "../game/horseTypes.js";
+import { COAT_PRESETS, HORSE_TYPES, coatPresetById } from "../game/horseTypes.js";
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -9,19 +9,19 @@ function ratingFor(score) {
   return Math.round(clamp(score * 72, 45, 96));
 }
 
-function paletteStyle(horse) {
-  const palette = horse.palette;
+function paletteStyle(coat) {
   return {
-    "--coat": palette.coat,
-    "--dark": palette.dark,
-    "--muzzle": palette.muzzle,
-    "--mark": palette.marking
+    "--coat": coat.coat,
+    "--dark": coat.dark,
+    "--muzzle": coat.muzzle,
+    "--mark": coat.marking
   };
 }
 
-function HorsePreview({ horse }) {
+function HorsePreview({ horse, coatId }) {
+  const coat = coatPresetById(coatId ?? horse.defaultCoatId);
   return (
-    <div className="horse-portrait" style={paletteStyle(horse)} aria-hidden="true">
+    <div className="horse-portrait" style={paletteStyle(coat)} aria-hidden="true">
       <span className="horse-preview-shadow" />
       <span className="horse-preview-leg front" />
       <span className="horse-preview-leg back" />
@@ -45,12 +45,19 @@ export function HorseOnboarding({ onComplete }) {
   const [selectedTypeId, setSelectedTypeId] = useState(HORSE_TYPES[0].id);
   const [horseName, setHorseName] = useState("");
   const [riderName, setRiderName] = useState("");
+  const [selectedCoatId, setSelectedCoatId] = useState(HORSE_TYPES[0].defaultCoatId);
 
   const selectedHorse = HORSE_TYPES.find((ht) => ht.id === selectedTypeId) ?? HORSE_TYPES[0];
 
+  function selectHorseType(id) {
+    const ht = HORSE_TYPES.find((h) => h.id === id) ?? HORSE_TYPES[0];
+    setSelectedTypeId(ht.id);
+    setSelectedCoatId(ht.defaultCoatId);
+  }
+
   function handleStart(event) {
     event.preventDefault();
-    onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null);
+    onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null, selectedCoatId);
   }
 
   return (
@@ -67,10 +74,10 @@ export function HorseOnboarding({ onComplete }) {
                 key={ht.id}
                 type="button"
                 className={isSelected ? "onboarding-horse-card selected" : "onboarding-horse-card"}
-                onClick={() => setSelectedTypeId(ht.id)}
+                onClick={() => selectHorseType(ht.id)}
                 aria-pressed={isSelected}
               >
-                <HorsePreview horse={ht} />
+                <HorsePreview horse={ht} coatId={isSelected ? selectedCoatId : ht.defaultCoatId} />
                 <strong className="onboarding-horse-name">{ht.name}</strong>
                 <span className="onboarding-horse-role">{ht.role}</span>
                 <div className="onboarding-horse-stats">
@@ -90,6 +97,22 @@ export function HorseOnboarding({ onComplete }) {
               </button>
             );
           })}
+        </div>
+
+        <div className="coat-picker">
+          <span className="coat-picker-label">Масть</span>
+          {COAT_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              className={selectedCoatId === preset.id ? "coat-swatch selected" : "coat-swatch"}
+              style={{ background: preset.coat }}
+              title={preset.label}
+              aria-label={preset.label}
+              aria-pressed={selectedCoatId === preset.id}
+              onClick={() => setSelectedCoatId(preset.id)}
+            />
+          ))}
         </div>
 
         <form className="onboarding-inputs" onSubmit={handleStart}>

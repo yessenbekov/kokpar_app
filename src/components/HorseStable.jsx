@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, Gauge, Pencil, Plus, Trash2, X } from "lucide-react";
-import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { COAT_PRESETS, DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
 import { itemById } from "../app/shopItems.js";
 import { HorseViewer3D } from "./HorseViewer3D.jsx";
 
@@ -179,6 +179,7 @@ export function HorseStable({
   const [draftName, setDraftName] = useState(selectedOwnedHorse?.name ?? "");
   const [creating, setCreating] = useState(false);
   const [createTypeId, setCreateTypeId] = useState(DEFAULT_HORSE_TYPE_ID);
+  const [createCoatId, setCreateCoatId] = useState(horseTypeById(DEFAULT_HORSE_TYPE_ID).defaultCoatId);
   const [createName, setCreateName] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -199,10 +200,11 @@ export function HorseStable({
   function submitCreate(event) {
     event.preventDefault();
     const name = createName.trim() || horseTypeById(createTypeId).name;
-    onHorseCreate?.(createTypeId, name);
+    onHorseCreate?.(createTypeId, name, createCoatId);
     setCreating(false);
     setCreateName("");
     setCreateTypeId(DEFAULT_HORSE_TYPE_ID);
+    setCreateCoatId(horseTypeById(DEFAULT_HORSE_TYPE_ID).defaultCoatId);
   }
 
   function handleDelete() {
@@ -264,7 +266,10 @@ export function HorseStable({
                   key={ht.id}
                   type="button"
                   className={createTypeId === ht.id ? "horse-type-choice active" : "horse-type-choice"}
-                  onClick={() => setCreateTypeId(ht.id)}
+                  onClick={() => {
+                    setCreateTypeId(ht.id);
+                    setCreateCoatId(ht.defaultCoatId);
+                  }}
                 >
                   <HorseToken horse={ht} />
                   <span>
@@ -272,6 +277,20 @@ export function HorseStable({
                     <small>{ht.role}</small>
                   </span>
                 </button>
+              ))}
+            </div>
+            <div className="coat-picker">
+              {COAT_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className={createCoatId === preset.id ? "coat-swatch selected" : "coat-swatch"}
+                  style={{ background: preset.coat }}
+                  title={preset.label}
+                  aria-label={preset.label}
+                  aria-pressed={createCoatId === preset.id}
+                  onClick={() => setCreateCoatId(preset.id)}
+                />
               ))}
             </div>
             <div className="horse-create-row">

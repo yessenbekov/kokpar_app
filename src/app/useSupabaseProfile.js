@@ -420,8 +420,8 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
     }
   }, [authState.status]);
 
-  async function completeOnboarding(horseTypeId, horseName, riderName) {
-    const horse = newOwnedHorse(horseTypeId, horseName);
+  async function completeOnboarding(horseTypeId, horseName, riderName, coatId) {
+    const horse = newOwnedHorse(horseTypeId, horseName, coatId);
     const baseProfile = playerProfileStore.read();
     const newProfile = {
       ...baseProfile,

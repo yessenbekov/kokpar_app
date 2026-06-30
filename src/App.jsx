@@ -217,6 +217,7 @@ export default function App() {
       nextSettings.horseId = selectedHorse.id;
       nextSettings.horseType = selectedHorse.typeId;
       nextSettings.horseName = selectedHorse.name;
+      nextSettings.horseCoatId = selectedHorse.coatId ?? null;
     }
 
     setSettings(nextSettings);
@@ -330,8 +331,8 @@ export default function App() {
     });
   }
 
-  function createHorse(typeId, name) {
-    const horse = newOwnedHorse(typeId, name);
+  function createHorse(typeId, name, coatId) {
+    const horse = newOwnedHorse(typeId, name, coatId);
     const currentProfile = playerProfileStore.read();
     if (currentProfile.ownedHorses.length >= currentProfile.stableCapacity) return;
 
@@ -342,7 +343,7 @@ export default function App() {
       selectedHorseType: horse.typeId
     });
     setProfile(nextProfile);
-    setSettings((s) => ({ ...s, horseId: horse.id, horseType: horse.typeId, horseName: horse.name }));
+    setSettings((s) => ({ ...s, horseId: horse.id, horseType: horse.typeId, horseName: horse.name, horseCoatId: horse.coatId ?? null }));
   }
 
   function renameRider(name) {
@@ -543,8 +544,8 @@ export default function App() {
 
       {needsOnboarding && (
         <HorseOnboarding
-          onComplete={(typeId, horseName, riderName) => {
-            completeOnboarding(typeId, horseName, riderName);
+          onComplete={(typeId, horseName, riderName, coatId) => {
+            completeOnboarding(typeId, horseName, riderName, coatId);
           }}
         />
       )}

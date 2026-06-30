@@ -1,4 +1,4 @@
-import { DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { COAT_PRESETS, DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, coatPresetById, horseTypeById } from "../game/horseTypes.js";
 import { DEFAULT_MODE_ID, gameModeById } from "./gameModes.js";
 
 const HORSE_IDS = new Set(HORSE_TYPES.map((horse) => horse.id));
@@ -30,17 +30,20 @@ export const DEFAULT_PLAYER_PROFILE = {
   }
 };
 
-export function newOwnedHorse(typeId, name) {
+export function newOwnedHorse(typeId, name, coatId) {
   const id = `horse-${typeId}-${Date.now()}`;
   const safeName = typeof name === "string" && name.trim() ? name.trim().slice(0, 24) : horseTypeById(typeId).name;
-  return createOwnedHorse({ id, name: safeName, typeId });
+  const safeCoatId = coatPresetById(coatId).id;
+  return createOwnedHorse({ id, name: safeName, typeId, coatId: safeCoatId });
 }
 
-function createOwnedHorse({ id, name, typeId, level = 1, xp = 0, bond = 0, equipment = {}, record = {} }) {
+function createOwnedHorse({ id, name, typeId, coatId, level = 1, xp = 0, bond = 0, equipment = {}, record = {} }) {
+  const horseType = horseTypeById(typeId);
   return {
     id,
     name,
-    typeId: horseTypeById(typeId).id,
+    typeId: horseType.id,
+    coatId: coatPresetById(coatId ?? horseType.defaultCoatId).id,
     level,
     xp,
     bond,

@@ -3738,6 +3738,55 @@ button {
   transform: translateY(0);
 }
 
+.coat-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.coat-picker-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 100%;
+  margin-bottom: -2px;
+}
+
+.coat-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  outline: none;
+  flex-shrink: 0;
+}
+
+.coat-swatch:hover {
+  transform: scale(1.12);
+}
+
+.coat-swatch.selected {
+  border-color: #2c1a0e;
+  box-shadow: 0 0 0 3px rgba(139, 88, 38, 0.35), 0 1px 4px rgba(0,0,0,0.18);
+  transform: scale(1.08);
+}
+
+/* Coat picker inside the stable create form */
+.horse-create-form .coat-picker {
+  gap: 7px;
+}
+
+.horse-create-form .coat-swatch {
+  width: 26px;
+  height: 26px;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    STABLE / SHOP TABS
    ═══════════════════════════════════════════════════════════════ */

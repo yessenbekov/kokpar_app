@@ -119,7 +119,7 @@ const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", 
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
 const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null) {
   const riders = [];
   const size = clamp(Math.round(teamSize), 1, 5);
 
@@ -138,7 +138,8 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         z: blueSpot[1],
         color: blueIsPlayer ? COLORS.blue : COLORS.blueAlt,
         horseType: blueIsPlayer ? playerHorseType : AI_HORSE_ROTATION[i],
-        horseName: blueIsPlayer ? playerHorseName : null
+        horseName: blueIsPlayer ? playerHorseName : null,
+        coatId: blueIsPlayer ? playerCoatId : null
       })
     );
 
@@ -151,7 +152,8 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         z: redSpot[1],
         color: COLORS.red,
         horseType: redIsPlayer ? playerHorseType : AI_HORSE_ROTATION[(i + 1) % AI_HORSE_ROTATION.length],
-        horseName: redIsPlayer ? playerHorseName : null
+        horseName: redIsPlayer ? playerHorseName : null,
+        coatId: redIsPlayer ? playerCoatId : null
       })
     );
   }
@@ -179,6 +181,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     matchSeconds: clamp(Number(options.matchSeconds) || MATCH_SECONDS, 60, 15 * 60),
     horseType: horseTypeById(options.horseType).id,
     horseName: typeof options.horseName === "string" && options.horseName.trim() ? options.horseName.trim() : null,
+    horseCoatId: typeof options.horseCoatId === "string" ? options.horseCoatId : null,
     onMatchEvent: typeof options.onMatchEvent === "function" ? options.onMatchEvent : null
   };
   const isOnline = Boolean(options.onlineMatchId);
@@ -286,7 +289,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId);
   const player = riders.find(r => r.human) ?? riders[0];
 
   // Apply equipment bonuses to the human player's stats
@@ -327,7 +330,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   riders.forEach((rider) => {
-    setRiderGroup(rider, createHorseMesh(rider.color, rider.team, rider.horseType));
+    setRiderGroup(rider, createHorseMesh(rider.color, rider.team, rider.horseType, rider.coatId));
     rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.contestMarker);
     rider.roleMarker = createRiderRoleMarker();

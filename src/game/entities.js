@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { COLORS, GOAL_RADIUS } from "./constants.js";
-import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "./horseTypes.js";
+import { DEFAULT_HORSE_TYPE_ID, coatPresetById, horseTypeById } from "./horseTypes.js";
 
 export function createRider(config) {
   const horseType = horseTypeById(config.horseType);
@@ -59,16 +59,18 @@ export function createRider(config) {
   };
 }
 
-function horsePaletteFor(horseTypeId = DEFAULT_HORSE_TYPE_ID) {
-  return horseTypeById(horseTypeId).palette;
+function horsePaletteFor(horseTypeId = DEFAULT_HORSE_TYPE_ID, coatId) {
+  const horseType = horseTypeById(horseTypeId);
+  if (coatId) return coatPresetById(coatId);
+  return coatPresetById(horseType.defaultCoatId);
 }
 
-export function createHorseMesh(color, team, horseTypeId) {
+export function createHorseMesh(color, team, horseTypeId, coatId) {
   const group = new THREE.Group();
   const legs = [];
   const arms = [];
   const upperBody = [];
-  const horsePalette = horsePaletteFor(horseTypeId);
+  const horsePalette = horsePaletteFor(horseTypeId, coatId);
   const horseMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.coat, roughness: 0.78 });
   const darkMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.dark, roughness: 0.82 });
   const muzzleMaterial = new THREE.MeshStandardMaterial({ color: horsePalette.muzzle, roughness: 0.84 });

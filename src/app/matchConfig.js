@@ -1,4 +1,4 @@
-import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "../game/horseTypes.js";
+import { DEFAULT_HORSE_TYPE_ID, horseTypeById, coatPresetById } from "../game/horseTypes.js";
 import { DEFAULT_MODE_ID, gameModeById } from "./gameModes.js";
 import { ownedHorseById, selectedHorseFromProfile } from "./playerProfile.js";
 
@@ -30,6 +30,7 @@ export function settingsFromProfile(profile = {}) {
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
     horseName: selectedHorse.name,
+    horseCoatId: coatPresetById(selectedHorse.coatId ?? horseTypeById(selectedHorse.typeId).defaultCoatId).id,
     equipment: selectedHorse.equipment ?? {},
     teamSide: preferences.teamSide === "red" ? "red" : "blue"
   };
@@ -98,6 +99,7 @@ export function readUrlSettings(profile) {
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
     horseName: selectedHorse.name,
+    horseCoatId: coatPresetById(selectedHorse.coatId ?? horseTypeById(selectedHorse.typeId).defaultCoatId).id,
     equipment: selectedHorse.equipment ?? {},
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide
   };
