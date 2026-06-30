@@ -785,6 +785,19 @@ button {
   font-weight: 900;
 }
 
+.choice.team-blue.active {
+  border-color: #2255aa;
+  background: rgba(180, 210, 248, 0.92);
+  box-shadow: 0 0 0 2px rgba(34, 85, 170, 0.22);
+}
+
+.choice.team-red.active {
+  border-color: #aa2222;
+  background: rgba(248, 200, 200, 0.92);
+  box-shadow: 0 0 0 2px rgba(170, 34, 34, 0.22);
+  color: #6a1010;
+}
+
 .choice strong,
 .choice span {
   display: block;

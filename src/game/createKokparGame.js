@@ -21,6 +21,7 @@ import {
   createBodyCheckImpactMarker,
   createContestRiderMarker,
   createMountedTensionGuide,
+  createPlayerGroundMarker,
   createRiderRoleMarker
 } from "./visualIndicators.js";
 import { clamp, distance2D, normalize2D, rotate2D, angleDelta, formatTime, forwardVector } from "./mathUtils.js";
@@ -331,6 +332,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     scene.add(rider.contestMarker);
     rider.roleMarker = createRiderRoleMarker();
     scene.add(rider.roleMarker);
+    if (rider.human) {
+      rider.groundMarker = createPlayerGroundMarker();
+      scene.add(rider.groundMarker);
+    }
   });
 
   const kokpar = {
@@ -1955,6 +1960,15 @@ export function createKokparGame(container, onHudChange, options = {}) {
       }
 
       updateRiderRoleMarker(rider, riderRoleMarkerState(rider, inContest), time);
+
+      if (rider.groundMarker) {
+        rider.groundMarker.visible = true;
+        rider.groundMarker.position.set(rider.x, 0, rider.z);
+        const pulse = 0.88 + Math.sin(time * 4.5) * 0.08;
+        rider.groundMarker.scale.setScalar(pulse);
+        rider.groundMarker.userData.ring.material.opacity = 0.52 + Math.sin(time * 4.5) * 0.12;
+        rider.groundMarker.userData.disc.material.opacity = 0.22 + Math.sin(time * 4.5 + 1) * 0.08;
+      }
     });
 
     updateBodyCheckImpactMarker(time);

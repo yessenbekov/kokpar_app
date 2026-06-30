@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Gavel, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { Marketplace } from "./Marketplace.jsx";
@@ -320,6 +320,31 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
         <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
 
         <div className="match-options">
+          <div className="setting-group" aria-label="Сторона">
+            <div className="setting-title">
+              <Flag size={17} strokeWidth={2.4} />
+              <span>Сторона</span>
+            </div>
+            <div className="choice-grid two">
+              <button
+                className={`choice team-blue${settings.teamSide !== "red" ? " active" : ""}`}
+                type="button"
+                onClick={() => onSettingChange("teamSide", "blue")}
+              >
+                <strong>Синие</strong>
+                <span>Левые ворота</span>
+              </button>
+              <button
+                className={`choice team-red${settings.teamSide === "red" ? " active" : ""}`}
+                type="button"
+                onClick={() => onSettingChange("teamSide", "red")}
+              >
+                <strong>Красные</strong>
+                <span>Правые ворота</span>
+              </button>
+            </div>
+          </div>
+
           <div className="setting-group" aria-label="Тип цели">
             <div className="setting-title">
               <CircleDot size={17} strokeWidth={2.4} />

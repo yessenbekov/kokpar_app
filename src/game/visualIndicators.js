@@ -73,6 +73,43 @@ export function createRiderRoleMarker() {
   return group;
 }
 
+export function createPlayerGroundMarker() {
+  const group = new THREE.Group();
+
+  const shadowMat = new THREE.MeshBasicMaterial({
+    color: "#ffffff",
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+  const pulseMat = new THREE.MeshBasicMaterial({
+    color: "#aaddff",
+    transparent: true,
+    opacity: 0.30,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+
+  // Outer ring
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.0, 36), shadowMat.clone());
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.05;
+  group.add(ring);
+
+  // Inner filled disc (subtler, pulsing)
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.5, 36), pulseMat.clone());
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.04;
+  group.add(disc);
+
+  group.visible = false;
+  group.renderOrder = 1;
+  group.userData.ring = ring;
+  group.userData.disc = disc;
+  return group;
+}
+
 export function createMountedTensionGuide() {
   const group = new THREE.Group();
   const shaftMaterial = new THREE.MeshBasicMaterial({
