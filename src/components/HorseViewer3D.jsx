@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { coatPresetById } from "../game/horseTypes.js";
 
 const HORSE_GLB_PATH = "/models/horse_arabian.glb";
 const gltfLoader = new GLTFLoader();
@@ -32,8 +33,31 @@ function pickViewerClip(animations) {
   );
 }
 
-export function HorseViewer3D({ style }) {
+function applyCoatToModel(model, coatId) {
+  const preset = coatPresetById(coatId);
+  const coatColor = new THREE.Color(preset.coat);
+  const darkColor = new THREE.Color(preset.dark);
+
+  model.traverse((node) => {
+    if (!node.isMesh && !node.isSkinnedMesh) return;
+    const name = (node.name + " " + (node.material?.name ?? "")).toLowerCase();
+    const isDark = name.includes("hair") || name.includes("mane") || name.includes("tail") || name.includes("hoof") || name.includes("leg");
+    const target = isDark ? darkColor : coatColor;
+
+    if (Array.isArray(node.material)) {
+      node.material.forEach((m) => {
+        if (m?.color) { m.color.copy(target); m.needsUpdate = true; }
+      });
+    } else if (node.material?.color) {
+      node.material.color.copy(target);
+      node.material.needsUpdate = true;
+    }
+  });
+}
+
+export function HorseViewer3D({ coatId, style }) {
   const mountRef = useRef(null);
+  const modelRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -91,7 +115,6 @@ export function HorseViewer3D({ style }) {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Orbit state: spherical coords around the target
     const orbit = { azimuth: -0.62, elevation: 0.28, dist: 4.5, targetY: 1.0 };
 
     function applyOrbit() {
@@ -102,7 +125,6 @@ export function HorseViewer3D({ style }) {
       camera.lookAt(0, orbit.targetY, 0);
     }
 
-    // Pointer drag handling
     let dragging = false;
     let lastX = 0;
     let lastY = 0;
@@ -163,20 +185,26 @@ export function HorseViewer3D({ style }) {
         if (node.isMesh || node.isSkinnedMesh) {
           node.castShadow = true;
           node.receiveShadow = true;
+          if (node.material) {
+            node.material = Array.isArray(node.material)
+              ? node.material.map((m) => m.clone())
+              : node.material.clone();
+          }
         }
       });
 
       scene.add(model);
+      modelRef.current = model;
+
+      applyCoatToModel(model, coatId ?? "bay");
 
       const horseHeight = size.y;
-      const horseDepth  = size.z;
       const fovRad = camera.fov * (Math.PI / 180);
       const dist = (horseHeight / 0.85) / (2 * Math.tan(fovRad / 2));
 
-      orbit.dist    = dist * 1.05;
+      orbit.dist = dist * 1.05;
       orbit.targetY = horseHeight * 0.48;
-      // Initial 3/4 front-right view
-      orbit.azimuth   = -0.62;
+      orbit.azimuth = -0.62;
       orbit.elevation = Math.atan2(horseHeight * 0.52, dist * 0.9);
       applyOrbit();
 
@@ -198,6 +226,7 @@ export function HorseViewer3D({ style }) {
 
     return () => {
       alive = false;
+      modelRef.current = null;
       cancelAnimationFrame(rafId);
       el.removeEventListener("mousedown", onPointerDown);
       el.removeEventListener("touchstart", onPointerDown);
@@ -209,6 +238,12 @@ export function HorseViewer3D({ style }) {
       if (container.contains(el)) container.removeChild(el);
     };
   }, []);
+
+  useEffect(() => {
+    if (modelRef.current) {
+      applyCoatToModel(modelRef.current, coatId ?? "bay");
+    }
+  }, [coatId]);
 
   return (
     <div ref={mountRef} style={{ width: "100%", height: "100%", position: "relative", ...style }}>

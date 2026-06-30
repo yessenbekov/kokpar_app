@@ -331,7 +331,7 @@ export function HorseStable({
       <section className="stable-detail" aria-label={selectedOwnedHorse.name}>
         {/* Hero 3D scene */}
         <div className="horse-hero-scene">
-          <HorseViewer3D />
+          <HorseViewer3D coatId={selectedOwnedHorse?.coatId} />
           <div className="horse-hero-overlay">
             <p className="label">{selectedHorse.role} · {selectedHorse.name}</p>
             {editing ? (

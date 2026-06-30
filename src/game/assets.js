@@ -145,10 +145,10 @@ function tintRiderModel(root, rider) {
     if (!node.isMesh && !node.isSkinnedMesh) return;
 
     forEachMaterial(node, (material) => {
-      if (matchesAnyToken(node, material, TEAM_MATERIAL_TOKENS)) {
-        setMaterialColor(material, rider.color);
-      } else if (matchesAnyToken(node, material, HORSE_MATERIAL_TOKENS)) {
+      if (matchesAnyToken(node, material, HORSE_MATERIAL_TOKENS)) {
         setMaterialColor(material, horseColorForRider(rider));
+      } else if (matchesAnyToken(node, material, TEAM_MATERIAL_TOKENS)) {
+        setMaterialColor(material, rider.color);
       }
     });
   });
@@ -361,7 +361,7 @@ export function createRiderModelInstance(assetPipeline, rider) {
       group.userData.walkAction = walkAction;
       group.userData.gallopAction = gallopAction;
 
-      const coatColor = new THREE.Color(rider.color);
+      const coatColor = new THREE.Color(horseColorForRider(rider));
       const hairColor = coatColor.clone().multiplyScalar(0.5);
       const horseMat = new THREE.MeshStandardMaterial({ color: coatColor, roughness: 0.72 });
       const hairMat  = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.85 });
