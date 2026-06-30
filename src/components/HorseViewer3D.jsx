@@ -77,7 +77,7 @@ export function HorseViewer3D({ coatId, style }) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setClearColor(0x1c1208);
     container.appendChild(renderer.domElement);
-    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;cursor:grab;";
+    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;cursor:grab;touch-action:none;";
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, w / h, 0.05, 50);
@@ -125,42 +125,39 @@ export function HorseViewer3D({ coatId, style }) {
       camera.lookAt(0, orbit.targetY, 0);
     }
 
-    let dragging = false;
     let lastX = 0;
     let lastY = 0;
 
     function onPointerDown(e) {
-      dragging = true;
-      lastX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
-      lastY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      lastX = e.clientX;
+      lastY = e.clientY;
       renderer.domElement.style.cursor = "grabbing";
     }
 
     function onPointerMove(e) {
-      if (!dragging) return;
-      const cx = e.clientX ?? e.touches?.[0]?.clientX ?? lastX;
-      const cy = e.clientY ?? e.touches?.[0]?.clientY ?? lastY;
-      const dx = cx - lastX;
-      const dy = cy - lastY;
-      lastX = cx;
-      lastY = cy;
+      if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
       orbit.azimuth -= dx * 0.008;
       orbit.elevation = Math.max(-0.15, Math.min(Math.PI / 2.2, orbit.elevation - dy * 0.006));
       applyOrbit();
     }
 
-    function onPointerUp() {
-      dragging = false;
+    function onPointerUp(e) {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
       renderer.domElement.style.cursor = "grab";
     }
 
     const el = renderer.domElement;
-    el.addEventListener("mousedown", onPointerDown);
-    el.addEventListener("touchstart", onPointerDown, { passive: true });
-    window.addEventListener("mousemove", onPointerMove);
-    window.addEventListener("touchmove", onPointerMove, { passive: true });
-    window.addEventListener("mouseup", onPointerUp);
-    window.addEventListener("touchend", onPointerUp);
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("pointercancel", onPointerUp);
 
     const clock = new THREE.Clock();
     let mixer = null;
@@ -228,12 +225,10 @@ export function HorseViewer3D({ coatId, style }) {
       alive = false;
       modelRef.current = null;
       cancelAnimationFrame(rafId);
-      el.removeEventListener("mousedown", onPointerDown);
-      el.removeEventListener("touchstart", onPointerDown);
-      window.removeEventListener("mousemove", onPointerMove);
-      window.removeEventListener("touchmove", onPointerMove);
-      window.removeEventListener("mouseup", onPointerUp);
-      window.removeEventListener("touchend", onPointerUp);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("pointercancel", onPointerUp);
       renderer.dispose();
       if (container.contains(el)) container.removeChild(el);
     };
