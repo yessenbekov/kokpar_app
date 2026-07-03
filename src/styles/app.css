@@ -5523,3 +5523,196 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
   outline: 2px solid rgba(240, 195, 71, 0.45);
   outline-offset: 3px;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   GOLD ACCENT SYSTEM — Казахский + RPG стиль
+   Заменяем синие акценты на золото/янтарь
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Guest button: янтарный градиент (= start-button) ──────── */
+.guest-button {
+  background: linear-gradient(to bottom, #e8a830, #b86c08) !important;
+  border-color: rgba(100, 58, 4, 0.5) !important;
+  color: #1c0e04 !important;
+  box-shadow: 0 4px 22px rgba(200, 138, 18, 0.44), inset 0 1px 0 rgba(255, 228, 100, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(80, 40, 0, 0.4);
+  font-weight: 900;
+}
+.guest-button:hover {
+  background: linear-gradient(to bottom, #f0b838, #cc7a10) !important;
+  box-shadow: 0 6px 30px rgba(220, 158, 22, 0.52), inset 0 1px 0 rgba(255, 228, 100, 0.35) !important;
+  filter: none !important;
+}
+
+/* ── Auth submit button: золотой ────────────────────────────── */
+.auth-gate-form button[type="submit"] {
+  background: linear-gradient(to bottom, #c8902c, #9a5e0e);
+  border-color: rgba(100, 58, 4, 0.42);
+  color: #f4e2b4;
+  box-shadow: 0 3px 14px rgba(180, 118, 16, 0.3), inset 0 1px 0 rgba(255, 218, 80, 0.22);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.auth-gate-form button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #d89a32, #a86812);
+  box-shadow: 0 5px 20px rgba(180, 118, 16, 0.42), inset 0 1px 0 rgba(255, 218, 80, 0.28);
+}
+
+/* ── Auth tabs: активный = золотой ──────────────────────────── */
+.auth-method-tabs button.active,
+.auth-channel-toggle button.active {
+  background: rgba(78, 48, 12, 0.98);
+  border-color: rgba(200, 152, 50, 0.7);
+  color: #f0c347;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(200, 152, 50, 0.15);
+}
+
+/* ── Инпуты: фокус = золотое свечение ───────────────────────── */
+.auth-gate-form input:focus,
+.rider-name-form input:focus,
+.lobby-join-form input:focus,
+.horse-name-form input:focus,
+.horse-create-input:focus,
+.onboarding-input-group input:focus,
+.listing-price-input:focus {
+  border-color: rgba(200, 152, 50, 0.78);
+  box-shadow: 0 0 0 3px rgba(200, 152, 50, 0.14);
+  outline: none;
+}
+
+/* ── Верхняя полоска панели: чисто золотая ──────────────────── */
+.setup-panel::before,
+.auth-gate-panel::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(200, 148, 42, 0.35) 20%,
+    #f0c347 50%,
+    rgba(200, 148, 42, 0.35) 80%,
+    transparent 100%
+  ) !important;
+  opacity: 0.7 !important;
+}
+
+/* ── Auth панель: золотое свечение ───────────────────────────── */
+.auth-gate-panel {
+  border-color: rgba(180, 138, 52, 0.32) !important;
+  box-shadow:
+    var(--shadow-panel),
+    0 0 0 1px rgba(180, 138, 52, 0.14),
+    0 0 70px rgba(150, 92, 14, 0.16) !important;
+}
+
+/* ── Логотип: орнамент снизу ─────────────────────────────────── */
+.auth-game-logo {
+  border-bottom: 1px solid rgba(200, 152, 48, 0.22);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.auth-logo-kk {
+  font-size: 56px;
+  color: #f2c84a;
+  text-shadow: 0 2px 28px rgba(240, 195, 71, 0.6), 0 0 80px rgba(180, 120, 20, 0.25);
+}
+.auth-game-tagline {
+  letter-spacing: 0.18em;
+  color: rgba(200, 158, 72, 0.6);
+  font-size: 9px;
+}
+
+/* ── Stable card active: янтарный (не синий) ─────────────────── */
+.stable-card.active {
+  border-left-color: #c89430;
+  background: rgba(64, 40, 10, 0.98);
+  box-shadow:
+    inset 3px 0 0 rgba(200, 148, 48, 0.55),
+    inset 0 0 0 1px rgba(200, 148, 48, 0.14),
+    var(--shadow-card);
+}
+
+/* ── Choice/mode card active: янтарный ──────────────────────── */
+.choice.active {
+  border-color: rgba(200, 152, 48, 0.68);
+  background: rgba(70, 44, 12, 0.98);
+  box-shadow: 0 0 0 1px rgba(200, 152, 48, 0.22), 0 3px 14px rgba(4, 2, 0, 0.48);
+  color: var(--ink);
+}
+
+/* ── Onboarding: выбранная лошадь = золото ───────────────────── */
+.onboarding-horse-card.selected {
+  background: rgba(70, 44, 12, 0.98);
+  border-color: rgba(200, 152, 50, 0.75);
+  box-shadow: 0 0 0 2px rgba(200, 152, 50, 0.28), var(--shadow-card);
+}
+
+/* ── Horse type choice: active = золото ──────────────────────── */
+.horse-type-choice.active {
+  border-color: rgba(200, 152, 48, 0.65);
+  background: rgba(68, 42, 12, 0.96);
+  color: var(--ink);
+}
+
+/* ── Ready button: active = золото ──────────────────────────── */
+.ready-button.active {
+  background: linear-gradient(to bottom, #c8902c, #9a5e0e);
+  border-color: rgba(200, 148, 40, 0.58);
+  color: #f0d070;
+  box-shadow: 0 3px 14px rgba(180, 118, 16, 0.32);
+}
+
+/* ── Lobby code + host chip: янтарь ──────────────────────────── */
+.lobby-code { color: #e0aa38; }
+.lobby-host-chip {
+  background: rgba(78, 50, 12, 0.9);
+  border-color: rgba(200, 152, 50, 0.38);
+  color: #e0aa38;
+}
+
+/* ── Match reward: золотая рамка ─────────────────────────────── */
+.match-reward {
+  border-color: rgba(200, 152, 48, 0.45) !important;
+  box-shadow: 0 0 50px rgba(150, 92, 14, 0.2);
+}
+
+/* ── Sell кнопка: золото вместо синего ───────────────────────── */
+.horse-list-btn.sell {
+  background: rgba(72, 44, 10, 0.85);
+  color: var(--ink-2);
+  border-color: rgba(155, 118, 42, 0.32);
+}
+.horse-list-btn.sell:hover {
+  background: rgba(90, 56, 14, 0.95);
+  color: var(--ink);
+}
+
+/* ── Setup head h1: золотой ─────────────────────────────────── */
+.setup-head h1 {
+  color: #f0d070;
+  text-shadow: 0 2px 14px rgba(200, 148, 30, 0.2);
+}
+
+/* ── Панели: чуть более выраженная граница ───────────────────── */
+.setup-panel,
+.auth-gate-panel {
+  border-color: rgba(180, 138, 52, 0.28);
+}
+
+/* ── Stable detail: слабое золотое свечение ──────────────────── */
+.stable-detail {
+  border-color: rgba(155, 120, 44, 0.26);
+  box-shadow: inset 0 1px 0 rgba(200, 152, 48, 0.06);
+}
+
+/* ── Sync pill cloud остаётся синим (это статус-индикатор) ───── */
+
+/* ── Market filter active: чуть ярче ────────────────────────── */
+.market-filter-btn.active {
+  background: rgba(155, 118, 42, 0.28);
+  border-color: rgba(200, 152, 50, 0.55);
+  color: var(--ink);
+}
+
+/* ── Score / panel HUD: усиленная рамка ─────────────────────── */
+.panel, .score {
+  border-color: rgba(155, 120, 44, 0.28);
+}
