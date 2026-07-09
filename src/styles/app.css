@@ -5691,6 +5691,172 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
   text-shadow: 0 2px 14px rgba(200, 148, 30, 0.2);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   КОНЮШНЯ — тёмная тема + RPG стиль
+   ════════════════════════════════════════════════════════════════ */
+
+/* Текст характеристик — светлый, читаемый */
+.stable-stat,
+.horse-progress {
+  color: var(--ink-2);
+}
+
+.stable-stat strong,
+.horse-progress strong {
+  color: var(--ink);
+}
+
+/* Дорожки прогрессбаров — видимые */
+.stable-stat i,
+.horse-progress i {
+  background: rgba(155, 120, 44, 0.22);
+  height: 8px;
+}
+
+.stable-stat b {
+  height: 100%;
+}
+
+/* XP полоска в карточке лошади */
+.stable-card-xp {
+  background: rgba(155, 120, 44, 0.22);
+  height: 4px;
+  margin-top: 6px;
+}
+
+/* 3D сцена: тонкая золотая рамка + тень */
+.horse-hero-scene {
+  border: 1px solid rgba(155, 120, 44, 0.28);
+  box-shadow: 0 6px 28px rgba(4, 2, 0, 0.55), inset 0 -1px 0 rgba(155, 120, 44, 0.12);
+  height: 320px;
+}
+
+/* Блоки Статистика / Снаряжение */
+.horse-record,
+.horse-equipment {
+  border-color: rgba(155, 120, 44, 0.2);
+}
+
+.horse-record > strong,
+.horse-equipment > strong {
+  color: rgba(200, 158, 72, 0.82);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(155, 120, 44, 0.18);
+  margin-bottom: 9px;
+}
+
+.horse-record b,
+.horse-equipment b {
+  color: var(--ink);
+}
+
+.horse-record small,
+.horse-equipment small {
+  color: var(--muted);
+  font-size: 9.5px;
+}
+
+/* Ячейки блоков */
+.horse-record span,
+.horse-equipment span {
+  background: rgba(72, 44, 14, 0.8);
+  border-color: rgba(155, 120, 44, 0.18);
+}
+
+/* Прогресс XP — секция под 3D */
+.horse-progress {
+  background: rgba(44, 26, 8, 0.55);
+  border: 1px solid rgba(155, 120, 44, 0.14);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 12px;
+}
+
+/* Заголовок секции настроек ("Лошадь") */
+.setting-title {
+  color: rgba(200, 158, 72, 0.72);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+/* Статистика секция */
+.stable-stats {
+  background: rgba(44, 26, 8, 0.45);
+  border: 1px solid rgba(155, 120, 44, 0.14);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 12px;
+}
+
+/* Horse meta grid */
+.horse-meta-grid {
+  margin-top: 12px;
+  gap: 10px;
+}
+
+/* Кнопка добавить лошадь */
+.add-horse-button {
+  border-style: dashed;
+  border-color: rgba(155, 120, 44, 0.28);
+  color: rgba(192, 152, 68, 0.55);
+  border-radius: 8px;
+  transition: all 0.18s;
+}
+.add-horse-button:hover {
+  border-color: rgba(200, 152, 48, 0.5);
+  background: rgba(155, 120, 44, 0.08);
+  color: var(--ink-2);
+}
+
+/* Тег тира лошади */
+.horse-tier {
+  background: rgba(155, 120, 44, 0.14);
+  border-color: rgba(200, 152, 48, 0.38);
+  color: #d4a830;
+  font-size: 10px;
+}
+
+/* Теги в оверлее 3D сцены */
+.horse-hero-overlay .horse-tags span {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Кнопки снаряжения */
+.equip-remove-btn,
+.equip-list-btn {
+  font-size: 10px;
+  color: var(--muted);
+  background: rgba(62, 38, 12, 0.7);
+  border: 1px solid rgba(155, 120, 44, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.equip-remove-btn:hover { color: var(--ink-2); background: rgba(80, 50, 16, 0.9); }
+.equip-list-btn:hover { color: #d4a830; background: rgba(72, 44, 12, 0.9); }
+
+/* Слот снаряжения заполненный */
+.equipment-slot-filled {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.equipment-slot-filled b {
+  font-size: 11.5px !important;
+}
+
+/* Цвет тира в снаряжении */
+.equip-slot.tier-1 b { color: rgba(180, 148, 60, 0.9) !important; }
+.equip-slot.tier-2 b { color: rgba(140, 180, 220, 0.9) !important; }
+.equip-slot.tier-3 b { color: rgba(180, 140, 255, 0.9) !important; }
+
 /* ── Панели: чуть более выраженная граница ───────────────────── */
 .setup-panel,
 .auth-gate-panel {
