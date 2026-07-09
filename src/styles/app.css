@@ -6396,3 +6396,153 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
     padding: 6px 6px;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   АНИМАЦИИ И ПЕРЕХОДЫ
+   ════════════════════════════════════════════════════════════════ */
+
+/* Базовые keyframes */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 6px 28px rgba(200, 140, 18, 0.48), inset 0 1px 0 rgba(255, 228, 100, 0.32); }
+  50%       { box-shadow: 0 8px 38px rgba(220, 160, 22, 0.72), inset 0 1px 0 rgba(255, 228, 100, 0.42); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Контент вкладок: появляется при переключении */
+.stable-layout,
+.shop-panel,
+.marketplace {
+  animation: fadeInUp 0.22s ease both;
+}
+
+/* Карточки лошадей: поочерёдно появляются */
+.stable-card-row:nth-child(1) { animation: fadeInUp 0.18s 0.00s ease both; }
+.stable-card-row:nth-child(2) { animation: fadeInUp 0.18s 0.04s ease both; }
+.stable-card-row:nth-child(3) { animation: fadeInUp 0.18s 0.08s ease both; }
+.stable-card-row:nth-child(4) { animation: fadeInUp 0.18s 0.12s ease both; }
+.stable-card-row:nth-child(5) { animation: fadeInUp 0.18s 0.16s ease both; }
+.stable-card-row:nth-child(6) { animation: fadeInUp 0.18s 0.20s ease both; }
+
+/* Карточки магазина */
+.shop-item-card {
+  animation: scaleIn 0.18s ease both;
+}
+
+/* Карточки торгов */
+.listing-card {
+  animation: fadeInUp 0.2s ease both;
+}
+
+/* История матчей: слайд вниз */
+.history-list {
+  animation: slideDown 0.2s ease both;
+}
+
+/* Онбординг: карточка выезжает снизу */
+.horse-onboarding-card {
+  animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Карточки выбора коня в онбординге */
+.onboarding-horse-card:nth-child(1) { animation: scaleIn 0.2s 0.05s ease both; }
+.onboarding-horse-card:nth-child(2) { animation: scaleIn 0.2s 0.10s ease both; }
+.onboarding-horse-card:nth-child(3) { animation: scaleIn 0.2s 0.15s ease both; }
+.onboarding-horse-card:nth-child(4) { animation: scaleIn 0.2s 0.20s ease both; }
+
+/* Start button: пульс когда можно нажать */
+.start-button:not(:disabled) {
+  animation: pulseGlow 2.8s ease-in-out infinite;
+}
+
+/* Нажатие кнопок: scale down */
+.choice:active:not(:disabled),
+.mode-choice:active,
+.stable-card:active,
+.shop-buy-btn:active:not(:disabled),
+.listing-buy-btn:active:not(:disabled),
+.onboarding-horse-card:active {
+  transform: scale(0.97) translateY(0) !important;
+  transition-duration: 0.06s !important;
+}
+
+.start-button:active:not(:disabled) {
+  transform: scale(0.98);
+  transition: transform 0.06s;
+}
+
+.touch-button:active {
+  transform: scale(0.93) translateY(1px) !important;
+}
+
+/* Таб-кнопки: плавный переход цвета */
+.stable-tab-btn {
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+/* Прогрессбары: плавное заполнение */
+.stable-stat b,
+.horse-progress i > b,
+.stable-card-xp-fill,
+.onboarding-stat-bar {
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Auth панель: появляется плавно */
+.auth-panel {
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* Sync pill: иконка синхронизации крутится */
+.sync-pill svg {
+  transition: color 0.2s;
+}
+
+/* Reward: выезжает снизу */
+.match-reward {
+  animation: fadeInUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Профиль: аватар при ховере */
+.profile-avatar {
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.profile-strip:hover .profile-avatar {
+  transform: scale(1.08);
+}
+
+/* Счёт в HUD: pop при изменении */
+@keyframes scorePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* Убираем анимации для пользователей с prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
