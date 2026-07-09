@@ -6293,3 +6293,106 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
 .radar-center {
   stroke: rgba(220, 180, 90, 0.35);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   МОБИЛЬНЫЙ UX — улучшения
+   ════════════════════════════════════════════════════════════════ */
+
+/* Auth signed-in: убираем синюю рамку → янтарь */
+.auth-panel.signed-in {
+  border-color: rgba(37, 144, 208, 0.22);
+  background: rgba(24, 38, 56, 0.72);
+}
+.auth-panel.cloud {
+  border-color: rgba(37, 144, 208, 0.22);
+}
+
+/* Таб-кнопки: минимум 44px для пальца */
+.stable-tab-btn,
+.shop-tabs .stable-tab-btn {
+  min-height: 44px;
+}
+
+/* Чипы профиля: ограничить ширину чтобы не переполняли */
+.profile-strip {
+  row-gap: 6px;
+}
+.profile-chip {
+  flex-shrink: 0;
+}
+
+/* Кнопка старта: sticky + z-index чтобы не терялась при скролле */
+@media (max-width: 720px) {
+  .start-button {
+    position: sticky;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 10;
+    margin-top: 16px;
+  }
+
+  /* 3D сцена: меньше высота на маленьких экранах */
+  .horse-hero-scene {
+    height: 220px;
+  }
+
+  /* Чипы профиля: компактнее */
+  .profile-chip {
+    min-height: 28px;
+    padding: 0 7px;
+    font-size: 11px;
+  }
+
+  /* Карточка истории: нет overflow при узком экране */
+  .history-entry {
+    grid-template-columns: 20px 32px 1fr auto;
+  }
+
+  /* Маркетплейс и магазин: кнопки списка */
+  .horse-list-btn,
+  .shop-buy-btn,
+  .listing-buy-btn {
+    min-height: 36px;
+  }
+
+  /* Инвентарь: кнопки по горизонтали */
+  .inventory-item-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* Форма онбординга: крупнее инпуты */
+  .onboarding-input-group input {
+    min-height: 44px;
+    font-size: 16px; /* предотвращает зум на iOS */
+  }
+
+  /* Auth form: предотвратить зум на iOS */
+  .auth-gate-form input,
+  .rider-name-form input,
+  .horse-name-form input,
+  .horse-create-input,
+  .lobby-join-form input {
+    font-size: 16px;
+  }
+}
+
+/* Очень маленький экран (SE, 375px) */
+@media (max-width: 390px) {
+  .horse-hero-scene {
+    height: 190px;
+  }
+
+  .setup-head h1 {
+    font-size: 22px;
+  }
+
+  .profile-strip {
+    gap: 5px;
+  }
+
+  .stable-tab-btn {
+    font-size: 11px;
+    padding: 6px 6px;
+  }
+}
