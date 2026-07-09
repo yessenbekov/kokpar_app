@@ -5882,3 +5882,317 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
 .panel, .score {
   border-color: rgba(155, 120, 44, 0.28);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   МАГАЗИН — тёмная тема
+   ════════════════════════════════════════════════════════════════ */
+
+/* Текущая лошадь */
+.shop-current-horse {
+  background: rgba(62, 38, 12, 0.85);
+  border: 1px solid rgba(155, 120, 44, 0.2);
+  border-radius: 8px;
+  color: var(--ink-2);
+}
+.shop-current-horse strong { color: var(--ink); }
+
+/* Заголовок секции (Седло / Узда / ...) */
+.shop-section-title {
+  color: rgba(200, 158, 72, 0.7);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid rgba(155, 120, 44, 0.16);
+  padding-bottom: 5px;
+}
+
+/* Карточки товаров */
+.shop-item-card {
+  background: rgba(58, 36, 10, 0.96);
+  border-color: rgba(155, 120, 44, 0.2);
+}
+.shop-item-card:hover {
+  background: rgba(76, 48, 14, 0.98);
+  box-shadow: 0 4px 16px rgba(4, 2, 0, 0.55);
+}
+.shop-item-card.equipped {
+  background: rgba(72, 46, 10, 0.98);
+  border-color: rgba(200, 152, 48, 0.48);
+  box-shadow: inset 0 0 0 1px rgba(200, 152, 48, 0.18);
+}
+
+/* Tier-цвета для карточек в тёмной теме */
+.shop-item-card.tier-1 {
+  background: linear-gradient(to right, rgba(180, 130, 40, 0.14), rgba(58, 36, 10, 0.96));
+}
+.shop-item-card.tier-2 {
+  background: linear-gradient(to right, rgba(120, 160, 210, 0.12), rgba(58, 36, 10, 0.96));
+}
+.shop-item-card.tier-3 {
+  background: linear-gradient(to right, rgba(160, 110, 220, 0.12), rgba(58, 36, 10, 0.96));
+  box-shadow: 0 0 0 1px rgba(200, 152, 48, 0.2), var(--shadow-card);
+}
+
+/* Название товара */
+.shop-item-name { color: var(--ink); }
+
+/* Цена */
+.shop-item-price { color: #d4a830; font-weight: 900; }
+.shop-item-price svg { opacity: 0.75; }
+
+/* Кнопка купить — янтарь */
+.shop-buy-btn {
+  background: linear-gradient(to bottom, rgba(180, 130, 36, 0.28), rgba(140, 96, 18, 0.22));
+  border-color: rgba(200, 152, 48, 0.38);
+  color: #f0d070;
+  font-weight: 900;
+}
+.shop-buy-btn:hover:not(:disabled) {
+  background: linear-gradient(to bottom, rgba(200, 148, 40, 0.4), rgba(160, 110, 22, 0.34));
+  color: var(--ink);
+}
+.shop-buy-btn:disabled {
+  background: rgba(40, 24, 8, 0.55);
+  border-color: rgba(155, 120, 44, 0.18);
+  color: rgba(192, 152, 68, 0.3);
+}
+
+/* Значок "Надето" / "Имеется" */
+.equipped-badge {
+  background: rgba(40, 120, 72, 0.2);
+  border: 1px solid rgba(40, 160, 80, 0.3);
+  color: #5dba82;
+  font-size: 9.5px;
+}
+
+/* Карточка лошади в магазине */
+.shop-horse-card {
+  background: rgba(58, 36, 10, 0.96);
+  border-color: rgba(155, 120, 44, 0.2);
+}
+.shop-horse-info strong { color: var(--ink); }
+.shop-horse-role { color: var(--muted); font-size: 11px; }
+.shop-horse-desc { color: var(--muted); }
+
+/* Баланс монет */
+.shop-coin-balance {
+  background: linear-gradient(135deg, rgba(200, 148, 36, 0.22), rgba(200, 148, 36, 0.1));
+  border-color: rgba(200, 152, 48, 0.38);
+  color: #e0aa30;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ТОРГИ (Маркетплейс) — тёмная тема
+   ════════════════════════════════════════════════════════════════ */
+
+/* Карточка лота */
+.listing-card {
+  background: rgba(58, 36, 10, 0.96);
+  border-color: rgba(155, 120, 44, 0.2);
+  box-shadow: var(--shadow-card);
+}
+.listing-card:hover {
+  background: rgba(72, 44, 14, 0.98);
+  box-shadow: 0 6px 18px rgba(4, 2, 0, 0.5);
+}
+
+/* Текст карточки */
+.listing-card-name { color: var(--ink); font-size: 13px; }
+.listing-card-type { color: rgba(200, 158, 72, 0.6); }
+.listing-card-seller { color: var(--muted); }
+.listing-card-tier { color: #d4a830; }
+
+/* Цена лота */
+.listing-card-price { color: #d4a830; font-weight: 900; }
+.listing-card-price strong { color: #f0c347; font-size: 16px; }
+
+/* Кнопка "Купить" — зелёная (сохраняем как призыв к действию) */
+.listing-buy-btn {
+  background: linear-gradient(to bottom, #2a9d5c, #1a7a44);
+  border-color: rgba(30, 120, 60, 0.4);
+  color: #e0ffe8;
+  box-shadow: 0 2px 10px rgba(30, 120, 60, 0.25);
+}
+.listing-buy-btn:disabled {
+  background: rgba(40, 28, 10, 0.65);
+  border-color: rgba(155, 120, 44, 0.18);
+  color: rgba(192, 152, 68, 0.35);
+  font-size: 10px;
+}
+
+/* Подтверждение покупки */
+.listing-confirm-row span { color: var(--ink-2); }
+.listing-confirm-yes {
+  background: linear-gradient(to bottom, #2a9d5c, #1a7a44);
+  border-color: rgba(30, 120, 60, 0.4);
+  color: #e0ffe8;
+}
+.listing-confirm-no {
+  background: rgba(58, 36, 10, 0.9);
+  border-color: rgba(155, 120, 44, 0.24);
+  color: var(--muted);
+}
+
+/* Кнопка "Снять с торгов" */
+.listing-cancel-btn {
+  background: rgba(80, 24, 14, 0.55);
+  border-color: rgba(200, 60, 40, 0.28);
+  color: rgba(240, 120, 90, 0.85);
+}
+.listing-cancel-btn:hover:not(:disabled) {
+  background: rgba(100, 28, 16, 0.72);
+  color: #ff9070;
+}
+
+/* Кнопка "Выставить" в модале */
+.listing-submit-btn {
+  background: linear-gradient(to bottom, #c8902c, #9a5e0e);
+  border-color: rgba(160, 110, 20, 0.45);
+  color: #f4e2b4;
+  font-weight: 700;
+  box-shadow: 0 3px 14px rgba(180, 118, 16, 0.28);
+}
+.listing-submit-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.listing-submit-btn:disabled {
+  background: rgba(40, 24, 8, 0.6);
+  color: rgba(192, 152, 68, 0.35);
+}
+
+/* Ошибка покупки */
+.listing-buy-error { color: var(--red-2); }
+
+/* Баланс на торгах */
+.marketplace-balance {
+  background: linear-gradient(135deg, rgba(200, 148, 36, 0.2), rgba(200, 148, 36, 0.08));
+  border-color: rgba(200, 152, 48, 0.36);
+  color: #e0aa30;
+}
+.marketplace-balance strong { color: #f0c347; font-size: 18px; }
+.marketplace-balance-label { color: var(--muted); font-size: 11px; }
+
+/* ════════════════════════════════════════════════════════════════
+   HUD В ИГРЕ — улучшения
+   ════════════════════════════════════════════════════════════════ */
+
+/* Панели HUD */
+.panel {
+  background: rgba(42, 24, 6, 0.94);
+  border-color: rgba(155, 120, 44, 0.3);
+  box-shadow: 0 8px 32px rgba(2, 1, 0, 0.72), 0 0 0 1px rgba(155, 120, 44, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Таймер крупнее */
+.panel .status {
+  font-size: 24px;
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Дорожка стамины — видимая */
+.meter {
+  background: rgba(155, 120, 44, 0.2);
+  height: 10px;
+}
+
+/* Стамина: зелёно-золотой градиент */
+.meter i {
+  background: linear-gradient(90deg, #2a9d5c, #d4a830);
+}
+
+/* Дорожка броска */
+.throw-meter { background: rgba(40, 28, 10, 0.35); }
+.throw-meter i { background: linear-gradient(90deg, #2590d0, #f0c347, #e04535); }
+
+/* Дорожка борьбы */
+.tug-meter {
+  background: linear-gradient(90deg,
+    rgba(37, 144, 208, 0.3), rgba(60, 36, 10, 0.2) 48%,
+    rgba(60, 36, 10, 0.2) 52%, rgba(224, 69, 53, 0.3));
+}
+.tug-meter i { background: rgba(240, 195, 71, 0.55); }
+
+/* Индикатор силового приёма */
+.check-indicator {
+  border-color: rgba(155, 120, 44, 0.28);
+  background: rgba(42, 26, 8, 0.65);
+  color: rgba(192, 152, 68, 0.4);
+  border-radius: 7px;
+  width: 24px;
+  height: 24px;
+}
+.check-indicator.ready {
+  border-color: rgba(37, 144, 208, 0.55);
+  color: var(--blue-2);
+  background: rgba(14, 50, 88, 0.4);
+}
+.check-indicator.active {
+  border-color: #d4a830;
+  color: #1c1008;
+  background: linear-gradient(to bottom, #f0c347, #d4890e);
+  box-shadow: 0 0 8px rgba(200, 148, 30, 0.6);
+}
+
+/* Счёт — команды */
+.score b {
+  color: rgba(200, 158, 72, 0.55);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Иконки действий в HUD */
+.icon-button {
+  background: rgba(42, 24, 6, 0.92);
+  border-color: rgba(155, 120, 44, 0.28);
+  color: rgba(200, 158, 72, 0.75);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(2, 1, 0, 0.55);
+}
+.icon-button:hover {
+  background: rgba(72, 44, 12, 0.98);
+  color: #f0c347;
+  box-shadow: 0 4px 18px rgba(2, 1, 0, 0.65);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   НАСТРОЙКИ МАТЧА (MatchSetup нижняя часть)
+   ════════════════════════════════════════════════════════════════ */
+
+/* Команды: синие */
+.choice.team-blue.active {
+  border-color: rgba(37, 144, 208, 0.65);
+  background: rgba(14, 40, 72, 0.88);
+  box-shadow: 0 0 0 1px rgba(37, 144, 208, 0.22), 0 0 18px rgba(37, 144, 208, 0.12);
+  color: rgba(170, 210, 255, 0.95);
+}
+/* Команды: красные */
+.choice.team-red.active {
+  border-color: rgba(200, 50, 40, 0.65);
+  background: rgba(70, 14, 10, 0.88);
+  box-shadow: 0 0 0 1px rgba(200, 50, 40, 0.22), 0 0 18px rgba(200, 50, 40, 0.12);
+  color: rgba(255, 175, 165, 0.95);
+}
+
+/* Кнопка "Начать игру" — крупнее, ярче */
+.start-button {
+  background: linear-gradient(to bottom, #e8a830, #b86808);
+  border-color: rgba(120, 72, 6, 0.5);
+  color: #1c0e02;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 6px 28px rgba(200, 140, 18, 0.48), inset 0 1px 0 rgba(255, 228, 100, 0.32);
+  text-shadow: 0 1px 2px rgba(100, 50, 0, 0.35);
+}
+.start-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #f0b838, #cc7a10);
+  box-shadow: 0 8px 36px rgba(220, 158, 22, 0.6), inset 0 1px 0 rgba(255, 228, 100, 0.38);
+}
