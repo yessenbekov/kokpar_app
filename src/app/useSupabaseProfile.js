@@ -448,11 +448,23 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
 
   const needsOnboarding = authState.needsOnboarding ?? false;
 
+  async function signInWithGoogle() {
+    if (!supabase) {
+      setAuthState({ ...signedOutState, status: "unconfigured", syncStatus: "error", error: "Supabase не настроен" });
+      return;
+    }
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin }
+    });
+  }
+
   return {
     authState,
     needsOnboarding,
     completeOnboarding,
     signInWithPassword,
+    signInWithGoogle,
     signUp,
     resetPassword,
     signInWithEmail,

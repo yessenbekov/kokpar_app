@@ -6546,3 +6546,41 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   GOOGLE SIGN-IN BUTTON
+   ════════════════════════════════════════════════════════════════ */
+
+.google-signin-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid rgba(155, 118, 42, 0.28);
+  border-radius: var(--r);
+  background: rgba(52, 32, 10, 0.88);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.google-signin-button:hover:not(:disabled) {
+  background: rgba(70, 44, 14, 0.98);
+  border-color: rgba(200, 152, 48, 0.45);
+  color: var(--ink);
+}
+
+.google-signin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.google-signin-button svg {
+  flex-shrink: 0;
+}

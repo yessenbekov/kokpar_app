@@ -38,7 +38,7 @@ export default function App() {
   const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
   const [matchReward, setMatchReward] = useState(null);
   const [syncStatus, setSyncStatus] = useState("idle");
-  const { authState, needsOnboarding, completeOnboarding, signInWithPassword, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({
+  const { authState, needsOnboarding, completeOnboarding, signInWithPassword, signInWithGoogle, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({
     onProfileLoaded: loadSyncedProfile
   });
 
@@ -535,6 +535,7 @@ export default function App() {
         <AuthGate
           auth={authState}
           onPasswordSignIn={signInWithPassword}
+          onGoogleSignIn={signInWithGoogle}
           onSignUp={signUp}
           onResetPassword={resetPassword}
           onEmailSignIn={signInWithEmail}
