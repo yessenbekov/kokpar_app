@@ -110,6 +110,34 @@ export function createPlayerGroundMarker() {
   return group;
 }
 
+export function createPlayerArrowMarker() {
+  const group = new THREE.Group();
+
+  const mat = new THREE.MeshBasicMaterial({
+    color: "#3dff6e",
+    transparent: true,
+    opacity: 0.92,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  // Shaft
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.52, 10), mat.clone());
+  shaft.position.y = 0.26;
+  group.add(shaft);
+
+  // Arrowhead pointing down
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.38, 12), mat.clone());
+  head.rotation.z = Math.PI;
+  head.position.y = -0.05;
+  group.add(head);
+
+  group.visible = false;
+  group.renderOrder = 15;
+  group.userData.parts = [shaft, head];
+  return group;
+}
+
 export function createMountedTensionGuide() {
   const group = new THREE.Group();
   const shaftMaterial = new THREE.MeshBasicMaterial({

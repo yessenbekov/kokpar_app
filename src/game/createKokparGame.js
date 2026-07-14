@@ -21,6 +21,7 @@ import {
   createBodyCheckImpactMarker,
   createContestRiderMarker,
   createMountedTensionGuide,
+  createPlayerArrowMarker,
   createPlayerGroundMarker,
   createRiderRoleMarker
 } from "./visualIndicators.js";
@@ -338,6 +339,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (rider.human) {
       rider.groundMarker = createPlayerGroundMarker();
       scene.add(rider.groundMarker);
+      rider.arrowMarker = createPlayerArrowMarker();
+      scene.add(rider.arrowMarker);
     }
   });
 
@@ -1971,6 +1974,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
         rider.groundMarker.scale.setScalar(pulse);
         rider.groundMarker.userData.ring.material.opacity = 0.52 + Math.sin(time * 4.5) * 0.12;
         rider.groundMarker.userData.disc.material.opacity = 0.22 + Math.sin(time * 4.5 + 1) * 0.08;
+      }
+
+      if (rider.arrowMarker) {
+        const bob = Math.sin(time * 3.2) * 0.18;
+        rider.arrowMarker.visible = true;
+        rider.arrowMarker.position.set(rider.x, 5.6 + bob, rider.z);
+        rider.arrowMarker.quaternion.copy(camera.quaternion);
+        const opacity = 0.82 + Math.sin(time * 3.2) * 0.12;
+        rider.arrowMarker.userData.parts.forEach((m) => {
+          m.material.opacity = opacity;
+        });
       }
     });
 
