@@ -1,4 +1,5 @@
 import { TEAM } from "./constants.js";
+import { clamp, distance2D, forwardVector, normalize2D } from "./mathUtils.js";
 
 const TACKLE_DROP_THRESHOLD = 0.94;
 const TACKLE_MOUNTED_CONTEST_THRESHOLD = 0.36;
@@ -19,23 +20,6 @@ export const BODY_CHECK_WINDUP_SECONDS = 0.14;
 export const BODY_CHECK_WINDOW_SECONDS = 0.4;
 export const BODY_CHECK_COOLDOWN_SECONDS = 1.45;
 export const TEAM_GUARD_RADIUS = 15;
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function distance2D(a, b) {
-  return Math.hypot(a.x - b.x, a.z - b.z);
-}
-
-function normalize2D(x, z) {
-  const length = Math.hypot(x, z) || 1;
-  return { x: x / length, z: z / length };
-}
-
-function forwardVector(rider) {
-  return { x: Math.cos(rider.rotation), z: Math.sin(rider.rotation) };
-}
 
 export function createContactSystem({
   riders,
