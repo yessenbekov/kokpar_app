@@ -197,6 +197,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     horseCoatId: typeof options.horseCoatId === "string" ? options.horseCoatId : null,
     onMatchEvent: typeof options.onMatchEvent === "function" ? options.onMatchEvent : null
   };
+  const isTraining = options.modeId === "training";
   const isOnline = Boolean(options.onlineMatchId);
   const isOnlineGuest = isOnline && options.onlineIsHost === false;
   const isSpectator = options.teamSide === "spectator";
@@ -468,7 +469,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const match = {
     blue: 0,
     red: 0,
-    time: gameSettings.matchSeconds,
+    time: isTraining ? 0 : gameSettings.matchSeconds,
     over: false,
     phase: "countdown",
     countdown: ROUND_COUNTDOWN_SECONDS,
@@ -676,7 +677,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     assetsLoaded = true;
     resetPositions();
-    beginCountdown("На старт", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
+    beginCountdown(
+      isTraining ? "Тренировка" : "На старт",
+      isTraining ? "Свободный заезд. Отрабатывай подборы и броски." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
+    );
     updateStadiumPresentation();
     publishHud(true);
   });
@@ -900,14 +904,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
     const opponentTeamScore = match[player.team === TEAM.blue ? TEAM.red : TEAM.blue];
     const gap = playerTeamScore - opponentTeamScore;
 
-    if (match.time < 30 && !match.announcedFinal30) {
+    if (!isTraining && match.time < 30 && !match.announcedFinal30) {
       match.announcedFinal30 = true;
       const scoreText = gap > 0 ? `Ведём ${playerTeamScore}:${opponentTeamScore}.` : gap < 0 ? `Проигрываем ${playerTeamScore}:${opponentTeamScore}.` : `Равно ${playerTeamScore}:${opponentTeamScore}.`;
       showMessage("Последние 30 секунд!", `${scoreText} Всё решается сейчас.`, 2.2);
       return;
     }
 
-    if (match.time < 10 && !match.announcedFinal10) {
+    if (!isTraining && match.time < 10 && !match.announcedFinal10) {
       match.announcedFinal10 = true;
       showMessage(gap < 0 ? "Нужен гол!" : gap === 0 ? "Нужен решающий!" : "Удержим победу!", "Финальный свисток рядом.", 1.8);
       return;
@@ -1339,10 +1343,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function finishGoalCelebration() {
     const goalTeam = match.goalTeam;
     resetPositions();
-    beginCountdown(
-      goalTeam === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
-      `Серке заброшен в ${targetName()}. Новый розыгрыш после свистка.`
-    );
+    if (isTraining) {
+      startRound();
+    } else {
+      beginCountdown(
+        goalTeam === TEAM.blue ? "Гол! Синие забили" : "Гол! Красные забили",
+        `Серке заброшен в ${targetName()}. Новый розыгрыш после свистка.`
+      );
+    }
   }
 
   function updateGoalCelebration(dt) {
@@ -1385,7 +1393,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   function restart() {
     match.blue = 0;
     match.red = 0;
-    match.time = gameSettings.matchSeconds;
+    match.time = isTraining ? 0 : gameSettings.matchSeconds;
     match.over = false;
     match.startedEventSent = false;
     match.finishEventSent = false;
@@ -1395,9 +1403,12 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.announcedFinal10 = false;
     match.breakawayCooldown = 0;
     match.lastPlayerTeamScore = 0;
-    match.lastCountdownInt = gameSettings.matchSeconds;
+    match.lastCountdownInt = isTraining ? 0 : gameSettings.matchSeconds;
     resetPositions();
-    beginCountdown("Новый матч", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
+    beginCountdown(
+      isTraining ? "Тренировка" : "Новый матч",
+      isTraining ? "Свободный заезд. Отрабатывай подборы и броски." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
+    );
   }
 
 
@@ -2199,23 +2210,26 @@ export function createKokparGame(container, onHudChange, options = {}) {
       } else if (match.phase === "goal") {
         updateGoalCelebration(dt);
       } else {
-        match.time -= dt;
-        updateThrowCharge(dt);
-
-        if (match.time <= 0) {
-          match.time = 0;
-          match.over = true;
-          const winner = match.blue === match.red ? "Ничья" : match.blue > match.red ? "Синие победили" : "Красные победили";
-          if (!match.finishEventSent) {
-            match.finishEventSent = true;
-            emitMatchEvent("match_finished", {
-              winner,
-              playerGoals: match.playerGoals,
-              playerSteals: match.playerSteals
-            });
+        if (isTraining) {
+          match.time += dt;
+        } else {
+          match.time -= dt;
+          if (match.time <= 0) {
+            match.time = 0;
+            match.over = true;
+            const winner = match.blue === match.red ? "Ничья" : match.blue > match.red ? "Синие победили" : "Красные победили";
+            if (!match.finishEventSent) {
+              match.finishEventSent = true;
+              emitMatchEvent("match_finished", {
+                winner,
+                playerGoals: match.playerGoals,
+                playerSteals: match.playerSteals
+              });
+            }
+            showMessage(winner, "Можно начать новый матч.", 999);
           }
-          showMessage(winner, "Можно начать новый матч.", 999);
         }
+        updateThrowCharge(dt);
 
         updateRiderMovement(dt, time);
         contactSystem.resolveRiderCollisions();

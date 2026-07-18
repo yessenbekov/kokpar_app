@@ -16,7 +16,7 @@ export function MatchHud({
   return (
     <section className="hud" aria-label="Match status">
       <div className="panel">
-        <p className="label">Матч</p>
+        <p className="label">{settings.modeId === "training" ? "Тренировка" : "Матч"}</p>
         <p className="status">{hud.timer}</p>
         <p className="small">{settings.teamSize}×{settings.teamSize} · {goalLabel}</p>
       </div>
