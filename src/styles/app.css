@@ -6747,3 +6747,24 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
 .match-result-btn--primary:hover {
   background: linear-gradient(135deg, #d99830 0%, #f0bc38 100%);
 }
+
+/* ── HUD restart confirmation buttons ──────────────────────────────────── */
+.icon-button--confirm {
+  color: #6ddc7a;
+  border-color: rgba(80, 200, 100, 0.4) !important;
+}
+
+.icon-button--confirm:hover {
+  background: rgba(40, 120, 55, 0.55) !important;
+  color: #8ef79a !important;
+}
+
+.icon-button--cancel {
+  color: #e07060;
+  border-color: rgba(200, 80, 60, 0.4) !important;
+}
+
+.icon-button--cancel:hover {
+  background: rgba(120, 40, 30, 0.55) !important;
+  color: #f09080 !important;
+}

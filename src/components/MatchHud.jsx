@@ -1,4 +1,5 @@
-import { Camera, RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Camera, Check, RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX, X } from "lucide-react";
 
 export function MatchHud({
   settings,
@@ -12,6 +13,13 @@ export function MatchHud({
   const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
   const meterMode = hud.throwPower > 0 ? "throw" : hud.mountedContest ? "tug" : "stamina";
   const activeMeterValue = meterMode === "throw" ? hud.throwPower : meterMode === "tug" ? hud.tugPower : hud.stamina;
+  const [confirmRestart, setConfirmRestart] = useState(false);
+
+  useEffect(() => {
+    if (!confirmRestart) return;
+    const t = setTimeout(() => setConfirmRestart(false), 4000);
+    return () => clearTimeout(t);
+  }, [confirmRestart]);
 
   return (
     <section className="hud" aria-label="Match status">
@@ -65,15 +73,38 @@ export function MatchHud({
           <Camera size={18} strokeWidth={2.4} />
         </button>
 
-        <button
-          className="icon-button"
-          type="button"
-          aria-label="Начать новый матч"
-          title="Начать новый матч"
-          onClick={onRestart}
-        >
-          <RotateCcw size={18} strokeWidth={2.4} />
-        </button>
+        {confirmRestart ? (
+          <>
+            <button
+              className="icon-button icon-button--confirm"
+              type="button"
+              aria-label="Подтвердить рестарт"
+              title="Да, начать заново"
+              onClick={() => { setConfirmRestart(false); onRestart(); }}
+            >
+              <Check size={18} strokeWidth={2.6} />
+            </button>
+            <button
+              className="icon-button icon-button--cancel"
+              type="button"
+              aria-label="Отмена"
+              title="Отмена"
+              onClick={() => setConfirmRestart(false)}
+            >
+              <X size={18} strokeWidth={2.6} />
+            </button>
+          </>
+        ) : (
+          <button
+            className="icon-button"
+            type="button"
+            aria-label="Начать новый матч"
+            title="Начать новый матч"
+            onClick={() => setConfirmRestart(true)}
+          >
+            <RotateCcw size={18} strokeWidth={2.4} />
+          </button>
+        )}
 
         <button
           className="icon-button"
