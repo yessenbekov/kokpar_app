@@ -875,7 +875,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function updateMatchCommentary() {
-    if (match.over || match.phase !== "active" || match.messageTime > 0.4) return;
+    if (match.over || match.phase !== "live" || match.messageTime > 0.4) return;
 
     const playerTeamScore = match[player.team];
     const opponentTeamScore = match[player.team === TEAM.blue ? TEAM.red : TEAM.blue];
@@ -1065,6 +1065,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       rider.z = STARTING_RIDER_SPOTS[index][1];
       rider.vx = 0;
       rider.vz = 0;
+      rider.stamina = 1;
       rider.lean = 0;
       rider.staggerTime = 0;
       rider.hitFlash = 0;
@@ -1369,6 +1370,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.over = false;
     match.startedEventSent = false;
     match.finishEventSent = false;
+    match.playerGoals = 0;
+    match.playerSteals = 0;
+    match.announcedFinal30 = false;
+    match.announcedFinal10 = false;
+    match.breakawayCooldown = 0;
+    match.lastPlayerTeamScore = 0;
+    match.lastCountdownInt = gameSettings.matchSeconds;
     resetPositions();
     beginCountdown("Новый матч", "Серке лежит на дальней стороне поля. Двигайся в своей зоне.");
   }
@@ -1992,7 +2000,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     const carriedHeight = kokpar.holder ? CARRIED_SERKE_HEIGHT + Math.sin(time * 8.5) * 0.06 : kokpar.y;
     kokpar.mesh.position.set(kokpar.x, carriedHeight, kokpar.z);
-    kokpar.mesh.rotation.y += 0.02 + Math.hypot(kokpar.vx, kokpar.vz) * (kokpar.holder ? 0.001 : 0.002);
+    kokpar.mesh.rotation.y += (1.2 + Math.hypot(kokpar.vx, kokpar.vz) * (kokpar.holder ? 0.06 : 0.12)) * dt;
     kokpar.mesh.rotation.x = kokpar.holder
       ? -0.2 + Math.sin(time * 6) * 0.08
       : kokpar.flightTeam

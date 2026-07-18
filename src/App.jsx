@@ -294,8 +294,8 @@ export default function App() {
         record: {
           matches: (horse.record?.matches ?? 0) + 1,
           wins: (horse.record?.wins ?? 0) + (playerWon ? 1 : 0),
-          goals: horse.record?.goals ?? 0,
-          steals: horse.record?.steals ?? 0
+          goals: (horse.record?.goals ?? 0) + (event.playerGoals ?? 0),
+          steals: (horse.record?.steals ?? 0) + (event.playerSteals ?? 0)
         }
       };
     });
