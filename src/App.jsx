@@ -233,7 +233,8 @@ export default function App() {
           goalType: nextSettings.goalType,
           teamSize: nextSettings.teamSize,
           matchMinutes: nextSettings.matchMinutes,
-          teamSide: nextSettings.teamSide
+          teamSide: nextSettings.teamSide,
+          difficulty: nextSettings.difficulty
         }
       })
     );

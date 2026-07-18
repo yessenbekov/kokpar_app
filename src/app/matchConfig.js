@@ -8,7 +8,8 @@ export const DEFAULT_SETTINGS = {
   teamSize: 3,
   matchMinutes: 2,
   horseType: DEFAULT_HORSE_TYPE_ID,
-  teamSide: "blue"
+  teamSide: "blue",
+  difficulty: "normal"
 };
 
 function formatTimer(minutes) {
@@ -34,7 +35,8 @@ export function settingsFromProfile(profile = {}) {
     equipment: selectedHorse.equipment ?? {},
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
-    teamSide: preferences.teamSide === "red" ? "red" : "blue"
+    teamSide: preferences.teamSide === "red" ? "red" : "blue",
+    difficulty: ["easy", "normal", "hard"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty
   };
 }
 
@@ -105,7 +107,8 @@ export function readUrlSettings(profile) {
     equipment: selectedHorse.equipment ?? {},
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
-    teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide
+    teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide,
+    difficulty: ["easy", "normal", "hard"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty
   };
 }
 

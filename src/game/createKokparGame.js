@@ -120,7 +120,7 @@ const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", 
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
 const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null, aiSpeedScale = 1, aiAccelScale = 1) {
   const riders = [];
   const size = clamp(Math.round(teamSize), 1, 5);
 
@@ -140,7 +140,9 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         color: blueIsPlayer ? COLORS.blue : COLORS.blueAlt,
         horseType: blueIsPlayer ? playerHorseType : AI_HORSE_ROTATION[i],
         horseName: blueIsPlayer ? playerHorseName : null,
-        coatId: blueIsPlayer ? playerCoatId : null
+        coatId: blueIsPlayer ? playerCoatId : null,
+        aiSpeedScale: blueIsPlayer ? 1 : aiSpeedScale,
+        aiAccelScale: blueIsPlayer ? 1 : aiAccelScale
       })
     );
 
@@ -154,7 +156,9 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         color: COLORS.red,
         horseType: redIsPlayer ? playerHorseType : AI_HORSE_ROTATION[(i + 1) % AI_HORSE_ROTATION.length],
         horseName: redIsPlayer ? playerHorseName : null,
-        coatId: redIsPlayer ? playerCoatId : null
+        coatId: redIsPlayer ? playerCoatId : null,
+        aiSpeedScale: redIsPlayer ? 1 : aiSpeedScale,
+        aiAccelScale: redIsPlayer ? 1 : aiAccelScale
       })
     );
   }
@@ -176,6 +180,14 @@ function distanceFromCenter(point) {
 }
 
 export function createKokparGame(container, onHudChange, options = {}) {
+  const DIFFICULTY_PRESETS = {
+    easy:   { urgencyScale: 0.70, wanderScale: 1.85, speedScale: 0.87, accelScale: 0.84, bodyCheckDist: 4.5, throwBase: 0.54, throwStam: 0.12, passRadius: 13 },
+    normal: { urgencyScale: 1.0,  wanderScale: 1.0,  speedScale: 1.0,  accelScale: 1.0,  bodyCheckDist: 6.3, throwBase: 0.74, throwStam: 0.18, passRadius: 8.5 },
+    hard:   { urgencyScale: 1.18, wanderScale: 0.52, speedScale: 1.10, accelScale: 1.08, bodyCheckDist: 8.2, throwBase: 0.88, throwStam: 0.22, passRadius: 6.0 }
+  };
+  const difficultyKey = ["easy", "normal", "hard"].includes(options.difficulty) ? options.difficulty : "normal";
+  const difficulty = DIFFICULTY_PRESETS[difficultyKey];
+
   const gameSettings = {
     goalType: options.goalType === "kazan" ? "kazan" : "circle",
     teamSize: clamp(Math.round(Number(options.teamSize) || 3), 1, 5),
@@ -294,7 +306,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale);
   const player = riders.find(r => r.human) ?? riders[0];
 
   // Apply equipment bonuses to the human player's stats
@@ -561,7 +573,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
     riders,
     kokpar,
     scoringGoalFor,
-    opponentTeam
+    opponentTeam,
+    difficultyUrgencyScale: difficulty.urgencyScale,
+    difficultyWanderScale: difficulty.wanderScale
   });
 
   const {
@@ -621,7 +635,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     STARTING_RIDER_SPOTS,
     showMessage,
     remoteRider,
-    getRemoteRiderInput
+    getRemoteRiderInput,
+    aiDifficulty: difficulty
   });
 
   const {

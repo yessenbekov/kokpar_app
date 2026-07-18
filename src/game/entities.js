@@ -5,9 +5,11 @@ import { DEFAULT_HORSE_TYPE_ID, coatPresetById, horseTypeById } from "./horseTyp
 export function createRider(config) {
   const horseType = horseTypeById(config.horseType);
   const stats = horseType.stats;
-  const baseMaxSpeed = config.human ? 19.5 : 18;
-  const baseAcceleration = config.human ? 27 : 24;
-  const baseBrakePower = config.human ? 44 : 38;
+  const aiSpeedScale = config.human ? 1 : (config.aiSpeedScale ?? 1);
+  const aiAccelScale = config.human ? 1 : (config.aiAccelScale ?? 1);
+  const baseMaxSpeed = config.human ? 19.5 : 18 * aiSpeedScale;
+  const baseAcceleration = config.human ? 27 : 24 * aiAccelScale;
+  const baseBrakePower = config.human ? 44 : 38 * aiAccelScale;
   const baseTurnRate = config.human ? 4.15 : 3.25;
   const baseLateralGrip = config.human ? 9.2 : 7.4;
 

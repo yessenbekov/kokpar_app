@@ -13,7 +13,9 @@ export function createAISystem({
   riders,
   kokpar,
   scoringGoalFor,
-  opponentTeam
+  opponentTeam,
+  difficultyUrgencyScale = 1,
+  difficultyWanderScale = 1
 }) {
   function ridersForTeam(team) {
     return riders.filter((rider) => rider.team === team);
@@ -172,7 +174,15 @@ export function createAISystem({
     return clampFieldTarget(offsetPoint(base, protectedPoint, side));
   }
 
-  function chooseAITarget(rider) {
+  function applyDifficulty(plan) {
+    return {
+      ...plan,
+      urgency: plan.urgency * difficultyUrgencyScale,
+      wander: plan.wander * difficultyWanderScale
+    };
+  }
+
+  function chooseAITargetRaw(rider) {
     const teammates = ridersForTeam(rider.team);
     const opponents = ridersForTeam(opponentTeam(rider.team));
     const aiTeammates = teammates.filter((teammate) => !teammate.human);
@@ -328,6 +338,10 @@ export function createAISystem({
       closeRadius: 5.5,
       wander: 1.8
     };
+  }
+
+  function chooseAITarget(rider) {
+    return applyDifficulty(chooseAITargetRaw(rider));
   }
 
   return {

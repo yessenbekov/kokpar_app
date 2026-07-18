@@ -32,8 +32,13 @@ export function createRiderMovement({
   keepRiderOutsideKazanGoals,
   STARTING_RIDER_SPOTS,
   remoteRider,
-  getRemoteRiderInput
+  getRemoteRiderInput,
+  aiDifficulty = {}
 }) {
+  const AI_BODY_CHECK_DIST = aiDifficulty.bodyCheckDist ?? 6.3;
+  const AI_THROW_BASE = aiDifficulty.throwBase ?? 0.74;
+  const AI_THROW_STAM = aiDifficulty.throwStam ?? 0.18;
+  const AI_PASS_THREAT_DIST = aiDifficulty.passRadius ?? AI_PASS_THREAT_RADIUS;
   function updateRiderActionPoses(rider, dt) {
     rider.pickupPose = Math.max(0, (rider.pickupPose ?? 0) - dt * PICKUP_POSE_DECAY);
     rider.pullPose = Math.max(0, (rider.pullPose ?? 0) - dt * PULL_POSE_DECAY);
@@ -256,11 +261,11 @@ export function createRiderMovement({
     rider.aiRole = plan.role;
 
     if (kokpar.holder === rider) {
-      if (canThrowAtTarget(rider) && attemptThrow(rider, false, 0.74 + rider.stamina * 0.18)) return;
+      if (canThrowAtTarget(rider) && attemptThrow(rider, false, AI_THROW_BASE + rider.stamina * AI_THROW_STAM)) return;
 
       if (attemptPass && rider.throwCooldown <= 0) {
         const isUnderThreat = riders.some(
-          (r) => r.team !== rider.team && distance2D(r, rider) < AI_PASS_THREAT_RADIUS
+          (r) => r.team !== rider.team && distance2D(r, rider) < AI_PASS_THREAT_DIST
         );
         if (isUnderThreat && attemptPass(rider)) {
           rider.throwCooldown = 2.0;
@@ -292,7 +297,7 @@ export function createRiderMovement({
       plan.role === "tackler" &&
       kokpar.holder &&
       kokpar.holder.team !== rider.team &&
-      Math.hypot(rider.x - kokpar.holder.x, rider.z - kokpar.holder.z) < 6.3 &&
+      Math.hypot(rider.x - kokpar.holder.x, rider.z - kokpar.holder.z) < AI_BODY_CHECK_DIST &&
       Math.hypot(rider.vx, rider.vz) > 3.5
     ) {
       contactSystem.startBodyCheck(rider);

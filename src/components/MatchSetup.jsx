@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, Users, X, Zap } from "lucide-react";
 import { gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { Marketplace } from "./Marketplace.jsx";
@@ -405,6 +405,30 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   onClick={() => onSettingChange("matchMinutes", minutes)}
                 >
                   <strong>{minutes}:00</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="setting-group" aria-label="Сложность">
+            <div className="setting-title">
+              <Zap size={17} strokeWidth={2.4} />
+              <span>Сложность</span>
+            </div>
+            <div className="choice-grid three">
+              {[
+                { id: "easy",   label: "Новичок", sub: "ИИ слабый" },
+                { id: "normal", label: "Нормально", sub: "Стандарт" },
+                { id: "hard",   label: "Батыр",   sub: "ИИ сильный" }
+              ].map(({ id, label, sub }) => (
+                <button
+                  className={(settings.difficulty ?? "normal") === id ? "choice active" : "choice"}
+                  type="button"
+                  key={id}
+                  onClick={() => onSettingChange("difficulty", id)}
+                >
+                  <strong>{label}</strong>
+                  <span>{sub}</span>
                 </button>
               ))}
             </div>
