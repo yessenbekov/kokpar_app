@@ -286,7 +286,13 @@ export default function App() {
         xpGain,
         leveledUp: levelsGained > 0,
         newLevel: horse.level + levelsGained,
-        horseName: horse.name
+        horseName: horse.name,
+        won: playerWon,
+        scoreBlue: event.score.blue,
+        scoreRed: event.score.red,
+        playerGoals: event.playerGoals ?? 0,
+        playerSteals: event.playerSteals ?? 0,
+        teamSide
       };
 
       return {
@@ -606,7 +612,11 @@ export default function App() {
         </div>
       )}
 
-      <MatchReward reward={matchReward} onDismiss={() => setMatchReward(null)} />
+      <MatchReward
+        reward={matchReward}
+        onRestart={() => { gameRef.current?.restart(); setMatchReward(null); }}
+        onLobby={() => { openSettings(); setMatchReward(null); }}
+      />
 
       {activeSettings?.onlineMatchId && (
         <div className={`sync-badge sync-badge--${syncStatus}`}>
