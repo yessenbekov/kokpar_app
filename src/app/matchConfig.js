@@ -32,6 +32,8 @@ export function settingsFromProfile(profile = {}) {
     horseName: selectedHorse.name,
     horseCoatId: coatPresetById(selectedHorse.coatId ?? horseTypeById(selectedHorse.typeId).defaultCoatId).id,
     equipment: selectedHorse.equipment ?? {},
+    horseLevel: selectedHorse.level ?? 1,
+    horseBond: selectedHorse.bond ?? 0,
     teamSide: preferences.teamSide === "red" ? "red" : "blue"
   };
 }
@@ -101,6 +103,8 @@ export function readUrlSettings(profile) {
     horseName: selectedHorse.name,
     horseCoatId: coatPresetById(selectedHorse.coatId ?? horseTypeById(selectedHorse.typeId).defaultCoatId).id,
     equipment: selectedHorse.equipment ?? {},
+    horseLevel: selectedHorse.level ?? 1,
+    horseBond: selectedHorse.bond ?? 0,
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide
   };
 }

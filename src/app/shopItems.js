@@ -157,6 +157,38 @@ export function itemById(id) {
  * Returns a new stats object with all bonuses applied additively.
  * For staminaDrain, a negative bonus correctly reduces the drain multiplier.
  */
+/**
+ * Apply horse level and bond bonuses on top of a stats object.
+ * Level 1 = baseline. Each level above 1 (up to level 10) adds small buffs.
+ * Bond tiers (0-19 / 20-49 / 50-79 / 80-100) unlock stamina and stability perks.
+ */
+export function applyHorseProgression(stats, level = 1, bond = 0) {
+  const result = { ...stats };
+
+  // Level bonus: capped at +9 levels of progression (level 10 = max)
+  const lvl = Math.min(Math.max(Math.floor(level), 1), 10) - 1;
+  if (lvl > 0) {
+    result.speed           = result.speed           + lvl * 0.008;
+    result.acceleration    = result.acceleration    + lvl * 0.007;
+    result.contestPower    = result.contestPower    + lvl * 0.006;
+    result.staminaDrain    = Math.max(0.3, result.staminaDrain - lvl * 0.006);
+  }
+
+  // Bond bonus: tiered
+  if (bond >= 80) {
+    result.staminaRecovery = result.staminaRecovery + 0.03;
+    result.stability       = result.stability       + 0.015;
+    result.contestPower    = result.contestPower    + 0.01;
+  } else if (bond >= 50) {
+    result.staminaRecovery = result.staminaRecovery + 0.02;
+    result.stability       = result.stability       + 0.01;
+  } else if (bond >= 20) {
+    result.staminaRecovery = result.staminaRecovery + 0.01;
+  }
+
+  return result;
+}
+
 export function applyEquipmentToStats(baseStats, equipment = {}) {
   const result = { ...baseStats };
 

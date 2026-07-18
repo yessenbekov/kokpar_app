@@ -8,7 +8,7 @@ import {
 } from "./contactSystem.js";
 import { createMatchFeedback } from "./feedback.js";
 import { DEFAULT_HORSE_TYPE_ID, horseTypeById } from "./horseTypes.js";
-import { applyEquipmentToStats } from "../app/shopItems.js";
+import { applyEquipmentToStats, applyHorseProgression } from "../app/shopItems.js";
 import {
   createContestIndicatorMesh,
   createGoalMesh,
@@ -191,7 +191,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const playerTeam = options.teamSide === "red" ? TEAM.red : TEAM.blue;
   const playerHorseType = horseTypeById(gameSettings.horseType);
   const playerEquipment = options.equipment ?? {};
-  const playerEffectiveStats = applyEquipmentToStats(playerHorseType.stats, playerEquipment);
+  const playerEffectiveStats = applyHorseProgression(
+    applyEquipmentToStats(playerHorseType.stats, playerEquipment),
+    options.horseLevel ?? 1,
+    options.horseBond ?? 0
+  );
   const scoreRadius = gameSettings.goalType === "kazan" ? GOAL_RADIUS * 0.82 : GOAL_RADIUS;
   const isMobile = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
   const assetPipeline = createGameAssetPipeline();

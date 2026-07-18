@@ -361,7 +361,7 @@ export function HorseStable({
               <div className="horse-tags" aria-label="Профиль лошади">
                 <span>{selectedHorse.stable.line}</span>
                 <span>Ур. {selectedOwnedHorse.level}</span>
-                <span>Связь {selectedOwnedHorse.bond}</span>
+                <span>Связь {selectedOwnedHorse.bond ?? 0}/100{(selectedOwnedHorse.bond ?? 0) >= 80 ? " ★" : (selectedOwnedHorse.bond ?? 0) >= 50 ? " ◆" : (selectedOwnedHorse.bond ?? 0) >= 20 ? " ●" : ""}</span>
               </div>
               <p>{selectedHorse.description}</p>
             </div>

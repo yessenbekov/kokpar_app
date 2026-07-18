@@ -218,6 +218,8 @@ export default function App() {
       nextSettings.horseType = selectedHorse.typeId;
       nextSettings.horseName = selectedHorse.name;
       nextSettings.horseCoatId = selectedHorse.coatId ?? null;
+      nextSettings.horseLevel = selectedHorse.level ?? 1;
+      nextSettings.horseBond = selectedHorse.bond ?? 0;
     }
 
     setSettings(nextSettings);
@@ -291,6 +293,7 @@ export default function App() {
         ...horse,
         xp: newXp % XP_PER_LEVEL,
         level: horse.level + levelsGained,
+        bond: Math.min(100, (horse.bond ?? 0) + 1),
         record: {
           matches: (horse.record?.matches ?? 0) + 1,
           wins: (horse.record?.wins ?? 0) + (playerWon ? 1 : 0),
