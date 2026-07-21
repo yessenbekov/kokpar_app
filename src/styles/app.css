@@ -6768,3 +6768,156 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
   background: rgba(120, 40, 30, 0.55) !important;
   color: #f09080 !important;
 }
+
+/* ── Tutorial hints overlay ─────────────────────────────────────────────── */
+.tutorial-hints {
+  position: fixed;
+  bottom: max(80px, calc(env(safe-area-inset-bottom) + 80px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  animation: fadeInUp 0.3s ease;
+  pointer-events: none;
+}
+
+.tutorial-hints__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 260px;
+  max-width: calc(100vw - 48px);
+  padding: 14px 36px 12px 16px;
+  background: rgba(20, 12, 4, 0.9);
+  border: 1px solid rgba(200, 155, 50, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  pointer-events: all;
+}
+
+.tutorial-hints__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.tutorial-hints__close:hover { color: var(--ink); }
+
+.tutorial-hints__step {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.tutorial-hints__content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tutorial-hints__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tutorial-hints__text strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tutorial-hints__text span {
+  font-size: 12px;
+  color: var(--ink-2);
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.tutorial-hints__progress {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.tutorial-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(200, 155, 50, 0.25);
+  transition: background 0.2s;
+}
+
+.tutorial-dot--active { background: var(--gold); }
+.tutorial-dot--done   { background: rgba(200, 155, 50, 0.55); }
+
+/* Keyboard hint keys */
+.hint-keys {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.hint-key--row {
+  display: flex;
+  gap: 3px;
+}
+
+.hint-key__empty {
+  width: 22px;
+  height: 22px;
+}
+
+kbd.hint-key, kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  background: rgba(255, 200, 80, 0.1);
+  border: 1px solid rgba(200, 155, 50, 0.4);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+kbd.hint-key--space {
+  min-width: 68px;
+  height: 24px;
+}
+
+/* SVG joystick / action icons */
+.hint-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+  .tutorial-hints {
+    bottom: max(110px, calc(env(safe-area-inset-bottom) + 110px));
+  }
+}

@@ -14,6 +14,7 @@ import { FieldRadar } from "./components/FieldRadar.jsx";
 import { HorseOnboarding } from "./components/HorseOnboarding.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
 import { MatchReward } from "./components/MatchReward.jsx";
+import { TutorialHints } from "./components/TutorialHints.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
 import { TouchControls } from "./components/TouchControls.jsx";
 import { createKokparGame } from "./game/createKokparGame.js";
@@ -612,6 +613,8 @@ export default function App() {
           <span>{hud.submessage}</span>
         </div>
       )}
+
+      <TutorialHints active={Boolean(activeSettings)} hud={hud} />
 
       <MatchReward
         reward={matchReward}
