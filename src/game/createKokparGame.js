@@ -499,6 +499,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   let assetsLoaded = false;
   const cameraDesired = new THREE.Vector3();
   const cameraLookAt = new THREE.Vector3();
+  const _inputFwdVec = new THREE.Vector3();
   const cameraTrack = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
   const cameraTrackTarget = new THREE.Vector3(0, 0.9, START_CAMERA_FOCUS_Z);
   const cameraForwardVector = new THREE.Vector3();
@@ -2347,7 +2348,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     let dx = 0, dz = 0;
     const len = Math.hypot(ax, az);
     if (len > 0.05) {
-      const fwd = new THREE.Vector3();
+      const fwd = _inputFwdVec;
       camera.getWorldDirection(fwd);
       const fl = Math.hypot(fwd.x, fwd.z) || 1;
       const fx = fwd.x / fl, fz = fwd.z / fl;
@@ -2365,7 +2366,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     };
   }
 
-  window.addEventListener("resize", resize);
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
   window.addEventListener("keydown", onKeyDown, { passive: false });
   window.addEventListener("keyup", onKeyUp);
 
@@ -2389,7 +2391,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       isDestroyed = true;
       resetTouchInput();
       cancelAnimationFrame(animationFrame);
-      window.removeEventListener("resize", resize);
+      resizeObserver.disconnect();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       feedback.destroy();

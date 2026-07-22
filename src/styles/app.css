@@ -6923,3 +6923,40 @@ kbd.hint-key--space {
 }
 
 .match-result-reward-row__value--coins { color: #a0d080; }
+
+/* ── Error boundary fallback ─────────────────────────────────────────────── */
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100dvh;
+  padding: 32px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.error-boundary strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.error-boundary span {
+  font-size: 13px;
+  opacity: 0.6;
+  max-width: 360px;
+}
+
+.error-boundary button {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: rgba(200, 140, 40, 0.15);
+  border: 1px solid rgba(200, 140, 40, 0.35);
+  border-radius: var(--r);
+  color: var(--gold);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}

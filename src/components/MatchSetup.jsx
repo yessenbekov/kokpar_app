@@ -8,8 +8,9 @@ import { ModeSelector } from "./ModeSelector.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 import { Shop } from "./Shop.jsx";
 
+const _coinFmt = new Intl.NumberFormat("ru-RU");
 function formatCoins(value) {
-  return new Intl.NumberFormat("ru-RU").format(value);
+  return _coinFmt.format(value);
 }
 
 function accountView(auth) {

@@ -10,6 +10,7 @@ import { playerProfileStore } from "./app/profileStore.js";
 import { supabaseProfileStore } from "./app/supabaseProfileStore.js";
 import { useSupabaseProfile } from "./app/useSupabaseProfile.js";
 import { AuthGate } from "./components/AuthGate.jsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { FieldRadar } from "./components/FieldRadar.jsx";
 import { HorseOnboarding } from "./components/HorseOnboarding.jsx";
 import { MatchHud } from "./components/MatchHud.jsx";
@@ -35,7 +36,7 @@ export default function App() {
   const [hud, setHud] = useState(() => makeInitialHud());
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
-  const [feedbackEnabled, setFeedbackEnabled] = useState(true);
+  const [feedbackEnabled, setFeedbackEnabled] = useState(() => localStorage.getItem("kokpar_feedback") !== "0");
   const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
   const [matchReward, setMatchReward] = useState(null);
   const [syncStatus, setSyncStatus] = useState("idle");
@@ -191,7 +192,7 @@ export default function App() {
       if (document.hidden) releaseTouchControls();
     }
 
-    window.addEventListener("blur", releaseTouchControls);
+    window.addEventListener("blur", () => releaseTouchControls());
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       releaseTouchControls(false);
@@ -315,7 +316,9 @@ export default function App() {
       };
     });
 
-    const nextProfile = saveProfile({ ...currentProfile, ownedHorses: updatedHorses, coins: (currentProfile.coins ?? 0) + coinsGain });
+    const totalMatches = updatedHorses.reduce((sum, h) => sum + (h.record?.matches ?? 0), 0);
+    const playerLevel = Math.floor(totalMatches / 5) + 1;
+    const nextProfile = saveProfile({ ...currentProfile, ownedHorses: updatedHorses, coins: (currentProfile.coins ?? 0) + coinsGain, level: playerLevel });
     setProfile(nextProfile);
     if (reward) {
       setMatchReward(reward);
@@ -527,6 +530,7 @@ export default function App() {
   function toggleFeedback() {
     const enabled = !feedbackEnabled;
     setFeedbackEnabled(enabled);
+    localStorage.setItem("kokpar_feedback", enabled ? "1" : "0");
     gameRef.current?.setFeedbackEnabled?.(enabled);
   }
 
@@ -543,6 +547,7 @@ export default function App() {
   const showAuthGate = isSetup && !setupEntered && authState.status !== "signed-in";
 
   return (
+    <ErrorBoundary>
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
@@ -648,5 +653,6 @@ export default function App() {
         />
       )}
     </main>
+    </ErrorBoundary>
   );
 }
