@@ -6921,3 +6921,5 @@ kbd.hint-key--space {
     bottom: max(110px, calc(env(safe-area-inset-bottom) + 110px));
   }
 }
+
+.match-result-reward-row__value--coins { color: #a0d080; }

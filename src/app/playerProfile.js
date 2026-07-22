@@ -124,7 +124,8 @@ function sanitizeMatchPreferences(value = {}) {
     goalType: mode.goalLocked ? mode.defaultGoalType : value.goalType === "kazan" ? "kazan" : mode.defaultGoalType,
     teamSize: [3, 4, 5].includes(Number(value.teamSize)) ? Number(value.teamSize) : 3,
     matchMinutes: [2, 3, 5].includes(Number(value.matchMinutes)) ? Number(value.matchMinutes) : 2,
-    teamSide: value.teamSide === "red" ? "red" : "blue"
+    teamSide: value.teamSide === "red" ? "red" : "blue",
+    difficulty: ["easy", "normal", "hard"].includes(value.difficulty) ? value.difficulty : "normal"
   };
 }
 

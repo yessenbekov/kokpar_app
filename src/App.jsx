@@ -257,7 +257,10 @@ export default function App() {
     const XP_PARTICIPATION = 15;
     const XP_WIN = 25;
     const XP_PER_LEVEL = 100;
+    const COINS_PARTICIPATION = 8;
+    const COINS_WIN = 15;
     const xpGain = XP_PARTICIPATION + (playerWon ? XP_WIN : 0);
+    const coinsGain = COINS_PARTICIPATION + (playerWon ? COINS_WIN : 0);
 
     const currentProfile = playerProfileStore.read();
     let reward = null;
@@ -286,6 +289,7 @@ export default function App() {
 
       reward = {
         xpGain,
+        coinsGain,
         leveledUp: levelsGained > 0,
         newLevel: horse.level + levelsGained,
         horseName: horse.name,
@@ -311,7 +315,7 @@ export default function App() {
       };
     });
 
-    const nextProfile = saveProfile({ ...currentProfile, ownedHorses: updatedHorses });
+    const nextProfile = saveProfile({ ...currentProfile, ownedHorses: updatedHorses, coins: (currentProfile.coins ?? 0) + coinsGain });
     setProfile(nextProfile);
     if (reward) {
       setMatchReward(reward);

@@ -2318,7 +2318,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       match.time = state.m.t;
       if (state.m.p !== match.phase) {
         match.phase = state.m.p;
-        if (state.m.p === "active" && (prevBlue !== match.blue || prevRed !== match.red)) {
+        if (state.m.p === "goal" && (prevBlue !== match.blue || prevRed !== match.red)) {
           showMessage(
             match.blue > match.red ? "Гол! Синие ведут" : match.red > match.blue ? "Гол! Красные ведут" : "Гол!",
             "Новый розыгрыш.", 2.4
