@@ -20,8 +20,8 @@
   "rider": {
     "path": "/models/riders/rider.glb",
     "scale": 1,
-    "position": [0, 0, 0],
-    "rotation": [0, 0, 0]
+    "position": [0.9, 4.7, 0],
+    "rotation": [0, 1.5708, 0]
   },
   "serke": {
     "path": "/models/serke/serke.glb",
