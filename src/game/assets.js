@@ -371,65 +371,62 @@ export function createRiderModelInstance(assetPipeline, rider) {
         node.material = (n.includes("hair") || n.includes("mane")) ? hairMat : horseMat;
       });
 
-      const saddleX = 0.9;
-      const saddleY = 4.2;
-      const skinMat = new THREE.MeshStandardMaterial({ color: "#f0e0c0", roughness: 0.65 });
-      const clothMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.55 });
-      const darkMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(rider.color).multiplyScalar(0.55), roughness: 0.6 });
+      // Only build a procedural rider when no GLB rider model is provided
+      if (!riderPrototype) {
+        const saddleX = 0.9;
+        const saddleY = 4.2;
+        const skinMat = new THREE.MeshStandardMaterial({ color: "#f0e0c0", roughness: 0.65 });
+        const clothMat = new THREE.MeshStandardMaterial({ color: rider.color, roughness: 0.55 });
+        const darkMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(rider.color).multiplyScalar(0.55), roughness: 0.6 });
 
-      const rider3D = new THREE.Group();
-      rider3D.position.set(saddleX, saddleY, 0);
+        const rider3D = new THREE.Group();
+        rider3D.position.set(saddleX, saddleY, 0);
 
-      // Torso (jacket in team color)
-      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.90, 1.40, 0.55), clothMat);
-      torso.position.y = 0.70;
-      torso.castShadow = true;
-      rider3D.add(torso);
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.90, 1.40, 0.55), clothMat);
+        torso.position.y = 0.70;
+        torso.castShadow = true;
+        rider3D.add(torso);
 
-      // Neck
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.20, 0.32, 6), skinMat);
-      neck.position.y = 1.56;
-      rider3D.add(neck);
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.20, 0.32, 6), skinMat);
+        neck.position.y = 1.56;
+        rider3D.add(neck);
 
-      // Head
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 8, 6), skinMat);
-      head.position.y = 1.92;
-      head.castShadow = true;
-      rider3D.add(head);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 8, 6), skinMat);
+        head.position.y = 1.92;
+        head.castShadow = true;
+        rider3D.add(head);
 
-      // Helmet (team color)
-      const helmetBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.50, 0.50, 0.08, 8), clothMat);
-      helmetBrim.position.y = 2.10;
-      rider3D.add(helmetBrim);
-      const helmetTop = new THREE.Mesh(new THREE.SphereGeometry(0.40, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2), clothMat);
-      helmetTop.position.y = 2.10;
-      rider3D.add(helmetTop);
+        const helmetBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.50, 0.50, 0.08, 8), clothMat);
+        helmetBrim.position.y = 2.10;
+        rider3D.add(helmetBrim);
+        const helmetTop = new THREE.Mesh(new THREE.SphereGeometry(0.40, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2), clothMat);
+        helmetTop.position.y = 2.10;
+        rider3D.add(helmetTop);
 
-      // Arms angled forward/down (holding reins)
-      for (const side of [-1, 1]) {
-        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.10, 0.80, 6), clothMat);
-        arm.rotation.z = side * 0.60;
-        arm.rotation.x = 0.30;
-        arm.position.set(side * 0.54, 0.88, 0.22);
-        arm.castShadow = true;
-        rider3D.add(arm);
+        for (const side of [-1, 1]) {
+          const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.10, 0.80, 6), clothMat);
+          arm.rotation.z = side * 0.60;
+          arm.rotation.x = 0.30;
+          arm.position.set(side * 0.54, 0.88, 0.22);
+          arm.castShadow = true;
+          rider3D.add(arm);
+        }
+
+        for (const side of [-1, 1]) {
+          const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.85, 6), darkMat);
+          thigh.rotation.z = side * 1.42;
+          thigh.position.set(side * 0.58, 0.18, 0);
+          thigh.castShadow = true;
+          rider3D.add(thigh);
+
+          const boot = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.30, 0.38), darkMat);
+          boot.position.set(side * 1.02, -0.38, 0.04);
+          rider3D.add(boot);
+        }
+
+        group.add(rider3D);
+        group.userData.rider3D = rider3D;
       }
-
-      // Legs hanging down sides of horse
-      for (const side of [-1, 1]) {
-        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.85, 6), darkMat);
-        thigh.rotation.z = side * 1.42;
-        thigh.position.set(side * 0.58, 0.18, 0);
-        thigh.castShadow = true;
-        rider3D.add(thigh);
-
-        const boot = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.30, 0.38), darkMat);
-        boot.position.set(side * 1.02, -0.38, 0.04);
-        rider3D.add(boot);
-      }
-
-      group.add(rider3D);
-      group.userData.rider3D = rider3D;
     }
   }
 
