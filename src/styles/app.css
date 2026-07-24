@@ -6960,3 +6960,52 @@ kbd.hint-key--space {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ── Portrait-mode lock overlay ──────────────────────────────────────────── */
+.portrait-lock {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #1a0e04;
+  color: var(--ink);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  padding: 32px;
+  pointer-events: none;
+}
+
+.portrait-lock svg {
+  width: 64px;
+  height: 64px;
+  color: var(--ink-2);
+  animation: portrait-rotate 2.2s ease-in-out infinite;
+}
+
+.portrait-lock p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.portrait-lock small {
+  font-size: 13px;
+  color: var(--ink-2);
+  opacity: 0.7;
+}
+
+@keyframes portrait-rotate {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(90deg); }
+  60%       { transform: rotate(90deg); }
+}
+
+@media (orientation: portrait) and (max-width: 1024px) {
+  .portrait-lock--active {
+    display: flex;
+  }
+}

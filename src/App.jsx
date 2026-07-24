@@ -512,6 +512,10 @@ export default function App() {
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
 
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+
     setHud(makeInitialHud(matchSettings));
     setReady(false);
     setSceneError("");
@@ -548,6 +552,14 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+    <div className={`portrait-lock${activeSettings ? " portrait-lock--active" : ""}`} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <path d="M12 18h.01" />
+      </svg>
+      <p>Поверни устройство горизонтально</p>
+      <small>Игра работает только в альбомной ориентации</small>
+    </div>
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
