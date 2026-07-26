@@ -6139,14 +6139,6 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
   box-shadow: 0 0 8px rgba(200, 148, 30, 0.6);
 }
 
-/* Счёт — команды */
-.score b {
-  color: rgba(200, 158, 72, 0.55);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 /* Иконки действий в HUD */
 .icon-button {
   background: rgba(42, 24, 6, 0.92);

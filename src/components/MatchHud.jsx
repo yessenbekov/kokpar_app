@@ -24,19 +24,16 @@ export function MatchHud({
   return (
     <section className="hud" aria-label="Match status">
       <div className="panel">
-        <p className="label">{settings.modeId === "training" ? "Тренировка" : "Матч"}</p>
         <p className="status">{hud.timer}</p>
         <p className="small">{settings.teamSize}×{settings.teamSize} · {goalLabel}</p>
       </div>
 
       <div className="panel score" aria-label="Score">
         <span className="blue">{hud.blue}</span>
-        <b>Кокпар 3D</b>
         <span className="red">{hud.red}</span>
       </div>
 
       <div className="panel right">
-        <p className="label">Конь · {hud.horseName}</p>
         <p className="status">{hud.carry}</p>
         <div className="horse-status">
           <div
