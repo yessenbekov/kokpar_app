@@ -15,7 +15,7 @@ const DEFAULT_MODEL_MANIFEST = {
   kazan: null
 };
 
-const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char"];
+const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char", "rider"];
 const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail"];
 const SERKE_MATERIAL_TOKENS = ["serke", "kokpar", "dummy", "hide"];
 const LEG_KEYS = ["fl", "fr", "bl", "br"];
