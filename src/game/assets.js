@@ -58,7 +58,11 @@ function prepareScene(root) {
 }
 
 async function loadTeamRiderPrototype(entry) {
-  if (!entry?.walk) return null;
+  if (!entry) return null;
+  // Static model (path-based) — delegate to standard loader
+  if (entry.path) return loadOptionalModel(entry);
+  // Animated model (walk/run GLBs)
+  if (!entry.walk) return null;
   const descriptor = {
     scale: entry.scale ?? 1,
     position: entry.position ?? [0, 0, 0],
