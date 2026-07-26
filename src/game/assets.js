@@ -11,11 +11,13 @@ const DEFAULT_MODEL_MANIFEST = {
   riderHorse: null,
   horse: null,
   rider: null,
+  riderBlue: null,
+  riderRed: null,
   serke: null,
   kazan: null
 };
 
-const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char", "rider"];
+const TEAM_MATERIAL_TOKENS = ["uniform", "jersey", "shirt", "kit", "team", "saddleblanket", "blanket", "char"];
 const HORSE_MATERIAL_TOKENS = ["horse", "coat", "body", "mane", "tail"];
 const SERKE_MATERIAL_TOKENS = ["serke", "kokpar", "dummy", "hide"];
 const LEG_KEYS = ["fl", "fr", "bl", "br"];
@@ -53,6 +55,34 @@ function prepareScene(root) {
     node.castShadow = true;
     node.receiveShadow = true;
   });
+}
+
+async function loadTeamRiderPrototype(entry) {
+  if (!entry?.walk) return null;
+  const descriptor = {
+    scale: entry.scale ?? 1,
+    position: entry.position ?? [0, 0, 0],
+    rotation: entry.rotation ?? [0, 0, 0]
+  };
+  try {
+    const walkGltf = await gltfLoader.loadAsync(entry.walk);
+    const scene = walkGltf.scene ?? walkGltf.scenes?.[0];
+    if (!scene) return null;
+    prepareScene(scene);
+    const animations = [...(walkGltf.animations ?? [])];
+    if (entry.run) {
+      try {
+        const runGltf = await gltfLoader.loadAsync(entry.run);
+        animations.push(...(runGltf.animations ?? []));
+      } catch (e) {
+        console.warn(`Could not load run animation at ${entry.run}`, e);
+      }
+    }
+    return { scene, animations, descriptor };
+  } catch (error) {
+    console.warn(`Could not load team rider at ${entry.walk}.`, error);
+    return null;
+  }
 }
 
 async function loadOptionalModel(entry) {
@@ -296,6 +326,8 @@ export function createGameAssetPipeline() {
       horse: null,
       rider: null,
       riderHorse: null,
+      riderBlue: null,
+      riderRed: null,
       serke: null,
       kazan: null
     },
@@ -306,15 +338,17 @@ export function createGameAssetPipeline() {
   pipeline.readyPromise = loadManifest().then(async (manifest) => {
     pipeline.manifest = manifest;
 
-    const [riderHorse, horse, rider, serke, kazan] = await Promise.all([
+    const [riderHorse, horse, rider, riderBlue, riderRed, serke, kazan] = await Promise.all([
       loadOptionalModel(manifest.riderHorse),
       loadOptionalModel(manifest.horse),
       loadOptionalModel(manifest.rider),
+      loadTeamRiderPrototype(manifest.riderBlue),
+      loadTeamRiderPrototype(manifest.riderRed),
       loadOptionalModel(manifest.serke),
       loadOptionalModel(manifest.kazan)
     ]);
 
-    pipeline.prototypes = { horse, rider, riderHorse, serke, kazan };
+    pipeline.prototypes = { horse, rider, riderHorse, riderBlue, riderRed, serke, kazan };
     pipeline.ready = true;
     return pipeline;
   });
@@ -323,8 +357,9 @@ export function createGameAssetPipeline() {
 }
 
 export function createRiderModelInstance(assetPipeline, rider) {
-  const { horse, rider: riderPrototype, riderHorse } = assetPipeline.prototypes;
-  if (!riderHorse && !horse && !riderPrototype) return null;
+  const { horse, rider: riderPrototype, riderHorse, riderBlue, riderRed } = assetPipeline.prototypes;
+  const teamRiderPrototype = rider.team === "blue" ? riderBlue : riderRed;
+  if (!riderHorse && !horse && !riderPrototype && !teamRiderPrototype) return null;
 
   const group = new THREE.Group();
   group.name = `${rider.name} GLB rider`;
@@ -334,7 +369,9 @@ export function createRiderModelInstance(assetPipeline, rider) {
     addModelPart(group, riderHorse, "combined-rider-horse");
   } else {
     const horsePart = addModelPart(group, horse, "horse");
-    addModelPart(group, riderPrototype, "rider");
+    if (!teamRiderPrototype) {
+      addModelPart(group, riderPrototype, "rider");
+    }
 
     if (horsePart?.userData.animations?.length > 0) {
       const anims = horsePart.userData.animations;
@@ -371,8 +408,7 @@ export function createRiderModelInstance(assetPipeline, rider) {
         node.material = (n.includes("hair") || n.includes("mane")) ? hairMat : horseMat;
       });
 
-      // Only build a procedural rider when no GLB rider model is provided
-      if (!riderPrototype) {
+      if (!riderPrototype && !teamRiderPrototype) {
         const saddleX = 0.9;
         const saddleY = 4.2;
         const skinMat = new THREE.MeshStandardMaterial({ color: "#f0e0c0", roughness: 0.65 });
@@ -431,6 +467,32 @@ export function createRiderModelInstance(assetPipeline, rider) {
   }
 
   tintRiderModel(group, rider);
+
+  if (teamRiderPrototype) {
+    const riderPart = clonePrototype(teamRiderPrototype);
+    riderPart.name = "team-rider";
+    applyTransform(riderPart, teamRiderPrototype.descriptor);
+    group.add(riderPart);
+
+    const anims = teamRiderPrototype.animations;
+    if (anims?.length > 0) {
+      const walkAnim = anims.find((a) => a.name.toLowerCase().includes("walk")) ?? anims[0];
+      const runAnim = anims.find((a) => a.name.toLowerCase().includes("run")) ?? walkAnim;
+
+      const riderMixer = new THREE.AnimationMixer(riderPart);
+      const riderWalkAction = riderMixer.clipAction(walkAnim);
+      const riderRunAction = riderMixer.clipAction(runAnim);
+      riderWalkAction.play();
+      riderRunAction.play();
+      riderWalkAction.setEffectiveWeight(1);
+      riderRunAction.setEffectiveWeight(0);
+
+      group.userData.riderMixer = riderMixer;
+      group.userData.riderWalkAction = riderWalkAction;
+      group.userData.riderRunAction = riderRunAction;
+    }
+  }
+
   hydrateRiderModelControls(group);
   return group;
 }

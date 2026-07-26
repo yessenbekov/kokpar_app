@@ -1785,6 +1785,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
         }
         mixer.update(dt);
       }
+
+      const riderMixer = rider.group.userData.riderMixer;
+      if (riderMixer && dt) {
+        const riderWalkAction = rider.group.userData.riderWalkAction;
+        const riderRunAction = rider.group.userData.riderRunAction;
+        const ts = Math.max(0.3, speedRatio * 2.0);
+        if (riderWalkAction) { riderWalkAction.setEffectiveWeight(1 - gallopBlend); riderWalkAction.setEffectiveTimeScale(ts); }
+        if (riderRunAction) { riderRunAction.setEffectiveWeight(gallopBlend); riderRunAction.setEffectiveTimeScale(ts); }
+        riderMixer.update(dt);
+      }
+
       const stopPose = clamp(rider.stopPose ?? 0, 0, 1);
       const turnPose = clamp(rider.turnPose ?? 0, 0, 1);
       const idleBreath = Math.sin(time * 2.2 + rider.aiPhase) * idleBlend;

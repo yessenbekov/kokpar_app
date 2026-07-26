@@ -18,9 +18,23 @@
     "rotation": [0, 1.5708, 0]
   },
   "rider": {
-    "path": "/models/riders/rider.glb",
+    "path": null,
     "scale": 1.5,
     "position": [0.9, 5.2, 0],
+    "rotation": [0, 1.5708, 0]
+  },
+  "riderBlue": {
+    "walk": "/models/riders/blue_walk.glb",
+    "run": "/models/riders/blue_run.glb",
+    "scale": 1.2,
+    "position": [0.9, 4.2, 0],
+    "rotation": [0, 1.5708, 0]
+  },
+  "riderRed": {
+    "walk": "/models/riders/red_walk.glb",
+    "run": "/models/riders/red_run.glb",
+    "scale": 1.2,
+    "position": [0.9, 4.2, 0],
     "rotation": [0, 1.5708, 0]
   },
   "serke": {
