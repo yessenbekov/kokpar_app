@@ -880,6 +880,7 @@ button {
 
 .stable-roster {
   margin-top: 0;
+  align-content: start;
 }
 
 .stable-horse-list {
