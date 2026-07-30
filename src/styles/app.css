@@ -3424,36 +3424,36 @@ button {
   }
 
   .panel {
-    padding: 8px 10px;
+    padding: 5px 8px;
   }
 
   .label {
-    margin-bottom: 3px;
-    font-size: 10px;
+    margin-bottom: 2px;
+    font-size: 9px;
   }
 
   .status {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .small {
-    margin-top: 3px;
-    font-size: 11px;
+    margin-top: 2px;
+    font-size: 9px;
   }
 
   .score {
     grid-column: auto;
     grid-row: auto;
-    gap: 9px;
+    gap: 7px;
     width: auto;
     margin: 0;
-    padding: 8px 12px;
+    padding: 5px 10px;
   }
 
   .score span {
-    width: 34px;
-    height: 28px;
-    font-size: 17px;
+    width: 28px;
+    height: 24px;
+    font-size: 14px;
   }
 
   .meter {
