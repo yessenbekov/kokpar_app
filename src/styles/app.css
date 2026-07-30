@@ -7182,6 +7182,199 @@ kbd.hint-key--space {
   letter-spacing: 0.06em;
 }
 
+/* ── HORSE STRIP ────────────────────────────────────────────────── */
+
+.horse-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(208, 160, 48, 0.3);
+  border-radius: 10px;
+  background: rgba(208, 160, 48, 0.07);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.horse-strip:hover {
+  background: rgba(208, 160, 48, 0.12);
+  border-color: rgba(208, 160, 48, 0.5);
+}
+
+.horse-strip-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--tier3) 0%, #b06800 100%);
+  color: rgba(40, 20, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.horse-strip-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.horse-strip-info strong {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--tier3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.horse-strip-info span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.horse-strip-arrow {
+  font-size: 20px;
+  color: var(--muted);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ── DESIGN POLISH ─────────────────────────────────────────────── */
+
+/* Top bar - gold accent */
+.setup-topbar {
+  padding: 14px 20px 12px;
+  background: linear-gradient(90deg, rgba(208, 160, 48, 0.13) 0%, transparent 65%);
+  border-bottom: 1px solid rgba(208, 160, 48, 0.28);
+}
+
+.setup-topbar-title {
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: var(--tier3);
+}
+
+.setup-topbar-coins {
+  color: var(--tier3);
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Panel - deeper shadow, subtle gold border */
+.setup-panel.stable-panel {
+  border: 1px solid rgba(208, 160, 48, 0.18);
+  box-shadow: 0 24px 64px rgba(20, 8, 0, 0.52), 0 0 0 1px rgba(208, 160, 48, 0.1);
+}
+
+/* Mode card - gold active state */
+.mode-choice.active {
+  border-color: rgba(208, 160, 48, 0.65);
+  border-width: 2px;
+  background: rgba(208, 160, 48, 0.09);
+  box-shadow: none;
+}
+
+.mode-choice.active strong {
+  color: var(--tier3);
+}
+
+/* Choice buttons - gold active state */
+.choice.active {
+  border-color: rgba(208, 160, 48, 0.7) !important;
+  background: rgba(208, 160, 48, 0.12) !important;
+  color: var(--tier3) !important;
+  box-shadow: none !important;
+}
+
+.choice.active strong {
+  color: var(--tier3) !important;
+}
+
+.choice.active span {
+  color: rgba(208, 160, 48, 0.7) !important;
+}
+
+/* Keep blue for team colors */
+.choice.team-blue.active {
+  border-color: rgba(23, 109, 159, 0.7) !important;
+  background: rgba(218, 239, 248, 0.85) !important;
+  color: var(--ink) !important;
+}
+
+.choice.team-blue.active strong {
+  color: var(--ink) !important;
+}
+
+.choice.team-blue.active span {
+  color: var(--muted) !important;
+}
+
+/* Bottom nav - gold active color + indicator line */
+.bottom-nav {
+  background: rgba(252, 243, 213, 0.99);
+  border-top: 1px solid rgba(208, 160, 48, 0.22);
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+}
+
+.bottom-nav-btn {
+  position: relative;
+  transition: color 0.15s;
+}
+
+.bottom-nav-btn.active {
+  color: var(--tier3);
+}
+
+.bottom-nav-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: var(--tier3);
+  border-radius: 0 0 4px 4px;
+}
+
+.bottom-nav-btn span {
+  font-weight: 800;
+}
+
+/* Profile avatar - warm gold instead of blue */
+.profile-avatar-lg {
+  background: linear-gradient(140deg, var(--tier3) 0%, #b06800 100%);
+  color: rgba(40, 20, 0, 0.82);
+  box-shadow: 0 6px 24px rgba(210, 140, 20, 0.38);
+}
+
+/* Profile stats - gold accent */
+.profile-stat {
+  background: rgba(208, 160, 48, 0.08);
+  border-color: rgba(208, 160, 48, 0.22);
+}
+
+.profile-stat-value {
+  color: var(--tier3);
+}
+
+/* Sticky start button in game tab */
+.tab-footer {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding-top: 14px;
+  background: linear-gradient(transparent 0%, rgba(255, 248, 229, 0.98) 35%);
+}
+
 /* Override landscape grid layout for new tab design */
 @media (orientation: landscape) and (max-height: 520px) {
   .setup-panel.stable-panel {

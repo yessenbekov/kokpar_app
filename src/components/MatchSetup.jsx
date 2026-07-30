@@ -164,6 +164,21 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {/* TAB: ИГРА */}
           {navTab === "game" && (
             <div className="tab-pane">
+              {/* Selected horse strip */}
+              <button
+                type="button"
+                className="horse-strip"
+                onClick={() => setNavTab("stable")}
+                aria-label="Сменить лошадь"
+              >
+                <span className="horse-strip-avatar">{selectedHorse.name.slice(0, 1)}</span>
+                <span className="horse-strip-info">
+                  <strong>{selectedHorse.name}</strong>
+                  <span>Ур. {selectedHorse.level} · Нажми чтобы сменить</span>
+                </span>
+                <span className="horse-strip-arrow">›</span>
+              </button>
+
               <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
 
               <div className="match-options">
@@ -265,10 +280,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 />
               )}
 
-              <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
-                <Play size={19} fill="currentColor" strokeWidth={2.4} />
-                <span>{startLabel}</span>
-              </button>
+              <div className="tab-footer">
+                <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
+                  <Play size={19} fill="currentColor" strokeWidth={2.4} />
+                  <span>{startLabel}</span>
+                </button>
+              </div>
             </div>
           )}
 
