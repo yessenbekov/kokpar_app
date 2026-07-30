@@ -2940,15 +2940,15 @@ button {
   }
 
   .panel {
-    padding: 10px 11px;
+    padding: 7px 9px;
   }
 
   .status {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .small {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .meter {
@@ -3424,36 +3424,36 @@ button {
   }
 
   .panel {
-    padding: 5px 8px;
+    padding: 3px 6px;
   }
 
   .label {
-    margin-bottom: 2px;
-    font-size: 9px;
+    margin-bottom: 1px;
+    font-size: 8px;
   }
 
   .status {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   .small {
-    margin-top: 2px;
-    font-size: 9px;
+    margin-top: 1px;
+    font-size: 8px;
   }
 
   .score {
     grid-column: auto;
     grid-row: auto;
-    gap: 7px;
+    gap: 5px;
     width: auto;
     margin: 0;
-    padding: 5px 10px;
+    padding: 3px 8px;
   }
 
   .score span {
-    width: 28px;
-    height: 24px;
-    font-size: 14px;
+    width: 24px;
+    height: 20px;
+    font-size: 12px;
   }
 
   .meter {
