@@ -22,6 +22,10 @@ import { createKokparGame } from "./game/createKokparGame.js";
 
 const JOYSTICK_RADIUS = 46;
 
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+const showIosHint = isIos && !isInStandaloneMode && !localStorage.getItem("kokpar_ios_hint_dismissed");
+
 export default function App() {
   const mountRef = useRef(null);
   const gameRef = useRef(null);
@@ -30,6 +34,7 @@ export default function App() {
   const initialProfileRef = useRef(null);
   if (!initialProfileRef.current) initialProfileRef.current = playerProfileStore.read();
   const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
+  const [iosHint, setIosHint] = useState(showIosHint);
   const [profile, setProfile] = useState(() => initialProfileRef.current);
   const [settings, setSettings] = useState(() => readUrlSettings(initialProfileRef.current));
   const [activeSettings, setActiveSettings] = useState(() => (shouldAutoStart() ? readUrlSettings(initialProfileRef.current) : null));
@@ -186,6 +191,25 @@ export default function App() {
     if (updateUi) setJoystick({ active: false, x: 0, z: 0 });
     setGameTouchInput({ x: 0, z: 0, action: false });
   }
+
+  useEffect(() => {
+    if (!iosHint) return;
+    const t = setTimeout(() => {
+      localStorage.setItem("kokpar_ios_hint_dismissed", "1");
+      setIosHint(false);
+    }, 7000);
+    return () => clearTimeout(t);
+  }, [iosHint]);
+
+  useEffect(() => {
+    function requestFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }
+    document.addEventListener("pointerdown", requestFullscreen, { once: true });
+    return () => document.removeEventListener("pointerdown", requestFullscreen);
+  }, []);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -663,6 +687,20 @@ export default function App() {
           bodyCheckCooldown={hud.bodyCheckCooldown}
           bodyCheckReady={hud.bodyCheckReady}
         />
+      )}
+
+      {iosHint && (
+        <div className="ios-install-hint" role="status">
+          <span>📲 Добавь на домашний экран для полного экрана</span>
+          <button
+            type="button"
+            aria-label="Закрыть подсказку"
+            onClick={() => {
+              localStorage.setItem("kokpar_ios_hint_dismissed", "1");
+              setIosHint(false);
+            }}
+          >✕</button>
+        </div>
       )}
     </main>
     </ErrorBoundary>

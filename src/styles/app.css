@@ -7432,3 +7432,42 @@ kbd.hint-key--space {
     font-size: 15px;
   }
 }
+
+/* ── IOS INSTALL HINT ────────────────────────────────────────────── */
+
+.ios-install-hint {
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 16px;
+  border-radius: 12px;
+  background: rgba(30, 16, 4, 0.92);
+  border: 1px solid rgba(208, 160, 48, 0.35);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 230, 160, 0.95);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: hint-in 0.3s ease;
+}
+
+.ios-install-hint button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 200, 100, 0.7);
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+@keyframes hint-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
