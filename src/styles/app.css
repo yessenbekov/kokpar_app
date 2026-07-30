@@ -3529,6 +3529,26 @@ button {
     width: 118px;
     padding: 5px;
   }
+
+  .tutorial-hints {
+    bottom: auto;
+    top: 50%;
+    left: auto;
+    right: max(8px, env(safe-area-inset-right));
+    transform: translateY(-50%);
+  }
+
+  .tutorial-hints__card {
+    min-width: 160px;
+    max-width: 185px;
+    padding: 8px 26px 8px 10px;
+    gap: 4px;
+    background: rgba(20, 12, 4, 0.82);
+  }
+
+  .tutorial-hints__text strong { font-size: 11px; }
+  .tutorial-hints__text span { font-size: 10px; max-width: 135px; }
+  .tutorial-hints__step { font-size: 9px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
