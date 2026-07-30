@@ -2020,10 +2020,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       if (rider.groundMarker) {
         rider.groundMarker.visible = true;
         rider.groundMarker.position.set(rider.x, 0, rider.z);
-        const pulse = 0.88 + Math.sin(time * 4.5) * 0.08;
+        const pulse = 0.92 + Math.sin(time * 4.5) * 0.07;
         rider.groundMarker.scale.setScalar(pulse);
-        rider.groundMarker.userData.ring.material.opacity = 0.52 + Math.sin(time * 4.5) * 0.12;
-        rider.groundMarker.userData.disc.material.opacity = 0.22 + Math.sin(time * 4.5 + 1) * 0.08;
+        rider.groundMarker.userData.ring.material.opacity = 0.75 + Math.sin(time * 4.5) * 0.18;
+        rider.groundMarker.userData.disc.material.opacity = 0.18 + Math.sin(time * 4.5 + 1) * 0.08;
       }
 
       if (rider.arrowMarker) {

@@ -76,29 +76,27 @@ export function createRiderRoleMarker() {
 export function createPlayerGroundMarker() {
   const group = new THREE.Group();
 
-  const shadowMat = new THREE.MeshBasicMaterial({
-    color: "#ffffff",
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: "#ff2020",
     transparent: true,
-    opacity: 0.55,
+    opacity: 0.82,
     depthWrite: false,
     side: THREE.DoubleSide
   });
-  const pulseMat = new THREE.MeshBasicMaterial({
-    color: "#aaddff",
+  const discMat = new THREE.MeshBasicMaterial({
+    color: "#ff3030",
     transparent: true,
-    opacity: 0.30,
+    opacity: 0.22,
     depthWrite: false,
     side: THREE.DoubleSide
   });
 
-  // Outer ring
-  const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.0, 36), shadowMat.clone());
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.1, 40), ringMat.clone());
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.05;
   group.add(ring);
 
-  // Inner filled disc (subtler, pulsing)
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.5, 36), pulseMat.clone());
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.55, 40), discMat.clone());
   disc.rotation.x = -Math.PI / 2;
   disc.position.y = 0.04;
   group.add(disc);
