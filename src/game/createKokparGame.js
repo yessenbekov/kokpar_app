@@ -2041,7 +2041,18 @@ export function createKokparGame(container, onHudChange, options = {}) {
     updateBodyCheckImpactMarker(time);
 
     const carriedHeight = kokpar.holder ? CARRIED_SERKE_HEIGHT + Math.sin(time * 8.5) * 0.06 : kokpar.y;
-    kokpar.mesh.position.set(kokpar.x, carriedHeight, kokpar.z);
+
+    // When carried, offset serke to the holder's side (same side as the carry strap)
+    let serkeMeshX = kokpar.x;
+    let serkeMeshZ = kokpar.z;
+    if (kokpar.holder) {
+      const fwd = forwardVector(kokpar.holder);
+      const carryDir = kokpar.holder.team === TEAM.blue ? -1 : 1;
+      serkeMeshX = kokpar.x + (-fwd.z) * carryDir * 1.1;
+      serkeMeshZ = kokpar.z + fwd.x * carryDir * 1.1;
+    }
+
+    kokpar.mesh.position.set(serkeMeshX, carriedHeight, serkeMeshZ);
     kokpar.mesh.rotation.y += (1.2 + Math.hypot(kokpar.vx, kokpar.vz) * (kokpar.holder ? 0.06 : 0.12)) * dt;
     kokpar.mesh.rotation.x = kokpar.holder
       ? -0.2 + Math.sin(time * 6) * 0.08
@@ -2067,7 +2078,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         2.45,
         holder.z + forward.z * 0.25 + side.z * carrySide * 0.58
       );
-      carryStrapEnd.set(kokpar.x, carriedHeight, kokpar.z);
+      carryStrapEnd.set(serkeMeshX, carriedHeight, serkeMeshZ);
       carryStrapDirection.subVectors(carryStrapEnd, carryStrapStart);
 
       const strapLength = carryStrapDirection.length();
