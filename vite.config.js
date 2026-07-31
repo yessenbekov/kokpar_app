@@ -45,12 +45,12 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
-            // GLB models — cache first, they're large and don't change often
+            // GLB models — stale-while-revalidate: serve cache instantly, refresh in background
             urlPattern: /\/models\/.*\.glb$/,
-            handler: "CacheFirst",
+            handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "glb-models",
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheName: "glb-models-v2",
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 },
               cacheableResponse: { statuses: [0, 200] }
             }
           },
