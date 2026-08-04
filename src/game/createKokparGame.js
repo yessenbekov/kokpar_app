@@ -64,7 +64,7 @@ const THROW_PREVIEW_STEP_SECONDS = 0.075;
 const THROW_AIM_MAX_ANGLE = Math.PI * 0.18;
 const THROW_AIM_RATE = 1.18;
 const LOOSE_SERKE_HEIGHT = 0.72;
-const CARRIED_SERKE_HEIGHT = 1.78;
+const CARRIED_SERKE_HEIGHT = 4.2;
 const PASS_RADIUS = 7;
 const PASS_SPEED = 19;
 const CONTEST_RADIUS = 5.4;
@@ -2075,7 +2075,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       carryStrapStart.set(
         holder.x + forward.x * 0.25 + side.x * carrySide * 0.58,
-        2.45,
+        4.8,
         holder.z + forward.z * 0.25 + side.z * carrySide * 0.58
       );
       carryStrapEnd.set(serkeMeshX, carriedHeight, serkeMeshZ);
@@ -2098,7 +2098,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
       tugStrapStart.set(
         tugChallenger.x + challengerForward.x * 0.3 + challengerSide.x * tugSide * 0.5,
-        2.42,
+        4.8,
         tugChallenger.z + challengerForward.z * 0.3 + challengerSide.z * tugSide * 0.5
       );
       tugStrapEnd.set(kokpar.x, carriedHeight, kokpar.z);
