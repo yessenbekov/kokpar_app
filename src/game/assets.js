@@ -192,17 +192,11 @@ function tintSerkeModel(root) {
   root.traverse((node) => {
     if (!node.isMesh && !node.isSkinnedMesh) return;
 
-    // Apply to any matching token, or fall back to all materials if none matched
-    let matched = false;
     forEachMaterial(node, (material) => {
       if (matchesAnyToken(node, material, SERKE_MATERIAL_TOKENS)) {
-        setMaterialColor(material, "#c8a060");
-        matched = true;
+        setMaterialColor(material, "#e5c99a");
       }
     });
-    if (!matched) {
-      forEachMaterial(node, (material) => setMaterialColor(material, "#c8a060"));
-    }
   });
 }
 
