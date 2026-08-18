@@ -37,7 +37,7 @@
   },
   "serke": {
     "path": "/models/serke/serke.glb",
-    "scale": 1.2,
+    "scale": 1.5,
     "position": [0, 0, 0],
     "rotation": [0, 0, 0]
   },

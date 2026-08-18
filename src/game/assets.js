@@ -189,7 +189,7 @@ function tintRiderModel(root, rider) {
 }
 
 function tintSerkeModel(root) {
-  const mat = new THREE.MeshStandardMaterial({ color: "#e8d5a0", roughness: 0.88, metalness: 0.0 });
+  const mat = new THREE.MeshStandardMaterial({ color: "#c04010", roughness: 0.88, metalness: 0.0 });
   root.traverse((node) => {
     if (!node.isMesh && !node.isSkinnedMesh) return;
     // Replace material entirely so GLB textures don't override the visible color
