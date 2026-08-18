@@ -64,7 +64,7 @@ const THROW_PREVIEW_STEP_SECONDS = 0.075;
 const THROW_AIM_MAX_ANGLE = Math.PI * 0.18;
 const THROW_AIM_RATE = 1.18;
 const LOOSE_SERKE_HEIGHT = 0.72;
-const CARRIED_SERKE_HEIGHT = 3.6;
+const CARRIED_SERKE_HEIGHT = 2.8;
 const PASS_RADIUS = 7;
 const PASS_SPEED = 19;
 const CONTEST_RADIUS = 5.4;
@@ -1633,9 +1633,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const side = { x: -forward.z, z: forward.x };
       const carrySide = rider.team === TEAM.blue ? -1 : 1;
 
-      kokpar.x = rider.x + forward.x * 0.6 + side.x * carrySide * 2.2;
+      kokpar.x = rider.x + forward.x * 0.5 + side.x * carrySide * 1.1;
       kokpar.y = CARRIED_SERKE_HEIGHT;
-      kokpar.z = rider.z + forward.z * 0.6 + side.z * carrySide * 2.2;
+      kokpar.z = rider.z + forward.z * 0.5 + side.z * carrySide * 1.1;
       kokpar.vx = rider.vx;
       kokpar.vy = 0;
       kokpar.vz = rider.vz;
