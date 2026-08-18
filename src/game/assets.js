@@ -189,14 +189,11 @@ function tintRiderModel(root, rider) {
 }
 
 function tintSerkeModel(root) {
+  const mat = new THREE.MeshStandardMaterial({ color: "#e8d5a0", roughness: 0.88, metalness: 0.0 });
   root.traverse((node) => {
     if (!node.isMesh && !node.isSkinnedMesh) return;
-
-    forEachMaterial(node, (material) => {
-      if (matchesAnyToken(node, material, SERKE_MATERIAL_TOKENS)) {
-        setMaterialColor(material, "#e5c99a");
-      }
-    });
+    // Replace material entirely so GLB textures don't override the visible color
+    node.material = Array.isArray(node.material) ? node.material.map(() => mat.clone()) : mat.clone();
   });
 }
 
