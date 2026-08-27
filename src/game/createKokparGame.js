@@ -1633,9 +1633,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       const side = { x: -forward.z, z: forward.x };
       const carrySide = rider.team === TEAM.blue ? -1 : 1;
 
-      kokpar.x = rider.x + forward.x * (-0.1) + side.x * carrySide * 1.1;
+      kokpar.x = rider.x + forward.x * 0.9 + side.x * carrySide * 1.1;
       kokpar.y = CARRIED_SERKE_HEIGHT;
-      kokpar.z = rider.z + forward.z * (-0.1) + side.z * carrySide * 1.1;
+      kokpar.z = rider.z + forward.z * 0.9 + side.z * carrySide * 1.1;
       kokpar.vx = rider.vx;
       kokpar.vy = 0;
       kokpar.vz = rider.vz;
