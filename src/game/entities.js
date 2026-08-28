@@ -67,7 +67,7 @@ function horsePaletteFor(horseTypeId = DEFAULT_HORSE_TYPE_ID, coatId) {
   return coatPresetById(horseType.defaultCoatId);
 }
 
-export function createHorseMesh(color, team, horseTypeId, coatId) {
+export function createHorseMesh(color, team, horseTypeId, coatId, equipment = {}) {
   const group = new THREE.Group();
   const legs = [];
   const arms = [];
@@ -81,6 +81,25 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   const uniformMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
   const tackMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.48 });
   const trimMaterial = new THREE.MeshStandardMaterial({ color: "#f2dfb2", roughness: 0.68 });
+
+  function equipTierOf(slot) {
+    const id = equipment?.[slot];
+    return id ? parseInt(id.slice(-1), 10) : 0;
+  }
+  function mkTierMat(tier, roughnessBase) {
+    const COLORS = [color, "#6b3010", "#1a3860", "#c89020"];
+    const ROUGHS = [roughnessBase, 0.82, 0.60, 0.22];
+    const METALS = [0, 0, 0.10, 0.72];
+    return new THREE.MeshStandardMaterial({
+      color: COLORS[tier] ?? color,
+      roughness: ROUGHS[tier] ?? roughnessBase,
+      metalness: METALS[tier] ?? 0
+    });
+  }
+  const saddleMat  = mkTierMat(equipTierOf("saddle"),   0.48);
+  const blanketMat = mkTierMat(equipTierOf("blanket"),  0.50);
+  const bridleMat  = mkTierMat(equipTierOf("bridle"),   0.48);
+  const legWrapMat = mkTierMat(equipTierOf("legWraps"), 0.50);
   const dustMaterial = new THREE.MeshStandardMaterial({
     color: "#c8a050",
     transparent: true,
@@ -140,7 +159,7 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
       leg.rotation.z = (x > 0 ? -0.12 : 0.1) + z * 0.05;
       group.add(leg);
 
-      const legWrap = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.15, 0.18, 10), uniformMaterial);
+      const legWrap = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.15, 0.18, 10), legWrapMat);
       legWrap.position.set(x, 0.78, z);
       legWrap.rotation.z = leg.rotation.z;
       group.add(legWrap);
@@ -160,7 +179,7 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   }
   group.userData.legs = legs;
 
-  const saddleBlanket = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 1.28), uniformMaterial);
+  const saddleBlanket = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 1.28), blanketMat);
   saddleBlanket.position.set(-0.2, 2.02, 0);
   saddleBlanket.rotation.z = -0.02;
   group.add(saddleBlanket);
@@ -170,30 +189,30 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   blanketTrim.rotation.z = -0.02;
   group.add(blanketTrim);
 
-  const saddlePad = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.18, 0.92), tackMaterial);
+  const saddlePad = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.18, 0.92), saddleMat);
   saddlePad.position.set(-0.22, 2.16, 0);
   saddlePad.rotation.z = -0.02;
   group.add(saddlePad);
 
-  const jerseyBack = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.78), uniformMaterial);
+  const jerseyBack = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.78), blanketMat);
   jerseyBack.position.set(-0.16, 2.82, 0);
   jerseyBack.rotation.z = -0.08;
   group.add(jerseyBack);
 
-  const girth = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.05, 1.52), tackMaterial);
+  const girth = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.05, 1.52), saddleMat);
   girth.position.set(-0.05, 1.18, 0);
   girth.rotation.z = -0.02;
   group.add(girth);
 
   for (const z of [-0.73, 0.73]) {
-    const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.62, 0.08), uniformMaterial);
+    const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.62, 0.08), saddleMat);
     sidePanel.position.set(-0.28, 1.36, z);
     sidePanel.rotation.z = -0.04;
     group.add(sidePanel);
   }
 
   // Нагрудник (breast collar) — team colour
-  const breastBand = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 1.48), uniformMaterial);
+  const breastBand = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 1.48), bridleMat);
   breastBand.position.set(1.88, 1.08, 0);
   group.add(breastBand);
 
@@ -202,18 +221,18 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   group.add(breastTrim);
 
   for (const z of [-0.71, 0.71]) {
-    const breastSideStrap = new THREE.Mesh(new THREE.BoxGeometry(1.94, 0.1, 0.09), uniformMaterial);
+    const breastSideStrap = new THREE.Mesh(new THREE.BoxGeometry(1.94, 0.1, 0.09), bridleMat);
     breastSideStrap.position.set(0.91, 1.08, z);
     group.add(breastSideStrap);
   }
 
-  const breastNeckStrap = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.09), uniformMaterial);
+  const breastNeckStrap = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.09), bridleMat);
   breastNeckStrap.position.set(2.02, 1.48, 0);
   breastNeckStrap.rotation.z = -0.38;
   group.add(breastNeckStrap);
 
   // Задняя попона (rump cloth) — team colour, flat on horse's back, visible from above
-  const rumpCloth = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.13, 1.42), uniformMaterial);
+  const rumpCloth = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.13, 1.42), blanketMat);
   rumpCloth.position.set(-1.82, 2.04, 0);
   rumpCloth.rotation.z = -0.02;
   group.add(rumpCloth);
@@ -225,7 +244,7 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
 
   // Боковые юбки чепрака — широкие панели по бокам, хорошо видны в изометрии
   for (const z of [-0.82, 0.82]) {
-    const caparison = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.62, 0.1), uniformMaterial);
+    const caparison = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.62, 0.1), blanketMat);
     caparison.position.set(-0.55, 1.55, z);
     caparison.rotation.z = -0.04;
     group.add(caparison);
@@ -237,11 +256,11 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   }
 
   // Султан (head plume) — team colour, tall vertical spike above head
-  const sultanStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.08, 0.85, 6), uniformMaterial);
+  const sultanStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.08, 0.85, 6), bridleMat);
   sultanStalk.position.set(2.44, 2.32, 0);
   group.add(sultanStalk);
 
-  const sultanPom = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), uniformMaterial);
+  const sultanPom = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), bridleMat);
   sultanPom.position.set(2.44, 2.78, 0);
   group.add(sultanPom);
 
@@ -250,13 +269,13 @@ export function createHorseMesh(color, team, horseTypeId, coatId) {
   sultanRing.position.set(2.44, 1.92, 0);
   group.add(sultanRing);
 
-  const bridle = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.035, 8, 24), tackMaterial);
+  const bridle = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.035, 8, 24), bridleMat);
   bridle.position.set(2.58, 1.45, -0.03);
   bridle.rotation.y = Math.PI / 2;
   group.add(bridle);
 
   for (const z of [-0.22, 0.22]) {
-    const rein = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.045, 0.035), tackMaterial);
+    const rein = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.045, 0.035), bridleMat);
     rein.position.set(1.32, 1.95, z);
     rein.rotation.z = -0.25;
     group.add(rein);

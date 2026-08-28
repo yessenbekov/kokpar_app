@@ -347,8 +347,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     scene.add(rider.group);
   }
 
+  if (player) player.equipment = playerEquipment;
+
   riders.forEach((rider) => {
-    setRiderGroup(rider, createHorseMesh(rider.color, rider.team, rider.horseType, rider.coatId));
+    setRiderGroup(rider, createHorseMesh(rider.color, rider.team, rider.horseType, rider.coatId, rider.equipment ?? {}));
     rider.contestMarker = createContestRiderMarker(rider.team === TEAM.blue ? COLORS.blue : COLORS.red);
     scene.add(rider.contestMarker);
     rider.roleMarker = createRiderRoleMarker();
