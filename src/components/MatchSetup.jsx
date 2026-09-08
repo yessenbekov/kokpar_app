@@ -193,7 +193,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
               {/* Step dots */}
               <div className="wizard-steps">
-                {Array.from({ length: isTraining ? 2 : 6 }).map((_, i) => (
+                {Array.from({ length: isTraining || onlineMode ? 2 : 6 }).map((_, i) => (
                   <span key={i} className={`wizard-dot${wizardStep > i ? " done" : wizardStep === i ? " current" : ""}`} />
                 ))}
               </div>
@@ -219,8 +219,34 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Step 1 (kokpar/online) — сторона */}
-              {wizardStep === 1 && !isTraining && (
+              {/* Online room: show lobby immediately after mode selection */}
+              {wizardStep >= 1 && onlineMode && (
+                <div className="wizard-section">
+                  <OnlineRoomLobby
+                    auth={auth}
+                    profile={profile}
+                    selectedHorse={selectedHorse}
+                    settings={settings}
+                    ready={onlineReady}
+                    startRequest={onlineStartRequest}
+                    onReadyChange={setOnlineReady}
+                    onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
+                    onBackToLogin={onBackToLogin}
+                    onLobbyStateChange={handleOnlineLobbyStateChange}
+                    onRoomStart={onStart}
+                  />
+                  <div className="tab-footer wizard-footer">
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>← Назад</button>
+                    <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
+                      <Play size={19} fill="currentColor" strokeWidth={2.4} />
+                      <span>{startLabel}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 1 (kokpar) — сторона */}
+              {wizardStep === 1 && !isTraining && !onlineMode && (
                 <div className="wizard-section">
                   <p className="wizard-label"><Flag size={16} strokeWidth={2.4} />Выберите сторону</p>
                   <div className="wizard-side-grid">
@@ -241,8 +267,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Step 2 (kokpar/online) — цель */}
-              {wizardStep === 2 && !isTraining && (
+              {/* Step 2 (kokpar) — цель */}
+              {wizardStep === 2 && !isTraining && !onlineMode && (
                 <div className="wizard-section">
                   <p className="wizard-label"><CircleDot size={16} strokeWidth={2.4} />Выберите цель</p>
                   <div className="wizard-side-grid">
@@ -265,8 +291,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Step 3 (kokpar/online) — игроки */}
-              {wizardStep === 3 && !isTraining && (
+              {/* Step 3 (kokpar) — игроки */}
+              {wizardStep === 3 && !isTraining && !onlineMode && (
                 <div className="wizard-section">
                   <p className="wizard-label"><Users size={16} strokeWidth={2.4} />Количество игроков</p>
                   <div className="wizard-three-grid">
@@ -288,8 +314,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Step 4 (kokpar/online) — время */}
-              {wizardStep === 4 && !isTraining && (
+              {/* Step 4 (kokpar) — время */}
+              {wizardStep === 4 && !isTraining && !onlineMode && (
                 <div className="wizard-section">
                   <p className="wizard-label"><Clock3 size={16} strokeWidth={2.4} />Время матча</p>
                   <div className="wizard-three-grid">
@@ -311,8 +337,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Final step — сложность + старт */}
-              {((wizardStep === 5 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+              {/* Final step (kokpar/training) — сложность + старт */}
+              {((wizardStep === 5 && !isTraining && !onlineMode) || (wizardStep === 1 && isTraining)) && (
                 <div className="wizard-section">
                   <p className="wizard-label"><Zap size={16} strokeWidth={2.4} />Выберите сложность</p>
                   <div className="wizard-diff-grid">
@@ -330,22 +356,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       </button>
                     ))}
                   </div>
-
-                  {onlineMode && (
-                    <OnlineRoomLobby
-                      auth={auth}
-                      profile={profile}
-                      selectedHorse={selectedHorse}
-                      settings={settings}
-                      ready={onlineReady}
-                      startRequest={onlineStartRequest}
-                      onReadyChange={setOnlineReady}
-                      onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
-                      onBackToLogin={onBackToLogin}
-                      onLobbyStateChange={handleOnlineLobbyStateChange}
-                      onRoomStart={onStart}
-                    />
-                  )}
 
                   <div className="tab-footer wizard-footer">
                     <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 4)}>← Назад</button>
