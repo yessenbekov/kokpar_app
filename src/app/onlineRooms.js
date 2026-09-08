@@ -266,6 +266,34 @@ export const onlineRoomStore = {
     return fetchRoom(roomId);
   },
 
+  async listOpenRooms() {
+    if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
+
+    const { data, error } = await supabase
+      .from("online_rooms")
+      .select("*")
+      .eq("status", "lobby")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) throw queryError(error, "Не удалось загрузить список комнат");
+
+    const rooms = (data ?? []).map(roomFromRow);
+    if (rooms.length === 0) return [];
+
+    const { data: playerRows } = await supabase
+      .from("online_room_players")
+      .select("room_id")
+      .in("room_id", rooms.map((r) => r.id));
+
+    const countsByRoom = {};
+    (playerRows ?? []).forEach((row) => {
+      countsByRoom[row.room_id] = (countsByRoom[row.room_id] ?? 0) + 1;
+    });
+
+    return rooms.map((room) => ({ ...room, playerCount: countsByRoom[room.id] ?? 0 }));
+  },
+
   subscribe(roomId, onChange) {
     if (!isSupabaseConfigured || !supabase || !roomId) return () => {};
 

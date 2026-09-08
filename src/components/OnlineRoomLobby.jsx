@@ -62,6 +62,9 @@ export function OnlineRoomLobby({
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
   const [countdown, setCountdown] = useState(null);
+  const [lobbyView, setLobbyView] = useState("choose");
+  const [openRooms, setOpenRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
   const startedRoomRef = useRef("");
   const autoJoinedRef = useRef(false);
 
@@ -264,6 +267,29 @@ export function OnlineRoomLobby({
     });
   }
 
+  async function joinByCode(code) {
+    setJoinCode(code);
+    await runRoomAction(async () => {
+      const nextState = await onlineRoomStore.join({ code, profile, selectedHorse, settings });
+      setCurrentUserId(nextState.currentUserId ?? "");
+      return nextState;
+    });
+  }
+
+  async function openJoinView() {
+    setLobbyView("join-list");
+    setLoadingRooms(true);
+    setError("");
+    try {
+      const rooms = await onlineRoomStore.listOpenRooms();
+      setOpenRooms(rooms);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Не удалось загрузить комнаты");
+    } finally {
+      setLoadingRooms(false);
+    }
+  }
+
   async function updateTeam(teamSide) {
     if (!room?.id) {
       onTeamChange(teamSide);
@@ -368,27 +394,66 @@ export function OnlineRoomLobby({
       </div>
 
       {!room ? (
-        <div className="lobby-actions">
-          <button className="ready-button" type="button" onClick={createRoom} disabled={busy}>
-            <Plus size={17} strokeWidth={2.6} />
-            <span>{busy ? "Создаем" : "Создать комнату"}</span>
-          </button>
+        <>
+          {/* Выбор: создать или войти */}
+          {lobbyView === "choose" && (
+            <div className="lobby-choice-grid">
+              <button type="button" className="lobby-choice-card" onClick={createRoom} disabled={busy}>
+                <Plus size={30} strokeWidth={2.2} />
+                <strong>Создать</strong>
+                <span>Новая комната</span>
+              </button>
+              <button type="button" className="lobby-choice-card" onClick={openJoinView} disabled={busy}>
+                <DoorOpen size={30} strokeWidth={2.2} />
+                <strong>Войти</strong>
+                <span>Открытые игры</span>
+              </button>
+            </div>
+          )}
 
-          <form className="lobby-join-form" onSubmit={joinRoom}>
-            <input
-              aria-label="Код комнаты"
-              value={joinCode}
-              onChange={(event) => setJoinCode(onlineRoomStore.normalizeCode(event.target.value))}
-              maxLength={6}
-              placeholder="КОД"
-              disabled={busy}
-            />
-            <button type="submit" disabled={busy || joinCode.length < 4}>
-              <DoorOpen size={16} strokeWidth={2.5} />
-              <span>Войти</span>
-            </button>
-          </form>
-        </div>
+          {/* Список открытых комнат */}
+          {lobbyView === "join-list" && (
+            <div className="lobby-join-view">
+              {loadingRooms ? (
+                <div className="lobby-rooms-loading">
+                  <RefreshCw size={18} strokeWidth={2.4} className="lobby-spin" />
+                  <span>Загружаем...</span>
+                </div>
+              ) : openRooms.length === 0 ? (
+                <div className="lobby-rooms-empty">Открытых комнат нет</div>
+              ) : (
+                <div className="lobby-rooms-list">
+                  {openRooms.map((r) => (
+                    <button key={r.id} type="button" className="lobby-room-card" onClick={() => joinByCode(r.code)} disabled={busy}>
+                      <span className="lobby-room-code">{r.code}</span>
+                      <span className="lobby-room-meta">
+                        {r.teamSize}×{r.teamSize} · {goalLabel(r.goalType)} · {r.matchMinutes}мин
+                      </span>
+                      <span className="lobby-room-players">{r.playerCount}/{r.teamSize * 2} 🏇</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <form className="lobby-join-form" onSubmit={joinRoom}>
+                <input
+                  aria-label="Код комнаты"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(onlineRoomStore.normalizeCode(e.target.value))}
+                  maxLength={6}
+                  placeholder="или введи КОД"
+                  disabled={busy}
+                />
+                <button type="submit" disabled={busy || joinCode.length < 4}>
+                  <DoorOpen size={16} strokeWidth={2.5} />
+                  <span>Войти</span>
+                </button>
+              </form>
+
+              <button type="button" className="wizard-back-btn" onClick={() => setLobbyView("choose")}>← Назад</button>
+            </div>
+          )}
+        </>
       ) : (
         <>
           <div className="lobby-share">

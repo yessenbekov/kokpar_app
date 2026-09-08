@@ -8292,3 +8292,119 @@ kbd.hint-key--space {
 .auth-gate-panel {
   padding-top: calc(24px + env(safe-area-inset-top, 0px));
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ONLINE LOBBY — create / join choice + room list
+   ═══════════════════════════════════════════════════════════════ */
+
+.lobby-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.lobby-choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(195, 148, 52, 0.24);
+  background: rgba(255, 248, 222, 0.82);
+  cursor: pointer;
+  transition: background 0.13s, border-color 0.13s, box-shadow 0.13s, transform 0.12s;
+  color: #3a2005;
+}
+
+.lobby-choice-card:hover:not(:disabled) {
+  background: rgba(255, 242, 195, 0.96);
+  border-color: rgba(210, 160, 48, 0.50);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(120, 72, 10, 0.16);
+}
+
+.lobby-choice-card strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.lobby-choice-card span {
+  font-size: 12px;
+  color: rgba(100, 65, 15, 0.62);
+}
+
+.lobby-join-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lobby-rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.lobby-room-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(195, 148, 52, 0.22);
+  background: rgba(255, 248, 222, 0.80);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s, transform 0.10s;
+  color: #3a2005;
+  width: 100%;
+}
+
+.lobby-room-card:hover:not(:disabled) {
+  background: rgba(255, 242, 195, 0.96);
+  border-color: rgba(210, 160, 48, 0.48);
+  transform: translateY(-1px);
+}
+
+.lobby-room-code {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  min-width: 56px;
+}
+
+.lobby-room-meta {
+  font-size: 12px;
+  color: rgba(100, 65, 15, 0.65);
+  flex: 1;
+}
+
+.lobby-room-players {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(120, 80, 20, 0.80);
+  white-space: nowrap;
+}
+
+.lobby-rooms-loading,
+.lobby-rooms-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  font-size: 13px;
+  color: rgba(100, 65, 15, 0.60);
+}
+
+@keyframes lobby-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lobby-spin {
+  animation: lobby-spin 1s linear infinite;
+}
