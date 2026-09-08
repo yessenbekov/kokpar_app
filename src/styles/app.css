@@ -8260,7 +8260,8 @@ kbd.hint-key--space {
    FULLSCREEN — panel fills the entire viewport, no outer gap
    ═══════════════════════════════════════════════════════════════ */
 
-.setup {
+/* Fullscreen only for the game lobby, not the auth screen */
+.setup:not(.auth-screen) {
   padding: 0;
   place-items: stretch;
 }
@@ -8285,4 +8286,9 @@ kbd.hint-key--space {
 
 .bottom-nav {
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Auth screen safe area (top padding on the panel itself) */
+.auth-gate-panel {
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
 }
