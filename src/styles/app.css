@@ -8201,6 +8201,13 @@ kbd.hint-key--space {
   align-self: flex-start;
 }
 
+/* Three-card grid (players / time) */
+.wizard-three-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
 /* Difficulty cards — final wizard step */
 .wizard-diff-grid {
   display: grid;

@@ -193,12 +193,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
               {/* Step dots */}
               <div className="wizard-steps">
-                {Array.from({ length: isTraining ? 2 : 4 }).map((_, i) => (
+                {Array.from({ length: isTraining ? 2 : 6 }).map((_, i) => (
                   <span key={i} className={`wizard-dot${wizardStep > i ? " done" : wizardStep === i ? " current" : ""}`} />
                 ))}
               </div>
 
-              {/* Step 0 — choose mode */}
+              {/* Step 0 — режим */}
               {wizardStep === 0 && (
                 <div className="wizard-section">
                   <p className="wizard-label">Выберите режим</p>
@@ -219,114 +219,111 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Step 1 (kokpar/online) — choose side */}
+              {/* Step 1 (kokpar/online) — сторона */}
               {wizardStep === 1 && !isTraining && (
                 <div className="wizard-section">
-                  <p className="wizard-label">
-                    <Flag size={16} strokeWidth={2.4} />
-                    Выберите сторону
-                  </p>
+                  <p className="wizard-label"><Flag size={16} strokeWidth={2.4} />Выберите сторону</p>
                   <div className="wizard-side-grid">
-                    <button
-                      type="button"
-                      className={`wizard-side-card blue${settings.teamSide !== "red" ? " active" : ""}`}
-                      onClick={() => { onSettingChange("teamSide", "blue"); setWizardStep(2); }}
-                    >
+                    <button type="button" className={`wizard-side-card blue${settings.teamSide !== "red" ? " active" : ""}`}
+                      onClick={() => { onSettingChange("teamSide", "blue"); setWizardStep(2); }}>
                       <span className="wizard-side-icon">🔵</span>
                       <strong>Синие</strong>
                       <span>Левые ворота</span>
                     </button>
-                    <button
-                      type="button"
-                      className={`wizard-side-card red${settings.teamSide === "red" ? " active" : ""}`}
-                      onClick={() => { onSettingChange("teamSide", "red"); setWizardStep(2); }}
-                    >
+                    <button type="button" className={`wizard-side-card red${settings.teamSide === "red" ? " active" : ""}`}
+                      onClick={() => { onSettingChange("teamSide", "red"); setWizardStep(2); }}>
                       <span className="wizard-side-icon">🔴</span>
                       <strong>Красные</strong>
                       <span>Правые ворота</span>
                     </button>
                   </div>
-                  <div className="wizard-nav">
-                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>← Назад</button>
-                    <button type="button" className="wizard-next-btn" onClick={() => setWizardStep(2)}>Далее →</button>
-                  </div>
+                  <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>← Назад</button>
                 </div>
               )}
 
-              {/* Step 2 (kokpar/online) — match settings */}
+              {/* Step 2 (kokpar/online) — цель */}
               {wizardStep === 2 && !isTraining && (
                 <div className="wizard-section">
-                  <p className="wizard-label">Настройки матча</p>
-                  <div className="match-options">
-                    <div className="setting-group" aria-label="Тип цели">
-                      <div className="setting-title">
-                        <CircleDot size={17} strokeWidth={2.4} />
-                        <span>Цель</span>
-                      </div>
-                      <div className="choice-grid two">
-                        <button className={settings.goalType === "circle" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "circle")}>
-                          <strong>Круг</strong>
-                          <span>На земле</span>
-                        </button>
-                        <button className={settings.goalType === "kazan" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "kazan")}>
-                          <strong>Казан</strong>
-                          <span>С бортом</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div className="setting-group" aria-label="Игроки">
-                      <div className="setting-title">
-                        <Users size={17} strokeWidth={2.4} />
-                        <span>Игроки</span>
-                      </div>
-                      <div className="choice-grid three">
-                        {[3, 4, 5].map((size) => (
-                          <button className={settings.teamSize === size ? "choice active" : "choice"} type="button" key={size} onClick={() => onSettingChange("teamSize", size)}>
-                            <strong>{size}×{size}</strong>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="setting-group" aria-label="Время матча">
-                      <div className="setting-title">
-                        <Clock3 size={17} strokeWidth={2.4} />
-                        <span>Время</span>
-                      </div>
-                      <div className="choice-grid three">
-                        {[2, 3, 5].map((minutes) => (
-                          <button className={settings.matchMinutes === minutes ? "choice active" : "choice"} type="button" key={minutes} onClick={() => onSettingChange("matchMinutes", minutes)}>
-                            <strong>{minutes}:00</strong>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                  <p className="wizard-label"><CircleDot size={16} strokeWidth={2.4} />Выберите цель</p>
+                  <div className="wizard-side-grid">
+                    <button type="button" className={`wizard-side-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => { onSettingChange("goalType", "circle"); setWizardStep(3); }}>
+                      <span className="wizard-side-icon">⭕</span>
+                      <strong>Круг</strong>
+                      <span>На земле</span>
+                    </button>
+                    <button type="button" className={`wizard-side-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => { onSettingChange("goalType", "kazan"); setWizardStep(3); }}>
+                      <span className="wizard-side-icon">🏺</span>
+                      <strong>Казан</strong>
+                      <span>С бортом</span>
+                    </button>
                   </div>
-                  <div className="wizard-nav">
-                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(1)}>← Назад</button>
-                    <button type="button" className="wizard-next-btn" onClick={() => setWizardStep(3)}>Далее →</button>
-                  </div>
+                  <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(1)}>← Назад</button>
                 </div>
               )}
 
-              {/* Final step — difficulty + start */}
-              {((wizardStep === 3 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+              {/* Step 3 (kokpar/online) — игроки */}
+              {wizardStep === 3 && !isTraining && (
                 <div className="wizard-section">
-                  <p className="wizard-label">
-                    <Zap size={16} strokeWidth={2.4} />
-                    Выберите сложность
-                  </p>
+                  <p className="wizard-label"><Users size={16} strokeWidth={2.4} />Количество игроков</p>
+                  <div className="wizard-three-grid">
+                    {[
+                      { size: 3, sub: "3 на 3" },
+                      { size: 4, sub: "4 на 4" },
+                      { size: 5, sub: "5 на 5" }
+                    ].map(({ size, sub }) => (
+                      <button key={size} type="button"
+                        className={`wizard-diff-card${settings.teamSize === size ? " active" : ""}`}
+                        onClick={() => { onSettingChange("teamSize", size); setWizardStep(4); }}>
+                        <span className="wizard-diff-emoji">{"🏇".repeat(Math.min(size, 3))}</span>
+                        <strong>{size}×{size}</strong>
+                        <span>{sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(2)}>← Назад</button>
+                </div>
+              )}
+
+              {/* Step 4 (kokpar/online) — время */}
+              {wizardStep === 4 && !isTraining && (
+                <div className="wizard-section">
+                  <p className="wizard-label"><Clock3 size={16} strokeWidth={2.4} />Время матча</p>
+                  <div className="wizard-three-grid">
+                    {[
+                      { minutes: 2, sub: "Короткий" },
+                      { minutes: 3, sub: "Стандарт" },
+                      { minutes: 5, sub: "Длинный" }
+                    ].map(({ minutes, sub }) => (
+                      <button key={minutes} type="button"
+                        className={`wizard-diff-card${settings.matchMinutes === minutes ? " active" : ""}`}
+                        onClick={() => { onSettingChange("matchMinutes", minutes); setWizardStep(5); }}>
+                        <span className="wizard-diff-emoji">⏱️</span>
+                        <strong>{minutes}:00</strong>
+                        <span>{sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(3)}>← Назад</button>
+                </div>
+              )}
+
+              {/* Final step — сложность + старт */}
+              {((wizardStep === 5 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+                <div className="wizard-section">
+                  <p className="wizard-label"><Zap size={16} strokeWidth={2.4} />Выберите сложность</p>
                   <div className="wizard-diff-grid">
                     {[
-                      { id: "easy",   label: "Новичок",  sub: "ИИ слабый",   emoji: "🐴" },
-                      { id: "normal", label: "Нормально", sub: "Стандарт",    emoji: "🏇" },
-                      { id: "hard",   label: "Батыр",    sub: "ИИ сильный",  emoji: "⚔️" }
+                      { id: "easy",   label: "Новичок",   sub: "ИИ слабый",  emoji: "🐴" },
+                      { id: "normal", label: "Нормально",  sub: "Стандарт",   emoji: "🏇" },
+                      { id: "hard",   label: "Батыр",     sub: "ИИ сильный", emoji: "⚔️" }
                     ].map(({ id, label, sub, emoji }) => (
-                      <button
-                        key={id}
-                        type="button"
+                      <button key={id} type="button"
                         className={`wizard-diff-card${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
-                        onClick={() => onSettingChange("difficulty", id)}
-                      >
+                        onClick={() => onSettingChange("difficulty", id)}>
                         <span className="wizard-diff-emoji">{emoji}</span>
                         <strong>{label}</strong>
                         <span>{sub}</span>
@@ -351,7 +348,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   )}
 
                   <div className="tab-footer wizard-footer">
-                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 2)}>← Назад</button>
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 4)}>← Назад</button>
                     <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
                       <Play size={19} fill="currentColor" strokeWidth={2.4} />
                       <span>{startLabel}</span>
