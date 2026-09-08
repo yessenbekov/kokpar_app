@@ -8277,3 +8277,12 @@ kbd.hint-key--space {
   border-right: none;
   border-bottom: none;
 }
+
+/* iOS safe area — notch / Dynamic Island / home indicator */
+.setup-topbar {
+  padding-top: calc(20px + env(safe-area-inset-top, 0px));
+}
+
+.bottom-nav {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
