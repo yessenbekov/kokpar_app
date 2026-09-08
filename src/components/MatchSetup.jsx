@@ -324,8 +324,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               {stableTab === "shop" && (
                 <Shop
                   profile={profile}
-                  selectedHorseId={settings.horseId}
-                  onBuyItem={onBuyItem}
                   onBuyHorse={onBuyHorse}
                 />
               )}
