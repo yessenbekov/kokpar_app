@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, History, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, User, Users, X, Zap } from "lucide-react";
-import { gameModeById } from "../app/gameModes.js";
+import { GAME_MODES, gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { Marketplace } from "./Marketplace.jsx";
 import { MatchHistory } from "./MatchHistory.jsx";
-import { ModeSelector } from "./ModeSelector.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 import { Shop } from "./Shop.jsx";
 
@@ -106,6 +105,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [draftRiderName, setDraftRiderName] = useState(profile.riderName);
   const [stableTab, setStableTab] = useState("stable");
   const [listingDraft, setListingDraft] = useState(null);
+  const [wizardStep, setWizardStep] = useState(0);
   const canStart = !onlineMode || onlineLobbyState.canStart;
   const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
 
@@ -117,6 +117,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     setOnlineReady(false);
     setOnlineLobbyState(EMPTY_ONLINE_STATE);
   }, [settings.modeId, settings.teamSide, settings.horseId]);
+
+  useEffect(() => {
+    setWizardStep(0);
+  }, [navTab]);
 
   function handleStart() {
     if (onlineMode) {
@@ -141,6 +145,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     const horse = profile.ownedHorses.find((h) => h.id === horseId);
     setListingDraft({ itemType: "horse", horseId, horseName: horse?.name, defaultPrice: 800 });
     setStableTab("market");
+  }
+
+  const MODE_EMOJI = { kokpar: "🏇", training: "🎯", online_room: "🌐" };
+  const isTraining = selectedMode.id === "training";
+
+  function handleModeCard(modeId) {
+    onSettingChange("modeId", modeId);
+    setWizardStep(1);
   }
 
   async function handleListItem(itemType, itemId, slotKey, horseId, price) {
@@ -179,113 +191,162 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <span className="horse-strip-arrow">›</span>
               </button>
 
-              <ModeSelector modeId={settings.modeId} onModeChange={(modeId) => onSettingChange("modeId", modeId)} />
+              {/* Step dots */}
+              <div className="wizard-steps">
+                {Array.from({ length: isTraining ? 2 : 3 }).map((_, i) => (
+                  <span key={i} className={`wizard-dot${wizardStep > i ? " done" : wizardStep === i ? " current" : ""}`} />
+                ))}
+              </div>
 
-              <div className="match-options">
-                <div className="setting-group" aria-label="Сторона">
-                  <div className="setting-title">
-                    <Flag size={17} strokeWidth={2.4} />
-                    <span>Сторона</span>
+              {/* Step 0 — choose mode */}
+              {wizardStep === 0 && (
+                <div className="wizard-section">
+                  <p className="wizard-label">Выберите режим</p>
+                  <div className="wizard-mode-grid">
+                    {GAME_MODES.map((mode) => (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        className={`wizard-mode-card${settings.modeId === mode.id ? " active" : ""}`}
+                        onClick={() => handleModeCard(mode.id)}
+                      >
+                        <span className="wizard-mode-emoji">{MODE_EMOJI[mode.id]}</span>
+                        <strong>{mode.name}</strong>
+                        <span>{mode.role}</span>
+                      </button>
+                    ))}
                   </div>
-                  <div className="choice-grid two">
-                    <button className={`choice team-blue${settings.teamSide !== "red" ? " active" : ""}`} type="button" onClick={() => onSettingChange("teamSide", "blue")}>
+                </div>
+              )}
+
+              {/* Step 1 (kokpar/online) — choose side */}
+              {wizardStep === 1 && !isTraining && (
+                <div className="wizard-section">
+                  <p className="wizard-label">
+                    <Flag size={16} strokeWidth={2.4} />
+                    Выберите сторону
+                  </p>
+                  <div className="wizard-side-grid">
+                    <button
+                      type="button"
+                      className={`wizard-side-card blue${settings.teamSide !== "red" ? " active" : ""}`}
+                      onClick={() => { onSettingChange("teamSide", "blue"); setWizardStep(2); }}
+                    >
+                      <span className="wizard-side-icon">🔵</span>
                       <strong>Синие</strong>
                       <span>Левые ворота</span>
                     </button>
-                    <button className={`choice team-red${settings.teamSide === "red" ? " active" : ""}`} type="button" onClick={() => onSettingChange("teamSide", "red")}>
+                    <button
+                      type="button"
+                      className={`wizard-side-card red${settings.teamSide === "red" ? " active" : ""}`}
+                      onClick={() => { onSettingChange("teamSide", "red"); setWizardStep(2); }}
+                    >
+                      <span className="wizard-side-icon">🔴</span>
                       <strong>Красные</strong>
                       <span>Правые ворота</span>
                     </button>
                   </div>
-                </div>
-
-                <div className="setting-group" aria-label="Тип цели">
-                  <div className="setting-title">
-                    <CircleDot size={17} strokeWidth={2.4} />
-                    <span>Цель</span>
-                  </div>
-                  <div className="choice-grid two">
-                    <button className={settings.goalType === "circle" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "circle")}>
-                      <strong>Круг</strong>
-                      <span>На земле</span>
-                    </button>
-                    <button className={settings.goalType === "kazan" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "kazan")}>
-                      <strong>Казан</strong>
-                      <span>С бортом</span>
-                    </button>
+                  <div className="wizard-nav">
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>← Назад</button>
+                    <button type="button" className="wizard-next-btn" onClick={() => setWizardStep(2)}>Далее →</button>
                   </div>
                 </div>
-
-                <div className="setting-group" aria-label="Игроки">
-                  <div className="setting-title">
-                    <Users size={17} strokeWidth={2.4} />
-                    <span>Игроки</span>
-                  </div>
-                  <div className="choice-grid three">
-                    {[3, 4, 5].map((size) => (
-                      <button className={settings.teamSize === size ? "choice active" : "choice"} type="button" key={size} onClick={() => onSettingChange("teamSize", size)}>
-                        <strong>{size}×{size}</strong>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="setting-group" aria-label="Время матча">
-                  <div className="setting-title">
-                    <Clock3 size={17} strokeWidth={2.4} />
-                    <span>Время</span>
-                  </div>
-                  <div className="choice-grid three">
-                    {[2, 3, 5].map((minutes) => (
-                      <button className={settings.matchMinutes === minutes ? "choice active" : "choice"} type="button" key={minutes} onClick={() => onSettingChange("matchMinutes", minutes)}>
-                        <strong>{minutes}:00</strong>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="setting-group" aria-label="Сложность">
-                  <div className="setting-title">
-                    <Zap size={17} strokeWidth={2.4} />
-                    <span>Сложность</span>
-                  </div>
-                  <div className="choice-grid three">
-                    {[
-                      { id: "easy",   label: "Новичок",   sub: "ИИ слабый" },
-                      { id: "normal", label: "Нормально", sub: "Стандарт" },
-                      { id: "hard",   label: "Батыр",     sub: "ИИ сильный" }
-                    ].map(({ id, label, sub }) => (
-                      <button className={(settings.difficulty ?? "normal") === id ? "choice active" : "choice"} type="button" key={id} onClick={() => onSettingChange("difficulty", id)}>
-                        <strong>{label}</strong>
-                        <span>{sub}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {onlineMode && (
-                <OnlineRoomLobby
-                  auth={auth}
-                  profile={profile}
-                  selectedHorse={selectedHorse}
-                  settings={settings}
-                  ready={onlineReady}
-                  startRequest={onlineStartRequest}
-                  onReadyChange={setOnlineReady}
-                  onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
-                  onBackToLogin={onBackToLogin}
-                  onLobbyStateChange={handleOnlineLobbyStateChange}
-                  onRoomStart={onStart}
-                />
               )}
 
-              <div className="tab-footer">
-                <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
-                  <Play size={19} fill="currentColor" strokeWidth={2.4} />
-                  <span>{startLabel}</span>
-                </button>
-              </div>
+              {/* Final step — match settings + start */}
+              {((wizardStep === 2 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+                <div className="wizard-section">
+                  <div className="match-options">
+                    <div className="setting-group" aria-label="Тип цели">
+                      <div className="setting-title">
+                        <CircleDot size={17} strokeWidth={2.4} />
+                        <span>Цель</span>
+                      </div>
+                      <div className="choice-grid two">
+                        <button className={settings.goalType === "circle" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "circle")}>
+                          <strong>Круг</strong>
+                          <span>На земле</span>
+                        </button>
+                        <button className={settings.goalType === "kazan" ? "choice active" : "choice"} type="button" disabled={selectedMode.goalLocked} onClick={() => onSettingChange("goalType", "kazan")}>
+                          <strong>Казан</strong>
+                          <span>С бортом</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="setting-group" aria-label="Игроки">
+                      <div className="setting-title">
+                        <Users size={17} strokeWidth={2.4} />
+                        <span>Игроки</span>
+                      </div>
+                      <div className="choice-grid three">
+                        {[3, 4, 5].map((size) => (
+                          <button className={settings.teamSize === size ? "choice active" : "choice"} type="button" key={size} onClick={() => onSettingChange("teamSize", size)}>
+                            <strong>{size}×{size}</strong>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="setting-group" aria-label="Время матча">
+                      <div className="setting-title">
+                        <Clock3 size={17} strokeWidth={2.4} />
+                        <span>Время</span>
+                      </div>
+                      <div className="choice-grid three">
+                        {[2, 3, 5].map((minutes) => (
+                          <button className={settings.matchMinutes === minutes ? "choice active" : "choice"} type="button" key={minutes} onClick={() => onSettingChange("matchMinutes", minutes)}>
+                            <strong>{minutes}:00</strong>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="setting-group" aria-label="Сложность">
+                      <div className="setting-title">
+                        <Zap size={17} strokeWidth={2.4} />
+                        <span>Сложность</span>
+                      </div>
+                      <div className="choice-grid three">
+                        {[
+                          { id: "easy",   label: "Новичок",   sub: "ИИ слабый" },
+                          { id: "normal", label: "Нормально", sub: "Стандарт" },
+                          { id: "hard",   label: "Батыр",     sub: "ИИ сильный" }
+                        ].map(({ id, label, sub }) => (
+                          <button className={(settings.difficulty ?? "normal") === id ? "choice active" : "choice"} type="button" key={id} onClick={() => onSettingChange("difficulty", id)}>
+                            <strong>{label}</strong>
+                            <span>{sub}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {onlineMode && (
+                    <OnlineRoomLobby
+                      auth={auth}
+                      profile={profile}
+                      selectedHorse={selectedHorse}
+                      settings={settings}
+                      ready={onlineReady}
+                      startRequest={onlineStartRequest}
+                      onReadyChange={setOnlineReady}
+                      onTeamChange={(teamSide) => onSettingChange("teamSide", teamSide)}
+                      onBackToLogin={onBackToLogin}
+                      onLobbyStateChange={handleOnlineLobbyStateChange}
+                      onRoomStart={onStart}
+                    />
+                  )}
+
+                  <div className="tab-footer wizard-footer">
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 1)}>← Назад</button>
+                    <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
+                      <Play size={19} fill="currentColor" strokeWidth={2.4} />
+                      <span>{startLabel}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
