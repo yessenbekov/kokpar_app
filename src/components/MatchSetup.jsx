@@ -193,7 +193,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
               {/* Step dots */}
               <div className="wizard-steps">
-                {Array.from({ length: isTraining ? 2 : 3 }).map((_, i) => (
+                {Array.from({ length: isTraining ? 2 : 4 }).map((_, i) => (
                   <span key={i} className={`wizard-dot${wizardStep > i ? " done" : wizardStep === i ? " current" : ""}`} />
                 ))}
               </div>
@@ -253,9 +253,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              {/* Final step — match settings + start */}
-              {((wizardStep === 2 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+              {/* Step 2 (kokpar/online) — match settings */}
+              {wizardStep === 2 && !isTraining && (
                 <div className="wizard-section">
+                  <p className="wizard-label">Настройки матча</p>
                   <div className="match-options">
                     <div className="setting-group" aria-label="Тип цели">
                       <div className="setting-title">
@@ -273,7 +274,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         </button>
                       </div>
                     </div>
-
                     <div className="setting-group" aria-label="Игроки">
                       <div className="setting-title">
                         <Users size={17} strokeWidth={2.4} />
@@ -287,7 +287,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         ))}
                       </div>
                     </div>
-
                     <div className="setting-group" aria-label="Время матча">
                       <div className="setting-title">
                         <Clock3 size={17} strokeWidth={2.4} />
@@ -301,25 +300,38 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         ))}
                       </div>
                     </div>
+                  </div>
+                  <div className="wizard-nav">
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(1)}>← Назад</button>
+                    <button type="button" className="wizard-next-btn" onClick={() => setWizardStep(3)}>Далее →</button>
+                  </div>
+                </div>
+              )}
 
-                    <div className="setting-group" aria-label="Сложность">
-                      <div className="setting-title">
-                        <Zap size={17} strokeWidth={2.4} />
-                        <span>Сложность</span>
-                      </div>
-                      <div className="choice-grid three">
-                        {[
-                          { id: "easy",   label: "Новичок",   sub: "ИИ слабый" },
-                          { id: "normal", label: "Нормально", sub: "Стандарт" },
-                          { id: "hard",   label: "Батыр",     sub: "ИИ сильный" }
-                        ].map(({ id, label, sub }) => (
-                          <button className={(settings.difficulty ?? "normal") === id ? "choice active" : "choice"} type="button" key={id} onClick={() => onSettingChange("difficulty", id)}>
-                            <strong>{label}</strong>
-                            <span>{sub}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+              {/* Final step — difficulty + start */}
+              {((wizardStep === 3 && !isTraining) || (wizardStep === 1 && isTraining)) && (
+                <div className="wizard-section">
+                  <p className="wizard-label">
+                    <Zap size={16} strokeWidth={2.4} />
+                    Выберите сложность
+                  </p>
+                  <div className="wizard-diff-grid">
+                    {[
+                      { id: "easy",   label: "Новичок",  sub: "ИИ слабый",   emoji: "🐴" },
+                      { id: "normal", label: "Нормально", sub: "Стандарт",    emoji: "🏇" },
+                      { id: "hard",   label: "Батыр",    sub: "ИИ сильный",  emoji: "⚔️" }
+                    ].map(({ id, label, sub, emoji }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className={`wizard-diff-card${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
+                        onClick={() => onSettingChange("difficulty", id)}
+                      >
+                        <span className="wizard-diff-emoji">{emoji}</span>
+                        <strong>{label}</strong>
+                        <span>{sub}</span>
+                      </button>
+                    ))}
                   </div>
 
                   {onlineMode && (
@@ -339,7 +351,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   )}
 
                   <div className="tab-footer wizard-footer">
-                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 1)}>← Назад</button>
+                    <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(isTraining ? 0 : 2)}>← Назад</button>
                     <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
                       <Play size={19} fill="currentColor" strokeWidth={2.4} />
                       <span>{startLabel}</span>
