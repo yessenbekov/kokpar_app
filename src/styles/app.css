@@ -8285,7 +8285,7 @@ kbd.hint-key--space {
 }
 
 .bottom-nav {
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Auth screen safe area (top padding on the panel itself) */
