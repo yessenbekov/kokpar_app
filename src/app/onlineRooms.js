@@ -162,15 +162,17 @@ export const onlineRoomStore = {
     if (roomCode.length < 4) throw new Error("Введи код комнаты");
 
     const user = await currentUser();
+    const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const { data: roomRow, error: roomError } = await supabase
       .from("online_rooms")
       .select("*")
       .eq("code", roomCode)
       .eq("status", "lobby")
+      .gte("created_at", cutoff)
       .maybeSingle();
 
     if (roomError) throw queryError(roomError, "Не удалось найти комнату");
-    if (!roomRow) throw new Error("Комната не найдена");
+    if (!roomRow) throw new Error("Комната не найдена или истекла");
 
     const currentRoom = await fetchRoom(roomRow.id);
     const isSpectator = settings.teamSide === "spectator";
@@ -269,10 +271,12 @@ export const onlineRoomStore = {
   async listOpenRooms() {
     if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
 
+    const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const { data, error } = await supabase
       .from("online_rooms")
       .select("*")
       .eq("status", "lobby")
+      .gte("created_at", cutoff)
       .order("created_at", { ascending: false })
       .limit(20);
 
