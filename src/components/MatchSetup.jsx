@@ -106,7 +106,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [stableTab, setStableTab] = useState("stable");
   const [listingDraft, setListingDraft] = useState(null);
   const [wizardStep, setWizardStep] = useState(0);
+  const [homeScreen, setHomeScreen] = useState(true);
   const canStart = !onlineMode || onlineLobbyState.canStart;
+
+  function goHome() {
+    setHomeScreen(true);
+    setNavTab("game");
+    setWizardStep(0);
+  }
   const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
 
   const handleOnlineLobbyStateChange = useCallback((nextState) => {
@@ -160,13 +167,71 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     <section className="setup" aria-label="Кокпар 3D">
       <div className="setup-panel stable-panel">
 
-        {/* Top bar */}
-        <div className="setup-topbar">
-          <span className="setup-topbar-title">Кокпар 3D</span>
-          <span className="setup-topbar-coins">{formatCoins(profile.coins)} күміс</span>
-        </div>
+        {/* HOME SCREEN */}
+        {homeScreen && (
+          <>
+            <div className="home-profile-row">
+              <div className="home-avatar">{profile.riderName.slice(0, 1)}</div>
+              <div className="home-profile-info">
+                <span className="home-role">Шабандоз</span>
+                <span className="home-name">{profile.riderName || "Ерлан"}</span>
+              </div>
+              <span className="home-level-chip">Ур. {profile.level}</span>
+              <span className="home-coins-chip">{formatCoins(profile.coins)} күміс</span>
+            </div>
+
+            <div className="home-scene-card">
+              <div className="home-scene-inner">
+                <div className="home-logo">КӨКПАР</div>
+                <div className="home-logo-3d">3 D</div>
+                <span className="home-scene-caption">3D сцена: всадник с серке, статичный кадр</span>
+              </div>
+            </div>
+
+            <div className="home-actions">
+              <button
+                className="start-button home-play-btn"
+                type="button"
+                onClick={() => { setHomeScreen(false); setNavTab("game"); setWizardStep(0); }}
+              >
+                Ойнау · Играть
+              </button>
+              <div className="home-sub-btns">
+                <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); }}>
+                  Конюшня
+                </button>
+                <button type="button" className="home-sub-btn" onClick={() => {
+                  onSettingChange("modeId", "online_room");
+                  setHomeScreen(false);
+                  setNavTab("game");
+                  setWizardStep(1);
+                }}>
+                  Онлайн
+                </button>
+                <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
+                  Настройки
+                </button>
+              </div>
+
+              <div className="home-guest-strip">
+                <span className="home-guest-dot" />
+                <span className="home-guest-text">Гостевой профиль · сохраняется локально</span>
+                <button type="button" className="home-guest-login" onClick={onBackToLogin}>Войти</button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Top bar (shown when not on home screen) */}
+        {!homeScreen && (
+          <div className="setup-topbar">
+            <span className="setup-topbar-title">Кокпар 3D</span>
+            <span className="setup-topbar-coins">{formatCoins(profile.coins)} күміс</span>
+          </div>
+        )}
 
         {/* Scrollable content */}
+        {!homeScreen && (
         <div className="setup-content">
 
           {/* TAB: ИГРА */}
@@ -227,14 +292,18 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     })}
                   </div>
                   <div className="tab-footer">
-                    <button
-                      className="start-button"
-                      type="button"
-                      disabled={selectedMode.soon}
-                      onClick={() => setWizardStep(1)}
-                    >
-                      Далее · Настройки матча
-                    </button>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button type="button" className="wizard-back-btn" style={{ flexShrink: 0 }} onClick={goHome}>‹</button>
+                      <button
+                        className="start-button"
+                        type="button"
+                        style={{ flex: 1 }}
+                        disabled={selectedMode.soon}
+                        onClick={() => setWizardStep(1)}
+                      >
+                        Далее · Настройки матча
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -384,7 +453,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {navTab === "stable" && (
             <div className="tab-pane">
               <div className="wizard-step-header">
-                <button type="button" className="wizard-back-btn" onClick={() => setNavTab("game")}>‹</button>
+                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
                 <span className="wizard-step-title">Қора · Конюшня</span>
               </div>
               <div className="stable-tabs">
@@ -438,7 +507,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {navTab === "history" && (
             <div className="tab-pane">
               <div className="wizard-step-header">
-                <button type="button" className="wizard-back-btn" onClick={() => setNavTab("game")}>‹</button>
+                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
                 <span className="wizard-step-title">История</span>
               </div>
               <MatchHistory />
@@ -449,7 +518,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {navTab === "profile" && (
             <div className="tab-pane">
               <div className="wizard-step-header">
-                <button type="button" className="wizard-back-btn" onClick={() => setNavTab("game")}>‹</button>
+                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
                 <span className="wizard-step-title">Профиль</span>
               </div>
               <div className="profile-page">
@@ -506,6 +575,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           )}
 
         </div>
+        )}
 
         {/* Bottom navigation */}
         <nav className="bottom-nav" aria-label="Навигация">

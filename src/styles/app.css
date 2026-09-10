@@ -9559,3 +9559,205 @@ body,
 .bottom-nav {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HOME SCREEN (design 1a)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* The home screen lives inside .setup-panel and fills it vertically */
+.setup-panel > :not(.setup-topbar):not(.setup-content):not(.bottom-nav) {
+  /* home elements get their own flex context from parent */
+}
+
+/* Profile row at top */
+.home-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 20px 6px;
+  flex: none;
+}
+
+.home-avatar {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #3aabee, #2590d0);
+  color: #fff;
+  font: 700 18px Oswald, sans-serif;
+}
+
+.home-profile-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-role {
+  font: 700 10px Manrope, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.6);
+}
+
+.home-name {
+  font: 600 16px Oswald, sans-serif;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.home-level-chip {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(52, 32, 10, 0.70);
+  font: 700 12px Manrope, sans-serif;
+  color: var(--ink);
+  flex: none;
+}
+
+.home-coins-chip {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(208, 160, 48, 0.45);
+  background: rgba(208, 160, 48, 0.14);
+  font: 700 12px Manrope, sans-serif;
+  color: #f0c347;
+  flex: none;
+}
+
+/* 3D scene card */
+.home-scene-card {
+  flex: 1;
+  margin: 16px 20px 12px;
+  border-radius: 20px;
+  background:
+    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.055) 0 9px, transparent 9px 18px),
+    linear-gradient(180deg, rgba(208, 160, 48, 0.10), rgba(0, 0, 0, 0.25));
+  border: 1px dashed rgba(190, 148, 60, 0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 280px;
+}
+
+.home-scene-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-logo {
+  font: 700 64px/0.9 Oswald, sans-serif;
+  letter-spacing: 0.02em;
+  color: #f7ecd0;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+}
+
+.home-logo-3d {
+  font: 600 20px Oswald, sans-serif;
+  letter-spacing: 0.5em;
+  color: #d0a030;
+  padding-left: 0.5em;
+}
+
+.home-scene-caption {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 400 10px ui-monospace, Menlo, monospace;
+  color: rgba(214, 178, 110, 0.55);
+}
+
+/* Bottom action area */
+.home-actions {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 20px 28px;
+}
+
+.home-play-btn {
+  width: 100%;
+  font-size: 17px !important;
+  letter-spacing: 0.08em !important;
+}
+
+.home-sub-btns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.home-sub-btn {
+  height: 52px;
+  border: 1px solid rgba(190, 148, 60, 0.28);
+  border-radius: 11px;
+  background: rgba(52, 32, 10, 0.80);
+  color: var(--ink);
+  font: 600 13px Oswald, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.home-sub-btn:hover {
+  background: rgba(68, 42, 14, 0.90);
+}
+
+/* Guest profile strip */
+.home-guest-strip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(190, 148, 60, 0.20);
+  background: rgba(52, 32, 10, 0.55);
+}
+
+.home-guest-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #d0a030;
+}
+
+.home-guest-text {
+  flex: 1;
+  font: 600 12px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.80);
+}
+
+.home-guest-login {
+  background: none;
+  border: none;
+  padding: 0;
+  font: 700 12px Manrope, sans-serif;
+  color: #3aabee;
+  cursor: pointer;
+}
+
+/* Home screen layout: setup-panel becomes a flex column */
+.setup-panel:has(.home-profile-row) {
+  display: flex;
+  flex-direction: column;
+}
