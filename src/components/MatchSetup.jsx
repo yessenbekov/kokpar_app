@@ -235,8 +235,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           </>
         )}
 
-        {/* Top bar (shown when not on home screen) */}
-        {!homeScreen && (
+        {/* Top bar (hidden on game step 0 — that screen has its own header) */}
+        {!homeScreen && !(navTab === "game" && wizardStep === 0) && (
           <div className="setup-topbar">
             <span className="setup-topbar-title">Кокпар 3D</span>
             <span className="setup-topbar-coins">{formatCoins(profile.coins)} күміс</span>
@@ -254,6 +254,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               {/* Step 0 — mode selection */}
               {wizardStep === 0 && (
                 <div className="wizard-section">
+                  {/* Header with back + title (replaces topbar on this screen) */}
+                  <div className="wizard-step-header" style={{ padding: "8px 0 18px" }}>
+                    <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
+                    <span className="wizard-step-title">{kz ? "Режим" : "Режим"}</span>
+                  </div>
                   <div className="wizard-mode-grid">
                     {GAME_MODES.map((mode) => {
                       const isActive = settings.modeId === mode.id;
@@ -263,9 +268,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         online_room: "арт режима: онлайн-лобби"
                       };
                       const MODE_BADGE = {
-                        kokpar: "Классика",
-                        training: "Практика",
+                        kokpar: kz ? "Классика" : "Классика",
+                        training: kz ? "Практика" : "Практика",
                         online_room: "Онлайн"
+                      };
+                      const MODE_SHORT_DESC = {
+                        kokpar: kz ? "Матч — шеңбер немесе қазан." : "Матч с выбором круга или казана.",
+                        training: kz ? "Бос жүріс: бақылау, серке, лақтыру." : "Свободный заезд: контроль, подбор серке, броски.",
+                        online_room: kz ? "Бөлме жасау немесе код бойынша кіру." : "Создать комнату или войти по коду."
                       };
                       if (isActive) {
                         return (
@@ -276,7 +286,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                                 <span className="wizard-mode-big-title">{mode.name}</span>
                                 {MODE_BADGE[mode.id] && <span className="wizard-classic-badge">{MODE_BADGE[mode.id]}</span>}
                               </div>
-                              <p className="wizard-mode-big-desc">{mode.description}</p>
+                              <p className="wizard-mode-big-desc">{MODE_SHORT_DESC[mode.id] ?? mode.description}</p>
                             </div>
                           </div>
                         );
@@ -298,25 +308,22 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                               <strong>{mode.name}</strong>
                               {mode.soon && <span className="wizard-mode-soon-badge">скоро</span>}
                             </div>
-                            <span>{mode.role}</span>
+                            <span className="wizard-mode-short-desc">{MODE_SHORT_DESC[mode.id] ?? mode.role}</span>
                           </span>
                         </button>
                       );
                     })}
                   </div>
                   <div className="tab-footer">
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <button type="button" className="wizard-back-btn" style={{ flexShrink: 0 }} onClick={goHome}>‹</button>
-                      <button
-                        className="start-button"
-                        type="button"
-                        style={{ flex: 1 }}
-                        disabled={selectedMode.soon}
-                        onClick={() => setWizardStep(1)}
-                      >
-                        Далее · Настройки матча
+                    <button
+                      className="start-button"
+                      type="button"
+                      style={{ width: "100%" }}
+                      disabled={selectedMode.soon}
+                      onClick={() => setWizardStep(1)}
+                    >
+                        {kz ? "Әрі қарай · Матч баптаулары" : "Далее · Настройки матча"}
                       </button>
-                    </div>
                   </div>
                 </div>
               )}

@@ -10406,3 +10406,10 @@ body,
   color: rgba(214, 178, 110, 0.85) !important;
 }
 
+
+/* Short description in compact mode cards */
+.wizard-mode-short-desc {
+  display: block;
+  font: 400 12.5px/1.4 Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.72);
+}
