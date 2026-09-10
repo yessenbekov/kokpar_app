@@ -8408,3 +8408,697 @@ kbd.hint-key--space {
 .lobby-spin {
   animation: lobby-spin 1s linear infinite;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK FELT / LEATHER THEME — overrides cream panels with dark leather
+   ═══════════════════════════════════════════════════════════════ */
+
+html,
+body,
+#root {
+  background: #15100a;
+  font-family: Manrope, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Setup background — dark with subtle amber glow */
+.setup {
+  background:
+    radial-gradient(120% 70% at 50% -8%, rgba(208, 160, 48, 0.28) 0%, transparent 62%),
+    linear-gradient(165deg, #33200c 0%, #120a02 100%);
+}
+
+/* Main panel — dark leather */
+.setup-panel,
+.setup-panel.stable-panel {
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+  border-color: rgba(190, 148, 60, 0.24);
+  color: var(--ink);
+}
+
+/* Auth screen panel */
+.auth-gate-panel {
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+  border-color: rgba(190, 148, 60, 0.24);
+  color: var(--ink);
+}
+
+/* Profile & auth text that was dark on light */
+.profile-strip,
+.lobby-topline {
+  color: var(--ink);
+}
+
+.auth-copy strong {
+  color: var(--ink);
+}
+
+.auth-copy small {
+  color: var(--muted);
+}
+
+/* Auth tabs / channel toggle */
+.auth-method-tabs button,
+.auth-channel-toggle button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.auth-method-tabs button small {
+  color: var(--muted);
+}
+
+.auth-method-tabs button.is-upcoming {
+  color: var(--muted);
+}
+
+.auth-method-tabs button.active,
+.auth-channel-toggle button.active {
+  border-color: rgba(37, 144, 208, 0.55);
+  background: rgba(37, 144, 208, 0.14);
+  color: var(--blue-2);
+}
+
+.auth-method-tabs button:hover,
+.auth-channel-toggle button:hover {
+  background: rgba(68, 42, 14, 0.88);
+}
+
+/* Auth coming-soon box */
+.auth-coming-soon {
+  background: rgba(52, 32, 10, 0.68);
+  border-color: rgba(190, 148, 60, 0.18);
+  color: var(--ink);
+}
+
+/* Auth form inputs */
+.auth-gate-form input {
+  background: rgba(30, 18, 6, 0.82);
+  border-color: rgba(190, 148, 60, 0.28);
+  color: var(--ink);
+}
+
+.auth-gate-form input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 144, 208, 0.14);
+}
+
+/* Auth form buttons (non-primary) */
+.auth-gate-form button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.auth-gate-form button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+/* Auth status line */
+.auth-status-line {
+  background: rgba(30, 18, 6, 0.55);
+  border-color: rgba(190, 148, 60, 0.14);
+  color: var(--muted);
+}
+
+/* Auth panel states */
+.auth-panel {
+  background: rgba(42, 26, 8, 0.6);
+  border-color: rgba(190, 148, 60, 0.20);
+}
+
+.auth-panel.signed-in {
+  border-color: rgba(37, 144, 208, 0.30);
+  background: rgba(37, 144, 208, 0.10);
+}
+
+.auth-panel.pending {
+  border-color: rgba(208, 160, 48, 0.32);
+  background: rgba(208, 160, 48, 0.08);
+}
+
+.auth-panel.error {
+  border-color: rgba(187, 60, 49, 0.32);
+  background: rgba(187, 60, 49, 0.08);
+}
+
+/* Sync pills */
+.sync-pill {
+  background: rgba(42, 26, 8, 0.72);
+  border-color: rgba(190, 148, 60, 0.18);
+  color: var(--muted);
+}
+
+.sync-pill.cloud {
+  border-color: rgba(37, 144, 208, 0.36);
+  background: rgba(37, 144, 208, 0.12);
+  color: var(--blue-2);
+}
+
+.sync-pill.pending {
+  border-color: rgba(208, 160, 48, 0.38);
+  background: rgba(208, 160, 48, 0.10);
+  color: var(--tier3);
+}
+
+.sync-pill.error {
+  border-color: rgba(187, 60, 49, 0.38);
+  background: rgba(187, 60, 49, 0.10);
+  color: var(--red-2);
+}
+
+/* Profile chip */
+.profile-chip {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+/* Inline auth form */
+.auth-form input {
+  background: rgba(30, 18, 6, 0.82);
+  border-color: rgba(190, 148, 60, 0.26);
+  color: var(--ink);
+}
+
+.auth-form button,
+.auth-action {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.auth-form button:hover,
+.auth-action:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+/* Rider name form */
+.rider-name-form input {
+  background: rgba(30, 18, 6, 0.82);
+  border-color: rgba(190, 148, 60, 0.26);
+  color: var(--ink);
+}
+
+.rider-name-form button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.rider-name-form button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+.rider-edit-button:hover {
+  background: rgba(190, 148, 60, 0.10);
+  color: var(--ink);
+}
+
+/* Mode choices */
+.mode-choice {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.mode-choice:hover {
+  background: rgba(68, 42, 14, 0.88);
+}
+
+.mode-choice.active {
+  border-color: rgba(37, 144, 208, 0.58);
+  background: rgba(37, 144, 208, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(37, 144, 208, 0.16);
+}
+
+/* Generic choice cards */
+.choice {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.choice:hover:not(.active):not(:disabled) {
+  background: rgba(68, 42, 14, 0.88);
+  box-shadow: none;
+}
+
+.choice.active {
+  border-color: rgba(37, 144, 208, 0.58);
+  background: rgba(37, 144, 208, 0.14);
+  box-shadow: 0 0 0 2px rgba(37, 144, 208, 0.16);
+}
+
+.choice.team-blue.active {
+  border-color: rgba(37, 144, 208, 0.60);
+  background: rgba(37, 144, 208, 0.18);
+  box-shadow: 0 0 0 2px rgba(37, 144, 208, 0.20);
+  color: var(--ink);
+}
+
+.choice.team-red.active {
+  border-color: rgba(187, 60, 49, 0.58);
+  background: rgba(187, 60, 49, 0.14);
+  box-shadow: 0 0 0 2px rgba(187, 60, 49, 0.20);
+  color: var(--ink);
+}
+
+/* Stable cards */
+.stable-card {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.stable-card:hover {
+  background: rgba(68, 42, 14, 0.88);
+}
+
+.stable-card.active {
+  background: rgba(37, 144, 208, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(37, 144, 208, 0.18);
+}
+
+.stable-card.locked {
+  color: var(--muted);
+}
+
+/* Stable detail pane */
+.stable-detail {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--coat, #8a5c35) 8%, transparent), transparent),
+    linear-gradient(165deg, #2e1c08, #150c03);
+  border-color: rgba(190, 148, 60, 0.20);
+}
+
+.stable-stat,
+.horse-progress,
+.stable-copy {
+  color: var(--ink);
+}
+
+.stable-stat i,
+.horse-progress i {
+  background: rgba(190, 148, 60, 0.14);
+}
+
+/* Horse record / equipment boxes */
+.horse-record,
+.horse-equipment {
+  background: rgba(42, 26, 8, 0.62);
+  border-color: rgba(190, 148, 60, 0.16);
+}
+
+.horse-record > strong,
+.horse-equipment > strong {
+  color: var(--muted);
+}
+
+.horse-record span,
+.horse-equipment span {
+  background: rgba(30, 18, 6, 0.55);
+}
+
+.horse-record b,
+.horse-equipment b {
+  color: var(--ink);
+}
+
+/* Horse type picker */
+.horse-type-choice {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.horse-type-choice.active {
+  border-color: rgba(37, 144, 208, 0.52);
+  background: rgba(37, 144, 208, 0.14);
+}
+
+.horse-type-choice:hover:not(.active) {
+  background: rgba(68, 42, 14, 0.88);
+}
+
+/* Horse name inputs */
+.horse-name-form input,
+.horse-create-input {
+  background: rgba(30, 18, 6, 0.82);
+  border-color: rgba(190, 148, 60, 0.26);
+  color: var(--ink);
+}
+
+.horse-edit-button,
+.horse-name-form button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.horse-edit-button:hover,
+.horse-name-form button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+.horse-create-row button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.horse-create-row button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+/* Horse tags */
+.horse-tags span {
+  background: rgba(52, 32, 10, 0.62);
+  border-color: rgba(190, 148, 60, 0.18);
+  color: var(--muted);
+}
+
+/* Add horse button */
+.add-horse-button {
+  border-color: rgba(190, 148, 60, 0.26);
+  color: var(--muted);
+}
+
+.add-horse-button:hover {
+  border-color: rgba(190, 148, 60, 0.48);
+  background: rgba(52, 32, 10, 0.25);
+  color: var(--ink);
+}
+
+/* Horse delete */
+.horse-delete-confirm {
+  background: rgba(187, 60, 49, 0.10);
+}
+
+.horse-delete-confirm button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.horse-delete-confirm button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+/* Online lobby box */
+.online-lobby {
+  background: rgba(42, 26, 8, 0.65);
+  border-color: rgba(190, 148, 60, 0.20);
+}
+
+/* Lobby summary chips */
+.lobby-summary span {
+  background: rgba(42, 26, 8, 0.72);
+  border-color: rgba(190, 148, 60, 0.18);
+  color: var(--muted);
+}
+
+/* Host chip */
+.lobby-host-chip {
+  border-color: rgba(37, 144, 208, 0.30);
+  background: rgba(37, 144, 208, 0.12);
+  color: var(--blue-2);
+}
+
+/* Team choices */
+.team-choice {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.team-choice.blue.active {
+  border-color: rgba(37, 144, 208, 0.56);
+  background: rgba(37, 144, 208, 0.16);
+}
+
+.team-choice.red.active {
+  border-color: rgba(187, 60, 49, 0.54);
+  background: rgba(187, 60, 49, 0.14);
+}
+
+/* Team panels */
+.lobby-team {
+  background: rgba(42, 26, 8, 0.62);
+  border-color: rgba(190, 148, 60, 0.18);
+}
+
+.lobby-team.blue > strong { color: var(--blue-2); }
+.lobby-team.red > strong { color: var(--red-2); }
+
+/* Player row */
+.lobby-player {
+  background: rgba(30, 18, 6, 0.70);
+}
+
+/* Ready button */
+.ready-button {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.ready-button.secondary {
+  background: rgba(52, 32, 10, 0.70);
+  color: var(--ink);
+}
+
+/* Lobby join form */
+.lobby-join-form input {
+  background: rgba(30, 18, 6, 0.82);
+  border-color: rgba(190, 148, 60, 0.26);
+  color: var(--ink);
+}
+
+.lobby-join-form button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.lobby-join-form button:hover {
+  background: rgba(68, 42, 14, 0.9);
+}
+
+/* Lobby empty / status */
+.lobby-empty,
+.lobby-status {
+  background: rgba(42, 26, 8, 0.62);
+  border-color: rgba(190, 148, 60, 0.16);
+  color: var(--muted);
+}
+
+.lobby-empty strong { color: var(--ink); }
+
+.lobby-status.error {
+  border-color: rgba(187, 60, 49, 0.32);
+  background: rgba(187, 60, 49, 0.10);
+  color: var(--red-2);
+}
+
+.lobby-status.success {
+  border-color: rgba(31, 122, 71, 0.30);
+  background: rgba(31, 122, 71, 0.10);
+  color: #4ec484;
+}
+
+/* Lobby share buttons */
+.lobby-share button {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.lobby-share > span {
+  background: rgba(30, 18, 6, 0.60);
+  border-color: rgba(190, 148, 60, 0.16);
+  color: var(--muted);
+}
+
+/* Lobby code color */
+.lobby-code { color: var(--blue-2); }
+
+/* Choice/join view cards */
+.lobby-choice-card {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.24);
+  color: var(--ink);
+}
+
+.lobby-choice-card:hover:not(:disabled) {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.46);
+  box-shadow: 0 6px 18px rgba(10, 6, 2, 0.36);
+}
+
+.lobby-choice-card span {
+  color: var(--muted);
+}
+
+/* Room cards */
+.lobby-room-card {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.22);
+  color: var(--ink);
+}
+
+.lobby-room-card:hover:not(:disabled) {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.46);
+}
+
+.lobby-room-meta {
+  color: var(--muted);
+}
+
+.lobby-room-players {
+  color: var(--ink-2);
+}
+
+.lobby-rooms-loading,
+.lobby-rooms-empty {
+  color: var(--muted);
+}
+
+/* Wizard mode cards */
+.wizard-mode-card,
+.wizard-side-card {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.24);
+  color: var(--ink);
+}
+
+.wizard-mode-card:hover,
+.wizard-side-card:hover {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.44);
+}
+
+.wizard-mode-card.active,
+.wizard-side-card.active {
+  background: rgba(37, 144, 208, 0.14);
+  border-color: rgba(37, 144, 208, 0.58);
+}
+
+/* Wizard difficulty cards */
+.wizard-diff-card {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.24);
+}
+
+.wizard-diff-card:hover {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.44);
+  box-shadow: 0 4px 14px rgba(10, 6, 2, 0.36);
+}
+
+.wizard-diff-card.active {
+  background: rgba(208, 160, 48, 0.12);
+  border-color: rgba(208, 160, 48, 0.60);
+  box-shadow: 0 0 0 2px rgba(208, 160, 48, 0.16), 0 4px 16px rgba(10, 6, 2, 0.28);
+}
+
+.wizard-diff-card strong {
+  color: var(--ink);
+}
+
+.wizard-diff-card span {
+  color: var(--muted);
+}
+
+/* Wizard option cards (players count / match time) */
+.wizard-option-card {
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.24);
+  color: var(--ink);
+}
+
+.wizard-option-card:hover {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.44);
+}
+
+.wizard-option-card.active {
+  background: rgba(37, 144, 208, 0.14);
+  border-color: rgba(37, 144, 208, 0.58);
+}
+
+/* Bottom nav */
+.bottom-nav {
+  background: rgba(14, 8, 2, 0.94);
+  border-top-color: rgba(190, 148, 60, 0.18);
+}
+
+.bottom-nav-btn {
+  color: var(--muted);
+}
+
+.bottom-nav-btn.active {
+  color: var(--blue-2);
+}
+
+/* Profile stat (if rendered inside bottom nav or profile) */
+.profile-stat {
+  background: rgba(42, 26, 8, 0.70);
+  border-color: rgba(190, 148, 60, 0.20);
+  color: var(--ink);
+}
+
+/* HUD panel (in-game) stays dark as-is */
+
+/* Icon buttons in HUD */
+.icon-button:hover {
+  background: rgba(52, 32, 10, 0.95);
+}
+
+/* Setup topbar title font */
+.setup-topbar-title {
+  font-family: Oswald, Russo\ One, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+/* Setup head h1 — use Oswald */
+.setup-head h1 {
+  font-family: Oswald, Russo\ One, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Auth brand heading */
+.auth-gate-brand h1 {
+  font-family: Oswald, Russo\ One, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Focus ring in dark context */
+.choice:focus-visible,
+.mode-choice:focus-visible,
+.team-choice:focus-visible,
+.ready-button:focus-visible,
+.stable-card:focus-visible,
+.horse-edit-button:focus-visible,
+.horse-name-form button:focus-visible,
+.horse-name-form input:focus-visible,
+.auth-form button:focus-visible,
+.auth-form input:focus-visible,
+.auth-action:focus-visible,
+.lobby-join-form button:focus-visible,
+.lobby-join-form input:focus-visible,
+.lobby-share button:focus-visible,
+.auth-gate-form button:focus-visible,
+.auth-gate-form input:focus-visible,
+.auth-method-tabs button:focus-visible,
+.auth-channel-toggle button:focus-visible,
+.guest-button:focus-visible,
+.start-button:focus-visible {
+  outline: 3px solid rgba(58, 171, 238, 0.38);
+}
