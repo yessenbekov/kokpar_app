@@ -300,9 +300,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                           disabled={mode.soon}
                           onClick={() => onSettingChange("modeId", mode.id)}
                         >
-                          <span className={`wizard-mode-icon mode-icon-${MODE_ICON_COLOR[mode.id] ?? "gold"}`}>
-                            {MODE_INITIAL[mode.id] ?? mode.name[0]}
-                          </span>
+                          <div className={`wizard-mode-img-box mode-img-${MODE_ICON_COLOR[mode.id] ?? "gold"}`} />
                           <span className="wizard-mode-body">
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <strong>{mode.name}</strong>

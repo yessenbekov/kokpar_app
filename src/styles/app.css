@@ -9057,8 +9057,8 @@ body,
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 18px 16px;
   border-radius: 14px;
   background: rgba(52, 32, 10, 0.72);
   border-color: rgba(190, 148, 60, 0.24);
@@ -9401,7 +9401,7 @@ body,
 }
 
 .wizard-mode-big-preview {
-  height: 126px;
+  height: 210px;
   background:
     repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.06) 0 9px, transparent 9px 18px),
     linear-gradient(180deg, rgba(37, 144, 208, 0.22), transparent);
@@ -9441,7 +9441,27 @@ body,
   color: #7ec8f0;
 }
 
-/* ── Mode icon variants (letter initials) ── */
+/* ── Mode image boxes (76×76 placeholder) ── */
+.wizard-mode-img-box {
+  width: 76px;
+  height: 76px;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.06) 0 8px, transparent 8px 16px),
+    rgba(52, 32, 10, 0.60);
+}
+
+.wizard-mode-img-box.mode-img-gold {
+  border: 1px solid rgba(208, 160, 48, 0.30);
+}
+
+.wizard-mode-img-box.mode-img-blue {
+  border: 1px solid rgba(37, 144, 208, 0.30);
+}
+
+/* ── Mode icon variants (letter initials — kept for legacy) ── */
 .wizard-mode-icon {
   flex: 0 0 46px;
   width: 46px;
