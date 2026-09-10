@@ -400,6 +400,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     scene.add(kokpar.mesh);
   }
 
+  const serkeGlowLight = new THREE.PointLight(0xffe888, 0, 14, 2);
+  serkeGlowLight.name = "serkeGlow";
+  scene.add(serkeGlowLight);
+
   const carryStrap = new THREE.Mesh(
     new THREE.CylinderGeometry(0.045, 0.045, 1, 8),
     new THREE.MeshBasicMaterial({ color: "#f7e7b8", transparent: true, opacity: 0.82 })
@@ -2058,6 +2062,16 @@ export function createKokparGame(container, onHudChange, options = {}) {
         ? kokpar.mesh.rotation.z + 0.18
         : 0;
     kokpar.mesh.scale.setScalar(kokpar.holder ? 1.1 : kokpar.flightTeam ? 1.06 : 1);
+
+    // Glow: bright pulse when loose, dim when opponent holds, off when player holds
+    {
+      const heldByPlayer = Boolean(kokpar.holder?.human);
+      const loose = !kokpar.holder && !kokpar.flightTeam;
+      const targetIntensity = heldByPlayer ? 0 : loose ? 4.0 + Math.sin(time * 4.5) * 1.2 : 1.8;
+      serkeGlowLight.intensity += (targetIntensity - serkeGlowLight.intensity) * Math.min(1, dt * 6);
+      serkeGlowLight.color.set(loose ? 0xffe888 : 0xff9944);
+      serkeGlowLight.position.set(kokpar.mesh.position.x, kokpar.mesh.position.y + 1.2, kokpar.mesh.position.z);
+    }
 
     carryStrap.visible = Boolean(kokpar.holder);
     if (kokpar.holder) {
