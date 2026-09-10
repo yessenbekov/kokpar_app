@@ -8421,6 +8421,59 @@ body,
   font-family: Manrope, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/* ── Topbar ── */
+.setup-topbar {
+  background: rgba(42, 26, 8, 0.60);
+  border-bottom-color: rgba(190, 148, 60, 0.22);
+}
+
+.setup-topbar-title {
+  font-family: Oswald, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #d0a030 0%, #f0c347 50%, #d0a030 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: none;
+}
+
+.setup-topbar-coins {
+  background: rgba(208, 160, 48, 0.14);
+  border-color: rgba(208, 160, 48, 0.45);
+  color: #f0c347;
+}
+
+/* ── Start button → blue (matches design) ── */
+.start-button {
+  background: linear-gradient(180deg, #3aabee, #2590d0);
+  border-color: rgba(10, 60, 100, 0.35);
+  border-bottom-color: rgba(8, 50, 88, 0.5);
+  color: white;
+  font-family: Oswald, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  height: 58px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(37, 144, 208, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.start-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 28px rgba(37, 144, 208, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.start-button:disabled {
+  background: rgba(52, 32, 10, 0.70);
+  border-color: rgba(190, 148, 60, 0.20);
+  color: rgba(214, 178, 110, 0.38);
+  box-shadow: none;
+}
+
 /* Setup background — dark with subtle amber glow */
 .setup {
   background:
@@ -8966,27 +9019,224 @@ body,
   color: var(--muted);
 }
 
-/* Wizard mode cards */
-.wizard-mode-card,
-.wizard-side-card {
+/* ── Wizard label / section title ── */
+.wizard-label {
+  color: rgba(214, 178, 110, 0.65);
+  font-family: Manrope, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+/* ── Wizard back button → square icon ── */
+.wizard-back-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(190, 148, 60, 0.28) !important;
+  border-radius: 10px !important;
+  background: rgba(52, 32, 10, 0.70) !important;
+  color: var(--ink) !important;
+  font-size: 22px;
+  font-family: Manrope, sans-serif;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  text-indent: -1px;
+}
+
+.wizard-back-btn:hover {
+  background: rgba(68, 42, 14, 0.90) !important;
+  color: var(--ink) !important;
+}
+
+/* ── Wizard mode cards — horizontal row ── */
+.wizard-mode-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   background: rgba(52, 32, 10, 0.72);
   border-color: rgba(190, 148, 60, 0.24);
   color: var(--ink);
 }
 
-.wizard-mode-card:hover,
-.wizard-side-card:hover {
+.wizard-mode-card.active {
+  background: linear-gradient(150deg, rgba(37, 144, 208, 0.16), rgba(52, 32, 10, 0.85));
+  border-color: rgba(37, 144, 208, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(37, 144, 208, 0.18);
+  transform: none;
+}
+
+.wizard-mode-card:hover:not(.active) {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.44);
+  transform: none;
+  box-shadow: none;
+}
+
+.wizard-mode-emoji {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: rgba(208, 160, 48, 0.14);
+  border: 1px solid rgba(208, 160, 48, 0.30);
+  font-size: 22px;
+}
+
+.wizard-mode-card.active .wizard-mode-emoji {
+  background: rgba(37, 144, 208, 0.12);
+  border-color: rgba(37, 144, 208, 0.30);
+}
+
+.wizard-mode-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.wizard-mode-card strong {
+  display: block;
+  font-family: Oswald, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.wizard-mode-card span {
+  display: block;
+  font-size: 12.5px;
+  font-family: Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.72);
+}
+
+.wizard-mode-card.disabled,
+.wizard-mode-card:disabled {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+/* ── Side cards — horizontal, compact ── */
+.wizard-side-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 50px;
+  padding: 0 16px;
+  background: rgba(52, 32, 10, 0.72);
+  border-color: rgba(190, 148, 60, 0.24);
+  border-radius: 12px;
+  color: var(--ink);
+}
+
+.wizard-side-card:hover:not(.active) {
+  background: rgba(68, 42, 14, 0.90);
+  border-color: rgba(208, 160, 48, 0.44);
+  box-shadow: none;
+  transform: none;
+}
+
+.wizard-side-card.blue.active {
+  background: rgba(37, 144, 208, 0.20);
+  border-color: #2590d0;
+  box-shadow: none;
+}
+
+.wizard-side-card.red.active {
+  background: rgba(224, 69, 53, 0.14);
+  border-color: rgba(224, 69, 53, 0.70);
+  box-shadow: none;
+}
+
+.wizard-side-card strong {
+  font-family: Oswald, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.wizard-side-card span,
+.wizard-side-icon {
+  color: rgba(214, 178, 110, 0.65);
+}
+
+/* ── Compact option cards (players/time/goal) ── */
+.wizard-option-card {
+  display: grid;
+  place-items: center;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid rgba(190, 148, 60, 0.24);
+  background: rgba(52, 32, 10, 0.70);
+  color: var(--ink);
+  font-family: Oswald, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.wizard-option-card:hover:not(.active) {
   background: rgba(68, 42, 14, 0.90);
   border-color: rgba(208, 160, 48, 0.44);
 }
 
-.wizard-mode-card.active,
-.wizard-side-card.active {
+.wizard-option-card.active {
   background: rgba(37, 144, 208, 0.14);
-  border-color: rgba(37, 144, 208, 0.58);
+  border-color: rgba(37, 144, 208, 0.60);
+  box-shadow: inset 0 0 0 1px rgba(37, 144, 208, 0.20);
 }
 
-/* Wizard difficulty cards */
+/* ── Difficulty segmented control ── */
+.wizard-diff-seg {
+  display: flex;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid rgba(190, 148, 60, 0.24);
+  background: rgba(52, 32, 10, 0.70);
+  overflow: hidden;
+}
+
+.wizard-diff-seg-btn {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(214, 178, 110, 0.75);
+  font-family: Manrope, sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.wizard-diff-seg-btn:not(:last-child) {
+  border-right: 1px solid rgba(190, 148, 60, 0.24);
+}
+
+.wizard-diff-seg-btn.active {
+  background: rgba(208, 160, 48, 0.18);
+  color: #f0c347;
+  font-weight: 700;
+}
+
+.wizard-diff-seg-btn:hover:not(.active) {
+  background: rgba(68, 42, 14, 0.60);
+}
+
+/* ── Wizard diff cards (if still used) ── */
 .wizard-diff-card {
   background: rgba(52, 32, 10, 0.72);
   border-color: rgba(190, 148, 60, 0.24);
@@ -9012,41 +9262,79 @@ body,
   color: var(--muted);
 }
 
-/* Wizard option cards (players count / match time) */
-.wizard-option-card {
-  background: rgba(52, 32, 10, 0.72);
-  border-color: rgba(190, 148, 60, 0.24);
-  color: var(--ink);
+/* ── Horse strip ── */
+.horse-strip {
+  background: rgba(52, 32, 10, 0.60);
+  border-color: rgba(190, 148, 60, 0.22);
+  box-shadow: none;
 }
 
-.wizard-option-card:hover {
-  background: rgba(68, 42, 14, 0.90);
+.horse-strip:hover {
+  background: rgba(68, 42, 14, 0.88);
   border-color: rgba(208, 160, 48, 0.44);
+  box-shadow: none;
+  transform: none;
 }
 
-.wizard-option-card.active {
-  background: rgba(37, 144, 208, 0.14);
-  border-color: rgba(37, 144, 208, 0.58);
+.horse-strip-avatar {
+  background: linear-gradient(135deg, #9b6030, #2e1608);
+  color: var(--ink);
+  font-family: Oswald, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
 }
 
-/* Bottom nav */
+.horse-strip-info strong {
+  color: var(--ink);
+  font-family: Oswald, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.horse-strip-info span {
+  color: rgba(214, 178, 110, 0.70);
+}
+
+/* ── Stable tabs ── */
+.stable-tabs {
+  background: rgba(30, 18, 6, 0.65);
+  border-color: rgba(190, 148, 60, 0.18);
+}
+
+.stable-tab-btn {
+  color: var(--muted);
+}
+
+.stable-tab-btn.active {
+  background: rgba(52, 32, 10, 0.85);
+  border-color: rgba(190, 148, 60, 0.32);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ── Bottom nav ── */
 .bottom-nav {
-  background: rgba(14, 8, 2, 0.94);
+  background: rgba(14, 8, 2, 0.96);
   border-top-color: rgba(190, 148, 60, 0.18);
 }
 
 .bottom-nav-btn {
-  color: var(--muted);
+  color: rgba(214, 178, 110, 0.42);
 }
 
 .bottom-nav-btn.active {
   color: var(--blue-2);
 }
 
-/* Profile stat (if rendered inside bottom nav or profile) */
+.bottom-nav-btn.active::after {
+  background: linear-gradient(90deg, transparent, var(--blue-2), transparent);
+  height: 2px;
+}
+
+/* ── Profile stats ── */
 .profile-stat {
   background: rgba(42, 26, 8, 0.70);
-  border-color: rgba(190, 148, 60, 0.20);
+  border: 1px solid rgba(190, 148, 60, 0.20);
   color: var(--ink);
 }
 
