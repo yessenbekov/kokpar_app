@@ -107,6 +107,17 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [listingDraft, setListingDraft] = useState(null);
   const [wizardStep, setWizardStep] = useState(0);
   const [homeScreen, setHomeScreen] = useState(true);
+  const [lang, setLangState] = useState(() => { try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; } });
+  const [sfxVol, setSfxVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_sfx") ?? 78); } catch { return 78; } });
+  const [musicVol, setMusicVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_music") ?? 42); } catch { return 42; } });
+  const [vibration, setVibration] = useState(() => { try { return localStorage.getItem("kokpar_vibration") !== "false"; } catch { return true; } });
+  const [cameraMode, setCameraMode] = useState(() => { try { return localStorage.getItem("kokpar_camera") || "back"; } catch { return "back"; } });
+  const [leftHand, setLeftHand] = useState(() => { try { return localStorage.getItem("kokpar_lefthand") === "true"; } catch { return false; } });
+  const [hints, setHints] = useState(() => { try { return localStorage.getItem("kokpar_hints") !== "false"; } catch { return true; } });
+
+  function toggleLang(l) { setLangState(l); try { localStorage.setItem("kokpar_lang", l); } catch {} }
+  const kz = lang === "kz";
+
   const canStart = !onlineMode || onlineLobbyState.canStart;
 
   function goHome() {
@@ -194,11 +205,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 type="button"
                 onClick={() => { setHomeScreen(false); setNavTab("game"); setWizardStep(0); }}
               >
-                Ойнау · Играть
+                {kz ? "Ойнау" : "Ойнау · Играть"}
               </button>
               <div className="home-sub-btns">
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); }}>
-                  Конюшня
+                  {kz ? "Қора" : "Конюшня"}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => {
                   onSettingChange("modeId", "online_room");
@@ -209,15 +220,17 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   Онлайн
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
-                  Настройки
+                  {kz ? "Баптаулар" : "Настройки"}
                 </button>
               </div>
 
-              <div className="home-guest-strip">
-                <span className="home-guest-dot" />
-                <span className="home-guest-text">Гостевой профиль · сохраняется локально</span>
-                <button type="button" className="home-guest-login" onClick={onBackToLogin}>Войти</button>
-              </div>
+              {auth.status !== "signed-in" && (
+                <div className="home-guest-strip">
+                  <span className="home-guest-dot" />
+                  <span className="home-guest-text">{kz ? "Қонақ профилі · жергілікті сақталады" : "Гостевой профиль · сохраняется локально"}</span>
+                  <button type="button" className="home-guest-login" onClick={onBackToLogin}>{kz ? "Кіру" : "Войти"}</button>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -514,62 +527,126 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             </div>
           )}
 
-          {/* TAB: ПРОФИЛЬ */}
+          {/* TAB: БАПТАУЛАР / НАСТРОЙКИ */}
           {navTab === "profile" && (
             <div className="tab-pane">
               <div className="wizard-step-header">
                 <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                <span className="wizard-step-title">Профиль</span>
+                <span className="wizard-step-title">{kz ? "Баптаулар" : "Настройки"}</span>
               </div>
-              <div className="profile-page">
-                <div className="profile-hero">
-                  <div className="profile-avatar-lg">{profile.riderName.slice(0, 1)}</div>
+              <div className="settings-page">
 
+                {/* Account row */}
+                <div className="settings-account-row">
+                  <div className="settings-account-avatar">{profile.riderName.slice(0, 1)}</div>
+                  <div className="settings-account-info">
+                    <strong>{profile.riderName}</strong>
+                    <span>{auth.status === "signed-in" ? auth.email : (kz ? "Қонақ профилі" : "Гостевой профиль")}</span>
+                  </div>
+                  {auth.status === "signed-in" ? (
+                    <button type="button" className="settings-signout-btn" onClick={onSignOut}>{kz ? "Шығу" : "Выйти"}</button>
+                  ) : (
+                    <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{kz ? "Кіру" : "Войти"}</button>
+                  )}
+                </div>
+
+                {/* Rider name edit */}
+                <div className="settings-name-row">
                   {editingRider ? (
                     <form className="rider-name-form" onSubmit={submitRiderName}>
-                      <input
-                        aria-label="Имя игрока"
-                        maxLength={24}
-                        value={draftRiderName}
-                        onChange={(e) => setDraftRiderName(e.target.value)}
-                        autoFocus
-                      />
+                      <input aria-label={kz ? "Ойыншы аты" : "Имя игрока"} maxLength={24} value={draftRiderName}
+                        onChange={(e) => setDraftRiderName(e.target.value)} autoFocus />
                       <button type="submit"><Check size={14} strokeWidth={2.7} /></button>
                       <button type="button" onClick={() => { setEditingRider(false); setDraftRiderName(profile.riderName); }}>
                         <X size={14} strokeWidth={2.7} />
                       </button>
                     </form>
                   ) : (
-                    <div className="profile-name-row">
-                      <strong className="profile-hero-name">{profile.riderName}</strong>
-                      <button
-                        className="rider-edit-button"
-                        type="button"
-                        aria-label="Переименовать"
-                        onClick={() => { setDraftRiderName(profile.riderName); setEditingRider(true); }}
-                      >
+                    <div className="settings-row" style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      <span className="settings-row-label">{kz ? "Лақап ат" : "Псевдоним"}</span>
+                      <span className="settings-name-val">{profile.riderName}</span>
+                      <button className="settings-edit-btn" type="button" onClick={() => { setDraftRiderName(profile.riderName); setEditingRider(true); }}>
                         <Pencil size={13} strokeWidth={2.4} />
                       </button>
                     </div>
                   )}
                 </div>
 
-                <div className="profile-stats-row">
-                  <div className="profile-stat">
-                    <span className="profile-stat-value">Ур. {profile.level}</span>
-                    <span className="profile-stat-label">Уровень</span>
+                {/* Language */}
+                <div className="settings-section-label">{kz ? "Тіл" : "Язык"}</div>
+                <div className="settings-seg">
+                  <button type="button" className={`settings-seg-btn${kz ? " active" : ""}`} onClick={() => toggleLang("kz")}>Қазақша</button>
+                  <button type="button" className={`settings-seg-btn${!kz ? " active" : ""}`} onClick={() => toggleLang("ru")}>Русский</button>
+                </div>
+
+                {/* Sound */}
+                <div className="settings-section-label">{kz ? "Дыбыс" : "Звук"}</div>
+                <div className="settings-group">
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Эффекттер" : "Эффекты"}</span>
+                    <input type="range" className="settings-slider" min={0} max={100} value={sfxVol}
+                      onChange={(e) => { const v = Number(e.target.value); setSfxVol(v); try { localStorage.setItem("kokpar_sfx", v); } catch {} }} />
+                    <span className="settings-row-val">{sfxVol}%</span>
                   </div>
-                  <div className="profile-stat">
-                    <span className="profile-stat-value">{formatCoins(profile.coins)}</span>
-                    <span className="profile-stat-label">Күміс</span>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Музыка" : "Музыка"}</span>
+                    <input type="range" className="settings-slider" min={0} max={100} value={musicVol}
+                      onChange={(e) => { const v = Number(e.target.value); setMusicVol(v); try { localStorage.setItem("kokpar_music", v); } catch {} }} />
+                    <span className="settings-row-val">{musicVol}%</span>
                   </div>
-                  <div className="profile-stat">
-                    <span className="profile-stat-value">{ownedCount}/{profile.stableCapacity}</span>
-                    <span className="profile-stat-label">Коней</span>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Діріл" : "Вибрация"}</span>
+                    <button type="button" className={`settings-toggle${vibration ? " on" : ""}`}
+                      onClick={() => { const v = !vibration; setVibration(v); try { localStorage.setItem("kokpar_vibration", String(v)); } catch {} }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
                   </div>
                 </div>
 
-                <AccountPanel auth={auth} onBackToLogin={onBackToLogin} onSignOut={onSignOut} />
+                {/* Camera / Controls */}
+                <div className="settings-section-label">{kz ? "Басқару" : "Управление"}</div>
+                <div className="settings-group">
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Камера" : "Камера"}</span>
+                    <div className="settings-seg-sm">
+                      <button type="button" className={`settings-seg-btn-sm${cameraMode === "tv" ? " active" : ""}`}
+                        onClick={() => { setCameraMode("tv"); try { localStorage.setItem("kokpar_camera", "tv"); } catch {} }}>ТВ</button>
+                      <button type="button" className={`settings-seg-btn-sm${cameraMode === "back" ? " active" : ""}`}
+                        onClick={() => { setCameraMode("back"); try { localStorage.setItem("kokpar_camera", "back"); } catch {} }}>{kz ? "Артта" : "За спиной"}</button>
+                    </div>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Сол қол" : "Левша"}</span>
+                    <button type="button" className={`settings-toggle${leftHand ? " on" : ""}`}
+                      onClick={() => { const v = !leftHand; setLeftHand(v); try { localStorage.setItem("kokpar_lefthand", String(v)); } catch {} }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{kz ? "Кеңестер" : "Подсказки"}</span>
+                    <button type="button" className={`settings-toggle${hints ? " on" : ""}`}
+                      onClick={() => { const v = !hints; setHints(v); try { localStorage.setItem("kokpar_hints", String(v)); } catch {} }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="settings-stats-row">
+                  <div className="settings-stat">
+                    <span className="settings-stat-value">Ур. {profile.level}</span>
+                    <span className="settings-stat-label">{kz ? "Деңгей" : "Уровень"}</span>
+                  </div>
+                  <div className="settings-stat">
+                    <span className="settings-stat-value">{formatCoins(profile.coins)}</span>
+                    <span className="settings-stat-label">Күміс</span>
+                  </div>
+                  <div className="settings-stat">
+                    <span className="settings-stat-value">{ownedCount}/{profile.stableCapacity}</span>
+                    <span className="settings-stat-label">{kz ? "Жылқы" : "Коней"}</span>
+                  </div>
+                </div>
+
+                <div className="settings-footer">Kokpar 3D · v0.9.0</div>
               </div>
             </div>
           )}

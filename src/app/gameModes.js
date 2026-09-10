@@ -28,16 +28,6 @@ export const GAME_MODES = [
     goalLocked: false,
     startLabel: "Старт тест-матча"
   },
-  {
-    id: "kokbori",
-    name: "Көкбөрі",
-    role: "Казан обязателен, длинное поле.",
-    description: "Казан обязателен, длинное поле.",
-    defaultGoalType: "kazan",
-    goalLocked: true,
-    startLabel: "Начать матч",
-    soon: true
-  }
 ];
 
 export function gameModeById(id) {
