@@ -167,6 +167,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
   const MODE_INITIAL = { kokpar: "К", training: "Т", online_room: "О", kokbori: "К" };
   const MODE_ICON_COLOR = { kokpar: "gold", training: "gold", online_room: "blue", kokbori: "muted" };
+  const MODE_IMG = {
+    kokpar: "/images/modes/mode-kokpar.webp",
+    training: "/images/modes/mode-training.webp",
+    online_room: "/images/modes/mode-online.webp",
+  };
   const isTraining = selectedMode.id === "training";
 
   async function handleListItem(itemType, itemId, slotKey, horseId, price) {
@@ -281,7 +286,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       if (isActive) {
                         return (
                           <div key={mode.id} className="wizard-mode-big-card">
-                            <div className="wizard-mode-big-preview">{MODE_PREVIEW_TEXT[mode.id] ?? "арт режима"}</div>
+                            <div className="wizard-mode-big-preview">
+                            {MODE_IMG[mode.id]
+                              ? <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-big-img" />
+                              : (MODE_PREVIEW_TEXT[mode.id] ?? "арт режима")}
+                          </div>
                             <div className="wizard-mode-big-body">
                               <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                                 <span className="wizard-mode-big-title">{mode.name}</span>
@@ -301,7 +310,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                           disabled={mode.soon}
                           onClick={() => onSettingChange("modeId", mode.id)}
                         >
-                          <div className={`wizard-mode-img-box mode-img-${MODE_ICON_COLOR[mode.id] ?? "gold"}`} />
+                          <div className={`wizard-mode-img-box mode-img-${MODE_ICON_COLOR[mode.id] ?? "gold"}`}>
+                            {MODE_IMG[mode.id] && <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-thumb-img" />}
+                          </div>
                           <span className="wizard-mode-body">
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <strong>{mode.name}</strong>

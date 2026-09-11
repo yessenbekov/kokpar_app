@@ -9447,6 +9447,23 @@ body,
   flex: none;
 }
 
+/* ── Mode preview & thumbnail images ── */
+.wizard-mode-big-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+
+.wizard-mode-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+
 /* ── Mode image boxes (76×76 placeholder) ── */
 .wizard-mode-img-box {
   width: 76px;
