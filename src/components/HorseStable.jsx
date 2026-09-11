@@ -223,6 +223,7 @@ export function HorseStable({
           {stableHorses.map((ownedHorse) => {
             const horse = horseTypeById(ownedHorse.typeId);
             const active = selectedOwnedHorse.id === ownedHorse.id;
+            const xpPct = Math.round((ownedHorse.xp / 100) * 100);
 
             return (
               <div key={ownedHorse.id} className="stable-card-row">
@@ -231,17 +232,18 @@ export function HorseStable({
                   type="button"
                   onClick={() => onHorseChange(ownedHorse.id)}
                 >
-                  <HorseToken horse={horse} />
-                  <span className="stable-card-copy">
-                    <strong>{ownedHorse.name}</strong>
-                    <span>
-                      {horse.name} · Ур. {ownedHorse.level}
-                    </span>
+                  <div className="stable-card-thumb" />
+                  <div className="stable-card-copy">
+                    <div className="stable-card-name-row">
+                      <strong>{ownedHorse.name}</strong>
+                      <span className="stable-tier-badge">{horse.tier}</span>
+                    </div>
+                    <span className="stable-card-sub">{horse.name} · {horse.role} · Ур. {ownedHorse.level}</span>
                     <span className="stable-card-xp">
-                      <span className="stable-card-xp-fill" style={{ width: `${Math.round((ownedHorse.xp / 100) * 100)}%` }} />
+                      <span className="stable-card-xp-fill" style={{ width: `${xpPct}%` }} />
                     </span>
-                  </span>
-                  <span className="horse-tier">{horse.tier}</span>
+                  </div>
+                  {active && <span className="stable-card-selected">Выбран</span>}
                 </button>
                 {canDelete && onListHorse && (
                   <button
@@ -256,6 +258,14 @@ export function HorseStable({
               </div>
             );
           })}
+
+          {/* Empty stall slots */}
+          {Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => (
+            <div key={`empty-${i}`} className="stable-empty-slot">
+              <div className="stable-empty-thumb" />
+              <span className="stable-empty-label">Свободное стойло</span>
+            </div>
+          ))}
         </div>
 
         {creating ? (
@@ -321,8 +331,7 @@ export function HorseStable({
         ) : (
           canAddMore && (
             <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
-              <Plus size={15} strokeWidth={2.5} />
-              <span>Добавить лошадь</span>
+              <span>+ Купить лошадь</span>
             </button>
           )
         )}
