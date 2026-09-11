@@ -9441,38 +9441,10 @@ body,
   color: #7ec8f0;
 }
 
-/* ── Mobile status bar ── */
-.status-bar {
+/* ── Space reserved for native OS status bar ── */
+.status-bar-spacer {
   height: 46px;
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  font: 600 13px Manrope, sans-serif;
-  color: rgba(242, 226, 184, 0.75);
-}
-
-.status-bar-icons {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.status-bar-battery {
-  display: block;
-  width: 15px;
-  height: 9px;
-  border-radius: 2px;
-  background: rgba(242, 226, 184, 0.70);
-}
-
-.status-bar-signal {
-  display: block;
-  width: 22px;
-  height: 10px;
-  border-radius: 3px;
-  border: 1px solid rgba(242, 226, 184, 0.55);
 }
 
 /* ── Mode image boxes (76×76 placeholder) ── */

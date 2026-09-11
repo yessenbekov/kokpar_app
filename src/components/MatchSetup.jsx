@@ -177,13 +177,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   return (
     <section className="setup" aria-label="Кокпар 3D">
       <div className="setup-panel stable-panel">
-        <div className="status-bar">
-          <span className="status-bar-time">9:41</span>
-          <div className="status-bar-icons">
-            <span className="status-bar-battery" />
-            <span className="status-bar-signal" />
-          </div>
-        </div>
+        <div className="status-bar-spacer" />
 
         {/* HOME SCREEN */}
         {homeScreen && (
