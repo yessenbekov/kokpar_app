@@ -10576,3 +10576,367 @@ body,
   font: 400 12.5px/1.4 Manrope, sans-serif;
   color: rgba(214, 178, 110, 0.72);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 1d — Stable list
+   ═══════════════════════════════════════════════════════════════ */
+
+.stable-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.stable-screen .stable-horse-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 4px 20px 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 1e — Horse card
+   ═══════════════════════════════════════════════════════════════ */
+
+.horse-card-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Hero 300px */
+.horse-card-hero {
+  height: 300px;
+  flex: none;
+  position: relative;
+  background: #110b04;
+  overflow: hidden;
+}
+
+.horse-card-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(90% 70% at 50% 34%, rgba(208, 160, 48, 0.26), transparent 72%),
+    #110b04;
+}
+
+.horse-card-hero canvas,
+.horse-card-hero > div:first-of-type {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Floating back button */
+.horse-card-back {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 10;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 240, 200, 0.2);
+  background: rgba(20, 12, 4, 0.6);
+  color: #f2e2b8;
+  font: 600 18px Manrope, sans-serif;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+/* Gradient overlay with horse info at bottom */
+.horse-card-hero-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: 32px 16px 16px;
+  background: linear-gradient(to bottom,
+    rgba(10, 6, 2, 0) 0%,
+    rgba(10, 6, 2, 0.55) 32%,
+    rgba(10, 6, 2, 0.90) 68%,
+    rgba(10, 6, 2, 0.97) 100%);
+}
+
+.horse-card-breed {
+  font: 700 10px Manrope, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 210, 130, 0.70);
+}
+
+.horse-card-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 3px;
+}
+
+.horse-card-name {
+  font: 600 27px Oswald, sans-serif;
+  color: #fff7e8;
+}
+
+.horse-card-tier-badge {
+  height: 20px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  border: 1px solid rgba(208, 160, 48, 0.55);
+  background: rgba(208, 160, 48, 0.18);
+  font: 700 11px Manrope, sans-serif;
+  color: #f0c347;
+  flex: none;
+}
+
+.horse-card-edit-btn {
+  background: none;
+  border: none;
+  color: rgba(214, 178, 110, 0.6);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.horse-card-traits {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+
+.horse-card-traits span {
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: rgba(255, 190, 80, 0.16);
+  border: 1px solid rgba(255, 190, 80, 0.28);
+  font: 700 10.5px Manrope, sans-serif;
+  color: rgba(255, 220, 150, 0.95);
+}
+
+/* Scrollable content */
+.horse-card-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 0;
+}
+
+/* XP row */
+.horse-card-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.horse-card-xp-label {
+  font: 700 11px Manrope, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.62);
+  white-space: nowrap;
+}
+
+.horse-card-xp-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(242, 226, 184, 0.14);
+  overflow: hidden;
+  display: block;
+}
+
+.horse-card-xp-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2a9d5c, #d0a030);
+}
+
+.horse-card-xp-val {
+  font: 700 12px Manrope, sans-serif;
+  color: #f2e2b8;
+  white-space: nowrap;
+}
+
+/* Stats grid 2 columns */
+.horse-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 16px;
+}
+
+.horse-card-stat-row {
+  display: grid;
+  grid-template-columns: 62px 1fr 26px;
+  gap: 8px;
+  align-items: center;
+  font: 700 11.5px Manrope, sans-serif;
+  color: rgba(242, 226, 184, 0.90);
+}
+
+.horse-card-stat-label {
+  color: rgba(214, 178, 110, 0.80);
+  font-weight: 400;
+}
+
+.horse-card-stat-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(242, 226, 184, 0.13);
+  overflow: hidden;
+  display: block;
+}
+
+.horse-card-stat-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2a9d5c, #e6a817);
+}
+
+.horse-card-stat-val {
+  text-align: right;
+}
+
+/* Bottom 2-panel row */
+.horse-card-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.horse-card-panel {
+  padding: 11px;
+  border-radius: 11px;
+  border: 1px solid rgba(190, 148, 60, 0.20);
+  background: rgba(52, 32, 10, 0.60);
+}
+
+.horse-card-panel-title {
+  font: 700 10.5px Manrope, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.62);
+  margin-bottom: 8px;
+}
+
+.horse-card-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.horse-card-panel-cell {
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(242, 226, 184, 0.06);
+}
+
+.horse-card-panel-cell.equipped {
+  background: rgba(208, 160, 48, 0.12);
+  border: 1px solid rgba(208, 160, 48, 0.30);
+}
+
+.horse-card-panel-cell.empty {
+  background: rgba(242, 226, 184, 0.05);
+  border: 1px dashed rgba(190, 148, 60, 0.28);
+}
+
+.horse-card-panel-cell-label {
+  font: 700 9.5px Manrope, sans-serif;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.65);
+}
+
+.horse-card-panel-cell-val {
+  margin-top: 2px;
+  font: 700 12px Manrope, sans-serif;
+  color: #f2e2b8;
+}
+
+.horse-card-panel-cell-val.equipped-name {
+  color: #f0c347;
+}
+
+.horse-card-panel-cell-val.empty-val {
+  color: rgba(214, 178, 110, 0.60);
+}
+
+/* Inventory */
+.horse-card-inventory {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.horse-card-inv-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(52, 32, 10, 0.60);
+  border: 1px solid rgba(190, 148, 60, 0.18);
+  font: 600 13px Manrope, sans-serif;
+  color: #f2e2b8;
+}
+
+.horse-card-inv-btn {
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(52, 32, 10, 0.80);
+  color: #f2e2b8;
+  font: 600 11px Manrope, sans-serif;
+  cursor: pointer;
+}
+
+.horse-card-inv-btn.sell {
+  border-color: rgba(37, 144, 208, 0.35);
+  color: #3aabee;
+}
+
+/* Footer buttons (shared by 1d and 1e) */
+.horse-card-footer {
+  flex: none;
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px 26px;
+}
+
+.horse-card-footer-btn {
+  height: 54px;
+  border-radius: 12px;
+  font: 600 14px Oswald, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.horse-card-footer-btn.secondary {
+  flex: 1;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(52, 32, 10, 0.85);
+  color: #f2e2b8;
+}
+
+.horse-card-footer-btn.primary {
+  flex: 1.4;
+  border: 1px solid rgba(10, 60, 100, 0.35);
+  background: linear-gradient(180deg, #3aabee, #2590d0);
+  color: #fff;
+  font-size: 15px;
+  letter-spacing: 0.07em;
+  box-shadow: 0 6px 20px rgba(37, 144, 208, 0.35);
+}

@@ -107,6 +107,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [listingDraft, setListingDraft] = useState(null);
   const [wizardStep, setWizardStep] = useState(0);
   const [homeScreen, setHomeScreen] = useState(true);
+  const [stableCardOpen, setStableCardOpen] = useState(false);
   const [lang, setLangState] = useState(() => { try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; } });
   const [sfxVol, setSfxVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_sfx") ?? 78); } catch { return 78; } });
   const [musicVol, setMusicVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_music") ?? 42); } catch { return 42; } });
@@ -482,22 +483,29 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {/* TAB: КОНЮШНЯ */}
           {navTab === "stable" && (
             <div className="tab-pane">
-              <div className="wizard-step-header">
-                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                <span className="wizard-step-title">Қора · Конюшня</span>
-              </div>
-              <div className="stable-tabs">
-                <button type="button" className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("stable")}>
-                  Конюшня
-                </button>
-                <button type="button" className={stableTab === "shop" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("shop")}>
-                  Магазин
-                </button>
-                <button type="button" className={stableTab === "market" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("market")}>
-                  <Gavel size={13} strokeWidth={2.4} />
-                  Торги
-                </button>
-              </div>
+              {!stableCardOpen && (
+                <div className="wizard-step-header">
+                  <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
+                  <span className="wizard-step-title">Қора · Конюшня</span>
+                  <span style={{ font: "700 12px Manrope, sans-serif", color: "rgba(214,178,110,.7)" }}>
+                    {profile.ownedHorses.length} / {profile.stableCapacity}
+                  </span>
+                </div>
+              )}
+              {!stableCardOpen && stableTab !== "stable" && (
+                <div className="stable-tabs">
+                  <button type="button" className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("stable")}>
+                    Конюшня
+                  </button>
+                  <button type="button" className={stableTab === "shop" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("shop")}>
+                    Магазин
+                  </button>
+                  <button type="button" className={stableTab === "market" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("market")}>
+                    <Gavel size={13} strokeWidth={2.4} />
+                    Торги
+                  </button>
+                </div>
+              )}
 
               {stableTab === "stable" && (
                 <HorseStable
@@ -513,22 +521,36 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   onListEquipment={handleListEquipment}
                   onListHorse={handleListHorse}
                   onEquipFromInventory={onEquipFromInventory}
+                  onGoToShop={() => setStableTab("shop")}
+                  onGoToMatch={() => { setNavTab("game"); setWizardStep(0); }}
+                  onCardOpenChange={setStableCardOpen}
                 />
               )}
               {stableTab === "shop" && (
-                <Shop
-                  profile={profile}
-                  onBuyHorse={onBuyHorse}
-                />
+                <>
+                  <div className="stable-tabs">
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>Конюшня</button>
+                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("shop")}>Магазин</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />Торги</button>
+                  </div>
+                  <Shop profile={profile} onBuyHorse={onBuyHorse} />
+                </>
               )}
               {stableTab === "market" && (
-                <Marketplace
-                  profile={profile}
-                  listingDraft={listingDraft}
-                  onListItem={handleListItem}
-                  onCancelListing={onCancelListing}
-                  onPurchase={onPurchase}
-                />
+                <>
+                  <div className="stable-tabs">
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>Конюшня</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("shop")}>Магазин</button>
+                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />Торги</button>
+                  </div>
+                  <Marketplace
+                    profile={profile}
+                    listingDraft={listingDraft}
+                    onListItem={handleListItem}
+                    onCancelListing={onCancelListing}
+                    onPurchase={onPurchase}
+                  />
+                </>
               )}
             </div>
           )}
