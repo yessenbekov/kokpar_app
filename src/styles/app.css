@@ -10940,3 +10940,371 @@ body,
   letter-spacing: 0.07em;
   box-shadow: 0 6px 20px rgba(37, 144, 208, 0.35);
 }
+
+/* ════════════════════════════════════════════════
+   NEW GAME HUD  —  designs 2a / 2b / 2c / 2d
+   ════════════════════════════════════════════════ */
+
+/* Override legacy .hud positioning */
+.hud { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+  display: flex !important; flex-direction: column !important; justify-content: space-between !important;
+  grid-template-columns: none !important; gap: 0 !important;
+  padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
+            max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)) !important; }
+
+/* ── Top bar ── */
+.nh-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* Timer + Score combined pill */
+.nh-timer-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, rgba(21,10,3,.88), rgba(14,8,2,.74));
+  border: 1px solid rgba(208,160,48,.22);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  flex: 0 0 auto;
+}
+
+.nh-timer {
+  font: 700 20px/1 Oswald, sans-serif;
+  color: rgba(242,226,184,.95);
+  letter-spacing: .5px;
+}
+
+.nh-ts-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(208,160,48,.28);
+  flex: none;
+}
+
+.nh-score-pill {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font: 700 18px/1 Oswald, sans-serif;
+  color: #fff;
+}
+
+.nh-blue { background: linear-gradient(160deg, #3aabee, #2590d0); }
+.nh-red  { background: linear-gradient(160deg, #e05040, #cc3a2a); }
+
+.nh-score-colon {
+  font: 700 15px/1 Oswald, sans-serif;
+  color: rgba(242,226,184,.5);
+}
+
+/* Serke possession tracker */
+.nh-serke-track {
+  flex: 1;
+  min-width: 0;
+  max-width: 228px;
+  padding: 7px 10px 8px;
+  background: rgba(14,8,2,.72);
+  border: 1px solid rgba(208,160,48,.28);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.nh-serke-label {
+  display: block;
+  font: 600 10px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(242,226,184,.52);
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nh-serke-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.nh-seg { height: 100%; border-radius: 2px; }
+.nh-seg-blue { background: #3aabee; flex: 48; }
+.nh-seg-gold { background: rgba(208,160,48,.9); flex: 9; }
+.nh-seg-red  { background: #e05040; flex: 43; }
+
+/* Icon buttons */
+.nh-icons {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.nh-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(14,8,2,.72);
+  border: 1px solid rgba(208,160,48,.22);
+  border-radius: 10px;
+  color: rgba(242,226,184,.75);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.nh-icon-btn:active { background: rgba(208,160,48,.18); }
+
+.nh-pause-icon {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(242,226,184,.75);
+}
+
+/* ── Bottom strip ── */
+.nh-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.nh-stamina-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+  max-width: 150px;
+}
+
+.nh-stamina-label {
+  font: 600 9px/1 Manrope, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(242,226,184,.45);
+}
+
+.nh-stamina-track {
+  position: relative;
+  height: 5px;
+  background: rgba(255,255,255,.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.nh-stamina-track.nh-stamina-active {
+  height: 7px;
+}
+
+.nh-stamina-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7fba6b, #d0a030);
+  transition: width 180ms linear;
+}
+
+.nh-stamina-fill.throw {
+  background: linear-gradient(90deg, #2f86bd, #f0c347, #bb3c31);
+}
+
+.nh-stamina-fill.tug {
+  background: rgba(240,195,71,.5);
+}
+
+.nh-tug-marker {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 13px;
+  border-radius: 3px;
+  background: #f0c347;
+  border: 1.5px solid #fff3d2;
+  transform: translate(-50%, -50%);
+  transition: left 90ms linear;
+}
+
+.nh-tug-marker.blue { background: #2f86bd; }
+.nh-tug-marker.red  { background: #d25445; }
+
+/* Action buttons */
+.nh-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.nh-action-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font: 700 13px/1 Manrope, sans-serif;
+  letter-spacing: .02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nh-action-amber {
+  background: linear-gradient(160deg, rgba(208,160,48,.88), rgba(178,128,28,.88));
+  border: 1px solid rgba(208,160,48,.55);
+  color: #15100a;
+}
+
+.nh-action-dark {
+  background: rgba(21,10,3,.82);
+  border: 1px solid rgba(208,160,48,.22);
+  color: rgba(242,226,184,.88);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Pause overlay ── */
+.nh-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,8,2,.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
+  padding: 16px;
+}
+
+.nh-pause-panels {
+  display: flex;
+  gap: 14px;
+  max-width: 620px;
+  width: 100%;
+}
+
+.nh-pause-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 18px;
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+  border: 1px solid rgba(208,160,48,.28);
+  border-radius: 14px;
+}
+
+.nh-exit-confirm {
+  flex: 0 0 auto;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 16px;
+  background: linear-gradient(165deg, #2e0c08, #150503);
+  border: 1px solid rgba(200,60,50,.35);
+  border-radius: 14px;
+}
+
+.nh-pause-title {
+  font: 700 21px/1 Oswald, sans-serif;
+  color: rgba(242,226,184,.95);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.nh-exit-title {
+  font: 700 16px/1 Oswald, sans-serif;
+  color: rgba(242,226,184,.9);
+}
+
+.nh-exit-sub {
+  font: 400 11px/1.4 Manrope, sans-serif;
+  color: rgba(242,226,184,.45);
+}
+
+.nh-pause-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nh-pause-score-pill {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 36px;
+  border-radius: 7px;
+  font: 700 22px/1 Oswald, sans-serif;
+  color: #fff;
+}
+
+.nh-pause-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  font: 700 13px/1 Manrope, sans-serif;
+  letter-spacing: .03em;
+  cursor: pointer;
+  text-align: center;
+}
+
+.nh-pause-amber {
+  background: linear-gradient(160deg, rgba(208,160,48,.9), rgba(178,128,28,.9));
+  border: 1px solid rgba(208,160,48,.5);
+  color: #15100a;
+}
+
+.nh-pause-red {
+  background: rgba(200,50,40,.18);
+  border: 1px solid rgba(200,50,40,.38);
+  color: rgba(230,100,88,1);
+}
+
+.nh-pause-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nh-pause-grid-btn {
+  padding: 9px 6px;
+  border-radius: 8px;
+  background: rgba(208,160,48,.1);
+  border: 1px solid rgba(208,160,48,.2);
+  color: rgba(242,226,184,.8);
+  font: 600 11px/1 Manrope, sans-serif;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* ── Desktop (2a / 2b) ── */
+@media (min-width: 900px) {
+  .nh-top { gap: 12px; }
+
+  .nh-timer-score { gap: 12px; padding: 10px 18px; }
+  .nh-timer { font-size: 34px; }
+  .nh-ts-sep { height: 28px; }
+
+  .nh-score-pill { width: 52px; height: 44px; font-size: 26px; border-radius: 8px; }
+
+  .nh-serke-track { max-width: 420px; padding: 10px 14px 11px; }
+  .nh-serke-label { font-size: 12px; margin-bottom: 7px; }
+  .nh-serke-bar { height: 8px; }
+
+  .nh-icon-btn { width: 42px; height: 42px; }
+
+  .nh-stamina-wrap { max-width: 200px; }
+  .nh-stamina-label { font-size: 10px; }
+
+  .nh-action-btn { padding: 12px 22px; font-size: 14px; }
+
+  .nh-pause-menu { padding: 28px 24px; gap: 14px; }
+  .nh-pause-title { font-size: 30px; }
+  .nh-pause-score-pill { width: 52px; height: 44px; font-size: 28px; }
+  .nh-pause-btn { padding: 13px; font-size: 14px; }
+  .nh-exit-confirm { width: 240px; padding: 28px 20px; }
+}

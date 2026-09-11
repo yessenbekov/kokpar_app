@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Camera, Check, RotateCcw, Shield, SlidersHorizontal, Volume2, VolumeX, X } from "lucide-react";
+import { useState } from "react";
+import { Camera, Volume2, VolumeX } from "lucide-react";
 
 export function MatchHud({
   settings,
@@ -10,120 +10,140 @@ export function MatchHud({
   onCycleCamera,
   onToggleFeedback
 }) {
-  const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
-  const meterMode = hud.throwPower > 0 ? "throw" : hud.mountedContest ? "tug" : "stamina";
-  const activeMeterValue = meterMode === "throw" ? hud.throwPower : meterMode === "tug" ? hud.tugPower : hud.stamina;
-  const [confirmRestart, setConfirmRestart] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
-  useEffect(() => {
-    if (!confirmRestart) return;
-    const t = setTimeout(() => setConfirmRestart(false), 4000);
-    return () => clearTimeout(t);
-  }, [confirmRestart]);
+  const staminaPct = Math.round((hud.stamina ?? 1) * 100);
+  const meterMode = hud.throwPower > 0 ? "throw" : hud.mountedContest ? "tug" : "stamina";
+  const activePct =
+    meterMode === "throw" ? Math.round(hud.throwPower * 100)
+    : meterMode === "tug" ? Math.round(hud.tugPower * 100)
+    : staminaPct;
+
+  function handlePause() { setPaused(true); setShowExitConfirm(false); }
+  function handleResume() { setPaused(false); setShowExitConfirm(false); }
+  function handleExit() { setPaused(false); setShowExitConfirm(false); onOpenSettings?.(); }
+
+  const serkeLabel =
+    hud.carry === "blue" ? "Синие владеют" :
+    hud.carry === "red" ? "Красные владеют" :
+    "Серке";
 
   return (
-    <section className="hud" aria-label="Match status">
-      <div className="panel">
-        <p className="status">{hud.timer}</p>
-        <p className="small">{settings.teamSize}×{settings.teamSize} · {goalLabel}</p>
-      </div>
+    <section className="nh" aria-label="Match status">
+      {/* ── Top bar ── */}
+      <div className="nh-top">
+        {/* Timer + Score */}
+        <div className="nh-timer-score">
+          <span className="nh-timer">{hud.timer}</span>
+          <div className="nh-ts-sep" />
+          <span className={`nh-score-pill nh-blue`}>{hud.blue}</span>
+          <span className="nh-score-colon">:</span>
+          <span className={`nh-score-pill nh-red`}>{hud.red}</span>
+        </div>
 
-      <div className="panel score" aria-label="Score">
-        <span className="blue">{hud.blue}</span>
-        <span className="red">{hud.red}</span>
-      </div>
-
-      <div className="panel right">
-        <p className="status">{hud.carry}</p>
-        <div className="horse-status">
-          <div
-            className={meterMode === "throw" ? "meter throw-meter" : meterMode === "tug" ? "meter tug-meter" : "meter"}
-            aria-label={meterMode === "throw" ? "Сила броска" : meterMode === "tug" ? "Усилие борьбы" : "Выносливость"}
-          >
-            <i style={{ "--value": `${Math.round(activeMeterValue * 100)}%` }} />
-            {meterMode === "tug" && (
-              <b
-                className={hud.contestLeadingTeam ? `contest-balance ${hud.contestLeadingTeam}` : "contest-balance"}
-                style={{ "--balance": `${Math.round(hud.contestBalance * 100)}%` }}
-              />
-            )}
+        {/* Serke possession tracker */}
+        <div className="nh-serke-track">
+          <span className="nh-serke-label">{serkeLabel}</span>
+          <div className="nh-serke-bar">
+            <div className="nh-seg nh-seg-blue" />
+            <div className="nh-seg nh-seg-gold" />
+            <div className="nh-seg nh-seg-red" />
           </div>
-          <span
-            className={hud.bodyCheckActive ? "check-indicator active" : hud.bodyCheckReady ? "check-indicator ready" : "check-indicator cooldown"}
-            aria-label={hud.bodyCheckActive ? "Силовой прием активен" : hud.bodyCheckReady ? "Силовой прием готов" : "Силовой прием восстанавливается"}
-            title="Силовой прием"
-            style={{ "--cooldown": `${Math.round(hud.bodyCheckCooldown * 100)}%` }}
-          >
-            <Shield size={13} strokeWidth={2.6} />
-          </span>
+        </div>
+
+        {/* Icon buttons */}
+        <div className="nh-icons">
+          <button className="nh-icon-btn" type="button" onClick={onCycleCamera} aria-label="Камера">
+            <Camera size={16} strokeWidth={2.2} />
+          </button>
+          <button className="nh-icon-btn" type="button" onClick={onToggleFeedback} aria-label="Звук">
+            {feedbackEnabled ? <Volume2 size={16} strokeWidth={2.2} /> : <VolumeX size={16} strokeWidth={2.2} />}
+          </button>
+          <button className="nh-icon-btn" type="button" onClick={handlePause} aria-label="Пауза">
+            <span className="nh-pause-icon">❙❙</span>
+          </button>
         </div>
       </div>
 
-      <div className="hud-actions">
-        <button
-          className="icon-button"
-          type="button"
-          aria-label={`Сменить камеру. Сейчас: ${hud.cameraMode}`}
-          title={`Камера: ${hud.cameraMode}`}
-          onClick={onCycleCamera}
-        >
-          <Camera size={18} strokeWidth={2.4} />
-        </button>
+      {/* ── Bottom strip ── */}
+      <div className="nh-bottom">
+        {/* Stamina bar */}
+        <div className="nh-stamina-wrap">
+          <span className="nh-stamina-label">
+            {meterMode === "throw" ? "Бросок" : meterMode === "tug" ? "Борьба" : "Стамина"}
+          </span>
+          <div className={`nh-stamina-track${meterMode !== "stamina" ? " nh-stamina-active" : ""}`}>
+            <div
+              className={`nh-stamina-fill${meterMode === "throw" ? " throw" : meterMode === "tug" ? " tug" : ""}`}
+              style={{ width: `${activePct}%` }}
+            />
+            {meterMode === "tug" && (
+              <div
+                className={`nh-tug-marker${hud.contestLeadingTeam ? " " + hud.contestLeadingTeam : ""}`}
+                style={{ left: `${Math.round((hud.contestBalance ?? 0.5) * 100)}%` }}
+              />
+            )}
+          </div>
+        </div>
 
-        {confirmRestart ? (
-          <>
-            <button
-              className="icon-button icon-button--confirm"
-              type="button"
-              aria-label="Подтвердить рестарт"
-              title="Да, начать заново"
-              onClick={() => { setConfirmRestart(false); onRestart(); }}
-            >
-              <Check size={18} strokeWidth={2.6} />
-            </button>
-            <button
-              className="icon-button icon-button--cancel"
-              type="button"
-              aria-label="Отмена"
-              title="Отмена"
-              onClick={() => setConfirmRestart(false)}
-            >
-              <X size={18} strokeWidth={2.6} />
-            </button>
-          </>
-        ) : (
-          <button
-            className="icon-button"
-            type="button"
-            aria-label="Начать новый матч"
-            title="Начать новый матч"
-            onClick={() => setConfirmRestart(true)}
-          >
-            <RotateCcw size={18} strokeWidth={2.4} />
+        {/* Action buttons */}
+        <div className="nh-actions">
+          <button className="nh-action-btn nh-action-amber" type="button">
+            Поднять серке
           </button>
-        )}
-
-        <button
-          className="icon-button"
-          type="button"
-          aria-label="Настройки матча"
-          title="Настройки матча"
-          onClick={onOpenSettings}
-        >
-          <SlidersHorizontal size={18} strokeWidth={2.4} />
-        </button>
-
-        <button
-          className="icon-button"
-          type="button"
-          aria-label={feedbackEnabled ? "Отключить звук и отклик" : "Включить звук и отклик"}
-          aria-pressed={feedbackEnabled}
-          title={feedbackEnabled ? "Отключить звук и отклик" : "Включить звук и отклик"}
-          onClick={onToggleFeedback}
-        >
-          {feedbackEnabled ? <Volume2 size={18} strokeWidth={2.4} /> : <VolumeX size={18} strokeWidth={2.4} />}
-        </button>
+          <button className="nh-action-btn nh-action-dark" type="button">
+            Рывок
+          </button>
+        </div>
       </div>
+
+      {/* ── Pause overlay ── */}
+      {paused && (
+        <div className="nh-overlay">
+          <div className="nh-pause-panels">
+            <div className="nh-pause-menu">
+              <div className="nh-pause-title">Пауза</div>
+              <div className="nh-pause-score-row">
+                <span className="nh-pause-score-pill nh-blue">{hud.blue}</span>
+                <span className="nh-score-colon">:</span>
+                <span className="nh-pause-score-pill nh-red">{hud.red}</span>
+              </div>
+              <button className="nh-pause-btn nh-pause-amber" type="button" onClick={handleResume}>
+                Продолжить
+              </button>
+              <div className="nh-pause-grid">
+                <button className="nh-pause-grid-btn" type="button" onClick={onOpenSettings}>
+                  Настройки
+                </button>
+                <button className="nh-pause-grid-btn" type="button" onClick={onToggleFeedback}>
+                  {feedbackEnabled ? "Звук: Вкл" : "Звук: Выкл"}
+                </button>
+              </div>
+              <button
+                className="nh-pause-btn nh-pause-red"
+                type="button"
+                onClick={() => setShowExitConfirm(true)}
+              >
+                Покинуть матч
+              </button>
+            </div>
+
+            {showExitConfirm && (
+              <div className="nh-exit-confirm">
+                <div className="nh-exit-title">Выйти?</div>
+                <div className="nh-exit-sub">Прогресс не сохранится</div>
+                <button className="nh-pause-btn nh-pause-amber" type="button" onClick={handleResume}>
+                  Остаться
+                </button>
+                <button className="nh-pause-btn nh-pause-red" type="button" onClick={handleExit}>
+                  Выйти в меню
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
