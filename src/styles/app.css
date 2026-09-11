@@ -9684,19 +9684,30 @@ body,
   flex: 1;
   margin: 16px 20px 12px;
   border-radius: 20px;
-  background:
-    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.055) 0 9px, transparent 9px 18px),
-    linear-gradient(180deg, rgba(208, 160, 48, 0.10), rgba(0, 0, 0, 0.25));
-  border: 1px dashed rgba(190, 148, 60, 0.28);
+  background: rgba(21, 16, 10, 0.8);
+  border: 1px solid rgba(190, 148, 60, 0.22);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   min-height: 280px;
+  overflow: hidden;
+}
+
+.home-scene-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  opacity: 0.55;
 }
 
 .home-scene-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;

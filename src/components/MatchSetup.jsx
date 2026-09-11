@@ -198,10 +198,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             </div>
 
             <div className="home-scene-card">
+              <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
                 <div className="home-logo">КӨКПАР</div>
                 <div className="home-logo-3d">3 D</div>
-                <span className="home-scene-caption">3D сцена: всадник с серке, статичный кадр</span>
               </div>
             </div>
 
