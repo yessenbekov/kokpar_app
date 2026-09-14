@@ -74,6 +74,13 @@ function AccountPanel({ auth, onBackToLogin, onSignOut }) {
   );
 }
 
+const COIN_PACKAGES = [
+  { coins: 500,  price: "99 ₸",  bonus: null },
+  { coins: 1200, price: "199 ₸", bonus: 20 },
+  { coins: 3000, price: "399 ₸", bonus: 50 },
+  { coins: 7000, price: "799 ₸", bonus: 75 },
+];
+
 const EMPTY_ONLINE_STATE = {
   allReady: false, canStart: false, hasRoom: false, isHost: false,
   playerReady: false, playersCount: 0, readyCount: 0,
@@ -108,6 +115,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [wizardStep, setWizardStep] = useState(0);
   const [homeScreen, setHomeScreen] = useState(true);
   const [stableCardOpen, setStableCardOpen] = useState(false);
+  const [showCoinShop, setShowCoinShop] = useState(false);
   const [lang, setLangState] = useState(() => { try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; } });
   const [sfxVol, setSfxVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_sfx") ?? 78); } catch { return 78; } });
   const [musicVol, setMusicVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_music") ?? 42); } catch { return 42; } });
@@ -195,7 +203,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <span className="home-name">{profile.riderName || "Ерлан"}</span>
               </div>
               <span className="home-level-chip">Ур. {profile.level}</span>
-              <span className="home-coins-chip">{formatCoins(profile.coins)} күміс</span>
+              <button className="home-coins-chip" type="button" onClick={() => setShowCoinShop(true)}>
+                {formatCoins(profile.coins)} күміс <span className="coins-chip-plus">+</span>
+              </button>
             </div>
 
             <div className="home-scene-card">
@@ -246,7 +256,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
         {!homeScreen && !(navTab === "game" && wizardStep === 0) && (
           <div className="setup-topbar">
             <span className="setup-topbar-title">Кокпар 3D</span>
-            <span className="setup-topbar-coins">{formatCoins(profile.coins)} күміс</span>
+            <button className="setup-topbar-coins" type="button" onClick={() => setShowCoinShop(true)}>
+              {formatCoins(profile.coins)} күміс <span className="coins-chip-plus">+</span>
+            </button>
           </div>
         )}
 
@@ -732,6 +744,38 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
         </nav>
 
       </div>
+
+      {/* ── Coin shop overlay ── */}
+      {showCoinShop && (
+        <div className="coin-shop-overlay" onClick={() => setShowCoinShop(false)}>
+          <div className="coin-shop-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="coin-shop-header">
+              <span className="coin-shop-title">Купить монеты</span>
+              <button className="coin-shop-close" type="button" onClick={() => setShowCoinShop(false)}>✕</button>
+            </div>
+            <div className="coin-shop-balance">
+              Баланс: <strong>{formatCoins(profile.coins)} 🪙</strong>
+            </div>
+            <div className="coin-shop-packages">
+              {COIN_PACKAGES.map((pkg) => (
+                <div key={pkg.coins} className="coin-shop-pkg">
+                  <div className="coin-shop-pkg-coins">
+                    <span className="coin-shop-pkg-icon">🪙</span>
+                    <span className="coin-shop-pkg-amount">{formatCoins(pkg.coins)}</span>
+                    {pkg.bonus && <span className="coin-shop-pkg-bonus">+{pkg.bonus}% бонус</span>}
+                  </div>
+                  <button className="coin-shop-pkg-btn" type="button" disabled>
+                    {pkg.price}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="coin-shop-note">
+              Платежи скоро · Зарабатывай монеты в матчах
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
