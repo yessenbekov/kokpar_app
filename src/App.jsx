@@ -432,6 +432,19 @@ export default function App() {
     setProfile(nextProfile);
   }
 
+  const STABLE_SLOT_COST = 500;
+
+  function handleExpandStable() {
+    const currentProfile = playerProfileStore.read();
+    if (currentProfile.coins < STABLE_SLOT_COST) return;
+    const nextProfile = saveProfile({
+      ...currentProfile,
+      coins: currentProfile.coins - STABLE_SLOT_COST,
+      stableCapacity: currentProfile.stableCapacity + 1,
+    });
+    setProfile(nextProfile);
+  }
+
   function handleBuyHorse(typeId, horseName, cost) {
     const currentProfile = playerProfileStore.read();
     if (currentProfile.coins < cost) return;
@@ -622,6 +635,8 @@ export default function App() {
           onStart={startMatch}
           onBuyItem={handleBuyItem}
           onBuyHorse={handleBuyHorse}
+          onExpandStable={handleExpandStable}
+          stableSlotCost={STABLE_SLOT_COST}
           onEquipItem={handleEquipItem}
           onListItem={handleListItem}
           onCancelListing={handleCancelListing}

@@ -92,7 +92,7 @@ function onlineStartLabel(lobbyState) {
   return "Запустить комнату";
 }
 
-export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onEquipItem, onListItem, onCancelListing, onPurchase, onEquipFromInventory }) {
+export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onExpandStable, stableSlotCost, onEquipItem, onListItem, onCancelListing, onPurchase, onEquipFromInventory }) {
   const ownedCount = profile.ownedHorses.length;
   const selectedHorse = profile.ownedHorses.find((horse) => horse.id === settings.horseId) ?? profile.ownedHorses[0];
   const selectedMode = gameModeById(settings.modeId);
@@ -521,6 +521,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   onListEquipment={handleListEquipment}
                   onListHorse={handleListHorse}
                   onEquipFromInventory={onEquipFromInventory}
+                  onExpandStable={onExpandStable}
+                  stableSlotCost={stableSlotCost}
                   onGoToShop={() => setStableTab("shop")}
                   onGoToMatch={() => { setNavTab("game"); setWizardStep(0); }}
                   onCardOpenChange={setStableCardOpen}

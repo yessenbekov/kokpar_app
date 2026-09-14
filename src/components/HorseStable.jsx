@@ -60,6 +60,8 @@ export function HorseStable({
   onListEquipment,
   onListHorse,
   onEquipFromInventory,
+  onExpandStable,
+  stableSlotCost = 500,
   onGoToShop,
   onGoToMatch,
   onCardOpenChange,
@@ -397,16 +399,29 @@ export function HorseStable({
               </button>
             </div>
           </form>
+        ) : canAddMore ? (
+          <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
+            <span>+ Купить лошадь</span>
+          </button>
         ) : (
-          canAddMore && (
-            <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
-              <span>+ Купить лошадь</span>
-            </button>
-          )
+          <button
+            className={`add-horse-button expand-stable-button${profile?.coins < stableSlotCost ? " expand-stable-locked" : ""}`}
+            type="button"
+            onClick={onExpandStable}
+            disabled={!onExpandStable || profile?.coins < stableSlotCost}
+          >
+            <span>⊕ Расширить конюшню</span>
+            <span className="expand-stable-cost">
+              {stableSlotCost} 🪙
+              {profile?.coins < stableSlotCost && (
+                <span className="expand-stable-short"> · не хватает {stableSlotCost - (profile?.coins ?? 0)}</span>
+              )}
+            </span>
+          </button>
         )}
 
         {/* Empty stall slots */}
-        {!creating && Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => (
+        {!creating && canAddMore && Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => (
           <div key={`empty-${i}`} className="stable-empty-slot">
             <div className="stable-empty-thumb" />
             <span className="stable-empty-label">Свободное стойло</span>

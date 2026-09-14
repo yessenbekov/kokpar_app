@@ -19,7 +19,7 @@ export const DEFAULT_PLAYER_PROFILE = {
   selectedHorseId: DEFAULT_OWNED_HORSES[0].id,
   selectedHorseType: DEFAULT_OWNED_HORSES[0].typeId,
   ownedHorses: DEFAULT_OWNED_HORSES,
-  stableCapacity: 6,
+  stableCapacity: 1,
   inventory: [],
   matchPreferences: {
     modeId: DEFAULT_MODE_ID,

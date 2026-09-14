@@ -11322,3 +11322,36 @@ body,
   .nh-pause-btn { padding: 13px; font-size: 14px; }
   .nh-exit-confirm { width: 240px; padding: 28px 20px; }
 }
+
+/* ── Stable expand button ── */
+.expand-stable-button {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-color: rgba(208, 160, 48, 0.45) !important;
+  background: rgba(208, 160, 48, 0.08) !important;
+}
+
+.expand-stable-button span:first-child {
+  font: 700 13px Manrope, sans-serif;
+  color: rgba(208, 160, 48, 0.9);
+}
+
+.expand-stable-cost {
+  font: 600 11px Manrope, sans-serif;
+  color: rgba(208, 160, 48, 0.7);
+}
+
+.expand-stable-short {
+  color: rgba(220, 100, 80, 0.85);
+}
+
+.expand-stable-locked {
+  border-color: rgba(220, 100, 80, 0.35) !important;
+  background: rgba(220, 80, 60, 0.07) !important;
+  cursor: not-allowed;
+}
+
+.expand-stable-locked span:first-child {
+  color: rgba(220, 100, 80, 0.75);
+}
