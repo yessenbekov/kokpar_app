@@ -11154,29 +11154,49 @@ body,
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 7px;
+  gap: 11px;
 }
 
 .nh-action-btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  font: 700 13px/1 Manrope, sans-serif;
-  letter-spacing: .02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  border-radius: 14px;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
 .nh-action-amber {
-  background: linear-gradient(160deg, rgba(208,160,48,.88), rgba(178,128,28,.88));
-  border: 1px solid rgba(208,160,48,.55);
-  color: #15100a;
+  height: 58px;
+  border: 1px solid rgba(240,195,71,.6);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(208,160,48,.9), rgba(150,104,20,.9));
+  color: #1b0f04;
+  font: 800 15px/1 Manrope, sans-serif;
+}
+
+.nh-action-amber-icon {
+  width: 11px;
+  height: 11px;
+  background: #1b0f04;
+  transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
 .nh-action-dark {
-  background: rgba(21,10,3,.82);
-  border: 1px solid rgba(208,160,48,.22);
-  color: rgba(242,226,184,.88);
-  backdrop-filter: blur(8px);
+  height: 52px;
+  border: 1px solid rgba(190,148,60,.34);
+  border-radius: 13px;
+  background: rgba(26,15,4,.9);
+  color: #f2e2b8;
+  font: 700 14px/1 Manrope, sans-serif;
+}
+
+.nh-action-cooldown {
+  font: 700 12px/1 ui-monospace, Menlo, monospace;
+  color: rgba(214,178,110,.65);
 }
 
 /* ── Pause overlay ── */

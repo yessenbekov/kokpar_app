@@ -25,8 +25,8 @@ export function MatchHud({
   function handleExit() { setPaused(false); setShowExitConfirm(false); onOpenSettings?.(); }
 
   const serkeLabel =
-    hud.carry === "blue" ? "Синие владеют" :
-    hud.carry === "red" ? "Красные владеют" :
+    hud.serkeTeam === "blue" ? "Синие владеют" :
+    hud.serkeTeam === "red" ? "Красные владеют" :
     "Серке";
 
   return (
@@ -46,9 +46,9 @@ export function MatchHud({
         <div className="nh-serke-track">
           <span className="nh-serke-label">{serkeLabel}</span>
           <div className="nh-serke-bar">
-            <div className={`nh-seg nh-seg-blue${hud.carry === "blue" ? " nh-seg-glow" : ""}`} />
-            <div className={`nh-seg nh-seg-gold${!hud.carry ? " nh-seg-glow" : ""}`} />
-            <div className={`nh-seg nh-seg-red${hud.carry === "red" ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-blue${hud.serkeTeam === "blue" ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-gold${!hud.serkeTeam ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-red${hud.serkeTeam === "red" ? " nh-seg-glow" : ""}`} />
           </div>
         </div>
 
@@ -90,10 +90,16 @@ export function MatchHud({
         {/* Action buttons */}
         <div className="nh-actions">
           <button className="nh-action-btn nh-action-amber" type="button">
+            <span className="nh-action-amber-icon" />
             Поднять серке
           </button>
           <button className="nh-action-btn nh-action-dark" type="button">
             Рывок
+            {hud.bodyCheckCooldown > 0 && (
+              <span className="nh-action-cooldown">
+                {(hud.bodyCheckCooldown * 1.45).toFixed(1)}с
+              </span>
+            )}
           </button>
         </div>
       </div>

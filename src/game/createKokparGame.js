@@ -881,6 +881,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       cameraMode: currentCameraMode().label,
       horseName: player.horseName ?? gameSettings.horseName ?? playerHorseType.name,
       carry: carryStatusText(),
+      serkeTeam: kokpar.holder?.team ?? kokpar.flightTeam ?? null,
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
       showBanner: isCountdown || match.messageTime > 0 || match.over,
