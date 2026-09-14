@@ -30,7 +30,7 @@ export function MatchHud({
     "Серке";
 
   return (
-    <section className="nh" aria-label="Match status">
+    <section className="hud" aria-label="Match status">
       {/* ── Top bar ── */}
       <div className="nh-top">
         {/* Timer + Score */}
@@ -46,9 +46,9 @@ export function MatchHud({
         <div className="nh-serke-track">
           <span className="nh-serke-label">{serkeLabel}</span>
           <div className="nh-serke-bar">
-            <div className="nh-seg nh-seg-blue" />
-            <div className="nh-seg nh-seg-gold" />
-            <div className="nh-seg nh-seg-red" />
+            <div className={`nh-seg nh-seg-blue${hud.carry === "blue" ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-gold${!hud.carry ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-red${hud.carry === "red" ? " nh-seg-glow" : ""}`} />
           </div>
         </div>
 

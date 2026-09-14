@@ -10948,9 +10948,14 @@ body,
 /* Override legacy .hud positioning */
 .hud { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
   display: flex !important; flex-direction: column !important; justify-content: space-between !important;
-  grid-template-columns: none !important; gap: 0 !important;
+  grid-template-columns: none !important; gap: 0 !important; align-items: stretch !important;
+  /* push nh-bottom above touch-controls (~140px tall on mobile) */
   padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
-            max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)) !important; }
+            calc(148px + max(0px,env(safe-area-inset-bottom))) max(10px,env(safe-area-inset-left)) !important; }
+
+@media (min-width: 900px) {
+  .hud { padding-bottom: max(16px, env(safe-area-inset-bottom)) !important; }
+}
 
 /* ── Top bar ── */
 .nh-top {
@@ -11036,10 +11041,19 @@ body,
   gap: 2px;
 }
 
-.nh-seg { height: 100%; border-radius: 2px; }
+.nh-seg { height: 100%; border-radius: 2px; transition: filter .3s; }
 .nh-seg-blue { background: #3aabee; flex: 48; }
 .nh-seg-gold { background: rgba(208,160,48,.9); flex: 9; }
 .nh-seg-red  { background: #e05040; flex: 43; }
+
+@keyframes nh-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .65; }
+}
+
+.nh-seg-glow.nh-seg-blue { filter: drop-shadow(0 0 5px rgba(58,171,238,.9)); animation: nh-pulse 1.6s ease-in-out infinite; }
+.nh-seg-glow.nh-seg-gold { filter: drop-shadow(0 0 5px rgba(208,160,48,.9)); animation: nh-pulse 1.6s ease-in-out infinite; }
+.nh-seg-glow.nh-seg-red  { filter: drop-shadow(0 0 5px rgba(224,80,64,.9)); animation: nh-pulse 1.6s ease-in-out infinite; }
 
 /* Icon buttons */
 .nh-icons {
