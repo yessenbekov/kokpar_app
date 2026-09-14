@@ -11355,3 +11355,12 @@ body,
 .expand-stable-locked span:first-child {
   color: rgba(220, 100, 80, 0.75);
 }
+
+/* Daily bonus row in match reward */
+.match-result-reward-row--daily {
+  background: rgba(208, 160, 48, 0.1);
+  border: 1px solid rgba(208, 160, 48, 0.28);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 2px 0;
+}

@@ -284,10 +284,15 @@ export default function App() {
     const XP_PER_LEVEL = 100;
     const COINS_PARTICIPATION = 8;
     const COINS_WIN = 15;
-    const xpGain = XP_PARTICIPATION + (playerWon ? XP_WIN : 0);
-    const coinsGain = COINS_PARTICIPATION + (playerWon ? COINS_WIN : 0);
+    const DAILY_BONUS = 50;
 
     const currentProfile = playerProfileStore.read();
+    const today = new Date().toISOString().slice(0, 10);
+    const isDailyBonus = currentProfile.lastDailyBonus !== today;
+    const dailyBonusCoins = isDailyBonus ? DAILY_BONUS : 0;
+
+    const xpGain = XP_PARTICIPATION + (playerWon ? XP_WIN : 0);
+    const coinsGain = COINS_PARTICIPATION + (playerWon ? COINS_WIN : 0) + dailyBonusCoins;
     let reward = null;
 
     matchHistoryStore.push({
@@ -315,6 +320,7 @@ export default function App() {
       reward = {
         xpGain,
         coinsGain,
+        dailyBonusCoins,
         leveledUp: levelsGained > 0,
         newLevel: horse.level + levelsGained,
         horseName: horse.name,
@@ -342,7 +348,13 @@ export default function App() {
 
     const totalMatches = updatedHorses.reduce((sum, h) => sum + (h.record?.matches ?? 0), 0);
     const playerLevel = Math.floor(totalMatches / 5) + 1;
-    const nextProfile = saveProfile({ ...currentProfile, ownedHorses: updatedHorses, coins: (currentProfile.coins ?? 0) + coinsGain, level: playerLevel });
+    const nextProfile = saveProfile({
+      ...currentProfile,
+      ownedHorses: updatedHorses,
+      coins: (currentProfile.coins ?? 0) + coinsGain,
+      level: playerLevel,
+      lastDailyBonus: isDailyBonus ? today : currentProfile.lastDailyBonus,
+    });
     setProfile(nextProfile);
     if (reward) {
       setMatchReward(reward);

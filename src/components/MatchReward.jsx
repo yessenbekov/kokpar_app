@@ -3,7 +3,7 @@ import { Star, Target, Sword } from "lucide-react";
 export function MatchReward({ reward, onRestart, onLobby }) {
   if (!reward) return null;
 
-  const { won, scoreBlue, scoreRed, teamSide, playerGoals, playerSteals, xpGain, coinsGain, leveledUp, newLevel, horseName } = reward;
+  const { won, scoreBlue, scoreRed, teamSide, playerGoals, playerSteals, xpGain, coinsGain, dailyBonusCoins, leveledUp, newLevel, horseName } = reward;
 
   const playerScore = teamSide === "red" ? scoreRed : scoreBlue;
   const opponentScore = teamSide === "red" ? scoreBlue : scoreRed;
@@ -39,10 +39,16 @@ export function MatchReward({ reward, onRestart, onLobby }) {
             <span className="match-result-reward-row__label">Опыт</span>
             <span className="match-result-reward-row__value match-result-reward-row__value--xp">+{xpGain} XP</span>
           </div>
+          {dailyBonusCoins > 0 && (
+            <div className="match-result-reward-row match-result-reward-row--daily">
+              <span className="match-result-reward-row__label">🎁 Ежедневный бонус</span>
+              <span className="match-result-reward-row__value match-result-reward-row__value--coins">+{dailyBonusCoins}</span>
+            </div>
+          )}
           {coinsGain > 0 && (
             <div className="match-result-reward-row">
               <span className="match-result-reward-row__label">Монеты</span>
-              <span className="match-result-reward-row__value match-result-reward-row__value--coins">+{coinsGain}</span>
+              <span className="match-result-reward-row__value match-result-reward-row__value--coins">+{coinsGain - (dailyBonusCoins ?? 0)}</span>
             </div>
           )}
           <div className="match-result-reward-row">
