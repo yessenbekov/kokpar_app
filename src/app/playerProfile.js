@@ -14,7 +14,7 @@ const DEFAULT_OWNED_HORSES = [
 export const DEFAULT_PLAYER_PROFILE = {
   riderName: "Шабандоз",
   level: 1,
-  coins: 600,
+  coins: 200,
   reputation: 0,
   selectedHorseId: DEFAULT_OWNED_HORSES[0].id,
   selectedHorseType: DEFAULT_OWNED_HORSES[0].typeId,
