@@ -420,7 +420,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
     }
   }, [authState.status]);
 
-  async function completeOnboarding(horseTypeId, horseName, riderName, coatId) {
+  async function completeOnboarding(horseTypeId, horseName, riderName, coatId, language) {
     const horse = newOwnedHorse(horseTypeId, horseName, coatId);
     const baseProfile = playerProfileStore.read();
     const newProfile = {
@@ -429,7 +429,9 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       coins: 600,
       ownedHorses: [horse],
       selectedHorseId: horse.id,
-      selectedHorseType: horse.typeId
+      selectedHorseType: horse.typeId,
+      language: typeof language === "string" && ["ru", "kz"].includes(language) ? language : (baseProfile.language ?? "ru"),
+      onboardingDone: true
     };
 
     const savedProfile = playerProfileStore.save(newProfile);

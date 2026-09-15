@@ -1,53 +1,16 @@
 import { useState } from "react";
 import { COAT_PRESETS, HORSE_TYPES, coatPresetById } from "../game/horseTypes.js";
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function ratingFor(score) {
-  return Math.round(clamp(score * 72, 45, 96));
-}
-
-function paletteStyle(coat) {
-  return {
-    "--coat": coat.coat,
-    "--dark": coat.dark,
-    "--muzzle": coat.muzzle,
-    "--mark": coat.marking
-  };
-}
-
-function HorsePreview({ horse, coatId }) {
-  const coat = coatPresetById(coatId ?? horse.defaultCoatId);
-  return (
-    <div className="horse-portrait" style={paletteStyle(coat)} aria-hidden="true">
-      <span className="horse-preview-shadow" />
-      <span className="horse-preview-leg front" />
-      <span className="horse-preview-leg back" />
-      <span className="horse-preview-body" />
-      <span className="horse-preview-neck" />
-      <span className="horse-preview-head" />
-      <span className="horse-preview-mane" />
-      <span className="horse-preview-tail" />
-      <span className="horse-preview-mark" />
-    </div>
-  );
-}
-
-const ONBOARDING_STAT_ROWS = [
-  { label: "Скорость", key: "speed" },
-  { label: "Поворот", key: "turn" },
-  { label: "Сила", key: "contestPower" }
-];
+const TOTAL_STEPS = 3;
+const SUGGESTED_NAMES = ["Алмас_07", "Серке_Ханы", "Батыр", "Тулпар_2", "Жорға"];
 
 export function HorseOnboarding({ onComplete }) {
+  const [step, setStep] = useState(0);
+  const [language, setLanguage] = useState("ru");
+  const [riderName, setRiderName] = useState("");
   const [selectedTypeId, setSelectedTypeId] = useState(HORSE_TYPES[0].id);
   const [horseName, setHorseName] = useState("");
-  const [riderName, setRiderName] = useState("");
   const [selectedCoatId, setSelectedCoatId] = useState(HORSE_TYPES[0].defaultCoatId);
-
-  const selectedHorse = HORSE_TYPES.find((ht) => ht.id === selectedTypeId) ?? HORSE_TYPES[0];
 
   function selectHorseType(id) {
     const ht = HORSE_TYPES.find((h) => h.id === id) ?? HORSE_TYPES[0];
@@ -55,93 +18,174 @@ export function HorseOnboarding({ onComplete }) {
     setSelectedCoatId(ht.defaultCoatId);
   }
 
-  function handleStart(event) {
-    event.preventDefault();
-    onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null, selectedCoatId);
+  function handleComplete() {
+    onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null, selectedCoatId, language);
+  }
+
+  function next() {
+    if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
+    else handleComplete();
   }
 
   return (
-    <div className="horse-onboarding" role="dialog" aria-modal="true" aria-label="Выбор первого коня">
-      <div className="horse-onboarding-card">
-        <h2 className="horse-onboarding-title">Выбери своего первого коня</h2>
-        <p className="horse-onboarding-subtitle">Каждый конь открывает свой стиль игры</p>
+    <div className="ob-wizard" role="dialog" aria-modal="true" aria-label="Настройка профиля">
+      <div className="ob-progress">
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+          <span key={i} className={`ob-progress-seg${i <= step ? " ob-progress-seg--active" : ""}`} />
+        ))}
+      </div>
 
-        <div className="onboarding-horse-grid">
-          {HORSE_TYPES.map((ht) => {
-            const isSelected = ht.id === selectedTypeId;
-            return (
-              <button
-                key={ht.id}
-                type="button"
-                className={isSelected ? "onboarding-horse-card selected" : "onboarding-horse-card"}
-                onClick={() => selectHorseType(ht.id)}
-                aria-pressed={isSelected}
-              >
-                <HorsePreview horse={ht} coatId={isSelected ? selectedCoatId : ht.defaultCoatId} />
-                <strong className="onboarding-horse-name">{ht.name}</strong>
-                <span className="onboarding-horse-role">{ht.role}</span>
-                <div className="onboarding-horse-stats">
-                  {ONBOARDING_STAT_ROWS.map(({ label, key }) => {
-                    const rating = ratingFor(ht.stats[key]);
-                    return (
-                      <div key={key} className="onboarding-stat-row">
-                        <span className="onboarding-stat-label">{label}</span>
-                        <div className="onboarding-stat-bar-wrap">
-                          <div className="onboarding-stat-bar" style={{ "--value": `${rating}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="onboarding-horse-desc">{ht.description}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="coat-picker">
-          <span className="coat-picker-label">Масть</span>
-          {COAT_PRESETS.map((preset) => (
+      {step === 0 && (
+        <>
+          <div className="ob-header">
+            <div className="ob-step-label">Шаг 1 из {TOTAL_STEPS}</div>
+            <div className="ob-step-title">Тіл · Язык</div>
+            <div className="ob-step-desc">Интерфейс и комментарий матча. Сменить можно в настройках.</div>
+          </div>
+          <div className="ob-body">
             <button
-              key={preset.id}
               type="button"
-              className={selectedCoatId === preset.id ? "coat-swatch selected" : "coat-swatch"}
-              style={{ background: preset.coat }}
-              title={preset.label}
-              aria-label={preset.label}
-              aria-pressed={selectedCoatId === preset.id}
-              onClick={() => setSelectedCoatId(preset.id)}
-            />
-          ))}
-        </div>
+              className={`ob-lang-card${language === "kz" ? " ob-lang-card--selected" : ""}`}
+              onClick={() => setLanguage("kz")}
+            >
+              <span className="ob-lang-code">ҚАЗ</span>
+              <div className="ob-lang-text">
+                <div className="ob-lang-name">Қазақша</div>
+                <div className="ob-lang-desc">Толық аударма · дауыстық түсініктеме</div>
+              </div>
+              {language === "kz" && <span className="ob-check-circle">✓</span>}
+            </button>
+            <button
+              type="button"
+              className={`ob-lang-card${language === "ru" ? " ob-lang-card--selected" : ""}`}
+              onClick={() => setLanguage("ru")}
+            >
+              <span className="ob-lang-code">РУС</span>
+              <div className="ob-lang-text">
+                <div className="ob-lang-name">Русский</div>
+                <div className="ob-lang-desc">Полный перевод · озвучка комментатора</div>
+              </div>
+              {language === "ru" && <span className="ob-check-circle">✓</span>}
+            </button>
+          </div>
+        </>
+      )}
 
-        <form className="onboarding-inputs" onSubmit={handleStart}>
-          <div className="onboarding-input-group">
-            <label htmlFor="onboarding-rider-name">Имя всадника</label>
-            <input
-              id="onboarding-rider-name"
-              type="text"
-              placeholder="Шабандоз"
-              maxLength={24}
-              value={riderName}
-              onChange={(e) => setRiderName(e.target.value)}
-            />
+      {step === 1 && (
+        <>
+          <div className="ob-header">
+            <div className="ob-step-label">Шаг 2 из {TOTAL_STEPS}</div>
+            <div className="ob-step-title">Кто вы на поле</div>
           </div>
-          <div className="onboarding-input-group">
-            <label htmlFor="onboarding-horse-name">Имя коня</label>
-            <input
-              id="onboarding-horse-name"
-              type="text"
-              placeholder={selectedHorse.name}
-              maxLength={24}
-              value={horseName}
-              onChange={(e) => setHorseName(e.target.value)}
-            />
+          <div className="ob-body">
+            <div className="ob-field-group">
+              <div className="ob-field-label">Имя всадника</div>
+              <input
+                className="ob-rider-name-input"
+                type="text"
+                placeholder="Алмас"
+                maxLength={24}
+                value={riderName}
+                onChange={(e) => setRiderName(e.target.value)}
+              />
+              <div className="ob-suggestions">
+                {SUGGESTED_NAMES.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    className="ob-suggestion-pill"
+                    onClick={() => setRiderName(name)}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <button type="submit" className="onboarding-start-btn">
-            Начать путь
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <div className="ob-header">
+            <div className="ob-step-label">Шаг 3 из {TOTAL_STEPS}</div>
+            <div className="ob-step-title">Выберите коня</div>
+            <div className="ob-step-desc">Один конь достаётся бесплатно. Остальные стойла откроете за монеты.</div>
+          </div>
+          <div className="ob-body">
+            {HORSE_TYPES.map((ht, idx) => {
+              const isFree = idx === 0;
+              const isSelected = ht.id === selectedTypeId;
+              const coat = coatPresetById(isSelected ? selectedCoatId : ht.defaultCoatId);
+              return (
+                <button
+                  key={ht.id}
+                  type="button"
+                  className={`ob-horse-card${isSelected ? " ob-horse-card--selected" : ""}${!isFree ? " ob-horse-card--locked" : ""}`}
+                  onClick={() => isFree && selectHorseType(ht.id)}
+                  disabled={!isFree}
+                >
+                  <div
+                    className="ob-horse-thumb"
+                    style={{ background: `linear-gradient(150deg, ${coat.coat}, ${coat.dark})` }}
+                  />
+                  <div className="ob-horse-info">
+                    <div className="ob-horse-title">{ht.name} · {ht.role}</div>
+                    <div className="ob-horse-desc">{ht.description}</div>
+                    {!isFree && <div className="ob-horse-lock">Купить за монеты</div>}
+                  </div>
+                  {isSelected && <span className="ob-check-circle">✓</span>}
+                </button>
+              );
+            })}
+
+            <div className="ob-coat-picker">
+              <div className="ob-field-label">Масть</div>
+              <div className="ob-coat-swatches">
+                {COAT_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className={`ob-coat-swatch${selectedCoatId === preset.id ? " ob-coat-swatch--active" : ""}`}
+                    style={{ background: preset.coat }}
+                    title={preset.label}
+                    aria-label={preset.label}
+                    aria-pressed={selectedCoatId === preset.id}
+                    onClick={() => setSelectedCoatId(preset.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="ob-field-group">
+              <div className="ob-field-label">Имя коня</div>
+              <input
+                className="ob-rider-name-input"
+                type="text"
+                placeholder={HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}
+                maxLength={24}
+                value={horseName}
+                onChange={(e) => setHorseName(e.target.value)}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="ob-footer">
+        <button className="ob-continue-btn" type="button" onClick={next}>
+          {step < TOTAL_STEPS - 1 ? "Продолжить" : "Начать путь"}
+        </button>
+        {step === 0 && (
+          <button className="ob-skip-btn" type="button" onClick={handleComplete}>
+            Пропустить
           </button>
-        </form>
+        )}
+        {step > 0 && (
+          <button className="ob-skip-btn" type="button" onClick={() => setStep((s) => s - 1)}>
+            ‹ Назад
+          </button>
+        )}
       </div>
     </div>
   );

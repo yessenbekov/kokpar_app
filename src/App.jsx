@@ -598,6 +598,7 @@ export default function App() {
 
   const isSetup = !activeSettings;
   const showAuthGate = isSetup && !setupEntered && authState.status !== "signed-in";
+  const showOnboarding = isSetup && !showAuthGate && (needsOnboarding || !profile.onboardingDone);
 
   return (
     <ErrorBoundary>
@@ -624,15 +625,15 @@ export default function App() {
         />
       )}
 
-      {needsOnboarding && (
+      {showOnboarding && (
         <HorseOnboarding
-          onComplete={(typeId, horseName, riderName, coatId) => {
-            completeOnboarding(typeId, horseName, riderName, coatId);
+          onComplete={(typeId, horseName, riderName, coatId, language) => {
+            completeOnboarding(typeId, horseName, riderName, coatId, language);
           }}
         />
       )}
 
-      {isSetup && !showAuthGate && (
+      {isSetup && !showAuthGate && !showOnboarding && (
         <MatchSetup
           profile={profile}
           settings={settings}

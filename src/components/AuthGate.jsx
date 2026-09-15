@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link2, LogIn, Mail, Play, UserPlus, UserRound } from "lucide-react";
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/>
-      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/>
-      <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/>
-      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"/>
-    </svg>
-  );
-}
 
 export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onResetPassword, onGuestContinue, onGoogleSignIn }) {
+  const [showAuth, setShowAuth] = useState(false);
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState(auth.email ?? "");
   const [password, setPassword] = useState("");
@@ -34,28 +23,17 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
     setResetSent(false);
   }
 
-  function submitLogin(event) {
-    event.preventDefault();
+  function submitLogin(e) {
+    e.preventDefault();
     onPasswordSignIn(email, password);
   }
 
-  function submitRegister(event) {
-    event.preventDefault();
-    if (password.length < 6) {
-      setPasswordError("Минимум 6 символов");
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setPasswordError("Пароли не совпадают");
-      return;
-    }
+  function submitRegister(e) {
+    e.preventDefault();
+    if (password.length < 6) { setPasswordError("Минимум 6 символов"); return; }
+    if (password !== passwordConfirm) { setPasswordError("Пароли не совпадают"); return; }
     setPasswordError("");
     onSignUp(email, password);
-  }
-
-  function submitMagicLink(event) {
-    event.preventDefault();
-    onEmailSignIn(email);
   }
 
   async function handleResetPassword() {
@@ -64,145 +42,102 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
     setResetSent(true);
   }
 
-  return (
-    <section className="setup auth-screen" aria-label="Вход">
-      <div className="auth-gate-panel">
-        <div className="auth-gate-brand">
-          <div className="auth-game-logo">
-            <span className="auth-logo-kk">КОКПАР</span>
-            <span className="auth-logo-3d">3D</span>
+  if (showAuth) {
+    return (
+      <div className="ob-splash">
+        <div className="ob-splash-gradient" />
+        <div className="ob-auth-overlay">
+          <button className="ob-auth-back" type="button" onClick={() => setShowAuth(false)}>
+            ‹ Назад
+          </button>
+          <div className="ob-auth-title">
+            {mode === "register" ? "Регистрация" : "Вход"}
           </div>
-          <p className="auth-game-tagline">Традиционная казахская конная игра</p>
-          <h2 className="auth-section-title">
-            {mode === "register" ? "Регистрация" : mode === "magic-link" ? "Войти по ссылке" : "Вход"}
-          </h2>
-        </div>
-
-        <div className="auth-method-tabs auth-gate-tabs" role="tablist" aria-label="Способ входа">
-          <button className={mode === "login" ? "active" : ""} type="button" onClick={() => switchMode("login")}>
-            <LogIn size={15} strokeWidth={2.5} />
-            <span>Вход</span>
-          </button>
-          <button className={mode === "register" ? "active" : ""} type="button" onClick={() => switchMode("register")}>
-            <UserPlus size={15} strokeWidth={2.5} />
-            <span>Регистрация</span>
-          </button>
-          <button className={mode === "magic-link" ? "active" : ""} type="button" onClick={() => switchMode("magic-link")}>
-            <Link2 size={15} strokeWidth={2.5} />
-            <span>Ссылка</span>
-          </button>
-        </div>
-
-        {mode === "login" && (
-          <form className="auth-gate-form stacked" onSubmit={submitLogin}>
-            <input
-              aria-label="Email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={busy}
-            />
-            <input
-              aria-label="Пароль"
-              type="password"
-              autoComplete="current-password"
-              placeholder="пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={busy}
-            />
-            <button type="submit" disabled={busy || !email.trim() || !password}>
-              <LogIn size={17} strokeWidth={2.5} />
-              <span>{auth.status === "sending" ? "Входим…" : "Войти"}</span>
+          <div className="ob-auth-tabs">
+            <button type="button" className={`ob-auth-tab${mode === "login" ? " active" : ""}`} onClick={() => switchMode("login")}>
+              Вход
             </button>
-            <button
-              className="auth-gate-link"
-              type="button"
-              disabled={busy || !email.trim() || resetSent}
-              onClick={handleResetPassword}
-            >
-              {resetSent ? "Письмо отправлено" : "Забыли пароль?"}
+            <button type="button" className={`ob-auth-tab${mode === "register" ? " active" : ""}`} onClick={() => switchMode("register")}>
+              Регистрация
             </button>
-          </form>
-        )}
+          </div>
 
-        {mode === "register" && (
-          <form className="auth-gate-form stacked" onSubmit={submitRegister}>
-            <input
-              aria-label="Email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={busy}
-            />
-            <input
-              aria-label="Пароль"
-              type="password"
-              autoComplete="new-password"
-              placeholder="пароль (мин. 6 символов)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={busy}
-            />
-            <input
-              aria-label="Повтор пароля"
-              type="password"
-              autoComplete="new-password"
-              placeholder="повторите пароль"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              disabled={busy}
-            />
-            {passwordError && <p className="auth-gate-error">{passwordError}</p>}
-            <button type="submit" disabled={busy || !email.trim() || !password || !passwordConfirm}>
-              <UserPlus size={17} strokeWidth={2.5} />
-              <span>{auth.status === "sending" ? "Создаём…" : "Создать аккаунт"}</span>
+          {mode === "login" && (
+            <form className="ob-auth-form" onSubmit={submitLogin}>
+              <input className="ob-auth-input" type="email" inputMode="email" autoComplete="email"
+                placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} />
+              <input className="ob-auth-input" type="password" autoComplete="current-password"
+                placeholder="пароль" value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
+              <button className="ob-auth-submit" type="submit" disabled={busy || !email.trim() || !password}>
+                {auth.status === "sending" ? "Входим…" : "Войти"}
+              </button>
+              <button className="ob-skip-btn" type="button" disabled={busy || !email.trim() || resetSent} onClick={handleResetPassword}>
+                {resetSent ? "Письмо отправлено" : "Забыли пароль?"}
+              </button>
+            </form>
+          )}
+
+          {mode === "register" && (
+            <form className="ob-auth-form" onSubmit={submitRegister}>
+              <input className="ob-auth-input" type="email" inputMode="email" autoComplete="email"
+                placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} />
+              <input className="ob-auth-input" type="password" autoComplete="new-password"
+                placeholder="пароль (мин. 6 символов)" value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
+              <input className="ob-auth-input" type="password" autoComplete="new-password"
+                placeholder="повторите пароль" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} disabled={busy} />
+              {passwordError && <p className="ob-auth-error">{passwordError}</p>}
+              <button className="ob-auth-submit" type="submit" disabled={busy || !email.trim() || !password || !passwordConfirm}>
+                {auth.status === "sending" ? "Создаём…" : "Создать аккаунт"}
+              </button>
+            </form>
+          )}
+
+          {onGoogleSignIn && (
+            <button className="ob-splash-btn-social" type="button" onClick={onGoogleSignIn} disabled={busy}>
+              Войти через Google
             </button>
-          </form>
-        )}
+          )}
 
-        {mode === "magic-link" && (
-          <form className="auth-gate-form" onSubmit={submitMagicLink}>
-            <input
-              aria-label="Email для входа"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={busy}
-            />
-            <button type="submit" disabled={busy || !email.trim()}>
-              <Mail size={17} strokeWidth={2.5} />
-              <span>{auth.status === "sending" ? "Отправляем…" : "Войти"}</span>
-            </button>
-          </form>
-        )}
-
-        {onGoogleSignIn && (
-          <button className="google-signin-button" type="button" onClick={onGoogleSignIn} disabled={busy}>
-            <GoogleIcon />
-            <span>Войти через Google</span>
-          </button>
-        )}
-
-        <button className="guest-button" type="button" onClick={onGuestContinue}>
-          <Play size={17} fill="currentColor" strokeWidth={2.5} />
-          <span>Играть гостем</span>
-        </button>
-
-        <div className="auth-status-line" role="status" aria-live="polite">
-          <UserRound size={15} strokeWidth={2.5} />
-          <span>{auth.error || auth.message}</span>
+          {(auth.error || auth.message) && (
+            <p className={`ob-auth-error${auth.error ? "" : " ob-auth-msg"}`}>{auth.error || auth.message}</p>
+          )}
         </div>
       </div>
-    </section>
+    );
+  }
+
+  return (
+    <div className="ob-splash">
+      <div className="ob-splash-gradient" />
+      <div className="ob-splash-content">
+        <div>
+          <div className="ob-splash-title">KOKPAR 3D</div>
+          <p className="ob-splash-tagline">
+            Көкпар — игра всадников. Соберите конюшню, выигрывайте серке, поднимайтесь в аул-рейтинге.
+          </p>
+        </div>
+        <div className="ob-splash-actions">
+          <button className="ob-splash-btn-primary" type="button" onClick={onGuestContinue}>
+            Начать игру
+          </button>
+          <div className="ob-splash-btn-row">
+            <button className="ob-splash-btn-social" type="button" onClick={() => setShowAuth(true)}>
+              Войти
+            </button>
+            {onGoogleSignIn && (
+              <button className="ob-splash-btn-social" type="button" onClick={onGoogleSignIn}>
+                Google
+              </button>
+            )}
+          </div>
+          <button className="ob-splash-btn-ghost" type="button" onClick={onGuestContinue}>
+            Играть как гость
+          </button>
+        </div>
+        <p className="ob-splash-legal">
+          Продолжая, вы принимаете правила игры и политику данных.
+        </p>
+      </div>
+    </div>
   );
 }
