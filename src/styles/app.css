@@ -9669,10 +9669,10 @@ body,
 }
 
 .home-coins-chip {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
   height: 30px;
-  padding: 0 10px;
+  padding: 0 4px 0 10px;
   border-radius: 7px;
   border: 1px solid rgba(208, 160, 48, 0.45);
   background: rgba(208, 160, 48, 0.14);
@@ -9814,10 +9814,13 @@ body,
   cursor: pointer;
 }
 
-/* Home screen layout: setup-panel becomes a flex column */
+/* Home screen layout: setup-panel becomes a flex column with design 1a background */
 .setup-panel:has(.home-profile-row) {
   display: flex;
   flex-direction: column;
+  background:
+    radial-gradient(120% 70% at 50% -8%, rgba(208, 160, 48, 0.30), transparent 62%),
+    linear-gradient(165deg, #33200c 0%, #1a0f04 62%, #120a02 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -11406,12 +11409,17 @@ body,
    ════════════════════════════════════════════════ */
 
 .coins-chip-plus {
-  display: inline-block;
-  margin-left: 4px;
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(208, 160, 48, 0.9);
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 7px;
+  border-radius: 6px;
+  background: #d0a030;
+  color: #1b0f04;
+  font: 800 15px Manrope, sans-serif;
   line-height: 1;
+  vertical-align: middle;
 }
 
 .home-coins-chip {
@@ -11559,6 +11567,419 @@ body,
   text-align: center;
   font: 400 11px/1.5 Manrope, sans-serif;
   color: rgba(242, 226, 184, 0.35);
+}
+
+/* ──────────────────────────────────────────────
+   COIN SCREEN 3a — full screen
+   ────────────────────────────────────────────── */
+
+.cscreen-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+  color: #f2e2b8;
+  overflow: hidden;
+}
+
+.cscreen-topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 16px;
+}
+
+.cscreen-back {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(190, 148, 60, 0.28);
+  background: rgba(52, 32, 10, 0.70);
+  font: 600 18px Manrope, sans-serif;
+  color: #f2e2b8;
+  cursor: pointer;
+  flex: none;
+}
+
+.cscreen-title {
+  flex: 1;
+  font: 600 22px Oswald, sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.cscreen-balance-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(208, 160, 48, 0.45);
+  background: rgba(208, 160, 48, 0.14);
+  font: 700 12px Manrope, sans-serif;
+  color: #f0c347;
+}
+
+.cscreen-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 20px;
+  overflow-y: auto;
+}
+
+.cscreen-balance-card {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(208, 160, 48, 0.40);
+  background: linear-gradient(160deg, rgba(208, 160, 48, 0.20), rgba(52, 32, 10, 0.80));
+}
+
+.cscreen-balance-label {
+  font: 700 10px Manrope, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 210, 130, 0.75);
+}
+
+.cscreen-balance-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.cscreen-coin-circle {
+  display: block;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #f0c347, #b6801c);
+  border: 1px solid rgba(255, 240, 200, 0.50);
+}
+
+.cscreen-balance-amount {
+  font: 700 38px/1 Oswald, sans-serif;
+  color: #fff7e8;
+}
+
+.cscreen-daily {
+  margin-left: auto;
+  font: 400 11.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.75);
+  text-align: right;
+  line-height: 1.4;
+}
+
+.cscreen-daily-gain {
+  font: 700 13px Manrope, sans-serif;
+  color: #6fd39a;
+}
+
+.cscreen-section-label {
+  font: 700 11px Manrope, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.62);
+  margin-bottom: 11px;
+}
+
+.cscreen-packages-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+
+.cscreen-pkg {
+  padding: 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(190, 148, 60, 0.24);
+  background: rgba(52, 32, 10, 0.72);
+  position: relative;
+}
+
+.cscreen-pkg--featured {
+  border-color: rgba(208, 160, 48, 0.55);
+  background: rgba(208, 160, 48, 0.13);
+}
+
+.cscreen-pkg-badge {
+  position: absolute;
+  right: 10px;
+  top: -9px;
+  height: 19px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #d0a030;
+  color: #1b0f04;
+  font: 800 9.5px Manrope, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cscreen-pkg-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cscreen-pkg-coin {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #f0c347, #b6801c);
+  border: 1px solid rgba(255, 240, 200, 0.50);
+  flex: none;
+}
+
+.cscreen-pkg-amount {
+  font: 600 20px Oswald, sans-serif;
+  color: #f7ecd0;
+}
+
+.cscreen-pkg-name {
+  margin-top: 4px;
+  font: 400 11.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.72);
+}
+
+.cscreen-pkg-btn {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin-top: 11px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(52, 32, 10, 0.90);
+  font: 700 13px Manrope, sans-serif;
+  color: #f2e2b8;
+  cursor: pointer;
+}
+
+.cscreen-pkg-btn--featured {
+  border-color: rgba(240, 195, 71, 0.60);
+  background: linear-gradient(150deg, rgba(208, 160, 48, 0.95), rgba(150, 104, 20, 0.95));
+  color: #1b0f04;
+}
+
+.cscreen-pkg-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ──────────────────────────────────────────────
+   COIN QUICK TOP-UP 3b — bottom sheet overlay
+   ────────────────────────────────────────────── */
+
+.cshop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(14, 8, 2, 0.78);
+  display: flex;
+  align-items: flex-end;
+  backdrop-filter: blur(3px);
+}
+
+.cshop-sheet {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 22px 20px calc(26px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 36px 36px;
+  background: linear-gradient(165deg, #33200c 0%, #1a0f04 78%);
+  border-top: 1px solid rgba(190, 148, 60, 0.40);
+  box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.50);
+}
+
+.cshop-handle {
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin: 0 auto 16px;
+  border-radius: 99px;
+  background: rgba(242, 226, 184, 0.28);
+}
+
+.cshop-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cshop-coin-circle {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #f0c347, #b6801c);
+  border: 1px solid rgba(255, 240, 200, 0.50);
+}
+
+.cshop-head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cshop-head-title {
+  font: 600 19px Oswald, sans-serif;
+  color: #f2e2b8;
+}
+
+.cshop-head-balance {
+  font: 400 11.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.70);
+}
+
+.cshop-packages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.cshop-pkg {
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(190, 148, 60, 0.24);
+  background: rgba(52, 32, 10, 0.72);
+  text-align: center;
+  position: relative;
+}
+
+.cshop-pkg--featured {
+  border-color: rgba(208, 160, 48, 0.55);
+  background: rgba(208, 160, 48, 0.14);
+}
+
+.cshop-pkg-badge {
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  transform: translateX(-50%);
+  height: 18px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #d0a030;
+  color: #1b0f04;
+  font: 800 9px Manrope, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cshop-pkg-amount {
+  font: 600 18px Oswald, sans-serif;
+  color: #f7ecd0;
+}
+
+.cshop-pkg-price {
+  margin-top: 5px;
+  font: 700 11.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.80);
+}
+
+.cshop-pkg-price--featured {
+  color: #f0c347;
+}
+
+.cshop-methods {
+  display: flex;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.cshop-method {
+  flex: 1;
+  height: 44px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(52, 32, 10, 0.80);
+  font: 700 12.5px Manrope, sans-serif;
+  color: #f2e2b8;
+}
+
+.cshop-pay-btn {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 56px;
+  margin-top: 14px;
+  border: 1px solid rgba(240, 195, 71, 0.60);
+  border-radius: 12px;
+  background: linear-gradient(150deg, rgba(208, 160, 48, 0.95), rgba(150, 104, 20, 0.95));
+  color: #1b0f04;
+  font: 600 16px Oswald, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.cshop-pay-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cshop-ad-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 11px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  border: 1px solid rgba(190, 148, 60, 0.22);
+  background: rgba(52, 32, 10, 0.60);
+}
+
+.cshop-ad-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid rgba(58, 171, 238, 0.35);
+  background: rgba(58, 171, 238, 0.12);
+  color: #3aabee;
+  font-size: 12px;
+}
+
+.cshop-ad-text {
+  flex: 1;
+  font: 400 11.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.80);
+}
+
+.cshop-ad-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(58, 171, 238, 0.40);
+  background: rgba(58, 171, 238, 0.14);
+  color: #3aabee;
+  font: 700 12px Manrope, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cshop-ad-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* ──────────────────────────────────────────────

@@ -116,6 +116,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [homeScreen, setHomeScreen] = useState(true);
   const [stableCardOpen, setStableCardOpen] = useState(false);
   const [showCoinShop, setShowCoinShop] = useState(false);
+  const [showCoinScreen, setShowCoinScreen] = useState(false);
   const [lang, setLangState] = useState(() => { try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; } });
   const [sfxVol, setSfxVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_sfx") ?? 78); } catch { return 78; } });
   const [musicVol, setMusicVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_music") ?? 42); } catch { return 42; } });
@@ -204,7 +205,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               </div>
               <span className="home-level-chip">Ур. {profile.level}</span>
               <button className="home-coins-chip" type="button" onClick={() => setShowCoinShop(true)}>
-                {formatCoins(profile.coins)} күміс <span className="coins-chip-plus">+</span>
+                {formatCoins(profile.coins)} ⌾<span className="coins-chip-plus">+</span>
               </button>
             </div>
 
@@ -228,13 +229,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); }}>
                   {kz ? "Қора" : "Конюшня"}
                 </button>
-                <button type="button" className="home-sub-btn" onClick={() => {
-                  onSettingChange("modeId", "online_room");
-                  setHomeScreen(false);
-                  setNavTab("game");
-                  setWizardStep(1);
-                }}>
-                  Онлайн
+                <button type="button" className="home-sub-btn" onClick={() => setShowCoinScreen(true)}>
+                  {kz ? "Дүкен" : "Магазин"}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
                   {kz ? "Баптаулар" : "Настройки"}
@@ -257,7 +253,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           <div className="setup-topbar">
             <span className="setup-topbar-title">Кокпар 3D</span>
             <button className="setup-topbar-coins" type="button" onClick={() => setShowCoinShop(true)}>
-              {formatCoins(profile.coins)} күміс <span className="coins-chip-plus">+</span>
+              {formatCoins(profile.coins)} ⌾<span className="coins-chip-plus">+</span>
             </button>
           </div>
         )}
@@ -746,33 +742,95 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
       </div>
 
       {/* ── Coin shop overlay ── */}
-      {showCoinShop && (
-        <div className="coin-shop-overlay" onClick={() => setShowCoinShop(false)}>
-          <div className="coin-shop-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="coin-shop-header">
-              <span className="coin-shop-title">Купить монеты</span>
-              <button className="coin-shop-close" type="button" onClick={() => setShowCoinShop(false)}>✕</button>
+      {showCoinScreen && (
+        <div className="cscreen-wrap">
+          <div className="status-bar-spacer" />
+          <div className="cscreen-topbar">
+            <button className="cscreen-back" type="button" onClick={() => setShowCoinScreen(false)}>‹</button>
+            <div className="cscreen-title">{kz ? "Монеттер" : "Монеты"}</div>
+            <span className="cscreen-balance-chip">{formatCoins(profile.coins)} ⌾</span>
+          </div>
+          <div className="cscreen-body">
+            <div className="cscreen-balance-card">
+              <div className="cscreen-balance-label">{kz ? "Баланс" : "Баланс"}</div>
+              <div className="cscreen-balance-row">
+                <span className="cscreen-coin-circle" />
+                <span className="cscreen-balance-amount">{formatCoins(profile.coins)}</span>
+                <span className="cscreen-daily">
+                  {kz ? "бүгін матчтар үшін" : "за матчи сегодня"}<br />
+                  <span className="cscreen-daily-gain">+120 ⌾</span>
+                </span>
+              </div>
             </div>
-            <div className="coin-shop-balance">
-              Баланс: <strong>{formatCoins(profile.coins)} 🪙</strong>
-            </div>
-            <div className="coin-shop-packages">
-              {COIN_PACKAGES.map((pkg) => (
-                <div key={pkg.coins} className="coin-shop-pkg">
-                  <div className="coin-shop-pkg-coins">
-                    <span className="coin-shop-pkg-icon">🪙</span>
-                    <span className="coin-shop-pkg-amount">{formatCoins(pkg.coins)}</span>
-                    {pkg.bonus && <span className="coin-shop-pkg-bonus">+{pkg.bonus}% бонус</span>}
-                  </div>
-                  <button className="coin-shop-pkg-btn" type="button" disabled>
-                    {pkg.price}
-                  </button>
+            <div className="cscreen-packages-section">
+              <div className="cscreen-section-label">{kz ? "Жинақтар" : "Наборы"}</div>
+              <div className="cscreen-packages-grid">
+                <div className="cscreen-pkg">
+                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">300</span></div>
+                  <div className="cscreen-pkg-name">{kz ? "Стартовый" : "Стартовый"}</div>
+                  <button className="cscreen-pkg-btn" type="button" disabled>299 ₸</button>
                 </div>
-              ))}
+                <div className="cscreen-pkg">
+                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">800</span></div>
+                  <div className="cscreen-pkg-name">+10% {kz ? "бонус" : "бонус"}</div>
+                  <button className="cscreen-pkg-btn" type="button" disabled>749 ₸</button>
+                </div>
+                <div className="cscreen-pkg cscreen-pkg--featured">
+                  <span className="cscreen-pkg-badge">{kz ? "тиімді" : "выгодно"}</span>
+                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">2 000</span></div>
+                  <div className="cscreen-pkg-name">+20% {kz ? "бонус" : "бонус"}</div>
+                  <button className="cscreen-pkg-btn cscreen-pkg-btn--featured" type="button" disabled>1 690 ₸</button>
+                </div>
+                <div className="cscreen-pkg">
+                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">5 000</span></div>
+                  <div className="cscreen-pkg-name">+35% {kz ? "бонус" : "бонус"}</div>
+                  <button className="cscreen-pkg-btn" type="button" disabled>3 990 ₸</button>
+                </div>
+              </div>
             </div>
-            <p className="coin-shop-note">
-              Платежи скоро · Зарабатывай монеты в матчах
-            </p>
+          </div>
+        </div>
+      )}
+
+      {showCoinShop && (
+        <div className="cshop-overlay" onClick={() => setShowCoinShop(false)}>
+          <div className="cshop-sheet" onClick={(e) => e.stopPropagation()}>
+            <span className="cshop-handle" />
+            <div className="cshop-head">
+              <span className="cshop-coin-circle" />
+              <div className="cshop-head-info">
+                <div className="cshop-head-title">{kz ? "Монет толтыру" : "Пополнить монеты"}</div>
+                <div className="cshop-head-balance">{kz ? "Баланс" : "Баланс"} {formatCoins(profile.coins)} ⌾</div>
+              </div>
+            </div>
+            <div className="cshop-packages">
+              <div className="cshop-pkg">
+                <div className="cshop-pkg-amount">300</div>
+                <div className="cshop-pkg-price">299 ₸</div>
+              </div>
+              <div className="cshop-pkg cshop-pkg--featured">
+                <span className="cshop-pkg-badge">{kz ? "тиімді" : "выгодно"}</span>
+                <div className="cshop-pkg-amount">2 000</div>
+                <div className="cshop-pkg-price cshop-pkg-price--featured">1 690 ₸</div>
+              </div>
+              <div className="cshop-pkg">
+                <div className="cshop-pkg-amount">5 000</div>
+                <div className="cshop-pkg-price">3 990 ₸</div>
+              </div>
+            </div>
+            <div className="cshop-methods">
+              <div className="cshop-method">Kaspi</div>
+              <div className="cshop-method">Apple Pay</div>
+              <div className="cshop-method">Google Play</div>
+            </div>
+            <button className="cshop-pay-btn" type="button" disabled>
+              {kz ? "Төлеу 1 690 ₸" : "Оплатить 1 690 ₸"}
+            </button>
+            <div className="cshop-ad-row">
+              <div className="cshop-ad-icon">▶</div>
+              <div className="cshop-ad-text">{kz ? "Немесе жарнама қараңыз: +50 ⌾" : "Или посмотрите рекламу: +50 ⌾"}</div>
+              <button className="cshop-ad-btn" type="button" disabled>{kz ? "Қарау" : "Смотреть"}</button>
+            </div>
           </div>
         </div>
       )}
