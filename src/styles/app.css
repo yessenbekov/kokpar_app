@@ -9021,11 +9021,13 @@ body,
 
 /* ── Wizard label / section title ── */
 .wizard-label {
-  color: rgba(214, 178, 110, 0.65);
+  color: rgba(214, 178, 110, 0.62);
   font-family: Manrope, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 9px;
 }
 
 /* ── Wizard back button → square icon ── */
@@ -9684,8 +9686,10 @@ body,
   flex: 1;
   margin: 16px 20px 12px;
   border-radius: 20px;
-  background: rgba(21, 16, 10, 0.8);
-  border: 1px solid rgba(190, 148, 60, 0.22);
+  background:
+    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.055) 0 9px, transparent 9px 18px),
+    linear-gradient(180deg, rgba(208, 160, 48, 0.10), rgba(0, 0, 0, 0.25));
+  border: 1px dashed rgba(190, 148, 60, 0.28);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10146,10 +10150,21 @@ body,
   height: 62px;
   flex: none;
   border-radius: 11px;
-  background:
-    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.06) 0 7px, transparent 7px 14px),
-    rgba(21, 12, 3, 0.60);
+  background: linear-gradient(150deg, #9b6030, #2e1608);
   border: 1px solid rgba(190, 148, 60, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.stable-card-thumb::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 14px;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(236, 220, 192, 0.45);
 }
 
 .stable-card.active .stable-card-thumb {
@@ -10622,7 +10637,8 @@ body,
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(90% 70% at 50% 34%, rgba(208, 160, 48, 0.26), transparent 72%),
+    repeating-linear-gradient(48deg, rgba(242, 226, 184, 0.06) 0 9px, transparent 9px 18px),
+    radial-gradient(90% 70% at 50% 30%, rgba(208, 160, 48, 0.28), transparent 70%),
     #110b04;
 }
 

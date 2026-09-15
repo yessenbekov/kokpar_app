@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
-import { COAT_PRESETS, DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, horseTypeById } from "../game/horseTypes.js";
+import { COAT_PRESETS, DEFAULT_HORSE_TYPE_ID, HORSE_TYPES, coatPresetById, horseTypeById } from "../game/horseTypes.js";
 import { itemById } from "../app/shopItems.js";
 import { HorseViewer3D } from "./HorseViewer3D.jsx";
 
@@ -330,6 +330,7 @@ export function HorseStable({
           const active = selectedOwnedHorse?.id === ownedHorse.id;
           const xpPct = Math.round((ownedHorse.xp / 100) * 100);
 
+          const coat = coatPresetById(ownedHorse.coatId);
           return (
             <div key={ownedHorse.id} className="stable-card-row">
               <button
@@ -337,7 +338,7 @@ export function HorseStable({
                 type="button"
                 onClick={() => { onHorseChange(ownedHorse.id); setShowCard(true); }}
               >
-                <div className="stable-card-thumb" />
+                <div className="stable-card-thumb" style={{ background: `linear-gradient(150deg, ${coat.coat}, ${coat.dark})` }} />
                 <div className="stable-card-copy">
                   <div className="stable-card-name-row">
                     <strong>{ownedHorse.name}</strong>
