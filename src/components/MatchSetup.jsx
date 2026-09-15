@@ -641,13 +641,15 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Эффекты", "Эффекттер", "Effects")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={sfxVol}
-                      onChange={(e) => { const v = Number(e.target.value); setSfxVol(v); try { localStorage.setItem("kokpar_sfx", v); } catch {} }} />
+                      style={{"--fill": sfxVol + "%"}}
+                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setSfxVol(v); try { localStorage.setItem("kokpar_sfx", v); } catch {} }} />
                     <span className="settings-row-val">{sfxVol}%</span>
                   </div>
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Музыка", "Музыка", "Music")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={musicVol}
-                      onChange={(e) => { const v = Number(e.target.value); setMusicVol(v); try { localStorage.setItem("kokpar_music", v); } catch {} }} />
+                      style={{"--fill": musicVol + "%"}}
+                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setMusicVol(v); try { localStorage.setItem("kokpar_music", v); } catch {} }} />
                     <span className="settings-row-val">{musicVol}%</span>
                   </div>
                   <div className="settings-row">
