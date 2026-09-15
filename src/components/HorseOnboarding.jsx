@@ -113,17 +113,15 @@ export function HorseOnboarding({ onComplete }) {
             <div className="ob-step-desc">Один конь достаётся бесплатно. Остальные стойла откроете за монеты.</div>
           </div>
           <div className="ob-body">
-            {HORSE_TYPES.map((ht, idx) => {
-              const isFree = idx === 0;
+            {HORSE_TYPES.map((ht) => {
               const isSelected = ht.id === selectedTypeId;
               const coat = coatPresetById(isSelected ? selectedCoatId : ht.defaultCoatId);
               return (
                 <button
                   key={ht.id}
                   type="button"
-                  className={`ob-horse-card${isSelected ? " ob-horse-card--selected" : ""}${!isFree ? " ob-horse-card--locked" : ""}`}
-                  onClick={() => isFree && selectHorseType(ht.id)}
-                  disabled={!isFree}
+                  className={`ob-horse-card${isSelected ? " ob-horse-card--selected" : ""}`}
+                  onClick={() => selectHorseType(ht.id)}
                 >
                   <div
                     className="ob-horse-thumb"
@@ -132,7 +130,6 @@ export function HorseOnboarding({ onComplete }) {
                   <div className="ob-horse-info">
                     <div className="ob-horse-title">{ht.name} · {ht.role}</div>
                     <div className="ob-horse-desc">{ht.description}</div>
-                    {!isFree && <div className="ob-horse-lock">Купить за монеты</div>}
                   </div>
                   {isSelected && <span className="ob-check-circle">✓</span>}
                 </button>
