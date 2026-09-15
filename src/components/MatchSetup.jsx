@@ -127,6 +127,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
   function toggleLang(l) { setLangState(l); try { localStorage.setItem("kokpar_lang", l); } catch {} }
   const kz = lang === "kz";
+  const en = lang === "en";
+  function t(ru, kz_text, en_text) {
+    if (lang === "kz") return kz_text ?? ru;
+    if (lang === "en") return en_text ?? ru;
+    return ru;
+  }
 
   const canStart = !onlineMode || onlineLobbyState.canStart;
 
@@ -223,25 +229,25 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 type="button"
                 onClick={() => { setHomeScreen(false); setNavTab("game"); setWizardStep(0); }}
               >
-                {kz ? "Ойнау" : "Ойнау · Играть"}
+                {t("Ойнау · Играть", "Ойнау", "Play")}
               </button>
               <div className="home-sub-btns">
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); }}>
-                  {kz ? "Қора" : "Конюшня"}
+                  {t("Конюшня", "Қора", "Stable")}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => setShowCoinScreen(true)}>
-                  {kz ? "Дүкен" : "Магазин"}
+                  {t("Магазин", "Дүкен", "Shop")}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
-                  {kz ? "Баптаулар" : "Настройки"}
+                  {t("Настройки", "Баптаулар", "Settings")}
                 </button>
               </div>
 
               {auth.status !== "signed-in" && (
                 <div className="home-guest-strip">
                   <span className="home-guest-dot" />
-                  <span className="home-guest-text">{kz ? "Қонақ профилі · жергілікті сақталады" : "Гостевой профиль · сохраняется локально"}</span>
-                  <button type="button" className="home-guest-login" onClick={onBackToLogin}>{kz ? "Кіру" : "Войти"}</button>
+                  <span className="home-guest-text">{t("Гостевой профиль · сохраняется локально", "Қонақ профилі · жергілікті сақталады", "Guest profile · saved locally")}</span>
+                  <button type="button" className="home-guest-login" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
                 </div>
               )}
             </div>
@@ -272,7 +278,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   {/* Header with back + title (replaces topbar on this screen) */}
                   <div className="wizard-step-header" style={{ padding: "8px 0 18px" }}>
                     <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                    <span className="wizard-step-title">{kz ? "Режим" : "Режим"}</span>
+                    <span className="wizard-step-title">{t("Режим", "Режим", "Mode")}</span>
                   </div>
                   <div className="wizard-mode-grid">
                     {GAME_MODES.map((mode) => {
@@ -283,14 +289,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         online_room: "арт режима: онлайн-лобби"
                       };
                       const MODE_BADGE = {
-                        kokpar: kz ? "Классика" : "Классика",
-                        training: kz ? "Практика" : "Практика",
-                        online_room: "Онлайн"
+                        kokpar: t("Классика", "Классика", "Classic"),
+                        training: t("Практика", "Практика", "Practice"),
+                        online_room: t("Онлайн", "Онлайн", "Online")
                       };
                       const MODE_SHORT_DESC = {
-                        kokpar: kz ? "Матч — шеңбер немесе қазан." : "Матч с выбором круга или казана.",
-                        training: kz ? "Бос жүріс: бақылау, серке, лақтыру." : "Свободный заезд: контроль, подбор серке, броски.",
-                        online_room: kz ? "Бөлме жасау немесе код бойынша кіру." : "Создать комнату или войти по коду."
+                        kokpar: t("Матч с выбором круга или казана.", "Матч — шеңбер немесе қазан.", "Match with circle or kazan goal."),
+                        training: t("Свободный заезд: контроль, подбор серке, броски.", "Бос жүріс: бақылау, серке, лақтыру.", "Free ride: control, grab serke, throw."),
+                        online_room: t("Создать комнату или войти по коду.", "Бөлме жасау немесе код бойынша кіру.", "Create room or join by code.")
                       };
                       if (isActive) {
                         return (
@@ -341,7 +347,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       disabled={selectedMode.soon}
                       onClick={() => setWizardStep(1)}
                     >
-                        {kz ? "Әрі қарай · Матч баптаулары" : "Далее · Настройки матча"}
+                        {t("Далее · Настройки матча", "Әрі қарай · Матч баптаулары", "Next · Match settings")}
                       </button>
                   </div>
                 </div>
@@ -381,33 +387,33 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="wizard-section">
                   <div className="wizard-step-header">
                     <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>‹</button>
-                    <span className="wizard-step-title">{isTraining ? "Тренировка" : "Матч"}</span>
+                    <span className="wizard-step-title">{isTraining ? t("Тренировка", "Тренировка", "Training") : t("Матч", "Матч", "Match")}</span>
                     {!isTraining && <span className="wizard-mode-pill">{selectedMode.name}</span>}
                   </div>
 
                   {!isTraining && (
                     <>
-                      <p className="wizard-label">Цель</p>
+                      <p className="wizard-label">{t("Цель", "Мақсат", "Goal")}</p>
                       <div className="wizard-side-grid">
                         <button type="button"
                           className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
                           style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
                           disabled={selectedMode.goalLocked}
                           onClick={() => onSettingChange("goalType", "circle")}>
-                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>Круг</strong>
-                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>Разметка на земле</span>
+                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
+                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
                         </button>
                         <button type="button"
                           className={`wizard-option-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
                           style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
                           disabled={selectedMode.goalLocked}
                           onClick={() => onSettingChange("goalType", "kazan")}>
-                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>Казан</strong>
-                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>Препятствие</span>
+                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Казан", "Қазан", "Kazan")}</strong>
+                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Препятствие", "Кедергі", "Obstacle")}</span>
                         </button>
                       </div>
 
-                      <p className="wizard-label">Состав</p>
+                      <p className="wizard-label">{t("Состав", "Құрам", "Teams")}</p>
                       <div className="wizard-three-grid">
                         {[3, 4, 5].map((size) => (
                           <button key={size} type="button"
@@ -418,7 +424,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         ))}
                       </div>
 
-                      <p className="wizard-label">Время</p>
+                      <p className="wizard-label">{t("Время", "Уақыт", "Time")}</p>
                       <div className="wizard-three-grid">
                         {[
                           { minutes: 2, label: "2 мин" },
@@ -433,7 +439,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         ))}
                       </div>
 
-                      <p className="wizard-label">Сторона</p>
+                      <p className="wizard-label">{t("Сторона", "Жақ", "Side")}</p>
                       <div className="wizard-side-grid">
                         <button type="button" className={`wizard-side-card blue${settings.teamSide !== "red" ? " active" : ""}`}
                           onClick={() => onSettingChange("teamSide", "blue")}>
@@ -449,12 +455,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     </>
                   )}
 
-                  <p className="wizard-label">Сложность</p>
+                  <p className="wizard-label">{t("Сложность", "Қиындық", "Difficulty")}</p>
                   <div className="wizard-diff-seg">
                     {[
-                      { id: "easy",   label: "Лёгкая"  },
-                      { id: "normal", label: "Средняя" },
-                      { id: "hard",   label: "Сложная" }
+                      { id: "easy",   label: t("Лёгкая", "Жеңіл", "Easy")  },
+                      { id: "normal", label: t("Средняя", "Орташа", "Normal") },
+                      { id: "hard",   label: t("Сложная", "Қиын", "Hard") }
                     ].map(({ id, label }) => (
                       <button key={id} type="button"
                         className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
@@ -474,9 +480,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       <span className="horse-strip-avatar">{selectedHorse.name.slice(0, 1)}</span>
                       <span className="horse-strip-info">
                         <strong>{selectedHorse.name}</strong>
-                        <span>Арғымақ · Баланс · Ур. {selectedHorse.level}</span>
+                        <span>Арғымақ · {t("Баланс", "Баланс", "Balance")} · {t("Ур.", "Дең.", "Lv.")} {selectedHorse.level}</span>
                       </span>
-                      <span style={{ font: "700 12px Manrope, sans-serif", color: "#3aabee" }}>Сменить</span>
+                      <span style={{ font: "700 12px Manrope, sans-serif", color: "#3aabee" }}>{t("Сменить", "Ауыстыру", "Change")}</span>
                     </button>
                     <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
                       <Play size={19} fill="currentColor" strokeWidth={2.4} />
@@ -503,14 +509,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               {!stableCardOpen && stableTab !== "stable" && (
                 <div className="stable-tabs">
                   <button type="button" className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("stable")}>
-                    Конюшня
+                    {t("Конюшня", "Қора", "Stable")}
                   </button>
                   <button type="button" className={stableTab === "shop" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("shop")}>
-                    Магазин
+                    {t("Магазин", "Дүкен", "Shop")}
                   </button>
                   <button type="button" className={stableTab === "market" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("market")}>
                     <Gavel size={13} strokeWidth={2.4} />
-                    Торги
+                    {t("Торги", "Аукцион", "Auction")}
                   </button>
                 </div>
               )}
@@ -581,7 +587,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="tab-pane">
               <div className="wizard-step-header">
                 <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                <span className="wizard-step-title">{kz ? "Баптаулар" : "Настройки"}</span>
+                <span className="wizard-step-title">{t("Настройки", "Баптаулар", "Settings")}</span>
               </div>
               <div className="settings-page">
 
@@ -590,12 +596,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <div className="settings-account-avatar">{profile.riderName.slice(0, 1)}</div>
                   <div className="settings-account-info">
                     <strong>{profile.riderName}</strong>
-                    <span>{auth.status === "signed-in" ? auth.email : (kz ? "Қонақ профилі" : "Гостевой профиль")}</span>
+                    <span>{auth.status === "signed-in" ? auth.email : t("Гостевой профиль", "Қонақ профилі", "Guest profile")}</span>
                   </div>
                   {auth.status === "signed-in" ? (
-                    <button type="button" className="settings-signout-btn" onClick={onSignOut}>{kz ? "Шығу" : "Выйти"}</button>
+                    <button type="button" className="settings-signout-btn" onClick={onSignOut}>{t("Выйти", "Шығу", "Sign out")}</button>
                   ) : (
-                    <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{kz ? "Кіру" : "Войти"}</button>
+                    <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
                   )}
                 </div>
 
@@ -603,7 +609,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="settings-name-row">
                   {editingRider ? (
                     <form className="rider-name-form" onSubmit={submitRiderName}>
-                      <input aria-label={kz ? "Ойыншы аты" : "Имя игрока"} maxLength={24} value={draftRiderName}
+                      <input aria-label={t("Имя игрока", "Ойыншы аты", "Player name")} maxLength={24} value={draftRiderName}
                         onChange={(e) => setDraftRiderName(e.target.value)} autoFocus />
                       <button type="submit"><Check size={14} strokeWidth={2.7} /></button>
                       <button type="button" onClick={() => { setEditingRider(false); setDraftRiderName(profile.riderName); }}>
@@ -612,7 +618,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     </form>
                   ) : (
                     <div className="settings-row" style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      <span className="settings-row-label">{kz ? "Лақап ат" : "Псевдоним"}</span>
+                      <span className="settings-row-label">{t("Псевдоним", "Лақап ат", "Nickname")}</span>
                       <span className="settings-name-val">{profile.riderName}</span>
                       <button className="settings-edit-btn" type="button" onClick={() => { setDraftRiderName(profile.riderName); setEditingRider(true); }}>
                         <Pencil size={13} strokeWidth={2.4} />
@@ -622,29 +628,30 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
 
                 {/* Language */}
-                <div className="settings-section-label">{kz ? "Тіл" : "Язык"}</div>
+                <div className="settings-section-label">{t("Язык", "Тіл", "Language")}</div>
                 <div className="settings-seg">
                   <button type="button" className={`settings-seg-btn${kz ? " active" : ""}`} onClick={() => toggleLang("kz")}>Қазақша</button>
-                  <button type="button" className={`settings-seg-btn${!kz ? " active" : ""}`} onClick={() => toggleLang("ru")}>Русский</button>
+                  <button type="button" className={`settings-seg-btn${!kz && !en ? " active" : ""}`} onClick={() => toggleLang("ru")}>Русский</button>
+                  <button type="button" className={`settings-seg-btn${en ? " active" : ""}`} onClick={() => toggleLang("en")}>English</button>
                 </div>
 
                 {/* Sound */}
-                <div className="settings-section-label">{kz ? "Дыбыс" : "Звук"}</div>
+                <div className="settings-section-label">{t("Звук", "Дыбыс", "Sound")}</div>
                 <div className="settings-group">
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Эффекттер" : "Эффекты"}</span>
+                    <span className="settings-row-label">{t("Эффекты", "Эффекттер", "Effects")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={sfxVol}
                       onChange={(e) => { const v = Number(e.target.value); setSfxVol(v); try { localStorage.setItem("kokpar_sfx", v); } catch {} }} />
                     <span className="settings-row-val">{sfxVol}%</span>
                   </div>
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Музыка" : "Музыка"}</span>
+                    <span className="settings-row-label">{t("Музыка", "Музыка", "Music")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={musicVol}
                       onChange={(e) => { const v = Number(e.target.value); setMusicVol(v); try { localStorage.setItem("kokpar_music", v); } catch {} }} />
                     <span className="settings-row-val">{musicVol}%</span>
                   </div>
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Діріл" : "Вибрация"}</span>
+                    <span className="settings-row-label">{t("Вибрация", "Діріл", "Vibration")}</span>
                     <button type="button" className={`settings-toggle${vibration ? " on" : ""}`}
                       onClick={() => { const v = !vibration; setVibration(v); try { localStorage.setItem("kokpar_vibration", String(v)); } catch {} }}>
                       <span className="settings-toggle-thumb" />
@@ -653,26 +660,26 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
 
                 {/* Camera / Controls */}
-                <div className="settings-section-label">{kz ? "Басқару" : "Управление"}</div>
+                <div className="settings-section-label">{t("Управление", "Басқару", "Controls")}</div>
                 <div className="settings-group">
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Камера" : "Камера"}</span>
+                    <span className="settings-row-label">{t("Камера", "Камера", "Camera")}</span>
                     <div className="settings-seg-sm">
                       <button type="button" className={`settings-seg-btn-sm${cameraMode === "tv" ? " active" : ""}`}
-                        onClick={() => { setCameraMode("tv"); try { localStorage.setItem("kokpar_camera", "tv"); } catch {} }}>ТВ</button>
+                        onClick={() => { setCameraMode("tv"); try { localStorage.setItem("kokpar_camera", "tv"); } catch {} }}>TV</button>
                       <button type="button" className={`settings-seg-btn-sm${cameraMode === "back" ? " active" : ""}`}
-                        onClick={() => { setCameraMode("back"); try { localStorage.setItem("kokpar_camera", "back"); } catch {} }}>{kz ? "Артта" : "За спиной"}</button>
+                        onClick={() => { setCameraMode("back"); try { localStorage.setItem("kokpar_camera", "back"); } catch {} }}>{t("За спиной", "Артта", "Behind")}</button>
                     </div>
                   </div>
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Сол қол" : "Левша"}</span>
+                    <span className="settings-row-label">{t("Левша", "Сол қол", "Left-handed")}</span>
                     <button type="button" className={`settings-toggle${leftHand ? " on" : ""}`}
                       onClick={() => { const v = !leftHand; setLeftHand(v); try { localStorage.setItem("kokpar_lefthand", String(v)); } catch {} }}>
                       <span className="settings-toggle-thumb" />
                     </button>
                   </div>
                   <div className="settings-row">
-                    <span className="settings-row-label">{kz ? "Кеңестер" : "Подсказки"}</span>
+                    <span className="settings-row-label">{t("Подсказки", "Кеңестер", "Hints")}</span>
                     <button type="button" className={`settings-toggle${hints ? " on" : ""}`}
                       onClick={() => { const v = !hints; setHints(v); try { localStorage.setItem("kokpar_hints", String(v)); } catch {} }}>
                       <span className="settings-toggle-thumb" />
@@ -683,15 +690,15 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="settings-stats-row">
                   <div className="settings-stat">
                     <span className="settings-stat-value">Ур. {profile.level}</span>
-                    <span className="settings-stat-label">{kz ? "Деңгей" : "Уровень"}</span>
+                    <span className="settings-stat-label">{t("Уровень", "Деңгей", "Level")}</span>
                   </div>
                   <div className="settings-stat">
                     <span className="settings-stat-value">{formatCoins(profile.coins)}</span>
-                    <span className="settings-stat-label">Күміс</span>
+                    <span className="settings-stat-label">⌾</span>
                   </div>
                   <div className="settings-stat">
                     <span className="settings-stat-value">{ownedCount}/{profile.stableCapacity}</span>
-                    <span className="settings-stat-label">{kz ? "Жылқы" : "Коней"}</span>
+                    <span className="settings-stat-label">{t("Коней", "Жылқы", "Horses")}</span>
                   </div>
                 </div>
 
@@ -711,7 +718,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             onClick={() => setNavTab("game")}
           >
             <Play size={22} strokeWidth={2.2} />
-            <span>Игра</span>
+            <span>{t("Игра", "Ойын", "Play")}</span>
           </button>
           <button
             type="button"
@@ -719,7 +726,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             onClick={() => setNavTab("stable")}
           >
             <Trophy size={22} strokeWidth={2.2} />
-            <span>Конюшня</span>
+            <span>{t("Конюшня", "Қора", "Stable")}</span>
           </button>
           <button
             type="button"
@@ -727,7 +734,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             onClick={() => setNavTab("history")}
           >
             <History size={22} strokeWidth={2.2} />
-            <span>История</span>
+            <span>{t("История", "Тарих", "History")}</span>
           </button>
           <button
             type="button"
@@ -735,7 +742,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             onClick={() => setNavTab("profile")}
           >
             <User size={22} strokeWidth={2.2} />
-            <span>Профиль</span>
+            <span>{t("Профиль", "Профиль", "Profile")}</span>
           </button>
         </nav>
 
@@ -747,27 +754,27 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           <div className="status-bar-spacer" />
           <div className="cscreen-topbar">
             <button className="cscreen-back" type="button" onClick={() => setShowCoinScreen(false)}>‹</button>
-            <div className="cscreen-title">{kz ? "Монеттер" : "Монеты"}</div>
+            <div className="cscreen-title">{t("Монеты", "Монеттер", "Coins")}</div>
             <span className="cscreen-balance-chip">{formatCoins(profile.coins)} ⌾</span>
           </div>
           <div className="cscreen-body">
             <div className="cscreen-balance-card">
-              <div className="cscreen-balance-label">{kz ? "Баланс" : "Баланс"}</div>
+              <div className="cscreen-balance-label">{t("Баланс", "Баланс", "Balance")}</div>
               <div className="cscreen-balance-row">
                 <span className="cscreen-coin-circle" />
                 <span className="cscreen-balance-amount">{formatCoins(profile.coins)}</span>
                 <span className="cscreen-daily">
-                  {kz ? "бүгін матчтар үшін" : "за матчи сегодня"}<br />
+                  {t("за матчи сегодня", "бүгін матчтар үшін", "from today's matches")}<br />
                   <span className="cscreen-daily-gain">+120 ⌾</span>
                 </span>
               </div>
             </div>
             <div className="cscreen-packages-section">
-              <div className="cscreen-section-label">{kz ? "Жинақтар" : "Наборы"}</div>
+              <div className="cscreen-section-label">{t("Наборы", "Жинақтар", "Packages")}</div>
               <div className="cscreen-packages-grid">
                 <div className="cscreen-pkg">
                   <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">300</span></div>
-                  <div className="cscreen-pkg-name">{kz ? "Стартовый" : "Стартовый"}</div>
+                  <div className="cscreen-pkg-name">{t("Стартовый", "Стартовый", "Starter")}</div>
                   <button className="cscreen-pkg-btn" type="button" disabled>299 ₸</button>
                 </div>
                 <div className="cscreen-pkg">
@@ -776,7 +783,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <button className="cscreen-pkg-btn" type="button" disabled>749 ₸</button>
                 </div>
                 <div className="cscreen-pkg cscreen-pkg--featured">
-                  <span className="cscreen-pkg-badge">{kz ? "тиімді" : "выгодно"}</span>
+                  <span className="cscreen-pkg-badge">{t("выгодно", "тиімді", "best value")}</span>
                   <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">2 000</span></div>
                   <div className="cscreen-pkg-name">+20% {kz ? "бонус" : "бонус"}</div>
                   <button className="cscreen-pkg-btn cscreen-pkg-btn--featured" type="button" disabled>1 690 ₸</button>
@@ -799,8 +806,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="cshop-head">
               <span className="cshop-coin-circle" />
               <div className="cshop-head-info">
-                <div className="cshop-head-title">{kz ? "Монет толтыру" : "Пополнить монеты"}</div>
-                <div className="cshop-head-balance">{kz ? "Баланс" : "Баланс"} {formatCoins(profile.coins)} ⌾</div>
+                <div className="cshop-head-title">{t("Пополнить монеты", "Монет толтыру", "Top up coins")}</div>
+                <div className="cshop-head-balance">{t("Баланс", "Баланс", "Balance")} {formatCoins(profile.coins)} ⌾</div>
               </div>
             </div>
             <div className="cshop-packages">
@@ -809,7 +816,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="cshop-pkg-price">299 ₸</div>
               </div>
               <div className="cshop-pkg cshop-pkg--featured">
-                <span className="cshop-pkg-badge">{kz ? "тиімді" : "выгодно"}</span>
+                <span className="cshop-pkg-badge">{t("выгодно", "тиімді", "best value")}</span>
                 <div className="cshop-pkg-amount">2 000</div>
                 <div className="cshop-pkg-price cshop-pkg-price--featured">1 690 ₸</div>
               </div>
@@ -824,12 +831,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               <div className="cshop-method">Google Play</div>
             </div>
             <button className="cshop-pay-btn" type="button" disabled>
-              {kz ? "Төлеу 1 690 ₸" : "Оплатить 1 690 ₸"}
+              {t("Оплатить 1 690 ₸", "Төлеу 1 690 ₸", "Pay 1 690 ₸")}
             </button>
             <div className="cshop-ad-row">
               <div className="cshop-ad-icon">▶</div>
-              <div className="cshop-ad-text">{kz ? "Немесе жарнама қараңыз: +50 ⌾" : "Или посмотрите рекламу: +50 ⌾"}</div>
-              <button className="cshop-ad-btn" type="button" disabled>{kz ? "Қарау" : "Смотреть"}</button>
+              <div className="cshop-ad-text">{t("Или посмотрите рекламу: +50 ⌾", "Немесе жарнама қараңыз: +50 ⌾", "Or watch an ad: +50 ⌾")}</div>
+              <button className="cshop-ad-btn" type="button" disabled>{t("Смотреть", "Қарау", "Watch")}</button>
             </div>
           </div>
         </div>

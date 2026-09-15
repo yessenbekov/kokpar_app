@@ -6,7 +6,9 @@ const SUGGESTED_NAMES = ["Алмас_07", "Серке_Ханы", "Батыр", "
 
 export function HorseOnboarding({ onComplete }) {
   const [step, setStep] = useState(0);
-  const [language, setLanguage] = useState("ru");
+  const [language, setLanguage] = useState(() => {
+    try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; }
+  });
   const [riderName, setRiderName] = useState("");
   const [selectedTypeId, setSelectedTypeId] = useState(HORSE_TYPES[0].id);
   const [horseName, setHorseName] = useState("");
@@ -19,7 +21,15 @@ export function HorseOnboarding({ onComplete }) {
   }
 
   function handleComplete() {
+    try { localStorage.setItem("kokpar_lang", language); } catch {}
     onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null, selectedCoatId, language);
+  }
+
+  const lang = language;
+  function tl(ru, kz, en) {
+    if (lang === "kz") return kz ?? ru;
+    if (lang === "en") return en ?? ru;
+    return ru;
   }
 
   function next() {
@@ -39,8 +49,8 @@ export function HorseOnboarding({ onComplete }) {
         <>
           <div className="ob-header">
             <div className="ob-step-label">Шаг 1 из {TOTAL_STEPS}</div>
-            <div className="ob-step-title">Тіл · Язык</div>
-            <div className="ob-step-desc">Интерфейс и комментарий матча. Сменить можно в настройках.</div>
+            <div className="ob-step-title">Тіл · Язык · Language</div>
+            <div className="ob-step-desc">Интерфейс и комментарий матча. Можно сменить в настройках.</div>
           </div>
           <div className="ob-body">
             <button
@@ -67,6 +77,18 @@ export function HorseOnboarding({ onComplete }) {
               </div>
               {language === "ru" && <span className="ob-check-circle">✓</span>}
             </button>
+            <button
+              type="button"
+              className={`ob-lang-card${language === "en" ? " ob-lang-card--selected" : ""}`}
+              onClick={() => setLanguage("en")}
+            >
+              <span className="ob-lang-code">ENG</span>
+              <div className="ob-lang-text">
+                <div className="ob-lang-name">English</div>
+                <div className="ob-lang-desc">Full translation · commentary voice</div>
+              </div>
+              {language === "en" && <span className="ob-check-circle">✓</span>}
+            </button>
           </div>
         </>
       )}
@@ -74,16 +96,16 @@ export function HorseOnboarding({ onComplete }) {
       {step === 1 && (
         <>
           <div className="ob-header">
-            <div className="ob-step-label">Шаг 2 из {TOTAL_STEPS}</div>
-            <div className="ob-step-title">Кто вы на поле</div>
+            <div className="ob-step-label">{tl("Шаг 2 из", "Қадам 2 /", "Step 2 of")} {TOTAL_STEPS}</div>
+            <div className="ob-step-title">{tl("Кто вы на поле", "Далада кімсіз", "Who are you on the field")}</div>
           </div>
           <div className="ob-body">
             <div className="ob-field-group">
-              <div className="ob-field-label">Имя всадника</div>
+              <div className="ob-field-label">{tl("Имя всадника", "Салт атшының аты", "Rider name")}</div>
               <input
                 className="ob-rider-name-input"
                 type="text"
-                placeholder="Алмас"
+                placeholder={tl("Алмас", "Алмас", "Almas")}
                 maxLength={24}
                 value={riderName}
                 onChange={(e) => setRiderName(e.target.value)}
@@ -108,9 +130,9 @@ export function HorseOnboarding({ onComplete }) {
       {step === 2 && (
         <>
           <div className="ob-header">
-            <div className="ob-step-label">Шаг 3 из {TOTAL_STEPS}</div>
-            <div className="ob-step-title">Выберите коня</div>
-            <div className="ob-step-desc">Один конь достаётся бесплатно. Остальные стойла откроете за монеты.</div>
+            <div className="ob-step-label">{tl("Шаг 3 из", "Қадам 3 /", "Step 3 of")} {TOTAL_STEPS}</div>
+            <div className="ob-step-title">{tl("Выберите коня", "Жылқы таңдаңыз", "Choose your horse")}</div>
+            <div className="ob-step-desc">{tl("Один конь достаётся бесплатно. Остальные стойла откроете за монеты.", "Бір жылқы тегін беріледі. Қалған орындарды монетаға ашасыз.", "One horse is free. Unlock more stalls with coins.")}</div>
           </div>
           <div className="ob-body">
             {HORSE_TYPES.map((ht) => {
@@ -137,7 +159,7 @@ export function HorseOnboarding({ onComplete }) {
             })}
 
             <div className="ob-coat-picker">
-              <div className="ob-field-label">Масть</div>
+              <div className="ob-field-label">{tl("Масть", "Жүн", "Coat")}</div>
               <div className="ob-coat-swatches">
                 {COAT_PRESETS.map((preset) => (
                   <button
@@ -155,7 +177,7 @@ export function HorseOnboarding({ onComplete }) {
             </div>
 
             <div className="ob-field-group">
-              <div className="ob-field-label">Имя коня</div>
+              <div className="ob-field-label">{tl("Имя коня", "Жылқының аты", "Horse name")}</div>
               <input
                 className="ob-rider-name-input"
                 type="text"
@@ -171,16 +193,16 @@ export function HorseOnboarding({ onComplete }) {
 
       <div className="ob-footer">
         <button className="ob-continue-btn" type="button" onClick={next}>
-          {step < TOTAL_STEPS - 1 ? "Продолжить" : "Начать путь"}
+          {step < TOTAL_STEPS - 1 ? tl("Продолжить", "Жалғастыру", "Continue") : tl("Начать путь", "Жолды бастау", "Start journey")}
         </button>
         {step === 0 && (
           <button className="ob-skip-btn" type="button" onClick={handleComplete}>
-            Пропустить
+            {tl("Пропустить", "Өткізіп жіберу", "Skip")}
           </button>
         )}
         {step > 0 && (
           <button className="ob-skip-btn" type="button" onClick={() => setStep((s) => s - 1)}>
-            ‹ Назад
+            ‹ {tl("Назад", "Артқа", "Back")}
           </button>
         )}
       </div>

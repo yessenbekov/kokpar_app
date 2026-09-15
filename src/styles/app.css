@@ -6756,6 +6756,217 @@ input::placeholder { color: rgba(180, 140, 60, 0.36); }
   background: linear-gradient(135deg, #d99830 0%, #f0bc38 100%);
 }
 
+/* ──────────────────────────────────────────────
+   MATCH RESULT (1h design)
+   ────────────────────────────────────────────── */
+
+.mr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 6, 2, 0.82);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.25s ease;
+  padding: 20px;
+}
+
+.mr-card {
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65);
+  animation: scaleIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mr-top {
+  background:
+    radial-gradient(70% 90% at 50% 0%, rgba(208, 160, 48, 0.35), transparent 65%),
+    linear-gradient(170deg, #33200c, #120a02);
+  padding: 28px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mr-outcome-badge {
+  font: 700 13px Manrope, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.65);
+}
+
+.mr-outcome-badge[data-won="true"] {
+  color: #f0c347;
+  text-shadow: 0 0 18px rgba(208, 160, 48, 0.45);
+}
+
+.mr-score-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mr-score-team {
+  font: 600 52px/1 Oswald, sans-serif;
+  letter-spacing: 0.06em;
+  color: rgba(214, 178, 110, 0.60);
+}
+
+.mr-score-team--blue.mr-score-team--active {
+  color: #f0c347;
+  text-shadow: 0 6px 26px rgba(208, 160, 48, 0.35);
+}
+
+.mr-score-team--red.mr-score-team--active {
+  color: #f0c347;
+  text-shadow: 0 6px 26px rgba(208, 160, 48, 0.35);
+}
+
+.mr-score-sep {
+  font: 600 17px Oswald, sans-serif;
+  letter-spacing: 0.1em;
+  color: rgba(214, 178, 110, 0.80);
+}
+
+.mr-score-labels {
+  display: flex;
+  gap: 52px;
+  font: 700 10px Manrope, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.55);
+}
+
+.mr-body {
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+  padding: 18px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mr-stats-panel {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(190, 148, 60, 0.24);
+  background: rgba(52, 32, 10, 0.72);
+}
+
+.mr-stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: rgba(242, 226, 184, 0.06);
+}
+
+.mr-stat-label {
+  font: 700 10px Manrope, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(214, 178, 110, 0.65);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mr-stat-value {
+  font: 700 20px Manrope, sans-serif;
+  color: #f2e2b8;
+}
+
+.mr-stat-value--xp { color: #7ec8f0; }
+.mr-stat-value--coins { color: #f0c347; }
+
+.mr-daily-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: rgba(242, 226, 184, 0.05);
+  font: 700 13px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.75);
+}
+
+.mr-daily-val {
+  color: #6fd39a;
+  font-weight: 800;
+}
+
+.mr-bond-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: rgba(242, 226, 184, 0.05);
+  font: 600 12.5px Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.75);
+}
+
+.mr-bond-val {
+  color: #f0c347;
+  font: 700 13px Manrope, sans-serif;
+}
+
+.mr-levelup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: rgba(208, 160, 48, 0.10);
+  border: 1px solid rgba(208, 160, 48, 0.25);
+  font: 600 13px Manrope, sans-serif;
+  color: #f0c347;
+}
+
+.mr-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px 22px;
+  background: linear-gradient(165deg, #2e1c08, #150c03);
+}
+
+.mr-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 12px;
+  font: 600 14px Oswald, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.mr-btn:hover { opacity: 0.88; }
+
+.mr-btn--primary {
+  border: 1px solid rgba(10, 60, 100, 0.35);
+  background: linear-gradient(180deg, #3aabee, #2590d0);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(37, 144, 208, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.mr-btn--secondary {
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  background: rgba(242, 226, 184, 0.07);
+  color: var(--ink);
+}
+
 /* ── HUD restart confirmation buttons ──────────────────────────────────── */
 .icon-button--confirm {
   color: #6ddc7a;
@@ -10017,8 +10228,8 @@ body,
 }
 
 .settings-toggle.on {
-  background: rgba(37, 144, 208, 0.55);
-  border-color: rgba(37, 144, 208, 0.70);
+  background: #3aabee;
+  border-color: rgba(37, 144, 208, 0.90);
 }
 
 .settings-toggle-thumb {

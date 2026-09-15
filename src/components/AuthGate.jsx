@@ -114,15 +114,16 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
           <div className="ob-splash-title">KOKPAR 3D</div>
           <p className="ob-splash-tagline">
             Көкпар — игра всадников. Соберите конюшню, выигрывайте серке, поднимайтесь в аул-рейтинге.
+            <br /><span style={{ fontSize: "0.82em", opacity: 0.65 }}>The riders' game — build your stable, win serke, rise in the aul rankings.</span>
           </p>
         </div>
         <div className="ob-splash-actions">
           <button className="ob-splash-btn-primary" type="button" onClick={onGuestContinue}>
-            Начать игру
+            Начать игру · Play
           </button>
           <div className="ob-splash-btn-row">
             <button className="ob-splash-btn-social" type="button" onClick={() => setShowAuth(true)}>
-              Войти
+              Войти · Sign in
             </button>
             {onGoogleSignIn && (
               <button className="ob-splash-btn-social" type="button" onClick={onGoogleSignIn}>
@@ -131,7 +132,7 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
             )}
           </div>
           <button className="ob-splash-btn-ghost" type="button" onClick={onGuestContinue}>
-            Играть как гость
+            Играть как гость · Play as guest
           </button>
         </div>
         <p className="ob-splash-legal">
