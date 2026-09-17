@@ -9929,6 +9929,26 @@ body,
   gap: 4px;
 }
 
+.home-emblem {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #f2e2b8 0%, #d4a028 55%, #a07020 100%);
+  border: 2.5px solid rgba(240, 195, 71, 0.55);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), inset 0 1px 3px rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.home-emblem-letter {
+  font: 700 46px/1 Oswald, sans-serif;
+  color: #15100a;
+  letter-spacing: -0.01em;
+}
+
 .home-logo {
   font: 700 64px/0.9 Oswald, sans-serif;
   letter-spacing: 0.02em;
@@ -10071,9 +10091,20 @@ body,
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 14px 0 16px;
-  border-bottom: 1px solid rgba(190, 148, 60, 0.15);
-  margin-bottom: 6px;
+  padding: 16px 0 14px;
+  border-top: 1px solid rgba(190, 148, 60, 0.15);
+  margin-top: 20px;
+}
+
+.settings-account-name-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
 }
 
 .settings-account-avatar {

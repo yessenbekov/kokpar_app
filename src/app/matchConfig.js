@@ -36,7 +36,15 @@ export function settingsFromProfile(profile = {}) {
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
     teamSide: preferences.teamSide === "red" ? "red" : "blue",
-    difficulty: ["easy", "normal", "hard"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty
+    difficulty: ["easy", "normal", "hard"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty,
+    lang: preferences.lang ?? null,
+    sfxVol: preferences.sfxVol ?? null,
+    musicVol: preferences.musicVol ?? null,
+    vibration: preferences.vibration !== undefined ? preferences.vibration : null,
+    cameraMode: preferences.cameraMode ?? null,
+    leftHand: preferences.leftHand !== undefined ? preferences.leftHand : null,
+    hints: preferences.hints !== undefined ? preferences.hints : null,
+    joystickSensitivity: preferences.joystickSensitivity ?? null
   };
 }
 
@@ -108,7 +116,15 @@ export function readUrlSettings(profile) {
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide,
-    difficulty: ["easy", "normal", "hard"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty
+    difficulty: ["easy", "normal", "hard"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty,
+    lang: profileSettings.lang,
+    sfxVol: profileSettings.sfxVol,
+    musicVol: profileSettings.musicVol,
+    vibration: profileSettings.vibration,
+    cameraMode: profileSettings.cameraMode,
+    leftHand: profileSettings.leftHand,
+    hints: profileSettings.hints,
+    joystickSensitivity: profileSettings.joystickSensitivity
   };
 }
 

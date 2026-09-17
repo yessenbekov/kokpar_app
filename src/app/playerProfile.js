@@ -29,7 +29,15 @@ export const DEFAULT_PLAYER_PROFILE = {
     goalType: "circle",
     teamSize: 3,
     matchMinutes: 2,
-    teamSide: "blue"
+    teamSide: "blue",
+    lang: "ru",
+    sfxVol: 78,
+    musicVol: 42,
+    vibration: true,
+    cameraMode: "back",
+    leftHand: false,
+    hints: true,
+    joystickSensitivity: 50
   }
 };
 
@@ -121,6 +129,7 @@ function sanitizeOwnedHorses(value, legacyOwnedHorseTypes) {
 
 function sanitizeMatchPreferences(value = {}) {
   const mode = gameModeById(value.modeId);
+  function clampVol(v, def) { const n = Number(v); return Number.isFinite(n) ? Math.round(Math.min(100, Math.max(0, n))) : def; }
 
   return {
     modeId: mode.id,
@@ -128,7 +137,15 @@ function sanitizeMatchPreferences(value = {}) {
     teamSize: [3, 4, 5].includes(Number(value.teamSize)) ? Number(value.teamSize) : 3,
     matchMinutes: [2, 3, 5].includes(Number(value.matchMinutes)) ? Number(value.matchMinutes) : 2,
     teamSide: value.teamSide === "red" ? "red" : "blue",
-    difficulty: ["easy", "normal", "hard"].includes(value.difficulty) ? value.difficulty : "normal"
+    difficulty: ["easy", "normal", "hard"].includes(value.difficulty) ? value.difficulty : "normal",
+    lang: ["ru", "kz", "en"].includes(value.lang) ? value.lang : "ru",
+    sfxVol: clampVol(value.sfxVol, 78),
+    musicVol: clampVol(value.musicVol, 42),
+    vibration: value.vibration !== false,
+    cameraMode: value.cameraMode === "tv" ? "tv" : "back",
+    leftHand: value.leftHand === true,
+    hints: value.hints !== false,
+    joystickSensitivity: clampVol(value.joystickSensitivity, 50)
   };
 }
 

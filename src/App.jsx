@@ -260,7 +260,15 @@ export default function App() {
           teamSize: nextSettings.teamSize,
           matchMinutes: nextSettings.matchMinutes,
           teamSide: nextSettings.teamSide,
-          difficulty: nextSettings.difficulty
+          difficulty: nextSettings.difficulty,
+          lang: nextSettings.lang,
+          sfxVol: nextSettings.sfxVol,
+          musicVol: nextSettings.musicVol,
+          vibration: nextSettings.vibration,
+          cameraMode: nextSettings.cameraMode,
+          leftHand: nextSettings.leftHand,
+          hints: nextSettings.hints,
+          joystickSensitivity: nextSettings.joystickSensitivity
         }
       })
     );

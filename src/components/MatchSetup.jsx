@@ -117,15 +117,31 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const [stableCardOpen, setStableCardOpen] = useState(false);
   const [showCoinShop, setShowCoinShop] = useState(false);
   const [showCoinScreen, setShowCoinScreen] = useState(false);
-  const [lang, setLangState] = useState(() => { try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; } });
-  const [sfxVol, setSfxVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_sfx") ?? 78); } catch { return 78; } });
-  const [musicVol, setMusicVol] = useState(() => { try { return Number(localStorage.getItem("kokpar_music") ?? 42); } catch { return 42; } });
-  const [vibration, setVibration] = useState(() => { try { return localStorage.getItem("kokpar_vibration") !== "false"; } catch { return true; } });
-  const [cameraMode, setCameraMode] = useState(() => { try { return localStorage.getItem("kokpar_camera") || "back"; } catch { return "back"; } });
-  const [leftHand, setLeftHand] = useState(() => { try { return localStorage.getItem("kokpar_lefthand") === "true"; } catch { return false; } });
-  const [hints, setHints] = useState(() => { try { return localStorage.getItem("kokpar_hints") !== "false"; } catch { return true; } });
+  function lsGet(key, def) { try { const v = localStorage.getItem(key); return v !== null ? v : def; } catch { return def; } }
+  const [lang, setLangState] = useState(() => settings.lang ?? lsGet("kokpar_lang", "ru"));
+  const [sfxVol, setSfxVol] = useState(() => settings.sfxVol ?? Number(lsGet("kokpar_sfx", "78")));
+  const [musicVol, setMusicVol] = useState(() => settings.musicVol ?? Number(lsGet("kokpar_music", "42")));
+  const [vibration, setVibration] = useState(() => settings.vibration !== null ? settings.vibration : lsGet("kokpar_vibration", "true") !== "false");
+  const [cameraMode, setCameraMode] = useState(() => settings.cameraMode ?? lsGet("kokpar_camera", "back"));
+  const [leftHand, setLeftHand] = useState(() => settings.leftHand !== null ? settings.leftHand : lsGet("kokpar_lefthand", "false") === "true");
+  const [hints, setHints] = useState(() => settings.hints !== null ? settings.hints : lsGet("kokpar_hints", "true") !== "false");
+  const [joystickSensitivity, setJoystickSensitivity] = useState(() => settings.joystickSensitivity ?? 50);
 
-  function toggleLang(l) { setLangState(l); try { localStorage.setItem("kokpar_lang", l); } catch {} }
+  // Sync UI settings when Supabase profile loads (settings prop updates)
+  useEffect(() => { if (settings.lang !== null && settings.lang !== undefined) setLangState(settings.lang); }, [settings.lang]);
+  useEffect(() => { if (settings.sfxVol !== null && settings.sfxVol !== undefined) setSfxVol(settings.sfxVol); }, [settings.sfxVol]);
+  useEffect(() => { if (settings.musicVol !== null && settings.musicVol !== undefined) setMusicVol(settings.musicVol); }, [settings.musicVol]);
+  useEffect(() => { if (settings.vibration !== null && settings.vibration !== undefined) setVibration(settings.vibration); }, [settings.vibration]);
+  useEffect(() => { if (settings.cameraMode !== null && settings.cameraMode !== undefined) setCameraMode(settings.cameraMode); }, [settings.cameraMode]);
+  useEffect(() => { if (settings.leftHand !== null && settings.leftHand !== undefined) setLeftHand(settings.leftHand); }, [settings.leftHand]);
+  useEffect(() => { if (settings.hints !== null && settings.hints !== undefined) setHints(settings.hints); }, [settings.hints]);
+  useEffect(() => { if (settings.joystickSensitivity !== null && settings.joystickSensitivity !== undefined) setJoystickSensitivity(settings.joystickSensitivity); }, [settings.joystickSensitivity]);
+
+  function saveSetting(key, value, lsKey) {
+    try { localStorage.setItem(lsKey, String(value)); } catch {}
+    onSettingChange?.(key, value);
+  }
+  function toggleLang(l) { setLangState(l); saveSetting("lang", l, "kokpar_lang"); }
   const kz = lang === "kz";
   const en = lang === "en";
   function t(ru, kz_text, en_text) {
@@ -218,6 +234,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="home-scene-card">
               <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
+                <div className="home-emblem"><span className="home-emblem-letter">Қ</span></div>
                 <div className="home-logo">КӨКПАР</div>
                 <div className="home-logo-3d">3 D</div>
               </div>
@@ -254,8 +271,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           </>
         )}
 
-        {/* Top bar (hidden on game step 0 — that screen has its own header) */}
-        {!homeScreen && !(navTab === "game" && wizardStep === 0) && (
+        {/* Top bar (hidden on game step 0 and on settings — those screens have their own header) */}
+        {!homeScreen && !(navTab === "game" && wizardStep === 0) && navTab !== "profile" && (
           <div className="setup-topbar">
             <span className="setup-topbar-title">Кокпар 3D</span>
             <button className="setup-topbar-coins" type="button" onClick={() => setShowCoinShop(true)}>
@@ -591,42 +608,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               </div>
               <div className="settings-page">
 
-                {/* Account row */}
-                <div className="settings-account-row">
-                  <div className="settings-account-avatar">{profile.riderName.slice(0, 1)}</div>
-                  <div className="settings-account-info">
-                    <strong>{profile.riderName}</strong>
-                    <span>{auth.status === "signed-in" ? auth.email : t("Гостевой профиль", "Қонақ профилі", "Guest profile")}</span>
-                  </div>
-                  {auth.status === "signed-in" ? (
-                    <button type="button" className="settings-signout-btn" onClick={onSignOut}>{t("Выйти", "Шығу", "Sign out")}</button>
-                  ) : (
-                    <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
-                  )}
-                </div>
-
-                {/* Rider name edit */}
-                <div className="settings-name-row">
-                  {editingRider ? (
-                    <form className="rider-name-form" onSubmit={submitRiderName}>
-                      <input aria-label={t("Имя игрока", "Ойыншы аты", "Player name")} maxLength={24} value={draftRiderName}
-                        onChange={(e) => setDraftRiderName(e.target.value)} autoFocus />
-                      <button type="submit"><Check size={14} strokeWidth={2.7} /></button>
-                      <button type="button" onClick={() => { setEditingRider(false); setDraftRiderName(profile.riderName); }}>
-                        <X size={14} strokeWidth={2.7} />
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="settings-row" style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      <span className="settings-row-label">{t("Псевдоним", "Лақап ат", "Nickname")}</span>
-                      <span className="settings-name-val">{profile.riderName}</span>
-                      <button className="settings-edit-btn" type="button" onClick={() => { setDraftRiderName(profile.riderName); setEditingRider(true); }}>
-                        <Pencil size={13} strokeWidth={2.4} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
                 {/* Language */}
                 <div className="settings-section-label">{t("Язык", "Тіл", "Language")}</div>
                 <div className="settings-seg">
@@ -642,20 +623,20 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <span className="settings-row-label">{t("Эффекты", "Эффекттер", "Effects")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={sfxVol}
                       style={{"--fill": sfxVol + "%"}}
-                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setSfxVol(v); try { localStorage.setItem("kokpar_sfx", v); } catch {} }} />
+                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setSfxVol(v); saveSetting("sfxVol", v, "kokpar_sfx"); }} />
                     <span className="settings-row-val">{sfxVol}%</span>
                   </div>
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Музыка", "Музыка", "Music")}</span>
                     <input type="range" className="settings-slider" min={0} max={100} value={musicVol}
                       style={{"--fill": musicVol + "%"}}
-                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setMusicVol(v); try { localStorage.setItem("kokpar_music", v); } catch {} }} />
+                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setMusicVol(v); saveSetting("musicVol", v, "kokpar_music"); }} />
                     <span className="settings-row-val">{musicVol}%</span>
                   </div>
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Вибрация", "Діріл", "Vibration")}</span>
                     <button type="button" className={`settings-toggle${vibration ? " on" : ""}`}
-                      onClick={() => { const v = !vibration; setVibration(v); try { localStorage.setItem("kokpar_vibration", String(v)); } catch {} }}>
+                      onClick={() => { const v = !vibration; setVibration(v); saveSetting("vibration", v, "kokpar_vibration"); }}>
                       <span className="settings-toggle-thumb" />
                     </button>
                   </div>
@@ -668,40 +649,60 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <span className="settings-row-label">{t("Камера", "Камера", "Camera")}</span>
                     <div className="settings-seg-sm">
                       <button type="button" className={`settings-seg-btn-sm${cameraMode === "tv" ? " active" : ""}`}
-                        onClick={() => { setCameraMode("tv"); try { localStorage.setItem("kokpar_camera", "tv"); } catch {} }}>TV</button>
+                        onClick={() => { setCameraMode("tv"); saveSetting("cameraMode", "tv", "kokpar_camera"); }}>TV</button>
                       <button type="button" className={`settings-seg-btn-sm${cameraMode === "back" ? " active" : ""}`}
-                        onClick={() => { setCameraMode("back"); try { localStorage.setItem("kokpar_camera", "back"); } catch {} }}>{t("За спиной", "Артта", "Behind")}</button>
+                        onClick={() => { setCameraMode("back"); saveSetting("cameraMode", "back", "kokpar_camera"); }}>{t("За спиной", "Артта", "Behind")}</button>
                     </div>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Джойстик", "Джойстик", "Joystick")}</span>
+                    <input type="range" className="settings-slider" min={10} max={100} value={joystickSensitivity}
+                      style={{"--fill": joystickSensitivity + "%"}}
+                      onChange={(e) => { const v = Number(e.target.value); e.target.style.setProperty("--fill", v + "%"); setJoystickSensitivity(v); saveSetting("joystickSensitivity", v, "kokpar_joystick"); }} />
+                    <span className="settings-row-val">{joystickSensitivity}%</span>
                   </div>
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Левша", "Сол қол", "Left-handed")}</span>
                     <button type="button" className={`settings-toggle${leftHand ? " on" : ""}`}
-                      onClick={() => { const v = !leftHand; setLeftHand(v); try { localStorage.setItem("kokpar_lefthand", String(v)); } catch {} }}>
+                      onClick={() => { const v = !leftHand; setLeftHand(v); saveSetting("leftHand", v, "kokpar_lefthand"); }}>
                       <span className="settings-toggle-thumb" />
                     </button>
                   </div>
                   <div className="settings-row">
                     <span className="settings-row-label">{t("Подсказки", "Кеңестер", "Hints")}</span>
                     <button type="button" className={`settings-toggle${hints ? " on" : ""}`}
-                      onClick={() => { const v = !hints; setHints(v); try { localStorage.setItem("kokpar_hints", String(v)); } catch {} }}>
+                      onClick={() => { const v = !hints; setHints(v); saveSetting("hints", v, "kokpar_hints"); }}>
                       <span className="settings-toggle-thumb" />
                     </button>
                   </div>
                 </div>
 
-                <div className="settings-stats-row">
-                  <div className="settings-stat">
-                    <span className="settings-stat-value">Ур. {profile.level}</span>
-                    <span className="settings-stat-label">{t("Уровень", "Деңгей", "Level")}</span>
+                {/* Account row — at bottom per design */}
+                <div className="settings-account-row">
+                  <div className="settings-account-avatar">{profile.riderName.slice(0, 1)}</div>
+                  <div className="settings-account-info">
+                    {editingRider ? (
+                      <form className="rider-name-form" onSubmit={submitRiderName}>
+                        <input aria-label={t("Имя игрока", "Ойыншы аты", "Player name")} maxLength={24} value={draftRiderName}
+                          onChange={(e) => setDraftRiderName(e.target.value)} autoFocus />
+                        <button type="submit"><Check size={14} strokeWidth={2.7} /></button>
+                        <button type="button" onClick={() => { setEditingRider(false); setDraftRiderName(profile.riderName); }}>
+                          <X size={14} strokeWidth={2.7} />
+                        </button>
+                      </form>
+                    ) : (
+                      <button type="button" className="settings-account-name-btn" onClick={() => { setDraftRiderName(profile.riderName); setEditingRider(true); }}>
+                        <strong>{profile.riderName}</strong>
+                        <Pencil size={11} strokeWidth={2.4} />
+                      </button>
+                    )}
+                    <span>{auth.status === "signed-in" ? auth.email : t("Гостевой профиль", "Қонақ профилі", "Guest profile")}</span>
                   </div>
-                  <div className="settings-stat">
-                    <span className="settings-stat-value">{formatCoins(profile.coins)}</span>
-                    <span className="settings-stat-label">⌾</span>
-                  </div>
-                  <div className="settings-stat">
-                    <span className="settings-stat-value">{ownedCount}/{profile.stableCapacity}</span>
-                    <span className="settings-stat-label">{t("Коней", "Жылқы", "Horses")}</span>
-                  </div>
+                  {auth.status === "signed-in" ? (
+                    <button type="button" className="settings-signout-btn" onClick={onSignOut}>{t("Выйти", "Шығу", "Sign out")}</button>
+                  ) : (
+                    <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
+                  )}
                 </div>
 
                 <div className="settings-footer">Kokpar 3D · v0.9.0</div>
