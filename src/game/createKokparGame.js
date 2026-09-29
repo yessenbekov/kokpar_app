@@ -502,6 +502,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   let animationFrame = 0;
   let lastFrameTime = performance.now();
   let isDestroyed = false;
+  let isPaused = false;
   let assetsLoaded = false;
   const cameraDesired = new THREE.Vector3();
   const cameraLookAt = new THREE.Vector3();
@@ -2209,6 +2210,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
   function frame(now) {
     if (isDestroyed) return;
+
+    if (isPaused) {
+      renderer.render(scene, camera);
+      animationFrame = requestAnimationFrame(frame);
+      return;
+    }
+
     readGamepad();
 
     const dt = clamp((now - lastFrameTime) / 1000, 0, 0.033);
@@ -2414,6 +2422,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     applyNetworkState,
     setRemoteRiderInput,
     getLocalPlayerInput,
+    setPaused(paused) {
+      isPaused = paused;
+      if (!paused) lastFrameTime = performance.now();
+    },
     setFeedbackEnabled(enabled) {
       feedback.setEnabled(enabled);
     },

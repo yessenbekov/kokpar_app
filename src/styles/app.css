@@ -9930,23 +9930,31 @@ body,
 }
 
 .home-emblem {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #f2e2b8 0%, #d4a028 55%, #a07020 100%);
-  border: 2.5px solid rgba(240, 195, 71, 0.55);
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), inset 0 1px 3px rgba(255, 255, 255, 0.25);
+  position: relative;
+  width: 82px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex-shrink: 0;
+  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.6));
+}
+
+.home-emblem-diamond {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .home-emblem-letter {
-  font: 700 46px/1 Oswald, sans-serif;
+  position: relative;
+  font: 700 38px/1 Oswald, sans-serif;
   color: #15100a;
   letter-spacing: -0.01em;
+  z-index: 1;
+  margin-top: 6px;
 }
 
 .home-logo {
@@ -11598,6 +11606,141 @@ body,
   cursor: pointer;
   text-align: center;
 }
+
+.nh-pause-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nh-pause-icon-lg {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.nh-pause-subtitle {
+  font: 400 11px/1.3 Manrope, sans-serif;
+  color: rgba(242,226,184,0.55);
+  text-align: center;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nh-settings-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.nh-settings-back {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(208,160,48,.12);
+  border: 1px solid rgba(208,160,48,.2);
+  color: var(--ink-2);
+  font: 600 18px/1 Manrope, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nh-pause-menu--settings {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.nh-settings-body {
+  width: 100%;
+}
+
+/* ── Демеушілік row ── */
+.demeushire-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  background: rgba(180, 120, 30, 0.08);
+  border: 1px solid rgba(180, 120, 30, 0.22);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  margin-bottom: 4px;
+}
+
+.demeushire-row:active { opacity: 0.75; }
+
+.demeushire-icon {
+  font-size: 16px;
+  color: #d4a028;
+  flex-shrink: 0;
+}
+
+.demeushire-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.demeushire-text strong {
+  font: 600 13px/1.2 Manrope, sans-serif;
+  color: #d4a028;
+}
+
+.demeushire-text span {
+  font: 400 11px/1.3 Manrope, sans-serif;
+  color: rgba(242,226,184,0.55);
+}
+
+.demeushire-arrow {
+  font-size: 18px;
+  color: rgba(212, 160, 40, 0.5);
+  flex-shrink: 0;
+}
+
+.demeushire-row--settings {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+/* Home demeushire */
+.home-demeushire-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(180, 120, 30, 0.08);
+  border: 1px solid rgba(180, 120, 30, 0.22);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  margin-top: 8px;
+}
+
+.home-demeushire-row:active { opacity: 0.75; }
+.home-demeushire-icon { font-size: 15px; color: #d4a028; flex-shrink: 0; }
+.home-demeushire-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-demeushire-text strong {
+  font: 600 12px/1.2 Manrope, sans-serif;
+  color: #d4a028;
+}
+.home-demeushire-text span {
+  font: 400 10px/1.3 Manrope, sans-serif;
+  color: rgba(242,226,184,0.5);
+}
+.home-demeushire-arrow { font-size: 16px; color: rgba(212,160,40,.45); flex-shrink: 0; }
 
 /* ── Desktop (2a / 2b) ── */
 @media (min-width: 900px) {

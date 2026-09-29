@@ -234,7 +234,20 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="home-scene-card">
               <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
-                <div className="home-emblem"><span className="home-emblem-letter">Қ</span></div>
+                <div className="home-emblem">
+                  <svg className="home-emblem-diamond" viewBox="0 0 90 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M45 2 L88 42 L45 100 L2 42 Z" fill="url(#dg)" stroke="rgba(240,195,71,0.5)" strokeWidth="1.5"/>
+                    <path d="M45 2 L60 24 L45 18 L30 24 Z" fill="rgba(240,195,71,0.6)" stroke="none"/>
+                    <defs>
+                      <linearGradient id="dg" x1="45" y1="2" x2="45" y2="100" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#f2e2b8"/>
+                        <stop offset="40%" stopColor="#d4a028"/>
+                        <stop offset="100%" stopColor="#8a5a10"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span className="home-emblem-letter">К</span>
+                </div>
                 <div className="home-logo">КӨКПАР</div>
                 <div className="home-logo-3d">3 D</div>
               </div>
@@ -267,6 +280,15 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <button type="button" className="home-guest-login" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
                 </div>
               )}
+
+              <button type="button" className="home-demeushire-row" onClick={() => { setHomeScreen(false); setNavTab("demeushire"); }}>
+                <span className="home-demeushire-icon">♥</span>
+                <span className="home-demeushire-text">
+                  <strong>{t("Демеушілік · поддержать", "Демеушілік", "Support")}</strong>
+                  <span>{t("Игру делает один человек · о разработчике", "Ойынды бір адам жасайды", "Made by one person")}</span>
+                </span>
+                <span className="home-demeushire-arrow">›</span>
+              </button>
             </div>
           </>
         )}
@@ -356,6 +378,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       );
                     })}
                   </div>
+                  <button type="button" className="demeushire-row" onClick={() => setNavTab("demeushire")}>
+                    <span className="demeushire-icon">♥</span>
+                    <span className="demeushire-text">{t("Демеушілік · поддержать проект", "Демеушілік · жобаны қолдау", "Support the project")}</span>
+                    <span className="demeushire-arrow">›</span>
+                  </button>
+
                   <div className="tab-footer">
                     <button
                       className="start-button"
@@ -599,6 +627,30 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             </div>
           )}
 
+          {/* TAB: ДЕМЕУШІЛІК */}
+          {navTab === "demeushire" && (
+            <div className="tab-pane">
+              <div className="wizard-step-header">
+                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
+                <span className="wizard-step-title">{t("Демеушілік", "Демеушілік", "Support")}</span>
+              </div>
+              <div className="settings-page" style={{ paddingTop: 8 }}>
+                <div style={{ textAlign: "center", padding: "32px 0 24px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>♥</div>
+                  <p style={{ font: "600 18px/1.3 Oswald, sans-serif", color: "#d4a028", marginBottom: 8 }}>
+                    {t("Поддержать Кокпар 3D", "Кокпар 3D қолдау", "Support Kokpar 3D")}
+                  </p>
+                  <p style={{ font: "400 13px/1.6 Manrope, sans-serif", color: "rgba(242,226,184,.65)", maxWidth: 280, margin: "0 auto 24px" }}>
+                    {t("Игру делает один разработчик. Взносы идут на серверы, анимации лошадей и звук.", "Ойынды бір әзірлеуші жасайды.", "Made by one developer. Contributions go to servers, animations and sound.")}
+                  </p>
+                </div>
+                <p style={{ font: "400 12px/1.5 Manrope, sans-serif", color: "rgba(242,226,184,.4)", textAlign: "center" }}>
+                  {t("Раздел в разработке · скоро здесь появится поддержка", "Бөлім жасалуда", "Section coming soon")}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* TAB: БАПТАУЛАР / НАСТРОЙКИ */}
           {navTab === "profile" && (
             <div className="tab-pane">
@@ -704,6 +756,15 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <button type="button" className="settings-signin-btn" onClick={onBackToLogin}>{t("Войти", "Кіру", "Sign in")}</button>
                   )}
                 </div>
+
+                <button type="button" className="demeushire-row demeushire-row--settings" onClick={() => setNavTab("demeushire")}>
+                  <span className="demeushire-icon">♥</span>
+                  <span className="demeushire-text">
+                    <strong>{t("Демеушілік · поддержать", "Демеушілік", "Support")}</strong>
+                    <span>{t("О разработчике и куда идут взносы", "Әзірлеуші туралы", "About the developer")}</span>
+                  </span>
+                  <span className="demeushire-arrow">›</span>
+                </button>
 
                 <div className="settings-footer">Kokpar 3D · v0.9.0</div>
               </div>

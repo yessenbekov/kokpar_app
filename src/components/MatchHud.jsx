@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Volume2, VolumeX } from "lucide-react";
 
 export function MatchHud({
@@ -6,12 +6,26 @@ export function MatchHud({
   hud,
   feedbackEnabled,
   onRestart,
-  onOpenSettings,
+  onQuitMatch,
+  onSetPaused,
   onCycleCamera,
-  onToggleFeedback
+  onToggleFeedback,
+  onSettingChange
 }) {
-  const [paused, setPaused] = useState(false);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [paused, setPausedState] = useState(false);
+  const [showInGameSettings, setShowInGameSettings] = useState(false);
+
+  const [sfxVol, setSfxVol] = useState(settings.sfxVol ?? 78);
+  const [musicVol, setMusicVol] = useState(settings.musicVol ?? 42);
+  const [vibration, setVibration] = useState(settings.vibration ?? true);
+  const [cameraModeSt, setCameraModeSt] = useState(settings.cameraMode ?? "back");
+  const [leftHand, setLeftHand] = useState(settings.leftHand ?? false);
+  const [hints, setHints] = useState(settings.hints ?? true);
+  const [joystickSensitivity, setJoystickSensitivity] = useState(settings.joystickSensitivity ?? 50);
+
+  useEffect(() => {
+    onSetPaused?.(paused);
+  }, [paused]);
 
   const staminaPct = Math.round((hud.stamina ?? 1) * 100);
   const meterMode = hud.throwPower > 0 ? "throw" : hud.mountedContest ? "tug" : "stamina";
@@ -20,14 +34,21 @@ export function MatchHud({
     : meterMode === "tug" ? Math.round(hud.tugPower * 100)
     : staminaPct;
 
-  function handlePause() { setPaused(true); setShowExitConfirm(false); }
-  function handleResume() { setPaused(false); setShowExitConfirm(false); }
-  function handleExit() { setPaused(false); setShowExitConfirm(false); onOpenSettings?.(); }
+  function handlePause() { setPausedState(true); setShowInGameSettings(false); }
+  function handleResume() { setPausedState(false); setShowInGameSettings(false); }
+  function handleQuit() { setPausedState(false); setShowInGameSettings(false); onQuitMatch?.(); }
+
+  function saveSetting(key, value) { onSettingChange?.(key, value); }
+
+  const lang = settings.lang ?? "ru";
+  function t(ru, kz, en) { return lang === "kz" ? kz : lang === "en" ? (en ?? ru) : ru; }
 
   const serkeLabel =
     hud.serkeTeam === "blue" ? "Синие владеют" :
     hud.serkeTeam === "red" ? "Красные владеют" :
     "Серке";
+
+  const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
 
   return (
     <section className="hud" aria-label="Match status">
@@ -68,7 +89,6 @@ export function MatchHud({
 
       {/* ── Bottom strip ── */}
       <div className="nh-bottom">
-        {/* Stamina bar */}
         <div className="nh-stamina-wrap">
           <span className="nh-stamina-label">
             {meterMode === "throw" ? "Бросок" : meterMode === "tug" ? "Борьба" : "Стамина"}
@@ -87,7 +107,6 @@ export function MatchHud({
           </div>
         </div>
 
-        {/* Action buttons */}
         <div className="nh-actions">
           <button className="nh-action-btn nh-action-amber" type="button">
             <span className="nh-action-amber-icon" />
@@ -105,48 +124,112 @@ export function MatchHud({
       </div>
 
       {/* ── Pause overlay ── */}
-      {paused && (
+      {paused && !showInGameSettings && (
         <div className="nh-overlay">
           <div className="nh-pause-panels">
             <div className="nh-pause-menu">
-              <div className="nh-pause-title">Пауза</div>
+              <div className="nh-pause-header">
+                <span className="nh-pause-icon-lg">⏸</span>
+                <span className="nh-pause-title">{t("Пауза", "Үзіліс", "Pause")}</span>
+              </div>
+              <p className="nh-pause-subtitle">{settings.teamSize}×{settings.teamSize} · {goalLabel.toUpperCase()} · {hud.timer}</p>
               <div className="nh-pause-score-row">
                 <span className="nh-pause-score-pill nh-blue">{hud.blue}</span>
                 <span className="nh-score-colon">:</span>
                 <span className="nh-pause-score-pill nh-red">{hud.red}</span>
               </div>
               <button className="nh-pause-btn nh-pause-amber" type="button" onClick={handleResume}>
-                Продолжить
+                {t("Продолжить", "Жалғастыру", "Resume")}
               </button>
               <div className="nh-pause-grid">
-                <button className="nh-pause-grid-btn" type="button" onClick={onOpenSettings}>
-                  Настройки
+                <button className="nh-pause-grid-btn" type="button" onClick={() => setShowInGameSettings(true)}>
+                  {t("Настройки", "Баптаулар", "Settings")}
                 </button>
-                <button className="nh-pause-grid-btn" type="button" onClick={onToggleFeedback}>
-                  {feedbackEnabled ? "Звук: Вкл" : "Звук: Выкл"}
+                <button className="nh-pause-grid-btn" type="button" onClick={onCycleCamera}>
+                  {t("Камера", "Камера", "Camera")}
                 </button>
               </div>
-              <button
-                className="nh-pause-btn nh-pause-red"
-                type="button"
-                onClick={() => setShowExitConfirm(true)}
-              >
-                Покинуть матч
+              <button className="nh-pause-btn nh-pause-red" type="button" onClick={handleQuit}>
+                {t("Покинуть матч", "Матчтан шығу", "Quit Match")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
 
-            {showExitConfirm && (
-              <div className="nh-exit-confirm">
-                <div className="nh-exit-title">Выйти?</div>
-                <div className="nh-exit-sub">Прогресс не сохранится</div>
-                <button className="nh-pause-btn nh-pause-amber" type="button" onClick={handleResume}>
-                  Остаться
-                </button>
-                <button className="nh-pause-btn nh-pause-red" type="button" onClick={handleExit}>
-                  Выйти в меню
-                </button>
+      {/* ── In-game settings overlay ── */}
+      {paused && showInGameSettings && (
+        <div className="nh-overlay">
+          <div className="nh-pause-panels">
+            <div className="nh-pause-menu nh-pause-menu--settings">
+              <div className="nh-settings-header">
+                <button type="button" className="nh-settings-back" onClick={() => setShowInGameSettings(false)}>‹</button>
+                <span className="nh-pause-title">{t("Настройки", "Баптаулар", "Settings")}</span>
               </div>
-            )}
+
+              <div className="nh-settings-body">
+                <div className="settings-section-label">{t("Звук", "Дыбыс", "Sound")}</div>
+                <div className="settings-group">
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Эффекты", "Эффекттер", "Effects")}</span>
+                    <input type="range" className="settings-slider" min={0} max={100} value={sfxVol}
+                      style={{ "--fill": `${sfxVol}%` }}
+                      onChange={(e) => { const v = Number(e.target.value); setSfxVol(v); saveSetting("sfxVol", v); }} />
+                    <span className="settings-row-val">{sfxVol}%</span>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Музыка", "Музыка", "Music")}</span>
+                    <input type="range" className="settings-slider" min={0} max={100} value={musicVol}
+                      style={{ "--fill": `${musicVol}%` }}
+                      onChange={(e) => { const v = Number(e.target.value); setMusicVol(v); saveSetting("musicVol", v); }} />
+                    <span className="settings-row-val">{musicVol}%</span>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Вибрация", "Діріл", "Vibration")}</span>
+                    <button type="button" className={`settings-toggle${vibration ? " on" : ""}`}
+                      onClick={() => { const v = !vibration; setVibration(v); saveSetting("vibration", v); }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="settings-section-label">{t("Управление", "Басқару", "Controls")}</div>
+                <div className="settings-group">
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Камера", "Камера", "Camera")}</span>
+                    <div className="settings-seg-sm">
+                      <button type="button" className={`settings-seg-btn-sm${cameraModeSt === "tv" ? " active" : ""}`}
+                        onClick={() => { setCameraModeSt("tv"); saveSetting("cameraMode", "tv"); }}>ТВ</button>
+                      <button type="button" className={`settings-seg-btn-sm${cameraModeSt !== "tv" ? " active" : ""}`}
+                        onClick={() => { setCameraModeSt("back"); saveSetting("cameraMode", "back"); }}>
+                        {t("За спиной", "Артта", "Behind")}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Джойстик", "Джойстик", "Joystick")}</span>
+                    <input type="range" className="settings-slider" min={10} max={100} value={joystickSensitivity}
+                      style={{ "--fill": `${joystickSensitivity}%` }}
+                      onChange={(e) => { const v = Number(e.target.value); setJoystickSensitivity(v); saveSetting("joystickSensitivity", v); }} />
+                    <span className="settings-row-val">{joystickSensitivity}</span>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Левша", "Сол қол", "Left hand")}</span>
+                    <button type="button" className={`settings-toggle${leftHand ? " on" : ""}`}
+                      onClick={() => { const v = !leftHand; setLeftHand(v); saveSetting("leftHand", v); }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-row-label">{t("Подсказки", "Кеңестер", "Hints")}</span>
+                    <button type="button" className={`settings-toggle${hints ? " on" : ""}`}
+                      onClick={() => { const v = !hints; setHints(v); saveSetting("hints", v); }}>
+                      <span className="settings-toggle-thumb" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

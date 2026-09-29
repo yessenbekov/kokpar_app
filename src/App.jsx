@@ -680,9 +680,11 @@ export default function App() {
           hud={hud}
           feedbackEnabled={feedbackEnabled}
           onRestart={() => gameRef.current?.restart()}
-          onOpenSettings={openSettings}
+          onQuitMatch={openSettings}
+          onSetPaused={(paused) => gameRef.current?.setPaused(paused)}
           onCycleCamera={() => gameRef.current?.cycleCameraMode?.()}
           onToggleFeedback={toggleFeedback}
+          onSettingChange={updateSetting}
         />
       )}
 
