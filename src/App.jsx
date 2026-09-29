@@ -42,7 +42,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [sceneError, setSceneError] = useState("");
   const [feedbackEnabled, setFeedbackEnabled] = useState(() => localStorage.getItem("kokpar_feedback") !== "0");
-  const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart());
+  const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart() || initialProfileRef.current.onboardingDone);
   const [matchReward, setMatchReward] = useState(null);
   const [syncStatus, setSyncStatus] = useState("idle");
   const { authState, needsOnboarding, completeOnboarding, signInWithPassword, signInWithGoogle, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({

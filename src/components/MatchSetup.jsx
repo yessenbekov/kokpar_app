@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, History, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, User, Users, X, Zap } from "lucide-react";
 import { GAME_MODES, gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
@@ -97,6 +97,139 @@ function onlineStartLabel(lobbyState) {
   if (!lobbyState.isHost) return "Ждем хоста";
   if (!lobbyState.allReady) return "Все должны быть готовы";
   return "Запустить комнату";
+}
+
+function Demeushire({ t, onBack }) {
+  const AMOUNTS = [
+    { tenge: "500 ₸", label: t("шай-пұл", "шай-пұл", "tea money") },
+    { tenge: "2 000 ₸", label: t("частый выбор", "жиі таңдау", "popular"), highlight: true },
+    { tenge: "5 000 ₸", label: t("демеуші", "демеуші", "supporter") },
+  ];
+  const [selected, setSelected] = React.useState(1);
+  const [monthly, setMonthly] = React.useState(false);
+
+  return (
+    <div className="tab-pane">
+      <div className="wizard-step-header">
+        <button type="button" className="wizard-back-btn" onClick={onBack}>‹</button>
+        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <span className="wizard-step-title">{t("Демеушілік", "Демеушілік", "Support")}</span>
+          <span style={{ font: "400 10px/1 Manrope, sans-serif", color: "rgba(214,178,110,.55)" }}>
+            {t("Поддержать проект", "Жобаны қолдау", "Support the project")}
+          </span>
+        </div>
+      </div>
+      <div className="settings-page" style={{ paddingTop: 0, gap: 16 }}>
+
+        {/* Hero banner */}
+        <div className="dn-hero">
+          <div className="dn-hero-overlay" />
+          <div className="dn-hero-text">
+            <div style={{ font: "600 18px/1.2 Oswald, sans-serif", color: "#f7ecd0" }}>
+              {t("Көкпар должен жить в цифре", "Көкпар цифрда өмір сүруі керек", "Kokpar must live in digital")}
+            </div>
+            <div style={{ marginTop: 4, font: "400 11px/1.45 Manrope, sans-serif", color: "rgba(242,226,184,.85)" }}>
+              {t("Игра без рекламы и pay-to-win. Её держат взносы игроков.", "Жарнамасыз ойын. Ойыншылар жарнамасы ұстайды.", "No ads, no pay-to-win. Kept alive by player contributions.")}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="dn-stats">
+          <div className="dn-stat">
+            <div className="dn-stat-value">1 842</div>
+            <div className="dn-stat-label">{t("демеуші всего", "барлық демеуші", "total supporters")}</div>
+          </div>
+          <div className="dn-stat">
+            <div className="dn-stat-value">68%</div>
+            <div className="dn-stat-label">{t("серверы сентября", "қыркүйек серверлері", "Sept. servers")}</div>
+          </div>
+          <div className="dn-stat">
+            <div className="dn-stat-value">0</div>
+            <div className="dn-stat-label">{t("рекламы в игре", "ойындағы жарнама", "ads in-game")}</div>
+          </div>
+        </div>
+
+        {/* One-time amounts */}
+        <div className="dn-section">
+          <div className="dn-section-row">
+            <span className="dn-section-label">{t("Разовый взнос", "Бір реттік жарна", "One-time contribution")}</span>
+            <span className="dn-section-sub">{t("без монет и бонусов", "монетасыз", "no coins or bonuses")}</span>
+          </div>
+          <div className="dn-amounts">
+            {AMOUNTS.map((a, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`dn-amount${selected === i ? " selected" : ""}${a.highlight ? " highlight" : ""}`}
+                onClick={() => setSelected(i)}
+              >
+                <span className="dn-amount-val">{a.tenge}</span>
+                <span className="dn-amount-label">{a.label}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="dn-custom">
+            {t("Своя сумма", "Өз сомасы", "Custom amount")}
+            <span style={{ marginLeft: "auto", font: "400 11px Manrope, sans-serif", color: "rgba(214,178,110,.6)" }}>
+              {t("от 200 ₸", "200 ₸-тан", "from 200 ₸")}
+            </span>
+          </button>
+        </div>
+
+        {/* Monthly toggle */}
+        <button
+          type="button"
+          className={`dn-monthly${monthly ? " on" : ""}`}
+          onClick={() => setMonthly(!monthly)}
+        >
+          <div style={{ flex: 1 }}>
+            <div style={{ font: "600 13px Manrope, sans-serif", color: "#f2e2b8" }}>
+              {t("Ежемесячно · 1 000 ₸", "Ай сайын · 1 000 ₸", "Monthly · 1 000 ₸")}
+            </div>
+            <div style={{ marginTop: 3, font: "400 11px/1.4 Manrope, sans-serif", color: "rgba(242,226,184,.75)" }}>
+              {t("Стабильный бюджет на серверы. Отменить — в один тап.", "Серверлерге тұрақты бюджет.", "Stable budget for servers. Cancel anytime.")}
+            </div>
+          </div>
+          <span className={`dn-toggle${monthly ? " on" : ""}`}>
+            <span className="dn-toggle-thumb" />
+          </span>
+        </button>
+
+        {/* Perks */}
+        <div className="dn-section">
+          <div className="dn-section-label">{t("Что получает демеуші", "Демеуші не алады", "What supporters get")}</div>
+          <div className="dn-perks">
+            <span className="dn-perk dn-perk-gold">{t("Значок у ника", "Нікте белгі", "Badge by name")}</span>
+            <span className="dn-perk">{t("Имя в титрах", "Титрда аты", "Name in credits")}</span>
+            <span className="dn-perk">{t("Ранний доступ к картам", "Картаға ерте кіру", "Early map access")}</span>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button type="button" className="dn-cta">
+          {t(`Поддержать ${AMOUNTS[selected].tenge}`, `Қолдау ${AMOUNTS[selected].tenge}`, `Support ${AMOUNTS[selected].tenge}`)}
+        </button>
+        <p style={{ font: "400 10.5px/1.5 Manrope, sans-serif", color: "rgba(214,178,110,.4)", textAlign: "center", margin: 0 }}>
+          {t("Платёжная система в разработке · скоро будет доступна", "Төлем жүйесі дайындалуда", "Payment system coming soon")}
+        </p>
+
+        {/* About */}
+        <div className="dn-about">
+          <div style={{ font: "600 14px Oswald, sans-serif", color: "#d0a030", marginBottom: 6 }}>
+            {t("Демеушілік · О нас", "Демеушілік · Біз туралы", "About us")}
+          </div>
+          <p style={{ font: "400 12px/1.6 Manrope, sans-serif", color: "rgba(214,178,110,.7)", margin: 0 }}>
+            {t(
+              "Кокпар 3D делает один разработчик с 2023 года. Никаких инвесторов, никакой рекламы. Игра живёт на взносах тех, кому важно, что традиционная казахская игра всадников существует в цифре.",
+              "Кокпар 3D 2023 жылдан бастап бір әзірлеуші жасайды. Инвесторлар жоқ, жарнама жоқ.",
+              "Kokpar 3D is made by one developer since 2023. No investors, no ads. The game lives on contributions from those who care that this traditional Kazakh game exists digitally."
+            )}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, onHorseRename, onHorseCreate, onHorseDelete, onSettingChange, onStart, onRiderRename, onBuyItem, onBuyHorse, onExpandStable, stableSlotCost, onEquipItem, onListItem, onCancelListing, onPurchase, onEquipFromInventory }) {
@@ -629,26 +762,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
           {/* TAB: ДЕМЕУШІЛІК */}
           {navTab === "demeushire" && (
-            <div className="tab-pane">
-              <div className="wizard-step-header">
-                <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                <span className="wizard-step-title">{t("Демеушілік", "Демеушілік", "Support")}</span>
-              </div>
-              <div className="settings-page" style={{ paddingTop: 8 }}>
-                <div style={{ textAlign: "center", padding: "32px 0 24px" }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>♥</div>
-                  <p style={{ font: "600 18px/1.3 Oswald, sans-serif", color: "#d4a028", marginBottom: 8 }}>
-                    {t("Поддержать Кокпар 3D", "Кокпар 3D қолдау", "Support Kokpar 3D")}
-                  </p>
-                  <p style={{ font: "400 13px/1.6 Manrope, sans-serif", color: "rgba(242,226,184,.65)", maxWidth: 280, margin: "0 auto 24px" }}>
-                    {t("Игру делает один разработчик. Взносы идут на серверы, анимации лошадей и звук.", "Ойынды бір әзірлеуші жасайды.", "Made by one developer. Contributions go to servers, animations and sound.")}
-                  </p>
-                </div>
-                <p style={{ font: "400 12px/1.5 Manrope, sans-serif", color: "rgba(242,226,184,.4)", textAlign: "center" }}>
-                  {t("Раздел в разработке · скоро здесь появится поддержка", "Бөлім жасалуда", "Section coming soon")}
-                </p>
-              </div>
-            </div>
+            <Demeushire t={t} onBack={goHome} />
           )}
 
           {/* TAB: БАПТАУЛАР / НАСТРОЙКИ */}

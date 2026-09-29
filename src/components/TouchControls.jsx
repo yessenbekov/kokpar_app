@@ -1,5 +1,3 @@
-import { Hand, Shield } from "lucide-react";
-
 export function TouchControls({
   joystick,
   joystickRef,
@@ -39,29 +37,29 @@ export function TouchControls({
 
       <div className="touch-action-wrap">
         <button
-          className={bodyCheckActive ? "touch-button touch-check active" : "touch-button touch-check"}
+          className="touch-btn-serke"
           type="button"
-          aria-label="Силовой прием"
-          title="Силовой прием"
-          disabled={!bodyCheckActive && !bodyCheckReady}
-          style={{ "--cooldown": `${Math.round(bodyCheckCooldown * 100)}%` }}
-          onPointerDown={onBodyCheck}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          <Shield size={25} strokeWidth={2.5} />
-        </button>
-        <button
-          className="touch-button touch-action"
-          type="button"
-          aria-label="Действие"
-          title="Действие"
+          aria-label="Поднять серке"
           onPointerDown={onActionPress}
           onPointerUp={onActionRelease}
           onPointerCancel={onActionRelease}
           onLostPointerCapture={onActionRelease}
           onContextMenu={(event) => event.preventDefault()}
         >
-          <Hand size={30} strokeWidth={2.6} />
+          <span className="touch-btn-serke-diamond" />
+          Поднять серке
+        </button>
+        <button
+          className={`touch-btn-dash${bodyCheckActive ? " active" : ""}${(!bodyCheckActive && !bodyCheckReady) ? " cooldown" : ""}`}
+          type="button"
+          aria-label="Рывок"
+          onPointerDown={onBodyCheck}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          Рывок
+          {bodyCheckCooldown > 0 && (
+            <span className="touch-btn-dash-cd">{(bodyCheckCooldown * 1.45).toFixed(1)}с</span>
+          )}
         </button>
       </div>
     </section>

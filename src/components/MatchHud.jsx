@@ -65,7 +65,10 @@ export function MatchHud({
 
         {/* Serke possession tracker */}
         <div className="nh-serke-track">
-          <span className="nh-serke-label">{serkeLabel}</span>
+          <span className="nh-serke-label">
+            <span className={`nh-serke-diamond${hud.serkeTeam ? "" : " active"}`} />
+            {serkeLabel}
+          </span>
           <div className="nh-serke-bar">
             <div className={`nh-seg nh-seg-blue${hud.serkeTeam === "blue" ? " nh-seg-glow" : ""}`} />
             <div className={`nh-seg nh-seg-gold${!hud.serkeTeam ? " nh-seg-glow" : ""}`} />
