@@ -54,39 +54,61 @@ export function MatchHud({
     <section className="hud" aria-label="Match status">
       {/* ── Top bar ── */}
       <div className="nh-top">
-        {/* Timer + Score */}
-        <div className="nh-timer-score">
-          <span className="nh-timer">{hud.timer}</span>
-          <div className="nh-ts-sep" />
-          <span className={`nh-score-pill nh-blue`}>{hud.blue}</span>
-          <span className="nh-score-colon">:</span>
-          <span className={`nh-score-pill nh-red`}>{hud.red}</span>
+        {/* Timer block */}
+        <div className="nh-left-group">
+          <div className="nh-timer-block">
+            <div className="nh-timer">{hud.timer}</div>
+            <div className="nh-timer-sub">{settings.teamSize}×{settings.teamSize} · {goalLabel}</div>
+          </div>
+          {/* Score block */}
+          <div className="nh-score-block">
+            <div className="nh-score-col">
+              <span className="nh-score-pill nh-blue">{hud.blue}</span>
+              <span className="nh-score-team">{t("Синие", "Көк", "Blue")}</span>
+            </div>
+            <span className="nh-score-colon">:</span>
+            <div className="nh-score-col">
+              <span className="nh-score-pill nh-red">{hud.red}</span>
+              <span className="nh-score-team">{t("Красные", "Қызыл", "Red")}</span>
+            </div>
+          </div>
         </div>
 
         {/* Serke possession tracker */}
         <div className="nh-serke-track">
-          <span className="nh-serke-label">
-            <span className={`nh-serke-diamond${hud.serkeTeam ? "" : " active"}`} />
-            {serkeLabel}
-          </span>
+          <div className="nh-serke-top-row">
+            <span className="nh-serke-label">
+              <span className={`nh-serke-diamond${hud.serkeTeam ? "" : " active"}`} />
+              {serkeLabel}
+            </span>
+            {hud.serkeDistance > 0 && (
+              <span className="nh-serke-distance">{Math.round(hud.serkeDistance)} м</span>
+            )}
+          </div>
           <div className="nh-serke-bar">
             <div className={`nh-seg nh-seg-blue${hud.serkeTeam === "blue" ? " nh-seg-glow" : ""}`} />
             <div className={`nh-seg nh-seg-gold${!hud.serkeTeam ? " nh-seg-glow" : ""}`} />
             <div className={`nh-seg nh-seg-red${hud.serkeTeam === "red" ? " nh-seg-glow" : ""}`} />
           </div>
+          <div className="nh-possession-row">
+            <span>{t("Владение", "Иелену", "Poss.")} {Math.round((hud.blueScore ?? 48))}%</span>
+            <span>{Math.round((hud.redScore ?? 52))}%</span>
+          </div>
         </div>
 
         {/* Icon buttons */}
-        <div className="nh-icons">
-          <button className="nh-icon-btn" type="button" onClick={onCycleCamera} aria-label="Камера">
-            <Camera size={16} strokeWidth={2.2} />
-          </button>
-          <button className="nh-icon-btn" type="button" onClick={onToggleFeedback} aria-label="Звук">
-            {feedbackEnabled ? <Volume2 size={16} strokeWidth={2.2} /> : <VolumeX size={16} strokeWidth={2.2} />}
-          </button>
-          <button className="nh-icon-btn" type="button" onClick={handlePause} aria-label="Пауза">
-            <span className="nh-pause-icon">❙❙</span>
-          </button>
+        <div className="nh-icons-wrap">
+          <div className="nh-icons">
+            <button className="nh-icon-btn" type="button" onClick={onCycleCamera} aria-label="Камера">
+              <Camera size={16} strokeWidth={2.2} />
+            </button>
+            <button className="nh-icon-btn" type="button" onClick={onToggleFeedback} aria-label="Звук">
+              {feedbackEnabled ? <Volume2 size={16} strokeWidth={2.2} /> : <VolumeX size={16} strokeWidth={2.2} />}
+            </button>
+            <button className="nh-icon-btn" type="button" onClick={handlePause} aria-label="Пауза">
+              <span className="nh-pause-icon">❙❙</span>
+            </button>
+          </div>
         </div>
       </div>
 

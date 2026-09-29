@@ -401,5 +401,106 @@ export function createArenaEnvironment(scene) {
   scoreboard.group.rotation.y = Math.PI;
   scene.add(scoreboard.group);
 
+  createAdvertisingBoards(scene);
+
   return { scoreboard };
+}
+
+function createAdvertisingBoardTexture(segments) {
+  return createCanvasTexture(1024, 128, (ctx, w, h) => {
+    let x = 0;
+    for (const { label, bg, fg, flex } of segments) {
+      const segW = Math.round((flex / segments.reduce((s, s2) => s + s2.flex, 0)) * w);
+      ctx.fillStyle = bg;
+      ctx.fillRect(x, 0, segW, h);
+      ctx.fillStyle = "#f6f4ee";
+      ctx.fillRect(x, 0, segW, 6);
+      ctx.fillStyle = fg;
+      ctx.font = "900 56px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, x + segW / 2, h / 2 + 8);
+      x += segW;
+    }
+  }).texture;
+}
+
+function createAdvertisingBoards(scene) {
+  const boardH = 1.6;
+  const boardY = boardH / 2 + 0.08;
+  const tilt = 0.18;
+
+  const longBoards = [
+    {
+      segments: [
+        { label: "QAZAQ TELECOM", bg: "#1668b8", fg: "#ffffff", flex: 1.5 },
+        { label: "BAIGE", bg: "#f6f4ee", fg: "#1a1008", flex: 1 },
+        { label: "TULPAR", bg: "#c02020", fg: "#fff8ec", flex: 1 },
+        { label: "ALTYN DALA", bg: "#0f8a4c", fg: "#ffffff", flex: 1.1 }
+      ],
+      length: WORLD.width * 0.92,
+      zOffset: -WORLD.height / 2 - 1.2,
+      rotY: 0,
+      tiltX: tilt
+    },
+    {
+      segments: [
+        { label: "ALTYN DALA", bg: "#0f8a4c", fg: "#ffffff", flex: 1.1 },
+        { label: "TULPAR", bg: "#c02020", fg: "#fff8ec", flex: 1 },
+        { label: "BAIGE", bg: "#f6f4ee", fg: "#1a1008", flex: 1 },
+        { label: "QAZAQ TELECOM", bg: "#1668b8", fg: "#ffffff", flex: 1.5 }
+      ],
+      length: WORLD.width * 0.92,
+      zOffset: WORLD.height / 2 + 1.2,
+      rotY: Math.PI,
+      tiltX: -tilt
+    }
+  ];
+
+  const sideBoards = [
+    {
+      segments: [
+        { label: "QAZAQ TELECOM", bg: "#1668b8", fg: "#ffffff", flex: 1.5 },
+        { label: "ALTYN DALA", bg: "#0f8a4c", fg: "#ffffff", flex: 1.1 }
+      ],
+      length: WORLD.height * 0.88,
+      xOffset: -WORLD.width / 2 - 1.2,
+      rotY: -Math.PI / 2,
+      tiltX: tilt
+    },
+    {
+      segments: [
+        { label: "TULPAR", bg: "#c02020", fg: "#fff8ec", flex: 1 },
+        { label: "BAIGE", bg: "#f6f4ee", fg: "#1a1008", flex: 1 }
+      ],
+      length: WORLD.height * 0.88,
+      xOffset: WORLD.width / 2 + 1.2,
+      rotY: Math.PI / 2,
+      tiltX: tilt
+    }
+  ];
+
+  for (const board of longBoards) {
+    const tex = createAdvertisingBoardTexture(board.segments);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(board.length, boardH),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide })
+    );
+    mesh.position.set(0, boardY, board.zOffset);
+    mesh.rotation.y = board.rotY;
+    mesh.rotation.x = board.tiltX;
+    scene.add(mesh);
+  }
+
+  for (const board of sideBoards) {
+    const tex = createAdvertisingBoardTexture(board.segments);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(board.length, boardH),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide })
+    );
+    mesh.position.set(board.xOffset, boardY, 0);
+    mesh.rotation.y = board.rotY;
+    mesh.rotation.x = board.tiltX;
+    scene.add(mesh);
+  }
 }
