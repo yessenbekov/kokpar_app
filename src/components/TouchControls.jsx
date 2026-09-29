@@ -18,14 +18,9 @@ export function TouchControls({
         ref={joystickRef}
         aria-label="Джойстик движения"
         role="application"
-        style={{
-          "--stick-x": joystick.x,
-          "--stick-z": joystick.z
-        }}
+        style={{ "--stick-x": joystick.x, "--stick-z": joystick.z }}
         onPointerDown={onJoystickStart}
-        onPointerMove={(event) => {
-          if (joystick.active) onJoystickMove(event);
-        }}
+        onPointerMove={(event) => { if (joystick.active) onJoystickMove(event); }}
         onPointerUp={onJoystickRelease}
         onPointerCancel={onJoystickRelease}
         onLostPointerCapture={onJoystickRelease}
@@ -37,6 +32,18 @@ export function TouchControls({
 
       <div className="touch-action-wrap">
         <button
+          className={`touch-btn-dash${bodyCheckActive ? " active" : ""}${(!bodyCheckActive && !bodyCheckReady) ? " cooldown" : ""}`}
+          type="button"
+          aria-label="Рывок"
+          onPointerDown={onBodyCheck}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          <span className="touch-btn-dash-label">Рывок</span>
+          {bodyCheckCooldown > 0 && (
+            <span className="touch-btn-dash-cd">{(bodyCheckCooldown * 1.45).toFixed(1)}с</span>
+          )}
+        </button>
+        <button
           className="touch-btn-serke"
           type="button"
           aria-label="Поднять серке"
@@ -47,19 +54,7 @@ export function TouchControls({
           onContextMenu={(event) => event.preventDefault()}
         >
           <span className="touch-btn-serke-diamond" />
-          Поднять серке
-        </button>
-        <button
-          className={`touch-btn-dash${bodyCheckActive ? " active" : ""}${(!bodyCheckActive && !bodyCheckReady) ? " cooldown" : ""}`}
-          type="button"
-          aria-label="Рывок"
-          onPointerDown={onBodyCheck}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          Рывок
-          {bodyCheckCooldown > 0 && (
-            <span className="touch-btn-dash-cd">{(bodyCheckCooldown * 1.45).toFixed(1)}с</span>
-          )}
+          <span className="touch-btn-serke-label">Поднять</span>
         </button>
       </div>
     </section>
