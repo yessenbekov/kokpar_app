@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Camera, Volume2, VolumeX } from "lucide-react";
 
+const isTouchDevice = navigator.maxTouchPoints > 0;
+
 export function MatchHud({
   settings,
   hud,
@@ -79,7 +81,7 @@ export function MatchHud({
         <div className="nh-serke-track">
           <div className="nh-serke-top-row">
             <span className="nh-serke-label">
-              <span className={`nh-serke-diamond${hud.serkeTeam ? "" : " active"}`} />
+              <span className={`nh-serke-diamond${!hud.serkeTeam ? " active" : hud.serkeTeam === "blue" ? " blue-hold" : " red-hold"}`} />
               {serkeLabel}
             </span>
             {hud.serkeDistance > 0 && (
@@ -87,13 +89,13 @@ export function MatchHud({
             )}
           </div>
           <div className="nh-serke-bar">
-            <div className={`nh-seg nh-seg-blue${hud.serkeTeam === "blue" ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-blue${hud.serkeTeam === "blue" ? " nh-seg-glow" : ""}`} style={{ flex: hud.blueScore ?? 50 }} />
             <div className={`nh-seg nh-seg-gold${!hud.serkeTeam ? " nh-seg-glow" : ""}`} />
-            <div className={`nh-seg nh-seg-red${hud.serkeTeam === "red" ? " nh-seg-glow" : ""}`} />
+            <div className={`nh-seg nh-seg-red${hud.serkeTeam === "red" ? " nh-seg-glow" : ""}`} style={{ flex: hud.redScore ?? 50 }} />
           </div>
           <div className="nh-possession-row">
-            <span>{t("Владение", "Иелену", "Poss.")} {Math.round((hud.blueScore ?? 48))}%</span>
-            <span>{Math.round((hud.redScore ?? 52))}%</span>
+            <span>{t("Владение", "Иелену", "Poss.")} {hud.blueScore ?? 50}%</span>
+            <span>{hud.redScore ?? 50}%</span>
           </div>
         </div>
 
@@ -110,47 +112,53 @@ export function MatchHud({
               <span className="nh-pause-icon-bars"><span /><span /></span>
             </button>
           </div>
-          <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label="Пауза">
-            <span className="nh-pause-bars"><span /><span /></span>
-            {t("Пауза", "Үзіліс", "Pause")}
-          </button>
-          <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label="Выход">
-            {t("Выход", "Шығу", "Exit")}
-          </button>
+          {!isTouchDevice && (
+            <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label="Пауза">
+              <span className="nh-pause-bars"><span /><span /></span>
+              {t("Пауза", "Үзіліс", "Pause")}
+            </button>
+          )}
+          {!isTouchDevice && (
+            <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label="Выход">
+              {t("Выход", "Шығу", "Exit")}
+            </button>
+          )}
         </div>
       </div>
 
       {/* ── Bottom strip ── */}
       <div className="nh-bottom">
-        <div className="nh-actions">
-          <button className="nh-action-btn nh-action-amber" type="button">
-            <span className="nh-action-amber-icon" />
-            {t("Поднять серке", "Серкені көтеру", "Pick up")}
-            <kbd className="nh-action-key">Space</kbd>
-          </button>
-          <div className="nh-actions-row2">
-            <button className="nh-action-btn nh-action-dark" type="button">
-              {t("Рывок", "Ұмтылу", "Dash")}
-              {hud.bodyCheckCooldown > 0 && (
-                <span className="nh-action-cooldown">
-                  {(hud.bodyCheckCooldown * 1.45).toFixed(1)}с
-                </span>
-              )}
-              <kbd className="nh-action-key">E</kbd>
+        {!isTouchDevice && (
+          <div className="nh-actions">
+            <button className="nh-action-btn nh-action-amber" type="button">
+              <span className="nh-action-amber-icon" />
+              {t("Поднять серке", "Серкені көтеру", "Pick up")}
+              <kbd className="nh-action-key">Space</kbd>
             </button>
-            <div className="nh-stamina-circle-wrap">
-              <svg className="nh-stamina-svg" viewBox="0 0 62 62" width="62" height="62">
-                <circle className="nh-sc-track" cx="31" cy="31" r="26" />
-                <circle
-                  className={`nh-sc-fill${meterMode === "throw" ? " throw" : meterMode === "tug" ? " tug" : ""}`}
-                  cx="31" cy="31" r="26"
-                  strokeDasharray={`${activePct * 1.634} 163.4`}
-                />
-              </svg>
-              <span className="nh-stamina-pct">{activePct}</span>
+            <div className="nh-actions-row2">
+              <button className="nh-action-btn nh-action-dark" type="button">
+                {t("Рывок", "Ұмтылу", "Dash")}
+                {hud.bodyCheckCooldown > 0 && (
+                  <span className="nh-action-cooldown">
+                    {(hud.bodyCheckCooldown * 1.45).toFixed(1)}с
+                  </span>
+                )}
+                <kbd className="nh-action-key">E</kbd>
+              </button>
+              <div className="nh-stamina-circle-wrap">
+                <svg className="nh-stamina-svg" viewBox="0 0 62 62" width="62" height="62">
+                  <circle className="nh-sc-track" cx="31" cy="31" r="26" />
+                  <circle
+                    className={`nh-sc-fill${meterMode === "throw" ? " throw" : meterMode === "tug" ? " tug" : ""}`}
+                    cx="31" cy="31" r="26"
+                    strokeDasharray={`${activePct * 1.634} 163.4`}
+                  />
+                </svg>
+                <span className="nh-stamina-pct">{activePct}</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Pause overlay ── */}

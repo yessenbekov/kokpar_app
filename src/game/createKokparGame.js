@@ -883,6 +883,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
       horseName: player.horseName ?? gameSettings.horseName ?? playerHorseType.name,
       carry: carryStatusText(),
       serkeTeam: kokpar.holder?.team ?? kokpar.flightTeam ?? null,
+      serkeDistance: kokpar.holder ? 0 : Math.round(Math.hypot(kokpar.x - player.x, kokpar.z - player.z)),
+      blueScore: (() => { const t = match.blueHoldSec + match.redHoldSec; return t > 0 ? Math.round(match.blueHoldSec / t * 100) : 50; })(),
+      redScore: (() => { const t = match.blueHoldSec + match.redHoldSec; return t > 0 ? Math.round(match.redHoldSec / t * 100) : 50; })(),
       message: isCountdown ? `${match.countdownLabel} ${countdown}` : match.message,
       submessage: match.submessage,
       showBanner: isCountdown || match.messageTime > 0 || match.over,
@@ -1408,6 +1411,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.finishEventSent = false;
     match.playerGoals = 0;
     match.playerSteals = 0;
+    match.blueHoldSec = 0;
+    match.redHoldSec = 0;
     match.announcedFinal30 = false;
     match.announcedFinal10 = false;
     match.breakawayCooldown = 0;
@@ -2267,6 +2272,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
             }
             showMessage(winner, "Можно начать новый матч.", 999);
           }
+        }
+        if (!match.over) {
+          if (kokpar.holder?.team === "blue") match.blueHoldSec += dt;
+          else if (kokpar.holder?.team === "red") match.redHoldSec += dt;
         }
         updateThrowCharge(dt);
 

@@ -11680,6 +11680,14 @@ body,
   background: #f0c347;
   box-shadow: 0 0 12px rgba(240,195,71,.8);
 }
+.nh-serke-diamond.blue-hold {
+  background: #3aabee;
+  box-shadow: 0 0 12px rgba(58,171,238,.7);
+}
+.nh-serke-diamond.red-hold {
+  background: #c73e34;
+  box-shadow: 0 0 12px rgba(199,62,52,.7);
+}
 
 .nh-serke-bar {
   display: flex;
