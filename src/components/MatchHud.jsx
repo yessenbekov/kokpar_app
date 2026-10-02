@@ -14,6 +14,7 @@ export function MatchHud({
 }) {
   const [paused, setPausedState] = useState(false);
   const [showInGameSettings, setShowInGameSettings] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const [sfxVol, setSfxVol] = useState(settings.sfxVol ?? 78);
   const [musicVol, setMusicVol] = useState(settings.musicVol ?? 42);
@@ -34,9 +35,9 @@ export function MatchHud({
     : meterMode === "tug" ? Math.round(hud.tugPower * 100)
     : staminaPct;
 
-  function handlePause() { setPausedState(true); setShowInGameSettings(false); }
-  function handleResume() { setPausedState(false); setShowInGameSettings(false); }
-  function handleQuit() { setPausedState(false); setShowInGameSettings(false); onQuitMatch?.(); }
+  function handlePause() { setPausedState(true); setShowInGameSettings(false); setShowExitConfirm(false); }
+  function handleResume() { setPausedState(false); setShowInGameSettings(false); setShowExitConfirm(false); }
+  function handleQuit() { setPausedState(false); setShowInGameSettings(false); setShowExitConfirm(false); onQuitMatch?.(); }
 
   function saveSetting(key, value) { onSettingChange?.(key, value); }
 
@@ -125,27 +126,30 @@ export function MatchHud({
           <button className="nh-action-btn nh-action-amber" type="button">
             <span className="nh-action-amber-icon" />
             {t("Поднять серке", "Серкені көтеру", "Pick up")}
+            <kbd className="nh-action-key">Space</kbd>
           </button>
-          <button className="nh-action-btn nh-action-dark" type="button">
-            {t("Рывок", "Ұмтылу", "Dash")}
-            {hud.bodyCheckCooldown > 0 && (
-              <span className="nh-action-cooldown">
-                {(hud.bodyCheckCooldown * 1.45).toFixed(1)}с
-              </span>
-            )}
-          </button>
-        </div>
-
-        <div className="nh-stamina-circle-wrap">
-          <svg className="nh-stamina-svg" viewBox="0 0 62 62" width="62" height="62">
-            <circle className="nh-sc-track" cx="31" cy="31" r="26" />
-            <circle
-              className={`nh-sc-fill${meterMode === "throw" ? " throw" : meterMode === "tug" ? " tug" : ""}`}
-              cx="31" cy="31" r="26"
-              strokeDasharray={`${activePct * 1.634} 163.4`}
-            />
-          </svg>
-          <span className="nh-stamina-pct">{activePct}</span>
+          <div className="nh-actions-row2">
+            <button className="nh-action-btn nh-action-dark" type="button">
+              {t("Рывок", "Ұмтылу", "Dash")}
+              {hud.bodyCheckCooldown > 0 && (
+                <span className="nh-action-cooldown">
+                  {(hud.bodyCheckCooldown * 1.45).toFixed(1)}с
+                </span>
+              )}
+              <kbd className="nh-action-key">E</kbd>
+            </button>
+            <div className="nh-stamina-circle-wrap">
+              <svg className="nh-stamina-svg" viewBox="0 0 62 62" width="62" height="62">
+                <circle className="nh-sc-track" cx="31" cy="31" r="26" />
+                <circle
+                  className={`nh-sc-fill${meterMode === "throw" ? " throw" : meterMode === "tug" ? " tug" : ""}`}
+                  cx="31" cy="31" r="26"
+                  strokeDasharray={`${activePct * 1.634} 163.4`}
+                />
+              </svg>
+              <span className="nh-stamina-pct">{activePct}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -175,10 +179,23 @@ export function MatchHud({
                   {t("Камера", "Камера", "Camera")}
                 </button>
               </div>
-              <button className="nh-pause-btn nh-pause-red" type="button" onClick={handleQuit}>
+              <button className="nh-pause-btn nh-pause-red" type="button" onClick={() => setShowExitConfirm(true)}>
                 {t("Покинуть матч", "Матчтан шығу", "Quit Match")}
               </button>
             </div>
+            {showExitConfirm && (
+              <div className="nh-exit-confirm">
+                <span className="nh-exit-status">{t("ПОДТВЕРЖДЕНИЕ", "РАСТАУ", "CONFIRM")}</span>
+                <div className="nh-exit-title">{t("Выйти из матча?", "Матчтан шығу?", "Quit Match?")}</div>
+                <p className="nh-exit-sub">{t("Матч зачтётся как поражение, награда за раунд не начислится.", "Матч жеңіліс деп есептеледі, раунд сыйлығы берілмейді.", "The match counts as a loss. Round reward won't be awarded.")}</p>
+                <button className="nh-exit-confirm-btn nh-exit-stay" type="button" onClick={() => setShowExitConfirm(false)}>
+                  {t("Остаться", "Қалу", "Stay")}
+                </button>
+                <button className="nh-exit-confirm-btn nh-exit-quit" type="button" onClick={handleQuit}>
+                  {t("Выйти в меню", "Менюге шығу", "Exit to Menu")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

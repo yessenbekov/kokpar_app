@@ -11530,13 +11530,9 @@ body,
   padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
             calc(148px + max(0px,env(safe-area-inset-bottom))) max(10px,env(safe-area-inset-left)) !important; }
 
-/* On mobile, hide the large Пауза/Выход text buttons and stamina circle */
+/* On mobile, hide the large Пауза/Выход text buttons */
 .nh-pause-top-btn,
 .nh-exit-top-btn {
-  display: none;
-}
-
-.nh-stamina-circle-wrap {
   display: none;
 }
 
@@ -11548,8 +11544,7 @@ body,
 @media (min-width: 900px) and (hover: hover) and (pointer: fine) {
   .nh-pause-top-btn { display: flex; }
   .nh-exit-top-btn { display: grid; }
-  .nh-stamina-circle-wrap { display: grid; }
-  /* On desktop (non-touch), show HUD action buttons */
+  /* On desktop (non-touch), show HUD action buttons (stamina circle is inside) */
   .nh-actions { display: flex !important; }
 }
 
@@ -11820,9 +11815,10 @@ body,
   pointer-events: auto;
 }
 
-/* Circular stamina gauge */
+/* Circular stamina gauge — shown when parent .nh-actions is visible */
 .nh-stamina-circle-wrap {
   position: relative;
+  flex-shrink: 0;
   width: 62px;
   height: 62px;
   display: grid;
@@ -11912,6 +11908,32 @@ body,
   color: rgba(214,178,110,.65);
 }
 
+.nh-action-key {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(242,226,184,.12);
+  border: 1px solid rgba(242,226,184,.2);
+  font: 700 10px/16px ui-monospace, Menlo, monospace;
+  color: rgba(242,226,184,.5);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.nh-action-amber .nh-action-key {
+  background: rgba(0,0,0,.15);
+  border-color: rgba(0,0,0,.25);
+  color: rgba(27,15,4,.55);
+}
+
+.nh-actions-row2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
 /* ── Pause overlay ── */
 .nh-overlay {
   position: absolute;
@@ -11963,15 +11985,56 @@ body,
   text-transform: uppercase;
 }
 
+.nh-exit-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: rgba(200,60,50,.25);
+  border: 1px solid rgba(200,60,50,.4);
+  font: 700 9px/1.4 Manrope, sans-serif;
+  letter-spacing: .08em;
+  color: rgba(255,160,150,.85);
+  text-transform: uppercase;
+}
+
 .nh-exit-title {
   font: 700 16px/1 Oswald, sans-serif;
   color: rgba(242,226,184,.9);
 }
 
 .nh-exit-sub {
-  font: 400 11px/1.4 Manrope, sans-serif;
+  margin: 0;
+  font: 400 11px/1.45 Manrope, sans-serif;
   color: rgba(242,226,184,.45);
 }
+
+.nh-exit-confirm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  font: 700 13px/1 Manrope, sans-serif;
+  cursor: pointer;
+  border: none;
+}
+
+.nh-exit-stay {
+  background: rgba(242,226,184,.1);
+  border: 1px solid rgba(242,226,184,.2);
+  color: rgba(242,226,184,.8);
+}
+
+.nh-exit-stay:active { background: rgba(242,226,184,.18); }
+
+.nh-exit-quit {
+  background: linear-gradient(150deg, #c73e34, #8c1d14);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(140,30,20,.4);
+}
+
+.nh-exit-quit:active { background: linear-gradient(150deg, #a02e26, #6a1510); }
 
 .nh-pause-score-row {
   display: flex;
