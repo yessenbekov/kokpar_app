@@ -132,6 +132,14 @@ export default function App() {
     if (authState.status === "signed-in") setSetupEntered(true);
   }, [authState.status]);
 
+  // When Supabase says profile is missing but we already have a local completed profile,
+  // auto-sync the local profile to Supabase rather than forcing re-onboarding
+  useEffect(() => {
+    if (needsOnboarding && (initialProfileRef.current.onboardingDone || profile.onboardingDone)) {
+      syncProfile(profile);
+    }
+  }, [needsOnboarding]);
+
   function setGameTouchInput(input) {
     gameRef.current?.setTouchInput?.(input);
   }
@@ -606,8 +614,9 @@ export default function App() {
 
   const isSetup = !activeSettings;
   const showAuthGate = isSetup && !setupEntered && authState.status !== "signed-in";
-  // Use localStorage initial read as primary truth — prevents re-showing onboarding after a session
-  const showOnboarding = isSetup && !showAuthGate && (needsOnboarding || (!initialProfileRef.current.onboardingDone && !profile.onboardingDone));
+  // Local profile truth beats remote state: if onboarding was ever done locally, never re-show it
+  const localOnboardingDone = initialProfileRef.current.onboardingDone || profile.onboardingDone;
+  const showOnboarding = isSetup && !showAuthGate && !localOnboardingDone;
 
   return (
     <ErrorBoundary>

@@ -11527,8 +11527,8 @@ body,
   display: flex !important; flex-direction: column !important; justify-content: space-between !important;
   grid-template-columns: none !important; gap: 0 !important; align-items: stretch !important;
   /* push nh-bottom above touch-controls (~140px tall on mobile) */
-  padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
-            calc(148px + max(0px,env(safe-area-inset-bottom))) max(10px,env(safe-area-inset-left)) !important; }
+  padding: max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right))
+            calc(152px + max(0px,env(safe-area-inset-bottom))) max(16px,env(safe-area-inset-left)) !important; }
 
 /* On mobile, hide the large Пауза/Выход text buttons */
 .nh-pause-top-btn,
