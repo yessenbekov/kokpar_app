@@ -606,7 +606,8 @@ export default function App() {
 
   const isSetup = !activeSettings;
   const showAuthGate = isSetup && !setupEntered && authState.status !== "signed-in";
-  const showOnboarding = isSetup && !showAuthGate && (needsOnboarding || !profile.onboardingDone);
+  // Use localStorage initial read as primary truth — prevents re-showing onboarding after a session
+  const showOnboarding = isSetup && !showAuthGate && (needsOnboarding || (!initialProfileRef.current.onboardingDone && !profile.onboardingDone));
 
   return (
     <ErrorBoundary>

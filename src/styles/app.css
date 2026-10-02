@@ -11540,13 +11540,16 @@ body,
   display: none;
 }
 
-/* Show them only on desktop */
+/* Desktop — non-touch only (hover:hover + pointer:fine = real mouse/keyboard) */
 @media (min-width: 900px) {
   .hud { padding-bottom: max(16px, env(safe-area-inset-bottom)) !important; }
+}
+
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
   .nh-pause-top-btn,
   .nh-exit-top-btn { display: flex; }
   .nh-stamina-circle-wrap { display: grid; }
-  /* On desktop, action buttons and stamina are visible */
+  /* On desktop (non-touch), show HUD action buttons */
   .nh-actions { display: flex !important; }
 }
 
