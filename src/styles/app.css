@@ -11546,8 +11546,8 @@ body,
 }
 
 @media (min-width: 900px) and (hover: hover) and (pointer: fine) {
-  .nh-pause-top-btn,
-  .nh-exit-top-btn { display: flex; }
+  .nh-pause-top-btn { display: flex; }
+  .nh-exit-top-btn { display: grid; }
   .nh-stamina-circle-wrap { display: grid; }
   /* On desktop (non-touch), show HUD action buttons */
   .nh-actions { display: flex !important; }
@@ -11767,7 +11767,6 @@ body,
 
 /* Пауза button (top right, text) */
 .nh-pause-top-btn {
-  display: flex;
   align-items: center;
   gap: 9px;
   height: 60px;
@@ -11797,7 +11796,6 @@ body,
 
 /* Выход button (top right, red) */
 .nh-exit-top-btn {
-  display: grid;
   place-items: center;
   height: 60px;
   padding: 0 18px;
@@ -11866,7 +11864,7 @@ body,
 
 /* Action buttons */
 .nh-actions {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: flex-end;
   gap: 11px;
