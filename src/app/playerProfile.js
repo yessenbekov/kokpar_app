@@ -157,7 +157,14 @@ export function sanitizePlayerProfile(value = {}) {
   const selectedHorse = selectedHorseById ?? selectedHorseByType ?? ownedHorses[0];
 
   const hasPlayedBefore = ownedHorses.some((h) => (h.record?.matches ?? 0) > 0);
-  const onboardingDone = value.onboardingDone === true ? true : hasPlayedBefore;
+  // If the user has a custom rider name (not default) and at least one horse, onboarding was completed
+  // even if the explicit flag is missing (e.g. saved before the flag was introduced)
+  const hasCustomProfile =
+    ownedHorses.length > 0 &&
+    typeof value.riderName === "string" &&
+    value.riderName.trim() !== "" &&
+    value.riderName.trim() !== DEFAULT_PLAYER_PROFILE.riderName;
+  const onboardingDone = value.onboardingDone === true ? true : hasPlayedBefore || hasCustomProfile;
 
   return {
     ...DEFAULT_PLAYER_PROFILE,
