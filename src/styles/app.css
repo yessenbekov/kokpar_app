@@ -13368,6 +13368,13 @@ body,
   text-transform: uppercase;
   box-shadow: 0 6px 20px rgba(208, 160, 48, .3);
   cursor: pointer;
+  transition: opacity .2s;
+}
+.ob-continue-btn--disabled,
+.ob-continue-btn:disabled {
+  opacity: .35;
+  cursor: default;
+  box-shadow: none;
 }
 
 .ob-skip-btn {

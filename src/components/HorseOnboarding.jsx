@@ -22,7 +22,7 @@ export function HorseOnboarding({ onComplete }) {
 
   function handleComplete() {
     try { localStorage.setItem("kokpar_lang", language); } catch {}
-    onComplete(selectedTypeId, horseName.trim() || null, riderName.trim() || null, selectedCoatId, language);
+    onComplete(selectedTypeId, horseName.trim(), riderName.trim(), selectedCoatId, language);
   }
 
   const lang = language;
@@ -32,7 +32,13 @@ export function HorseOnboarding({ onComplete }) {
     return ru;
   }
 
+  const canContinue =
+    step === 0 ? true :
+    step === 1 ? riderName.trim().length > 0 :
+    horseName.trim().length > 0;
+
   function next() {
+    if (!canContinue) return;
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
     else handleComplete();
   }
@@ -192,14 +198,14 @@ export function HorseOnboarding({ onComplete }) {
       )}
 
       <div className="ob-footer">
-        <button className="ob-continue-btn" type="button" onClick={next}>
+        <button
+          className={`ob-continue-btn${!canContinue ? " ob-continue-btn--disabled" : ""}`}
+          type="button"
+          onClick={next}
+          disabled={!canContinue}
+        >
           {step < TOTAL_STEPS - 1 ? tl("Продолжить", "Жалғастыру", "Continue") : tl("Начать путь", "Жолды бастау", "Start journey")}
         </button>
-        {step === 0 && (
-          <button className="ob-skip-btn" type="button" onClick={handleComplete}>
-            {tl("Пропустить", "Өткізіп жіберу", "Skip")}
-          </button>
-        )}
         {step > 0 && (
           <button className="ob-skip-btn" type="button" onClick={() => setStep((s) => s - 1)}>
             ‹ {tl("Назад", "Артқа", "Back")}

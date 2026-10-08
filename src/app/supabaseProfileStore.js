@@ -2,6 +2,8 @@ import { DEFAULT_PLAYER_PROFILE, sanitizePlayerProfile } from "./playerProfile.j
 import { supabase } from "./supabaseClient.js";
 
 function profileFromRows(profileRow, horseRows = []) {
+  // onboardingDone is stored inside match_preferences JSONB (no extra column needed)
+  const { onboardingDone: remoteOnboardingDone, ...matchPrefs } = profileRow.match_preferences ?? {};
   return sanitizePlayerProfile({
     riderName: profileRow.rider_name,
     level: profileRow.level,
@@ -11,7 +13,8 @@ function profileFromRows(profileRow, horseRows = []) {
     selectedHorseType: profileRow.selected_horse_type,
     stableCapacity: profileRow.stable_capacity,
     inventory: profileRow.inventory ?? [],
-    matchPreferences: profileRow.match_preferences,
+    onboardingDone: remoteOnboardingDone === true,
+    matchPreferences: matchPrefs,
     ownedHorses: (horseRows ?? []).map((horse) => ({
       id: horse.id,
       name: horse.name,
@@ -36,7 +39,7 @@ function profileRowFromProfile(profile, userId) {
     selected_horse_type: profile.selectedHorseType,
     stable_capacity: profile.stableCapacity,
     inventory: profile.inventory ?? [],
-    match_preferences: profile.matchPreferences
+    match_preferences: { onboardingDone: profile.onboardingDone === true, ...profile.matchPreferences }
   };
 }
 
