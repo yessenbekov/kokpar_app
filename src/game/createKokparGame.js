@@ -122,7 +122,25 @@ const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", 
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
 const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null, aiSpeedScale = 1, aiAccelScale = 1) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null, aiSpeedScale = 1, aiAccelScale = 1, soloOnly = false) {
+  if (soloOnly) {
+    return [
+      createRider({
+        name: BLUE_RIDER_NAMES[0],
+        team: TEAM.blue,
+        human: true,
+        x: STARTING_RIDER_SPOTS[0][0],
+        z: STARTING_RIDER_SPOTS[0][1],
+        color: COLORS.blue,
+        horseType: playerHorseType,
+        horseName: playerHorseName,
+        coatId: playerCoatId,
+        aiSpeedScale: 1,
+        aiAccelScale: 1
+      })
+    ];
+  }
+
   const riders = [];
   const size = clamp(Math.round(teamSize), 1, 5);
 
@@ -309,7 +327,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
 
-  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale, isTraining);
   const player = riders.find(r => r.human) ?? riders[0];
 
   // Apply equipment bonuses to the human player's stats
@@ -692,7 +710,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     resetPositions();
     beginCountdown(
       isTraining ? "Тренировка" : "На старт",
-      isTraining ? "Свободный заезд. Отрабатывай подборы и броски." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
+      isTraining ? "Поле твоё. Езди, подбирай серке и бросай куда хочешь." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
     );
     updateStadiumPresentation();
     publishHud(true);
@@ -1260,6 +1278,29 @@ export function createKokparGame(container, onHudChange, options = {}) {
       holderTeam: kokpar.holder?.team ?? null,
       flightTeam: kokpar.flightTeam ?? null
     });
+
+    if (isTraining) {
+      kokpar.x = CENTER_MARK.x;
+      kokpar.y = LOOSE_SERKE_HEIGHT;
+      kokpar.z = CENTER_MARK.z;
+      kokpar.vx = 0;
+      kokpar.vy = 0;
+      kokpar.vz = 0;
+      kokpar.holder = null;
+      kokpar.passTarget = null;
+      kokpar.flightTeam = null;
+      kokpar.flightScorer = null;
+      kokpar.flightTime = 0;
+      kokpar.lastThrowHuman = false;
+      kokpar.throwCharging = false;
+      kokpar.throwCharge = 0;
+      kokpar.throwAimOffset = 0;
+      kokpar.looseCooldown = 0.5;
+      clearContest();
+      beginCountdown("Серке за пределами поля", "Серке возвращён в центр.");
+      return;
+    }
+
     const blueDuelRider =
       riders.find((rider) => rider.team === TEAM.blue && rider.human) ??
       riders.find((rider) => rider.team === TEAM.blue);
@@ -1426,7 +1467,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     resetPositions();
     beginCountdown(
       isTraining ? "Тренировка" : "Новый матч",
-      isTraining ? "Свободный заезд. Отрабатывай подборы и броски." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
+      isTraining ? "Поле твоё. Езди, подбирай серке и бросай куда хочешь." : "Серке лежит на дальней стороне поля. Двигайся в своей зоне."
     );
   }
 
