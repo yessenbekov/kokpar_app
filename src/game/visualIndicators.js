@@ -158,6 +158,106 @@ export function createMountedTensionGuide() {
   return group;
 }
 
+function roundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+export function createSerkeHighlight() {
+  const group = new THREE.Group();
+
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: "#f0c347",
+    transparent: true,
+    opacity: 0.72,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+  const discMat = new THREE.MeshBasicMaterial({
+    color: "#f0c347",
+    transparent: true,
+    opacity: 0.14,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.2, 52), ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.06;
+  group.add(ring);
+
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(2.4, 52), discMat);
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.05;
+  group.add(disc);
+
+  // Floating label sprite
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 72;
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMat = new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(5.5, 1.25, 1);
+  sprite.position.y = 5.2;
+  group.add(sprite);
+
+  group.visible = false;
+  group.renderOrder = 2;
+  group.userData.ring = ring;
+  group.userData.disc = disc;
+  group.userData.sprite = sprite;
+  group.userData.canvas = canvas;
+  group.userData.texture = texture;
+  group.userData.lastDist = -1;
+  return group;
+}
+
+export function updateSerkeLabel(highlight, distanceM) {
+  const rounded = Math.round(distanceM);
+  if (rounded === highlight.userData.lastDist) return;
+  highlight.userData.lastDist = rounded;
+
+  const canvas = highlight.userData.canvas;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Background pill
+  ctx.fillStyle = "rgba(18, 10, 3, 0.90)";
+  roundedRect(ctx, 8, 6, w - 16, h - 12, (h - 12) / 2);
+  ctx.fill();
+
+  // Thin gold border
+  ctx.strokeStyle = "rgba(240,195,71,0.45)";
+  ctx.lineWidth = 1.5;
+  roundedRect(ctx, 8, 6, w - 16, h - 12, (h - 12) / 2);
+  ctx.stroke();
+
+  // Diamond
+  ctx.fillStyle = "#f0c347";
+  ctx.font = "bold 24px sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  ctx.fillText("◆", 26, h / 2);
+
+  // Label text
+  ctx.fillStyle = "#f7ecd0";
+  ctx.font = "bold 22px Oswald, Arial, sans-serif";
+  ctx.fillText(`СЕРКЕ  ${rounded} М`, 60, h / 2);
+
+  highlight.userData.texture.needsUpdate = true;
+}
+
 export function createBodyCheckImpactMarker() {
   const group = new THREE.Group();
   const material = new THREE.MeshBasicMaterial({

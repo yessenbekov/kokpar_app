@@ -23,7 +23,9 @@ import {
   createMountedTensionGuide,
   createPlayerArrowMarker,
   createPlayerGroundMarker,
-  createRiderRoleMarker
+  createRiderRoleMarker,
+  createSerkeHighlight,
+  updateSerkeLabel
 } from "./visualIndicators.js";
 import { clamp, distance2D, normalize2D, rotate2D, angleDelta, formatTime, forwardVector } from "./mathUtils.js";
 import { createGroundDetails, createArenaEnvironment } from "./arenaBuilder.js";
@@ -403,6 +405,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const serkeGlowLight = new THREE.PointLight(0xffe888, 0, 14, 2);
   serkeGlowLight.name = "serkeGlow";
   scene.add(serkeGlowLight);
+
+  const serkeHighlight = createSerkeHighlight();
+  scene.add(serkeHighlight);
 
   const carryStrap = new THREE.Mesh(
     new THREE.CylinderGeometry(0.045, 0.045, 1, 8),
@@ -2078,6 +2083,21 @@ export function createKokparGame(container, onHudChange, options = {}) {
       serkeGlowLight.intensity += (targetIntensity - serkeGlowLight.intensity) * Math.min(1, dt * 6);
       serkeGlowLight.color.set(loose ? 0xffe888 : 0xff9944);
       serkeGlowLight.position.set(kokpar.mesh.position.x, kokpar.mesh.position.y + 1.2, kokpar.mesh.position.z);
+
+      // Ground ring + floating label: show when player does NOT hold the serke
+      if (heldByPlayer) {
+        serkeHighlight.visible = false;
+      } else {
+        serkeHighlight.visible = true;
+        serkeHighlight.position.set(kokpar.mesh.position.x, 0, kokpar.mesh.position.z);
+        // Pulse ring opacity
+        const pulse = 0.55 + Math.sin(time * 3.5) * 0.15;
+        serkeHighlight.userData.ring.material.opacity = pulse;
+        serkeHighlight.userData.disc.material.opacity = pulse * 0.22;
+        // Label: distance from player to serke
+        const dist = Math.hypot(kokpar.x - player.x, kokpar.z - player.z);
+        updateSerkeLabel(serkeHighlight, dist);
+      }
     }
 
     carryStrap.visible = Boolean(kokpar.holder);
