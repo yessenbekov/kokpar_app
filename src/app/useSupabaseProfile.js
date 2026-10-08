@@ -50,23 +50,46 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       const result = await supabaseProfileStore.read();
 
       if (result.status === "missing") {
-        // New user — trigger onboarding instead of auto-saving
-        loadedUserIdRef.current = user.id;
-        pendingUserRef.current = user;
-        setAuthState({
-          status: "signed-in",
-          syncStatus: "synced",
-          email: user.email ?? "",
-          phone: user.phone ?? "",
-          phoneChannel: "sms",
-          message: "Добро пожаловать!",
-          error: "",
-          needsOnboarding: true
-        });
+        const localProfile = playerProfileStore.read();
+        if (localProfile.onboardingDone) {
+          // Local profile is complete — sync it to Supabase, skip onboarding
+          loadedUserIdRef.current = user.id;
+          pendingUserRef.current = user;
+          try { await supabaseProfileStore.save(localProfile); } catch { /* ignore */ }
+          onProfileLoadedRef.current?.(localProfile);
+          setAuthState({
+            status: "signed-in",
+            syncStatus: "synced",
+            email: user.email ?? "",
+            phone: user.phone ?? "",
+            phoneChannel: "sms",
+            message: "Профиль синхронизирован",
+            error: "",
+            needsOnboarding: false
+          });
+        } else {
+          // Genuinely new user — show onboarding
+          loadedUserIdRef.current = user.id;
+          pendingUserRef.current = user;
+          setAuthState({
+            status: "signed-in",
+            syncStatus: "synced",
+            email: user.email ?? "",
+            phone: user.phone ?? "",
+            phoneChannel: "sms",
+            message: "Добро пожаловать!",
+            error: "",
+            needsOnboarding: true
+          });
+        }
         return;
       }
 
-      const profile = playerProfileStore.save(result.profile);
+      // Preserve local onboardingDone — remote profile may not have it if it was
+      // saved before onboarding completed, causing the onboarding to re-show on next load.
+      const localDone = playerProfileStore.read().onboardingDone;
+      const merged = localDone ? { ...result.profile, onboardingDone: true } : result.profile;
+      const profile = playerProfileStore.save(merged);
       loadedUserIdRef.current = user.id;
       onProfileLoadedRef.current?.(profile);
       setAuthState({
