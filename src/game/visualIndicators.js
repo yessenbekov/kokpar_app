@@ -176,14 +176,14 @@ export function createSerkeHighlight() {
   const group = new THREE.Group();
 
   const ringMat = new THREE.MeshBasicMaterial({
-    color: "#ffee00",
+    color: "#39ff14",
     transparent: true,
     opacity: 0.92,
     depthWrite: false,
     side: THREE.DoubleSide
   });
   const discMat = new THREE.MeshBasicMaterial({
-    color: "#ffee00",
+    color: "#39ff14",
     transparent: true,
     opacity: 0.28,
     depthWrite: false,
