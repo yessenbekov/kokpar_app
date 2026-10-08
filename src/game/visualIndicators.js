@@ -176,21 +176,21 @@ export function createSerkeHighlight() {
   const group = new THREE.Group();
 
   const ringMat = new THREE.MeshBasicMaterial({
-    color: "#f0c347",
+    color: "#ffee00",
     transparent: true,
-    opacity: 0.72,
+    opacity: 0.92,
     depthWrite: false,
     side: THREE.DoubleSide
   });
   const discMat = new THREE.MeshBasicMaterial({
-    color: "#f0c347",
+    color: "#ffee00",
     transparent: true,
-    opacity: 0.14,
+    opacity: 0.28,
     depthWrite: false,
     side: THREE.DoubleSide
   });
 
-  const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.2, 52), ringMat);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.5, 52), ringMat);
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.06;
   group.add(ring);
