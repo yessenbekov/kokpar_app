@@ -1900,7 +1900,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
         bodyCheckPose * 0.09 +
         contactLean +
         turnPose * Math.sign(rider.lean || reachSide) * 0.08 +
-        reachSide * pickupPose * 0.11 -
+        reachSide * pickupPose * 0.30 -
         reachSide * pullPose * 0.08;
       rider.group.scale.setScalar(scale);
 
@@ -1981,19 +1981,19 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
         part.mesh.rotation.x =
           part.baseRotationX -
-          pickupPose * (0.34 + posePower * 0.06) -
+          pickupPose * (0.58 + posePower * 0.06) -
           pullPose * 0.12 -
           bodyCheckPose * 0.14 -
           bodyCheckRecoveryPose * 0.08 -
           throwPose * 0.1;
         part.mesh.rotation.z =
           part.baseRotationZ +
-          reachSide * pickupPose * 0.1 +
+          reachSide * pickupPose * 0.30 +
           pullPose * tugDirection * 0.12 +
           bodyCheckPose * 0.08 +
           bodyCheckRecoveryPose * 0.06 +
           throwPose * (throwSide * 0.1 + throwAimLean * 0.08);
-        part.mesh.position.y = part.baseY - pickupPose * 0.2 - pullPose * 0.03 + throwPose * 0.03;
+        part.mesh.position.y = part.baseY - pickupPose * 0.44 - pullPose * 0.03 + throwPose * 0.03;
       });
 
       arms.forEach((arm) => {
