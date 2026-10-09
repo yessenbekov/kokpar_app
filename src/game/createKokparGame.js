@@ -816,10 +816,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (contactSystem.isBodyCheckActive(player)) return "Силовой прием";
     if (kokpar.holder === player) {
       if (kokpar.throwCharging) return `Сила ${Math.round(kokpar.throwCharge * 100)}%`;
-      if (canThrowAtTarget(player)) return "Удерживай Space";
-      const passTarget = findPassTarget(player);
-      if (passTarget) return `Space — пас → ${passTarget.name}`;
-      return "Кокпар у тебя";
+      return canThrowAtTarget(player) ? "Удерживай Space" : "Удерживай Space — бросок";
     }
     if (kokpar.holder) return `${kokpar.holder.name} держит`;
     return "Кокпар на поле";
@@ -1049,8 +1046,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       touchInput.action = nextInput.action;
 
       if (touchInput.action && !wasActionPressed && kokpar.holder === player) {
-        if (!canThrowAtTarget(player)) attemptPass(player);
-        else startThrowCharge(player);
+        startThrowCharge(player);
       } else if (!touchInput.action && wasActionPressed) {
         releaseThrowCharge(player);
       }
@@ -2249,10 +2245,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return;
     }
     if (key === " " && !event.repeat && kokpar.holder === player) {
-      if (!canThrowAtTarget(player) && attemptPass(player)) {
-        keys.delete(key);
-        return;
-      }
       if (startThrowCharge(player)) {
         keys.delete(key);
         return;

@@ -51,19 +51,6 @@ export function createThrowSystem({
     if (match.phase !== "live" || match.over) return false;
     if (kokpar.holder !== rider || rider.throwCooldown > 0 || kokpar.contest.active) return false;
 
-    const distanceToGoal = goalDistanceFor(rider);
-    if (distanceToGoal > scoreRadius + THROW_READY_EXTRA_RADIUS) {
-      if (distanceToGoal <= scoreRadius + THROW_HINT_EXTRA_RADIUS) {
-        rider.throwCooldown = 0.45;
-        showMessage(
-          "Еще ближе",
-          `Подведи коня к ${targetName()}у и удерживай Space для броска.`,
-          1.1
-        );
-      }
-      return false;
-    }
-
     kokpar.throwCharging = true;
     kokpar.throwCharge = Math.max(kokpar.throwCharge, 0.16);
     kokpar.throwAimOffset = 0;
@@ -111,21 +98,33 @@ export function createThrowSystem({
     const startX = rider.x + forward.x * 1.15 + side.x * carrySide * 1.05;
     const startZ = rider.z + forward.z * 1.15 + side.z * carrySide * 1.05;
     const target = scoringGoalFor(rider.team);
-    const toGoal = normalize2D(target.x - startX, target.z - startZ);
-    const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
-    const aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
-    const throwDistance = Math.hypot(target.x - startX, target.z - startZ);
+    const goalDistance = Math.hypot(target.x - startX, target.z - startZ);
+    const nearGoal = goalDistance <= scoreRadius + THROW_READY_EXTRA_RADIUS;
     const riderSpeed = Math.hypot(rider.vx, rider.vz);
     const power = clamp(chargePower, 0.2, 1);
     const powerScale = 0.62 + power * 0.58;
-    const throwSpeed = clamp((throwDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
+
+    let aim, effectiveDistance;
+    if (nearGoal) {
+      const toGoal = normalize2D(target.x - startX, target.z - startZ);
+      const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
+      aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
+      effectiveDistance = goalDistance;
+    } else {
+      const sideAim = { x: -forward.z, z: forward.x };
+      const offsetFactor = Math.tan(clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
+      aim = normalize2D(forward.x + sideAim.x * offsetFactor, forward.z + sideAim.z * offsetFactor);
+      effectiveDistance = 22;
+    }
+
+    const throwSpeed = clamp((effectiveDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
 
     return {
       x: startX,
       y: CARRIED_SERKE_HEIGHT + 0.22,
       z: startZ,
       vx: aim.x * throwSpeed + rider.vx * 0.18,
-      vy: (4.1 + clamp(throwDistance / 10, 0, 2.1)) * (0.75 + power * 0.55),
+      vy: (4.1 + clamp(effectiveDistance / 10, 0, 2.1)) * (0.75 + power * 0.55),
       vz: aim.z * throwSpeed + rider.vz * 0.18
     };
   }
@@ -134,22 +133,6 @@ export function createThrowSystem({
     if (match.phase !== "live" || match.over) return false;
     if (kokpar.holder !== rider || rider.throwCooldown > 0) return false;
     if (kokpar.contest.active) return false;
-
-    const distanceToGoal = goalDistanceFor(rider);
-    const readyDistance = scoreRadius + THROW_READY_EXTRA_RADIUS;
-    const shouldHint = active && rider.human && distanceToGoal <= scoreRadius + THROW_HINT_EXTRA_RADIUS;
-
-    if (distanceToGoal > readyDistance) {
-      if (shouldHint) {
-        rider.throwCooldown = 0.45;
-        showMessage(
-          "Еще ближе",
-          `Подведи коня к ${targetName()}у и нажми Space для броска.`,
-          1.1
-        );
-      }
-      return false;
-    }
 
     const throwPlan = calculateThrowPlan(rider, chargePower, aimOffset);
 
