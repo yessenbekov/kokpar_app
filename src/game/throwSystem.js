@@ -104,28 +104,29 @@ export function createThrowSystem({
     const power = clamp(chargePower, 0.2, 1);
     const powerScale = 0.62 + power * 0.58;
 
-    let aim, effectiveDistance;
+    let aim, throwSpeed, vy;
     if (nearGoal) {
       const toGoal = normalize2D(target.x - startX, target.z - startZ);
       const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
       aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
-      effectiveDistance = goalDistance;
+      throwSpeed = clamp((goalDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
+      vy = (4.1 + clamp(goalDistance / 10, 0, 2.1)) * (0.75 + power * 0.55);
     } else {
+      // Free throw: distance is driven by rider momentum — standing still = short lob only
       const sideAim = { x: -forward.z, z: forward.x };
       const offsetFactor = Math.tan(clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
       aim = normalize2D(forward.x + sideAim.x * offsetFactor, forward.z + sideAim.z * offsetFactor);
-      effectiveDistance = 22;
+      throwSpeed = clamp(riderSpeed * 1.55 + power * 5, THROW_MIN_SPEED * 0.22, THROW_MAX_SPEED * 1.1);
+      vy = (2.2 + riderSpeed * 0.12) * (0.7 + power * 0.5);
     }
-
-    const throwSpeed = clamp((effectiveDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
 
     return {
       x: startX,
       y: CARRIED_SERKE_HEIGHT + 0.22,
       z: startZ,
-      vx: aim.x * throwSpeed + rider.vx * 0.18,
-      vy: (4.1 + clamp(effectiveDistance / 10, 0, 2.1)) * (0.75 + power * 0.55),
-      vz: aim.z * throwSpeed + rider.vz * 0.18
+      vx: aim.x * throwSpeed + rider.vx * 0.22,
+      vy,
+      vz: aim.z * throwSpeed + rider.vz * 0.22
     };
   }
 
