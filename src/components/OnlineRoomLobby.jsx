@@ -501,7 +501,7 @@ export function OnlineRoomLobby({
                 </button>
               </form>
 
-              <button type="button" className="wizard-back-btn" onClick={() => setLobbyView("choose")}>← Назад</button>
+              <button type="button" className="wizard-back-btn" onClick={() => setLobbyView("choose")}>‹</button>
             </div>
           )}
         </>
