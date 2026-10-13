@@ -250,6 +250,24 @@ export const onlineRoomStore = {
     if (error) throw queryError(error, "Не удалось выйти из комнаты");
   },
 
+  async updateSettings(roomId, updates) {
+    if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
+
+    const user = await currentUser();
+    const row = {};
+
+    if (updates.teamSize) row.team_size = updates.teamSize;
+    if (updates.goalType) row.goal_type = updates.goalType;
+    if (updates.matchMinutes) row.match_minutes = updates.matchMinutes;
+
+    if (Object.keys(row).length === 0) return fetchRoom(roomId);
+
+    const { error } = await supabase.from("online_rooms").update(row).eq("id", roomId).eq("host_user_id", user.id);
+    if (error) throw queryError(error, "Не удалось обновить настройки комнаты");
+
+    return fetchRoom(roomId);
+  },
+
   async kick(roomId, targetUserId) {
     if (!isSupabaseConfigured || !supabase) throw new Error("Supabase не настроен");
 

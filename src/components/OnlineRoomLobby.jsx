@@ -330,6 +330,11 @@ export function OnlineRoomLobby({
     await runRoomAction(() => onlineRoomStore.updatePlayer(room.id, { ready: !currentPlayer.ready }));
   }
 
+  async function updateRoomSetting(key, value) {
+    if (!room?.id || !isHost) return;
+    await runRoomAction(() => onlineRoomStore.updateSettings(room.id, { [key]: value }));
+  }
+
   async function kickPlayer(userId) {
     if (!room?.id || !isHost) return;
     await runRoomAction(() => onlineRoomStore.kick(room.id, userId));
@@ -407,18 +412,36 @@ export function OnlineRoomLobby({
       </div>
 
       <div className="lobby-summary">
-        <span>
-          <Users size={15} strokeWidth={2.4} />
-          {roomSettings.teamSize}×{roomSettings.teamSize}
-        </span>
-        <span>
-          <CircleDot size={15} strokeWidth={2.4} />
-          {goalLabel(roomSettings.goalType)}
-        </span>
-        <span>
-          <Shield size={15} strokeWidth={2.4} />
-          {roomSettings.matchMinutes}:00
-        </span>
+        {isHost && room ? (
+          <button type="button" className="lobby-summary-btn" disabled={busy}
+            onClick={() => { const s = [3,4,5]; updateRoomSetting("teamSize", s[(s.indexOf(roomSettings.teamSize)+1)%s.length]); }}>
+            <Users size={15} strokeWidth={2.4} />
+            {roomSettings.teamSize}×{roomSettings.teamSize}
+            <span className="lobby-summary-edit">▾</span>
+          </button>
+        ) : (
+          <span><Users size={15} strokeWidth={2.4} />{roomSettings.teamSize}×{roomSettings.teamSize}</span>
+        )}
+        {isHost && room ? (
+          <button type="button" className="lobby-summary-btn" disabled={busy}
+            onClick={() => updateRoomSetting("goalType", roomSettings.goalType === "circle" ? "kazan" : "circle")}>
+            <CircleDot size={15} strokeWidth={2.4} />
+            {goalLabel(roomSettings.goalType)}
+            <span className="lobby-summary-edit">▾</span>
+          </button>
+        ) : (
+          <span><CircleDot size={15} strokeWidth={2.4} />{goalLabel(roomSettings.goalType)}</span>
+        )}
+        {isHost && room ? (
+          <button type="button" className="lobby-summary-btn" disabled={busy}
+            onClick={() => { const t = [2,3,5]; updateRoomSetting("matchMinutes", t[(t.indexOf(roomSettings.matchMinutes)+1)%t.length]); }}>
+            <Shield size={15} strokeWidth={2.4} />
+            {roomSettings.matchMinutes}:00
+            <span className="lobby-summary-edit">▾</span>
+          </button>
+        ) : (
+          <span><Shield size={15} strokeWidth={2.4} />{roomSettings.matchMinutes}:00</span>
+        )}
       </div>
 
       {!room ? (

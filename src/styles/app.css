@@ -13900,3 +13900,44 @@ body,
 
 /* Countdown */
 .lobby-countdown { color: #f0c347 !important; text-shadow: 0 0 40px rgba(240,195,71,0.55) !important; }
+
+/* ── Lobby summary editable pills (host) ── */
+.lobby-summary-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  background: rgba(14, 8, 2, 0.75);
+  border: 1px solid rgba(190, 148, 60, 0.28);
+  border-radius: 8px;
+  color: rgba(214, 178, 110, 0.88);
+  font: 850 12px/1 Manrope, sans-serif;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.lobby-summary-btn:hover:not(:disabled) {
+  background: rgba(36, 22, 6, 0.92);
+  border-color: rgba(210, 160, 48, 0.55);
+  color: #f0c347;
+}
+.lobby-summary-btn:disabled { opacity: 0.5; cursor: default; }
+.lobby-summary-edit {
+  font-size: 9px;
+  opacity: 0.55;
+  margin-left: 1px;
+}
+
+/* ── Leave button — make it visible as active ── */
+.ready-button.secondary {
+  background: rgba(50, 28, 8, 0.85) !important;
+  border: 1px solid rgba(155, 118, 42, 0.38) !important;
+  color: rgba(214, 178, 110, 0.85) !important;
+}
+.ready-button.secondary:hover:not(:disabled) {
+  background: rgba(72, 40, 10, 0.95) !important;
+  border-color: rgba(200, 150, 50, 0.55) !important;
+  color: #f0c347 !important;
+}
