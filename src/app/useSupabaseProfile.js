@@ -246,7 +246,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
     setAuthState((current) => ({ ...current, status: "sending", message: "Отправляем письмо", error: "" }));
 
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: window.location.origin
+      redirectTo: window.location.origin + "/"
     });
 
     setAuthState((current) => ({
@@ -480,7 +480,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
     }
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin }
+      options: { redirectTo: window.location.origin + "/" }
     });
   }
 
