@@ -26,12 +26,13 @@ function inviteLink(room) {
 function LobbyPlayer({ player, current, host, onKick }) {
   return (
     <li className={current ? "lobby-player current" : "lobby-player"}>
-      <span>
+      <span className="lobby-player-avatar">{player.riderName.slice(0, 1)}</span>
+      <span style={{ flex: 1, minWidth: 0 }}>
         <strong>{player.riderName}</strong>
         <small>{player.horseName}</small>
       </span>
-      {host && <Crown size={15} strokeWidth={2.5} />}
-      {player.ready && <Check size={15} strokeWidth={2.5} />}
+      {host && <Crown size={14} strokeWidth={2.5} style={{ color: "#f0c347", flexShrink: 0 }} />}
+      {player.ready && <Check size={14} strokeWidth={2.5} style={{ color: "#7ed47e", flexShrink: 0 }} />}
       {onKick && (
         <button className="lobby-kick" type="button" onClick={onKick} aria-label={`Кикнуть ${player.riderName}`}>
           <X size={13} strokeWidth={2.5} />
