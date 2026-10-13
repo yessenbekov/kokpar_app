@@ -12892,7 +12892,7 @@ body,
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: #120a02;
+  background: #120a02 url("/images/modes/home-bg.webp") center 20% / cover no-repeat;
   color: #f2e2b8;
 }
 
