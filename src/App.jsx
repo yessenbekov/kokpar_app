@@ -18,13 +18,11 @@ import { MatchReward } from "./components/MatchReward.jsx";
 import { TutorialHints } from "./components/TutorialHints.jsx";
 import { MatchSetup } from "./components/MatchSetup.jsx";
 import { TouchControls } from "./components/TouchControls.jsx";
+import PwaInstallBanner from "./components/PwaInstallBanner.jsx";
 import { createKokparGame } from "./game/createKokparGame.js";
 
 const JOYSTICK_RADIUS = 46;
 
-const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isInStandaloneMode = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-const showIosHint = isIos && !isInStandaloneMode && !localStorage.getItem("kokpar_ios_hint_dismissed");
 
 export default function App() {
   const mountRef = useRef(null);
@@ -34,7 +32,7 @@ export default function App() {
   const initialProfileRef = useRef(null);
   if (!initialProfileRef.current) initialProfileRef.current = playerProfileStore.read();
   const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
-  const [iosHint, setIosHint] = useState(showIosHint);
+
   const [profile, setProfile] = useState(() => initialProfileRef.current);
   const [settings, setSettings] = useState(() => readUrlSettings(initialProfileRef.current));
   const [activeSettings, setActiveSettings] = useState(() => (shouldAutoStart() ? readUrlSettings(initialProfileRef.current) : null));
@@ -199,15 +197,6 @@ export default function App() {
     if (updateUi) setJoystick({ active: false, x: 0, z: 0 });
     setGameTouchInput({ x: 0, z: 0, action: false });
   }
-
-  useEffect(() => {
-    if (!iosHint) return;
-    const t = setTimeout(() => {
-      localStorage.setItem("kokpar_ios_hint_dismissed", "1");
-      setIosHint(false);
-    }, 7000);
-    return () => clearTimeout(t);
-  }, [iosHint]);
 
   useEffect(() => {
     function requestFullscreen() {
@@ -737,19 +726,7 @@ export default function App() {
         />
       )}
 
-      {iosHint && (
-        <div className="ios-install-hint" role="status">
-          <span>📲 Добавь на домашний экран для полного экрана</span>
-          <button
-            type="button"
-            aria-label="Закрыть подсказку"
-            onClick={() => {
-              localStorage.setItem("kokpar_ios_hint_dismissed", "1");
-              setIosHint(false);
-            }}
-          >✕</button>
-        </div>
-      )}
+      <PwaInstallBanner />
     </main>
     </ErrorBoundary>
   );

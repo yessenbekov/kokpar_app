@@ -1,5 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#4a2c0a"/>
-  <circle cx="256" cy="256" r="180" fill="#8b5a2b"/>
-  <text x="256" y="340" text-anchor="middle" font-size="220" font-family="serif" fill="#f2dfb2">Қ</text>
+  <defs>
+    <radialGradient id="bg" cx="32%" cy="18%" r="120%">
+      <stop offset="0%" stop-color="#3a2309"/>
+      <stop offset="78%" stop-color="#160d03"/>
+    </radialGradient>
+  </defs>
+  <!-- Background with rounded corners (22%) -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Diamond ring: 215x215 square rotated 45deg, rounded corners, gold border -->
+  <g transform="translate(256,256) rotate(45)">
+    <rect x="-107.5" y="-107.5" width="215" height="215" rx="43" ry="43"
+          fill="none" stroke="#f0c347" stroke-width="22"/>
+  </g>
+  <!-- Top cap: small gold diamond at apex -->
+  <g transform="translate(256,104) rotate(45)">
+    <rect x="-15" y="-15" width="30" height="30" rx="6" ry="6" fill="#f0c347"/>
+  </g>
+  <!-- К letter centered -->
+  <text x="256" y="272" text-anchor="middle" dominant-baseline="middle"
+        font-family="Oswald,Arial Black,sans-serif" font-weight="700" font-size="136"
+        fill="#f0c347" letter-spacing="0">К</text>
 </svg>

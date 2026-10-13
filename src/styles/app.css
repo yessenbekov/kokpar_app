@@ -13386,3 +13386,182 @@ body,
   font: 600 12.5px Manrope, sans-serif;
   cursor: pointer;
 }
+
+/* ── PWA Install Banner ─────────────────────────────────────────────────── */
+.pwa-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(10, 5, 1, 0.72);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: pwa-fade-in 0.22s ease;
+}
+
+@keyframes pwa-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pwa-modal {
+  width: min(560px, 100%);
+  background: linear-gradient(180deg, #2c1b08, #1a1005);
+  border: 1px solid rgba(240, 195, 71, 0.28);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: pwa-slide-up 0.28s cubic-bezier(0.34, 1.26, 0.64, 1);
+}
+
+@keyframes pwa-slide-up {
+  from { transform: translateY(120%); }
+  to   { transform: translateY(0); }
+}
+
+.pwa-modal-top {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.pwa-app-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.pwa-app-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pwa-modal-heading {
+  font: 700 18px / 1.1 Oswald, sans-serif;
+  letter-spacing: 0.02em;
+  color: #f7ecd0;
+}
+
+.pwa-modal-sub {
+  margin-top: 6px;
+  font: 400 13px / 1.45 Manrope, sans-serif;
+  color: rgba(242, 226, 184, 0.7);
+}
+
+.pwa-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pwa-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 500 14px Manrope, sans-serif;
+  color: #f2e2b8;
+}
+
+.pwa-step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f0c347;
+  font: 700 13px Manrope, sans-serif;
+  color: #1b0f04;
+}
+
+.pwa-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(240, 195, 71, 0.16);
+  vertical-align: middle;
+}
+
+.pwa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(240, 195, 71, 0.16);
+  color: #f7ecd0;
+  font: 500 13px Manrope, sans-serif;
+}
+
+.pwa-plus {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f0c347;
+  border-radius: 4px;
+  color: #f0c347;
+  font: 700 12px / 1 Manrope, sans-serif;
+}
+
+.pwa-android-hint {
+  font: 400 14px / 1.5 Manrope, sans-serif;
+  color: rgba(242, 226, 184, 0.75);
+}
+
+.pwa-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pwa-btn-primary {
+  flex: none;
+  height: 44px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 12px;
+  background: #f0c347;
+  font: 700 14px Manrope, sans-serif;
+  color: #1b0f04;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pwa-btn-primary:active {
+  opacity: 0.82;
+}
+
+.pwa-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pwa-btn-secondary {
+  flex: none;
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  font: 600 14px Manrope, sans-serif;
+  color: rgba(242, 226, 184, 0.65);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.pwa-btn-secondary:active {
+  color: rgba(242, 226, 184, 0.9);
+}
