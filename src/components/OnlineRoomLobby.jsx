@@ -68,6 +68,7 @@ export function OnlineRoomLobby({
   const [loadingRooms, setLoadingRooms] = useState(false);
   const startedRoomRef = useRef("");
   const autoJoinedRef = useRef(false);
+  const leavingRef = useRef(false);
 
   const signedIn = auth.status === "signed-in";
   const currentPlayer = useMemo(
@@ -110,9 +111,33 @@ export function OnlineRoomLobby({
       return;
     }
 
+    if (!nextState.room && room && !leavingRef.current) {
+      // Room disappeared externally — host closed it
+      setRoom(null);
+      setPlayers([]);
+      setCurrentUserId("");
+      setJoinCode("");
+      startedRoomRef.current = "";
+      onReadyChange(false);
+      setError("Хост закрыл комнату");
+      return;
+    }
+
+    if (nextState.room && currentUserId && !nextState.players.some((p) => p.userId === currentUserId) && players.some((p) => p.userId === currentUserId)) {
+      // Player disappeared from list but room is still open — kicked
+      setRoom(null);
+      setPlayers([]);
+      setCurrentUserId("");
+      setJoinCode("");
+      startedRoomRef.current = "";
+      onReadyChange(false);
+      setError("Вас выгнали из комнаты");
+      return;
+    }
+
     setRoom(nextState.room);
     setPlayers(nextState.players);
-    setError("");
+    if (nextState.room) setError("");
   }
 
   useEffect(() => {
@@ -311,6 +336,7 @@ export function OnlineRoomLobby({
   }
 
   async function leaveRoom() {
+    leavingRef.current = true;
     setBusy(true);
     setError("");
     setCopied("");
@@ -327,6 +353,7 @@ export function OnlineRoomLobby({
       setError(nextError instanceof Error ? nextError.message : "Ошибка выхода из комнаты");
     } finally {
       setBusy(false);
+      leavingRef.current = false;
     }
   }
 
