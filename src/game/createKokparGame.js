@@ -234,18 +234,31 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const assetPipeline = createGameAssetPipeline();
   const feedback = createMatchFeedback(options.feedbackEnabled !== false);
   const scene = new THREE.Scene();
-  const SKY_TOP = "#5f8fc4";
-  const SKY_HORIZON = "#e8c08c";
-  scene.fog = new THREE.Fog(SKY_HORIZON, 260, 680);
+
+  const LIGHT_PRESETS = {
+    golden: {
+      skyTop: "#5f8fc4", skyHorizon: "#e8c08c", fogColor: "#e8c08c",
+      sunColor: "#ffc978", sunIntensity: 3.6, sunPos: [-150, 70, -70],
+      hemiSky: "#ffe2b0", hemiGround: "#8c8a5a", hemiIntensity: 1.4, exposure: 1.0
+    },
+    midday: {
+      skyTop: "#3f7fd0", skyHorizon: "#cfe0ec", fogColor: "#d6e0e4",
+      sunColor: "#fff4dc", sunIntensity: 3.4, sunPos: [-70, 160, -50],
+      hemiSky: "#e8f0ff", hemiGround: "#9a9a62", hemiIntensity: 1.6, exposure: 0.95
+    }
+  };
+  const lp = LIGHT_PRESETS[options.lightPreset] ?? LIGHT_PRESETS.golden;
+
+  scene.fog = new THREE.Fog(lp.fogColor, 260, 680);
 
   const skyDome = new THREE.Mesh(
     new THREE.SphereGeometry(1400, 32, 16),
     new THREE.ShaderMaterial({
       uniforms: {
-        top:    { value: new THREE.Color(SKY_TOP).convertSRGBToLinear() },
-        horizon:{ value: new THREE.Color(SKY_HORIZON).convertSRGBToLinear() },
-        sunDir: { value: new THREE.Vector3(-150, 70, -70).normalize() },
-        sunCol: { value: new THREE.Color("#ffc978").convertSRGBToLinear() }
+        top:    { value: new THREE.Color(lp.skyTop).convertSRGBToLinear() },
+        horizon:{ value: new THREE.Color(lp.skyHorizon).convertSRGBToLinear() },
+        sunDir: { value: new THREE.Vector3(...lp.sunPos).normalize() },
+        sunCol: { value: new THREE.Color(lp.sunColor).convertSRGBToLinear() }
       },
       vertexShader: "varying vec3 vP;void main(){vP=normalize((modelMatrix*vec4(position,1.0)).xyz);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
       fragmentShader: "uniform vec3 top,horizon,sunDir,sunCol;varying vec3 vP;void main(){float h=clamp(vP.y,0.,1.);vec3 c=mix(horizon,top,pow(h,.55));float s=max(dot(vP,normalize(sunDir)),0.);c+=sunCol*(pow(s,600.)*1.2+pow(s,24.)*.18);c=min(c,vec3(1.));if(vP.y<0.)c=horizon;gl_FragColor=vec4(c,1.);}",
@@ -258,7 +271,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   scene.add(skyDome);
 
   const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 2000);
-  camera.position.set(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
+  camera.position.set(0, 200, 60);
 
   const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
@@ -266,14 +279,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
   renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = lp.exposure;
   container.appendChild(renderer.domElement);
 
-  const hemisphereLight = new THREE.HemisphereLight("#ffe2b0", "#8c8a5a", 1.4);
+  const hemisphereLight = new THREE.HemisphereLight(lp.hemiSky, lp.hemiGround, lp.hemiIntensity);
   scene.add(hemisphereLight);
 
-  const sun = new THREE.DirectionalLight("#ffc978", 3.6);
-  sun.position.set(-150, 70, -70);
+  const sun = new THREE.DirectionalLight(lp.sunColor, lp.sunIntensity);
+  sun.position.set(...lp.sunPos);
   sun.target.position.set(0, 0, 0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(isMobile ? 2048 : 4096, isMobile ? 2048 : 4096);

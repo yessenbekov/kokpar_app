@@ -652,6 +652,20 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     </>
                   )}
 
+                  <p className="wizard-label">{t("Освещение", "Жарықтандыру", "Lighting")}</p>
+                  <div className="wizard-diff-seg">
+                    {[
+                      { id: "golden", label: t("Золотой час", "Алтын сағат", "Golden hour") },
+                      { id: "midday", label: t("Полдень", "Күндіз", "Midday") }
+                    ].map(({ id, label }) => (
+                      <button key={id} type="button"
+                        className={`wizard-diff-seg-btn${(settings.lightPreset ?? "golden") === id ? " active" : ""}`}
+                        onClick={() => onSettingChange("lightPreset", id)}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="tab-footer wizard-footer">
                     <button
                       type="button"

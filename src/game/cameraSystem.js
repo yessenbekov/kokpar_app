@@ -17,12 +17,17 @@ const CAMERA_MODES = [
   { id: "broadcast", label: "ТВ" }
 ];
 
+const INTRO_DURATION = 3.5;
+const INTRO_START = new THREE.Vector3(0, 200, 60);
+const INTRO_END = new THREE.Vector3(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
+
 export function createCameraSystem({ camera, player, kokpar, match, contestCandidates, scoringGoalFor }) {
   const cameraTrack = new THREE.Vector3();
   const cameraTrackTarget = new THREE.Vector3();
   const cameraDesired = new THREE.Vector3();
   const cameraLookAt = new THREE.Vector3();
   let cameraModeIndex = 3;
+  let introTimer = INTRO_DURATION;
 
   function currentCameraMode() {
     return CAMERA_MODES[cameraModeIndex % CAMERA_MODES.length];
@@ -35,6 +40,18 @@ export function createCameraSystem({ camera, player, kokpar, match, contestCandi
 
   function updateCamera(dt) {
     const CONTEST_RADIUS = 5.4;
+
+    if (introTimer > 0) {
+      introTimer -= dt;
+      const progress = 1 - Math.max(introTimer, 0) / INTRO_DURATION;
+      const t = progress * progress * (3 - 2 * progress);
+      camera.position.lerpVectors(INTRO_START, INTRO_END, t);
+      cameraLookAt.set(0, 1, START_CAMERA_FOCUS_Z);
+      camera.fov += (64 - camera.fov) * (1 - Math.pow(0.05, dt));
+      camera.updateProjectionMatrix();
+      camera.lookAt(cameraLookAt);
+      return;
+    }
 
     if (match.phase === "goal") {
       const team = match.goalTeam ?? kokpar.flightTeam ?? TEAM.blue;

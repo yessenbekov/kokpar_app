@@ -485,29 +485,70 @@ export function createContestIndicatorMesh() {
 
 function createGroundGoalMesh(color) {
   const group = new THREE.Group();
-  const ringMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.55 });
-  const baseMaterial = new THREE.MeshStandardMaterial({
-    color: "#f6e6bd",
-    roughness: 0.8,
-    transparent: true,
-    opacity: 0.75
-  });
+  const R = GOAL_RADIUS;
+  const teamMat  = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
+  const woodDark = new THREE.MeshStandardMaterial({ color: "#3d2819", roughness: 0.85 });
+  const goldMat  = new THREE.MeshStandardMaterial({ color: "#f0c347", roughness: 0.35, metalness: 0.6 });
+  const feltMat  = new THREE.MeshStandardMaterial({ color: "#efe4cc", roughness: 0.95 });
 
-  const disk = new THREE.Mesh(new THREE.CylinderGeometry(GOAL_RADIUS, GOAL_RADIUS, 0.12, 48), baseMaterial);
-  disk.position.y = 0.04;
-  disk.receiveShadow = true;
-  group.add(disk);
+  // Sand disc
+  const disc = new THREE.Mesh(
+    new THREE.CircleGeometry(R - 0.3, 64),
+    new THREE.MeshStandardMaterial({ color: "#ead7a8", roughness: 1 })
+  );
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.06;
+  disc.receiveShadow = true;
+  group.add(disc);
 
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(GOAL_RADIUS, 0.22, 12, 56), ringMaterial);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.y = 0.22;
-  group.add(ring);
+  // Subtle team-colour inner ring
+  const inner = new THREE.Mesh(
+    new THREE.RingGeometry(R - 1.2, R - 0.9, 64),
+    new THREE.MeshStandardMaterial({ color, roughness: 0.8, transparent: true, opacity: 0.45 })
+  );
+  inner.rotation.x = -Math.PI / 2;
+  inner.position.y = 0.07;
+  group.add(inner);
 
-  for (let i = 0; i < 8; i += 1) {
-    const angle = (i / 8) * Math.PI * 2;
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.2, 8), ringMaterial);
-    post.position.set(Math.cos(angle) * GOAL_RADIUS, 0.65, Math.sin(angle) * GOAL_RADIUS);
+  // Kerb (main torus ring in team colour)
+  const kerb = new THREE.Mesh(new THREE.TorusGeometry(R, 0.28, 10, 96), teamMat);
+  kerb.rotation.x = Math.PI / 2;
+  kerb.position.y = 0.2;
+  kerb.castShadow = true;
+  group.add(kerb);
+
+  // Felt rope above kerb
+  const rope = new THREE.Mesh(new THREE.TorusGeometry(R, 0.06, 6, 96), feltMat);
+  rope.rotation.x = Math.PI / 2;
+  rope.position.y = 0.85;
+  group.add(rope);
+
+  // 16 posts — every 4th is gold
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * Math.PI * 2;
+    const mat = i % 4 === 0 ? goldMat : woodDark;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 1, 6), mat);
+    post.position.set(Math.cos(a) * R, 0.5, Math.sin(a) * R);
+    post.castShadow = true;
     group.add(post);
+  }
+
+  // 2 flag poles (north / south of circle)
+  for (const s of [-1, 1]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 6, 8), woodDark);
+    pole.position.set(0, 3, s * (R + 0.6));
+    pole.castShadow = true;
+    group.add(pole);
+
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2, 8, 1), teamMat.clone());
+    flag.material.side = THREE.DoubleSide;
+    flag.position.set(0, 5.3, s * (R + 0.6));
+    flag.castShadow = true;
+    group.add(flag);
+
+    const tip = new THREE.Mesh(new THREE.OctahedronGeometry(0.28), goldMat);
+    tip.position.set(0, 6.15, s * (R + 0.6));
+    group.add(tip);
   }
 
   return group;
@@ -515,74 +556,65 @@ function createGroundGoalMesh(color) {
 
 function createKazanGoalMesh(color) {
   const group = new THREE.Group();
+  const R = GOAL_RADIUS;
 
-  const greenMat  = new THREE.MeshStandardMaterial({ color: "#1d5c22", roughness: 0.55, metalness: 0.10 });
-  const whiteMat  = new THREE.MeshStandardMaterial({ color: "#e8e8e8", roughness: 0.60, metalness: 0.05 });
-  const accentMat = new THREE.MeshStandardMaterial({ color, roughness: 0.48, metalness: 0.18 });
+  const stoneMat = new THREE.MeshStandardMaterial({ color: "#e8dcc0", roughness: 0.9 });
+  const teamMat  = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
+  const goldMat  = new THREE.MeshStandardMaterial({ color: "#f0c347", roughness: 0.35, metalness: 0.6 });
+  const woodDark = new THREE.MeshStandardMaterial({ color: "#3d2819", roughness: 0.85 });
 
-  const POLY = 10;
-
-  const BASE_R_BOT  = GOAL_RADIUS * 0.90;
-  const BASE_R_TOP  = GOAL_RADIUS * 0.74;
-  const BASE_H      = 1.4;
-
-  const BOWL_R      = GOAL_RADIUS * 0.54;
-  const BOWL_TUBE   = GOAL_RADIUS * 0.22;
-  const BOWL_FLAT   = 0.52;
-  const BOWL_HALF_H = BOWL_TUBE * BOWL_FLAT;
-  const BOWL_Y      = BASE_H + BOWL_HALF_H;
-  const INNER_R     = BOWL_R - BOWL_TUBE;
-
-  // White flat disc at ground level
-  const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(BASE_R_BOT, BASE_R_BOT, 0.12, POLY),
-    whiteMat
-  );
-  disc.position.y = 0.06;
-  disc.receiveShadow = true;
-  group.add(disc);
-
-  // White trapezoidal base
-  const base = new THREE.Mesh(
-    new THREE.CylinderGeometry(BASE_R_TOP, BASE_R_BOT, BASE_H, POLY),
-    whiteMat
-  );
-  base.position.y = BASE_H / 2;
+  // Stone platform base (wider at bottom)
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.80, R * 0.875, 1.1, 48), stoneMat);
+  base.position.y = 0.55;
   base.castShadow = true;
   base.receiveShadow = true;
   group.add(base);
 
-  // White stripe at base-to-bowl junction
-  const stripe = new THREE.Mesh(
-    new THREE.CylinderGeometry(BASE_R_TOP + 0.08, BASE_R_TOP + 0.08, 0.28, POLY),
-    whiteMat
-  );
-  stripe.position.y = BASE_H + 0.06;
-  stripe.castShadow = true;
-  group.add(stripe);
+  // Team-colour band on base
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.806, R * 0.806, 0.35, 48, 1, true), teamMat);
+  band.position.y = 0.75;
+  group.add(band);
 
-  // Green torus bowl (flattened in Y)
-  const bowl = new THREE.Mesh(
-    new THREE.TorusGeometry(BOWL_R, BOWL_TUBE, 24, 64),
-    greenMat
-  );
-  bowl.rotation.x = Math.PI / 2;
-  bowl.scale.z = BOWL_FLAT;
-  bowl.position.y = BOWL_Y;
-  bowl.castShadow = true;
-  bowl.receiveShadow = true;
-  group.add(bowl);
+  // Main bowl ring (team colour)
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(R * 0.66, R * 0.112, 16, 64), teamMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 1.3;
+  ring.castShadow = true;
+  group.add(ring);
 
-  // Team-colour accent band around the outer base of the bowl
-  const accent = new THREE.Mesh(
-    new THREE.TorusGeometry(BASE_R_TOP + 0.04, 0.22, 8, 64),
-    accentMat
+  // Gold trim ring
+  const trim = new THREE.Mesh(new THREE.TorusGeometry(R * 0.66, R * 0.02, 8, 64), goldMat);
+  trim.rotation.x = Math.PI / 2;
+  trim.position.y = 2.15;
+  group.add(trim);
+
+  // Dark pit floor
+  const pit = new THREE.Mesh(
+    new THREE.CircleGeometry(R * 0.56, 48),
+    new THREE.MeshStandardMaterial({ color: "#5a3c20", roughness: 1 })
   );
-  accent.name = "kazan_team_rim";
-  accent.rotation.x = Math.PI / 2;
-  accent.position.y = BASE_H + 0.20;
-  accent.castShadow = true;
-  group.add(accent);
+  pit.rotation.x = -Math.PI / 2;
+  pit.position.y = 1.12;
+  group.add(pit);
+
+  // Flag poles (fore / aft)
+  for (let i = 0; i < 2; i += 1) {
+    const z = (i ? 1 : -1) * R * 0.95;
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 7, 8), woodDark);
+    pole.position.set(0, 3.5, z);
+    pole.castShadow = true;
+    group.add(pole);
+
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.3, 8, 1), teamMat.clone());
+    flag.material.side = THREE.DoubleSide;
+    flag.position.set(0, 6.2, z);
+    flag.castShadow = true;
+    group.add(flag);
+
+    const tip = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), goldMat);
+    tip.position.set(0, 7.15, z);
+    group.add(tip);
+  }
 
   return group;
 }

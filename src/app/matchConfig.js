@@ -9,7 +9,8 @@ export const DEFAULT_SETTINGS = {
   matchMinutes: 2,
   horseType: DEFAULT_HORSE_TYPE_ID,
   teamSide: "blue",
-  difficulty: "normal"
+  difficulty: "normal",
+  lightPreset: "golden"
 };
 
 function formatTimer(minutes) {
@@ -37,6 +38,7 @@ export function settingsFromProfile(profile = {}) {
     horseBond: selectedHorse.bond ?? 0,
     teamSide: preferences.teamSide === "red" ? "red" : "blue",
     difficulty: ["easy", "normal", "hard"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty,
+    lightPreset: ["golden", "midday"].includes(preferences.lightPreset) ? preferences.lightPreset : DEFAULT_SETTINGS.lightPreset,
     lang: preferences.lang ?? null,
     sfxVol: preferences.sfxVol ?? null,
     musicVol: preferences.musicVol ?? null,
@@ -117,6 +119,7 @@ export function readUrlSettings(profile) {
     horseBond: selectedHorse.bond ?? 0,
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide,
     difficulty: ["easy", "normal", "hard"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty,
+    lightPreset: ["golden", "midday"].includes(params.get("lightPreset")) ? params.get("lightPreset") : profileSettings.lightPreset,
     lang: profileSettings.lang,
     sfxVol: profileSettings.sfxVol,
     musicVol: profileSettings.musicVol,
