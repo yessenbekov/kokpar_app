@@ -665,7 +665,7 @@ export default function App() {
         />
       )}
 
-      {activeSettings && !ready && <div className="loading">Готовим степь, коней и казаны...</div>}
+      {activeSettings && !ready && <div className="loading-hint">Загружаем коней...</div>}
       {sceneError && (
         <div className="webgl-error" role="alert">
           <strong>3D-сцена не запустилась</strong>

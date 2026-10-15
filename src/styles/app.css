@@ -2615,6 +2615,23 @@ button {
   text-align: center;
 }
 
+.loading-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5e4b0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .sync-badge {
   position: absolute;
   top: 10px;
