@@ -5,7 +5,7 @@ export const WORLD = {
   groundHeight: 150
 };
 
-export const GOAL_RADIUS = 7.2;
+export const GOAL_RADIUS = 5.5;
 export const MATCH_SECONDS = 120;
 const GOAL_BACK_SPACE = 18;
 
