@@ -633,20 +633,24 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     </>
                   )}
 
-                  <p className="wizard-label">{t("Сложность", "Қиындық", "Difficulty")}</p>
-                  <div className="wizard-diff-seg">
-                    {[
-                      { id: "easy",   label: t("Лёгкая", "Жеңіл", "Easy")  },
-                      { id: "normal", label: t("Средняя", "Орташа", "Normal") },
-                      { id: "hard",   label: t("Сложная", "Қиын", "Hard") }
-                    ].map(({ id, label }) => (
-                      <button key={id} type="button"
-                        className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
-                        onClick={() => onSettingChange("difficulty", id)}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
+                  {!isTraining && (
+                    <>
+                      <p className="wizard-label">{t("Сложность", "Қиындық", "Difficulty")}</p>
+                      <div className="wizard-diff-seg">
+                        {[
+                          { id: "easy",   label: t("Лёгкая", "Жеңіл", "Easy")  },
+                          { id: "normal", label: t("Средняя", "Орташа", "Normal") },
+                          { id: "hard",   label: t("Сложная", "Қиын", "Hard") }
+                        ].map(({ id, label }) => (
+                          <button key={id} type="button"
+                            className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
+                            onClick={() => onSettingChange("difficulty", id)}>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
 
                   <div className="tab-footer wizard-footer">
                     <button

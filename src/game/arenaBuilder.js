@@ -493,7 +493,6 @@ function createAdvertisingBoardTexture(segments) {
 function createAdvertisingBoards(scene) {
   const boardH = 1.8;
   const boardY = boardH / 2 + 0.08;
-  const tilt = 0.18;
   const backMat = new THREE.MeshBasicMaterial({ color: 0x12100a });
 
   const longBoards = [
@@ -506,8 +505,7 @@ function createAdvertisingBoards(scene) {
       ],
       length: WORLD.width * 0.92,
       zOffset: -WORLD.height / 2 - 1.2,
-      rotY: 0,
-      tiltX: tilt
+      rotY: 0
     },
     {
       segments: [
@@ -518,8 +516,7 @@ function createAdvertisingBoards(scene) {
       ],
       length: WORLD.width * 0.92,
       zOffset: WORLD.height / 2 + 1.2,
-      rotY: Math.PI,
-      tiltX: -tilt
+      rotY: Math.PI
     }
   ];
 
@@ -531,8 +528,7 @@ function createAdvertisingBoards(scene) {
       ],
       length: WORLD.height * 0.88,
       xOffset: -WORLD.width / 2 - 1.2,
-      rotY: -Math.PI / 2,
-      tiltX: tilt
+      rotY: -Math.PI / 2
     },
     {
       segments: [
@@ -541,8 +537,7 @@ function createAdvertisingBoards(scene) {
       ],
       length: WORLD.height * 0.88,
       xOffset: WORLD.width / 2 + 1.2,
-      rotY: Math.PI / 2,
-      tiltX: tilt
+      rotY: Math.PI / 2
     }
   ];
 
@@ -551,7 +546,6 @@ function createAdvertisingBoards(scene) {
     const group = new THREE.Group();
     group.position.set(0, boardY, board.zOffset);
     group.rotation.y = board.rotY;
-    group.rotation.x = board.tiltX;
 
     const back = new THREE.Mesh(
       new THREE.BoxGeometry(board.length + 0.14, boardH + 0.1, 0.12),
@@ -574,7 +568,6 @@ function createAdvertisingBoards(scene) {
     const group = new THREE.Group();
     group.position.set(board.xOffset, boardY, 0);
     group.rotation.y = board.rotY;
-    group.rotation.x = board.tiltX;
 
     const back = new THREE.Mesh(
       new THREE.BoxGeometry(board.length + 0.14, boardH + 0.1, 0.12),

@@ -992,7 +992,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     countdownLabel = "Старт через"
   ) {
     match.phase = "countdown";
-    match.countdown = ROUND_COUNTDOWN_SECONDS;
+    match.countdown = isTraining ? 0 : ROUND_COUNTDOWN_SECONDS;
     match.lastCountdownInt = ROUND_COUNTDOWN_SECONDS;
     match.goalPause = 0;
     match.goalTeam = null;
