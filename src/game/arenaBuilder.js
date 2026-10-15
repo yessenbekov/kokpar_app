@@ -407,28 +407,94 @@ export function createArenaEnvironment(scene) {
 }
 
 function createAdvertisingBoardTexture(segments) {
-  return createCanvasTexture(1024, 128, (ctx, w, h) => {
+  return createCanvasTexture(2048, 256, (ctx, w, h) => {
+    const totalFlex = segments.reduce((s, seg) => s + seg.flex, 0);
     let x = 0;
+
     for (const { label, bg, fg, flex } of segments) {
-      const segW = Math.round((flex / segments.reduce((s, s2) => s + s2.flex, 0)) * w);
+      const segW = Math.round((flex / totalFlex) * w);
+
+      // Base color
       ctx.fillStyle = bg;
       ctx.fillRect(x, 0, segW, h);
-      ctx.fillStyle = "#f6f4ee";
-      ctx.fillRect(x, 0, segW, 6);
+
+      // Vertical gradient: lighten top, darken bottom
+      const vgrad = ctx.createLinearGradient(x, 0, x, h);
+      vgrad.addColorStop(0, "rgba(255,255,255,0.24)");
+      vgrad.addColorStop(0.38, "rgba(255,255,255,0)");
+      vgrad.addColorStop(0.65, "rgba(0,0,0,0)");
+      vgrad.addColorStop(1, "rgba(0,0,0,0.36)");
+      ctx.fillStyle = vgrad;
+      ctx.fillRect(x, 0, segW, h);
+
+      // Diagonal stripe overlay (clipped to segment)
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, 0, segW, h);
+      ctx.clip();
+      ctx.globalAlpha = 0.055;
+      ctx.strokeStyle = fg;
+      ctx.lineWidth = 8;
+      for (let sx = x - h * 1.5; sx < x + segW + h; sx += 24) {
+        ctx.beginPath();
+        ctx.moveTo(sx, 0);
+        ctx.lineTo(sx + h * 1.3, h);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // Top highlight band
+      const topGrad = ctx.createLinearGradient(x, 0, x, 14);
+      topGrad.addColorStop(0, "rgba(255,255,255,0.55)");
+      topGrad.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = topGrad;
+      ctx.fillRect(x, 0, segW, 14);
+
+      // Bottom shadow band
+      const botGrad = ctx.createLinearGradient(x, h - 12, x, h);
+      botGrad.addColorStop(0, "rgba(0,0,0,0)");
+      botGrad.addColorStop(1, "rgba(0,0,0,0.5)");
+      ctx.fillStyle = botGrad;
+      ctx.fillRect(x, h - 12, segW, 12);
+
+      // Text with drop shadow
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.65)";
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 5;
       ctx.fillStyle = fg;
-      ctx.font = "900 56px Arial";
+      ctx.font = "900 108px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, x + segW / 2, h / 2 + 8);
+      ctx.restore();
+
+      // Segment divider (white + dark hairlines)
+      if (x > 0) {
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.fillRect(x, 0, 3, h);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillRect(x + 3, 0, 2, h);
+      }
+
       x += segW;
     }
+
+    // Top and bottom edge lines
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
+    ctx.fillRect(0, 0, w, 4);
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(0, h - 4, w, 4);
   }).texture;
 }
 
 function createAdvertisingBoards(scene) {
-  const boardH = 1.6;
+  const boardH = 1.8;
   const boardY = boardH / 2 + 0.08;
   const tilt = 0.18;
+  const backMat = new THREE.MeshBasicMaterial({ color: 0x12100a });
 
   const longBoards = [
     {
@@ -482,25 +548,47 @@ function createAdvertisingBoards(scene) {
 
   for (const board of longBoards) {
     const tex = createAdvertisingBoardTexture(board.segments);
-    const mesh = new THREE.Mesh(
+    const group = new THREE.Group();
+    group.position.set(0, boardY, board.zOffset);
+    group.rotation.y = board.rotY;
+    group.rotation.x = board.tiltX;
+
+    const back = new THREE.Mesh(
+      new THREE.BoxGeometry(board.length + 0.14, boardH + 0.1, 0.12),
+      backMat
+    );
+    back.position.z = -0.062;
+
+    const face = new THREE.Mesh(
       new THREE.PlaneGeometry(board.length, boardH),
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide })
     );
-    mesh.position.set(0, boardY, board.zOffset);
-    mesh.rotation.y = board.rotY;
-    mesh.rotation.x = board.tiltX;
-    scene.add(mesh);
+
+    group.add(back);
+    group.add(face);
+    scene.add(group);
   }
 
   for (const board of sideBoards) {
     const tex = createAdvertisingBoardTexture(board.segments);
-    const mesh = new THREE.Mesh(
+    const group = new THREE.Group();
+    group.position.set(board.xOffset, boardY, 0);
+    group.rotation.y = board.rotY;
+    group.rotation.x = board.tiltX;
+
+    const back = new THREE.Mesh(
+      new THREE.BoxGeometry(board.length + 0.14, boardH + 0.1, 0.12),
+      backMat
+    );
+    back.position.z = -0.062;
+
+    const face = new THREE.Mesh(
       new THREE.PlaneGeometry(board.length, boardH),
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide })
     );
-    mesh.position.set(board.xOffset, boardY, 0);
-    mesh.rotation.y = board.rotY;
-    mesh.rotation.x = board.tiltX;
-    scene.add(mesh);
+
+    group.add(back);
+    group.add(face);
+    scene.add(group);
   }
 }
