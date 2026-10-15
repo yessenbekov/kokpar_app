@@ -199,10 +199,10 @@ export function createAdBoards(scene) {
   const SP = { qt: ["QAZAQ TELECOM", "#1668b8", "#fff", 1.5], bg: ["BAIGE", "#f6f4ee", "#1a1008", 1], tl: ["TULPAR", "#c02020", "#fff8ec", 1], ad: ["ALTYN DALA", "#0f8a4c", "#fff", 1.1], ko: ["KOKPAR.ONLINE", "#1a1005", GOLD, 1.3] };
   const boards = new THREE.Group(); boards.name = "adBoards";
   for (const b of [
-    { segs: [SP.qt, SP.bg, SP.ko, SP.tl, SP.ad], len: W * .94, pos: [0, -H / 2 - 1.6], ry: 0 },
-    { segs: [SP.ad, SP.tl, SP.ko, SP.bg, SP.qt], len: W * .94, pos: [0, H / 2 + 1.6], ry: Math.PI },
-    { segs: [SP.qt, SP.ko, SP.ad], len: H * .9, pos: [-W / 2 - 1.6, 0], ry: Math.PI / 2 },
-    { segs: [SP.tl, SP.ko, SP.bg], len: H * .9, pos: [W / 2 + 1.6, 0], ry: -Math.PI / 2 },
+    { segs: [SP.qt, SP.bg, SP.ko, SP.tl, SP.ad], len: FENCE_X * 2 - 6, pos: [0, SOUTH_Z + 1.2], ry: 0 },
+    // стартовая (северная) сторона без щитов — оттуда выезжают всадники. Щиты стоят у забора, между полем и щитами ~5 м (юг) и ~13 м (бока) для выхода в аут
+    { segs: [SP.qt, SP.ko, SP.ad], len: H * .9, pos: [-FENCE_X + 1.2, 0], ry: Math.PI / 2 },
+    { segs: [SP.tl, SP.ko, SP.bg], len: H * .9, pos: [FENCE_X - 1.2, 0], ry: -Math.PI / 2 },
   ]) {
     const g = new THREE.Group(); g.position.set(b.pos[0], .95, b.pos[1]); g.rotation.y = b.ry;
     const tilt = new THREE.Group(); tilt.rotation.x = -.16; g.add(tilt);
