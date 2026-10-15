@@ -28,7 +28,7 @@ import {
   updateSerkeLabel
 } from "./visualIndicators.js";
 import { clamp, distance2D, normalize2D, rotate2D, angleDelta, formatTime, forwardVector } from "./mathUtils.js";
-import { createGroundDetails, createArenaEnvironment } from "./arenaBuilder.js";
+import { createArenaV2 } from "./arenaV2.js";
 import { createThrowSystem } from "./throwSystem.js";
 import { createAISystem } from "./aiSystem.js";
 import { createCameraSystem } from "./cameraSystem.js";
@@ -235,41 +235,6 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const feedback = createMatchFeedback(options.feedbackEnabled !== false);
   const scene = new THREE.Scene();
 
-  const LIGHT_PRESETS = {
-    golden: {
-      skyTop: "#5f8fc4", skyHorizon: "#e8c08c", fogColor: "#e8c08c",
-      sunColor: "#ffc978", sunIntensity: 3.6, sunPos: [-150, 70, -70],
-      hemiSky: "#ffe2b0", hemiGround: "#8c8a5a", hemiIntensity: 1.4, exposure: 1.0
-    },
-    midday: {
-      skyTop: "#3f7fd0", skyHorizon: "#cfe0ec", fogColor: "#d6e0e4",
-      sunColor: "#fff4dc", sunIntensity: 3.4, sunPos: [-70, 160, -50],
-      hemiSky: "#e8f0ff", hemiGround: "#9a9a62", hemiIntensity: 1.6, exposure: 0.95
-    }
-  };
-  const lp = LIGHT_PRESETS[options.lightPreset] ?? LIGHT_PRESETS.golden;
-
-  scene.fog = new THREE.Fog(lp.fogColor, 260, 680);
-
-  const skyDome = new THREE.Mesh(
-    new THREE.SphereGeometry(1400, 32, 16),
-    new THREE.ShaderMaterial({
-      uniforms: {
-        top:    { value: new THREE.Color(lp.skyTop).convertSRGBToLinear() },
-        horizon:{ value: new THREE.Color(lp.skyHorizon).convertSRGBToLinear() },
-        sunDir: { value: new THREE.Vector3(...lp.sunPos).normalize() },
-        sunCol: { value: new THREE.Color(lp.sunColor).convertSRGBToLinear() }
-      },
-      vertexShader: "varying vec3 vP;void main(){vP=normalize((modelMatrix*vec4(position,1.0)).xyz);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
-      fragmentShader: "uniform vec3 top,horizon,sunDir,sunCol;varying vec3 vP;void main(){float h=clamp(vP.y,0.,1.);vec3 c=mix(horizon,top,pow(h,.55));float s=max(dot(vP,normalize(sunDir)),0.);c+=sunCol*(pow(s,600.)*1.2+pow(s,24.)*.18);c=min(c,vec3(1.));if(vP.y<0.)c=horizon;gl_FragColor=vec4(c,1.);}",
-      side: THREE.BackSide,
-      depthWrite: false,
-      fog: false
-    })
-  );
-  skyDome.renderOrder = -1;
-  scene.add(skyDome);
-
   const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 2000);
   camera.position.set(0, 200, 60);
 
@@ -277,43 +242,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = lp.exposure;
   container.appendChild(renderer.domElement);
 
-  const hemisphereLight = new THREE.HemisphereLight(lp.hemiSky, lp.hemiGround, lp.hemiIntensity);
-  scene.add(hemisphereLight);
-
-  const sun = new THREE.DirectionalLight(lp.sunColor, lp.sunIntensity);
-  sun.position.set(...lp.sunPos);
-  sun.target.position.set(0, 0, 0);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(isMobile ? 2048 : 4096, isMobile ? 2048 : 4096);
-  sun.shadow.camera.left = -130;
-  sun.shadow.camera.right = 130;
-  sun.shadow.camera.top = 110;
-  sun.shadow.camera.bottom = -110;
-  sun.shadow.camera.near = 10;
-  sun.shadow.camera.far = 600;
-  sun.shadow.bias = -0.0004;
-  sun.shadow.normalBias = 0.35;
-  scene.add(sun);
-  scene.add(sun.target);
-
-  const fillLight = new THREE.DirectionalLight("#b4c8e8", 0.25);
-  fillLight.position.set(28, 22, -20);
-  scene.add(fillLight);
-
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(WORLD.groundWidth, WORLD.groundHeight, 24, 18),
-    new THREE.MeshStandardMaterial({ color: COLORS.sand, roughness: 0.92 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
-  createGroundDetails(scene);
-  const arenaPresentation = createArenaEnvironment(scene);
+  const arenaPresentation = createArenaV2(scene, renderer, { preset: options.lightPreset ?? "golden", isMobile });
 
   if (isMobile) {
     scene.traverse((obj) => {
@@ -331,6 +262,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const redGoal = createGoalMesh(COLORS.red, gameSettings.goalType, redKazanGlb);
   redGoal.position.set(goalFor(TEAM.red).x, 0, goalFor(TEAM.red).z);
   scene.add(redGoal);
+  arenaPresentation.refreshFlags();
 
   const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale, isTraining);
   const player = riders.find(r => r.human) ?? riders[0];
@@ -2347,6 +2279,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     syncMeshes(time, dt);
     updateMatchCommentary();
     updateStadiumPresentation();
+    arenaPresentation.update(dt, time);
     updateCamera(dt);
     renderer.render(scene, camera);
     publishHud();
