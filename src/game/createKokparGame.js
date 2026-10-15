@@ -234,41 +234,30 @@ export function createKokparGame(container, onHudChange, options = {}) {
   const assetPipeline = createGameAssetPipeline();
   const feedback = createMatchFeedback(options.feedbackEnabled !== false);
   const scene = new THREE.Scene();
-  const SKY_HORIZON = "#dfc090";
-  scene.background = new THREE.Color(SKY_HORIZON);
-  scene.fog = new THREE.Fog(SKY_HORIZON, 82, 160);
+  const SKY_TOP = "#5f8fc4";
+  const SKY_HORIZON = "#e8c08c";
+  scene.fog = new THREE.Fog(SKY_HORIZON, 260, 680);
 
   const skyDome = new THREE.Mesh(
-    new THREE.SphereGeometry(480, 24, 12),
+    new THREE.SphereGeometry(1400, 32, 16),
     new THREE.ShaderMaterial({
       uniforms: {
-        uHorizon: { value: new THREE.Color(SKY_HORIZON).convertSRGBToLinear() },
-        uZenith: { value: new THREE.Color("#3a78cc").convertSRGBToLinear() }
+        top:    { value: new THREE.Color(SKY_TOP).convertSRGBToLinear() },
+        horizon:{ value: new THREE.Color(SKY_HORIZON).convertSRGBToLinear() },
+        sunDir: { value: new THREE.Vector3(-150, 70, -70).normalize() },
+        sunCol: { value: new THREE.Color("#ffc978").convertSRGBToLinear() }
       },
-      vertexShader: `
-        varying vec3 vWorld;
-        void main() {
-          vWorld = (modelMatrix * vec4(position, 1.0)).xyz;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 uHorizon;
-        uniform vec3 uZenith;
-        varying vec3 vWorld;
-        void main() {
-          float t = clamp(normalize(vWorld).y * 2.2 + 0.06, 0.0, 1.0);
-          gl_FragColor = vec4(mix(uHorizon, uZenith, pow(t, 0.55)), 1.0);
-        }
-      `,
+      vertexShader: "varying vec3 vP;void main(){vP=normalize((modelMatrix*vec4(position,1.0)).xyz);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
+      fragmentShader: "uniform vec3 top,horizon,sunDir,sunCol;varying vec3 vP;void main(){float h=clamp(vP.y,0.,1.);vec3 c=mix(horizon,top,pow(h,.55));float s=max(dot(vP,normalize(sunDir)),0.);c+=sunCol*(pow(s,600.)*1.2+pow(s,24.)*.18);c=min(c,vec3(1.));if(vP.y<0.)c=horizon;gl_FragColor=vec4(c,1.);}",
       side: THREE.BackSide,
-      depthWrite: false
+      depthWrite: false,
+      fog: false
     })
   );
   skyDome.renderOrder = -1;
   scene.add(skyDome);
 
-  const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 260);
+  const camera = new THREE.PerspectiveCamera(64, 1, 0.1, 2000);
   camera.position.set(START_CAMERA_POSITION.x, START_CAMERA_POSITION.y, START_CAMERA_POSITION.z);
 
   const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
@@ -277,26 +266,29 @@ export function createKokparGame(container, onHudChange, options = {}) {
   renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.9;
+  renderer.toneMappingExposure = 1.0;
   container.appendChild(renderer.domElement);
 
-  const hemisphereLight = new THREE.HemisphereLight("#fce8c0", "#8c9e70", 2.4);
+  const hemisphereLight = new THREE.HemisphereLight("#ffe2b0", "#8c8a5a", 1.4);
   scene.add(hemisphereLight);
 
-  const sun = new THREE.DirectionalLight("#ffe8a0", 3.6);
-  sun.position.set(-32, 38, 26);
+  const sun = new THREE.DirectionalLight("#ffc978", 3.6);
+  sun.position.set(-150, 70, -70);
+  sun.target.position.set(0, 0, 0);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
-  sun.shadow.camera.left = -80;
-  sun.shadow.camera.right = 80;
-  sun.shadow.camera.top = 70;
-  sun.shadow.camera.bottom = -70;
-  sun.shadow.camera.near = 2;
-  sun.shadow.bias = -0.0008;
-  sun.shadow.normalBias = 0.04;
+  sun.shadow.mapSize.set(isMobile ? 2048 : 4096, isMobile ? 2048 : 4096);
+  sun.shadow.camera.left = -130;
+  sun.shadow.camera.right = 130;
+  sun.shadow.camera.top = 110;
+  sun.shadow.camera.bottom = -110;
+  sun.shadow.camera.near = 10;
+  sun.shadow.camera.far = 600;
+  sun.shadow.bias = -0.0004;
+  sun.shadow.normalBias = 0.35;
   scene.add(sun);
+  scene.add(sun.target);
 
-  const fillLight = new THREE.DirectionalLight("#b4c8e8", 0.5);
+  const fillLight = new THREE.DirectionalLight("#b4c8e8", 0.25);
   fillLight.position.set(28, 22, -20);
   scene.add(fillLight);
 
