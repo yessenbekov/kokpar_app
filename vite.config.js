@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: "Кокпар 3D",
         short_name: "Кокпар",
-        description: "Традиционная казахская конная игра — Кокпар 3D",
+        description: "Традиционная казахская конная игра в 3D — играйте онлайн бесплатно в браузере.",
         theme_color: "#1a0f04",
         background_color: "#1a0f04",
         display: "fullscreen",
@@ -19,6 +19,15 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         lang: "ru",
+        categories: ["games", "sports"],
+        screenshots: [
+          {
+            src: "/images/og-preview.png",
+            sizes: "1200x630",
+            type: "image/png",
+            label: "Кокпар 3D — казахская конная игра"
+          }
+        ],
         icons: [
           {
             src: "/icons/icon-192.png",
