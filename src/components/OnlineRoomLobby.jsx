@@ -90,6 +90,7 @@ export function OnlineRoomLobby({
   const canHostStart = Boolean(room && room.status === "lobby" && isHost && allReady && currentPlayer);
 
   function roomMatchSettings() {
+    const opponent = players.find((p) => p.userId !== currentUserId && p.team !== "spectator") ?? null;
     return {
       ...settings,
       modeId: room?.modeId ?? settings.modeId,
@@ -101,7 +102,8 @@ export function OnlineRoomLobby({
       onlineRoomCode: room?.code ?? "",
       onlineMatchId: room?.onlineMatchId ?? "",
       onlineIsHost: isHost,
-      onlinePlayerCount: players.length
+      onlinePlayerCount: players.length,
+      opponentHorseCoatId: opponent?.horseCoatId ?? null
     };
   }
 
@@ -206,14 +208,16 @@ export function OnlineRoomLobby({
       riderName: profile.riderName,
       horseId: selectedHorse.id,
       horseName: selectedHorse.name,
-      horseType: selectedHorse.typeId
+      horseType: selectedHorse.typeId,
+      horseCoatId: selectedHorse.coatId ?? null
     };
 
     if (
       currentPlayer.riderName === nextHorse.riderName &&
       currentPlayer.horseId === nextHorse.horseId &&
       currentPlayer.horseName === nextHorse.horseName &&
-      currentPlayer.horseType === nextHorse.horseType
+      currentPlayer.horseType === nextHorse.horseType &&
+      currentPlayer.horseCoatId === nextHorse.horseCoatId
     ) {
       return undefined;
     }
@@ -228,7 +232,7 @@ export function OnlineRoomLobby({
     return () => {
       active = false;
     };
-  }, [room?.id, currentUserId, currentPlayer?.horseId, currentPlayer?.horseName, currentPlayer?.horseType, currentPlayer?.riderName, profile.riderName, selectedHorse.id, selectedHorse.name, selectedHorse.typeId]);
+  }, [room?.id, currentUserId, currentPlayer?.horseId, currentPlayer?.horseName, currentPlayer?.horseType, currentPlayer?.horseCoatId, currentPlayer?.riderName, profile.riderName, selectedHorse.id, selectedHorse.name, selectedHorse.typeId, selectedHorse.coatId]);
 
   useEffect(() => {
     if (!room?.id || room.status !== "starting" || !room.onlineMatchId || startedRoomRef.current === room.id) return;

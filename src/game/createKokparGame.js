@@ -122,7 +122,7 @@ const BLUE_RIDER_NAMES = ["Сен", "Арман", "Ерлан", "Данияр", 
 const RED_RIDER_NAMES = ["Бек", "Нур", "Самат", "Руслан", "Марат"];
 const AI_HORSE_ROTATION = ["argymak", "zhuyrik", "auyr", "argymak", "auyr"];
 
-function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null, aiSpeedScale = 1, aiAccelScale = 1, soloOnly = false) {
+function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, playerHorseName = null, playerTeam = TEAM.blue, playerCoatId = null, aiSpeedScale = 1, aiAccelScale = 1, soloOnly = false, remoteCoatId = null) {
   if (soloOnly) {
     return [
       createRider({
@@ -160,7 +160,7 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         color: blueIsPlayer ? COLORS.blue : COLORS.blueAlt,
         horseType: blueIsPlayer ? playerHorseType : AI_HORSE_ROTATION[i],
         horseName: blueIsPlayer ? playerHorseName : null,
-        coatId: blueIsPlayer ? playerCoatId : null,
+        coatId: blueIsPlayer ? playerCoatId : (i === 0 && playerTeam === TEAM.red ? remoteCoatId : null),
         aiSpeedScale: blueIsPlayer ? 1 : aiSpeedScale,
         aiAccelScale: blueIsPlayer ? 1 : aiAccelScale
       })
@@ -176,7 +176,7 @@ function createInitialRiders(teamSize, playerHorseType = DEFAULT_HORSE_TYPE_ID, 
         color: COLORS.red,
         horseType: redIsPlayer ? playerHorseType : AI_HORSE_ROTATION[(i + 1) % AI_HORSE_ROTATION.length],
         horseName: redIsPlayer ? playerHorseName : null,
-        coatId: redIsPlayer ? playerCoatId : null,
+        coatId: redIsPlayer ? playerCoatId : (i === 0 && playerTeam === TEAM.blue ? remoteCoatId : null),
         aiSpeedScale: redIsPlayer ? 1 : aiSpeedScale,
         aiAccelScale: redIsPlayer ? 1 : aiAccelScale
       })
@@ -215,6 +215,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     horseType: horseTypeById(options.horseType).id,
     horseName: typeof options.horseName === "string" && options.horseName.trim() ? options.horseName.trim() : null,
     horseCoatId: typeof options.horseCoatId === "string" ? options.horseCoatId : null,
+    opponentCoatId: typeof options.opponentHorseCoatId === "string" ? options.opponentHorseCoatId : null,
     onMatchEvent: typeof options.onMatchEvent === "function" ? options.onMatchEvent : null
   };
   const isTraining = options.modeId === "training";
@@ -264,7 +265,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   scene.add(redGoal);
   arenaPresentation.refreshFlags();
 
-  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale, isTraining);
+  const riders = createInitialRiders(gameSettings.teamSize, gameSettings.horseType, gameSettings.horseName, isSpectator ? null : playerTeam, gameSettings.horseCoatId, difficulty.speedScale, difficulty.accelScale, isTraining, isOnline ? gameSettings.opponentCoatId : null);
   const player = riders.find(r => r.human) ?? riders[0];
 
   // Apply equipment bonuses to the human player's stats
@@ -2308,7 +2309,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
         b: match.blue,
         r: match.red,
         t: Math.round(match.time * 10) / 10,
-        p: match.phase
+        p: match.phase,
+        d: match.duelMode ? 1 : 0
       }
     };
   }
@@ -2319,14 +2321,18 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (state.r) {
       state.r.forEach((rd, i) => {
         const rider = riders[i];
-        if (!rider || rider === player) return;
+        if (!rider) return;
+        const isLocal = rider === player;
         const dist = Math.hypot(rd[0] - rider.x, rd[1] - rider.z);
-        const alpha = dist > 4 ? 1 : 0.35;
+        // For the local player only correct when divergence is significant (>2 m)
+        // to avoid fighting the local prediction on small discrepancies.
+        if (isLocal && dist < 2) return;
+        const alpha = dist > 4 ? 1 : (isLocal ? 0.12 : 0.35);
         rider.x += (rd[0] - rider.x) * alpha;
         rider.z += (rd[1] - rider.z) * alpha;
         rider.vx = rd[2];
         rider.vz = rd[3];
-        rider.rotation = rd[4];
+        if (!isLocal) rider.rotation = rd[4];
       });
     }
 
@@ -2355,6 +2361,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
       match.blue = state.m.b;
       match.red = state.m.r;
       match.time = state.m.t;
+      match.duelMode = Boolean(state.m.d);
       if (state.m.p !== match.phase) {
         match.phase = state.m.p;
         if (state.m.p === "goal" && (prevBlue !== match.blue || prevRed !== match.red)) {

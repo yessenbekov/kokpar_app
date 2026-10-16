@@ -46,6 +46,7 @@ function playerFromRow(row) {
     horseId: row.horse_id,
     horseName: row.horse_name,
     horseType: row.horse_type,
+    horseCoatId: row.horse_coat_id ?? null,
     team: row.team_side,
     ready: Boolean(row.ready),
     joinedAt: row.joined_at,
@@ -77,6 +78,7 @@ function playerRow({ user, profile, selectedHorse, teamSide }) {
     horse_id: selectedHorse.id,
     horse_name: selectedHorse.name,
     horse_type: selectedHorse.typeId,
+    horse_coat_id: selectedHorse.coatId ?? null,
     team_side: side,
     ready: false
   };
@@ -197,6 +199,7 @@ export const onlineRoomStore = {
     if (updates.horseId) row.horse_id = updates.horseId;
     if (updates.horseName) row.horse_name = updates.horseName;
     if (updates.horseType) row.horse_type = updates.horseType;
+    if ("horseCoatId" in updates) row.horse_coat_id = updates.horseCoatId ?? null;
     if (updates.teamSide) {
       row.team_side = updates.teamSide === "red" ? "red" : updates.teamSide === "spectator" ? "spectator" : "blue";
     }
