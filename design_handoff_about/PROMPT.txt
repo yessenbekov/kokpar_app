@@ -1,0 +1,7 @@
+Реализуй design_handoff_about/README.md — только эту задачу.
+
+- На главном экране замени полосу «Демеушілік» на «Об игре» и сделай новую страницу AboutGame.jsx по README и скриншоту design_handoff_about/screenshots/11a-about.png.
+- Тексты, номер карты, email и Instagram бери из README дословно.
+- Логику PWA (isInPwa / isIos / isAndroid / beforeinstallprompt) вынеси из PwaInstallBanner.jsx в src/app/pwa.js и используй в обоих местах.
+- Арену (arenaV2.js), HUD, игру, магазин и конюшню не трогай.
+- В конце сверь страницу со скриншотом и перечисли изменённые файлы.
