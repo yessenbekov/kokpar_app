@@ -101,6 +101,21 @@ export default function App() {
         },
         onReceiveInput(input) {
           gameRef.current?.setRemoteRiderInput(input);
+        },
+        onHostLeft() {
+          setHud((h) => ({
+            ...h,
+            message: "Хост вышел из игры",
+            submessage: "Матч завершён. Возврат в меню…",
+            showBanner: true
+          }));
+          setTimeout(() => {
+            gameRef.current?.destroy();
+            gameRef.current = null;
+            setActiveSettings(null);
+            setReady(false);
+            setSyncStatus("idle");
+          }, 3000);
         }
       });
 
@@ -118,6 +133,7 @@ export default function App() {
 
     return () => {
       if (stateBroadcastInterval) clearInterval(stateBroadcastInterval);
+      if (isOnlineHost) syncRef.current?.notifyHostLeft();
       syncRef.current?.destroy();
       syncRef.current = null;
       setSyncStatus("idle");
