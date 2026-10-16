@@ -13975,9 +13975,9 @@ body,
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0 16px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+}
+.about-scroll > * + * {
+  margin-top: 16px;
 }
 
 /* Section label */
