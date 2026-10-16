@@ -1,0 +1,14 @@
+Положи папку design_handoff_landscape в корень репозитория kokpar_app и вставь в Claude Code этот текст:
+
+---
+Прочитай design_handoff_landscape/README.md и открой design_handoff_landscape/Kokpar Menu.dc.html в браузере (разделы 12 и 13). Скриншоты всех экранов лежат в design_handoff_landscape/screenshots/.
+Задача: сделать горизонтальную раскладку всех экранов меню, чтобы игроку не нужно было поворачивать телефон после матча.
+
+1. Убери принудительный .portrait-lock для экранов меню (App.jsx, app.css). Меню должно работать и в вертикали, и в горизонтали; блок поворота оставь только для самого матча, если он нужен.
+2. Добавь в app.css медиазапрос @media (orientation: landscape) and (max-height: 520px) и сделай раскладки по README для: AuthGate, ModeSelector, MatchSetup, HorseStable (+ карточка лошади), OnlineRoomLobby, Marketplace/Shop (монеты), AboutGame, настройки и HorseOnboarding.
+3. MatchHud: пауза и подтверждение выхода в горизонтали по экранам 12a/12b (две колонки: счёт слева, кнопки справа).
+4. MatchReward: раскладка 12c, добавь кнопку «Поделиться».
+5. Новый компонент ShareResult (12g/12h): рисует карточку 1080×1920 (или 1080×1080) на canvas, отправляет через navigator.share({files}), если не получилось — скачивает PNG.
+6. Используй существующие классы и токены из app.css, текст бери через t(ru, kz, en). Учти safe-area: env(safe-area-inset-left/right).
+Проверь на ширине 844×390 и 667×375. По каждому экрану сверяйся с макетом.
+---
