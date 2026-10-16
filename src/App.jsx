@@ -718,6 +718,7 @@ export default function App() {
         reward={matchReward}
         onRestart={() => { gameRef.current?.restart(); setMatchReward(null); }}
         onLobby={() => { openSettings(); setMatchReward(null); }}
+        riderName={profile?.riderName ?? ""}
       />
 
       {activeSettings?.onlineMatchId && (

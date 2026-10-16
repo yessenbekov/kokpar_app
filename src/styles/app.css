@@ -14432,3 +14432,497 @@ body,
   text-align: center;
   padding: 8px 0 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDSCAPE LAYOUTS  (phone rotated: ≤520px tall)
+   breakpoint: @media (orientation: landscape) and (max-height: 520px)
+   Reference screen: 844×390 — all overrides live only inside this block
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (orientation: landscape) and (max-height: 520px) {
+
+  /* ── Landscape tokens ────────────────────────────────────────── */
+  :root {
+    --ls-pl: max(52px, calc(env(safe-area-inset-left, 0px) + 16px));
+    --ls-pr: 30px;
+    --ls-pt: 18px;
+    --ls-pb: 20px;
+  }
+
+  /* ── Setup panel base ────────────────────────────────────────── */
+  .setup-panel.stable-panel {
+    height: 100dvh;
+    max-height: none;
+  }
+
+  /* ── 12d — HOME SCREEN ───────────────────────────────────────── */
+  /* Two-column grid: left = hero, right 320px = actions */
+  .setup-panel:has(.home-profile-row) {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+  }
+
+  .setup-panel:has(.home-profile-row) .status-bar-spacer {
+    display: none;
+  }
+
+  .setup-panel:has(.home-profile-row) .home-profile-row {
+    grid-column: 1;
+    grid-row: 1;
+    padding: var(--ls-pt) 16px 4px var(--ls-pl);
+  }
+
+  .setup-panel:has(.home-profile-row) .home-scene-card {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 4px 12px 4px var(--ls-pl);
+    min-height: 0;
+    flex: none;
+  }
+
+  .setup-panel:has(.home-profile-row) .home-actions {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--ls-pt) var(--ls-pr) 14px 16px;
+    border-left: 1px solid rgba(190, 148, 60, 0.20);
+    background: rgba(18, 10, 2, 0.55);
+    overflow-y: auto;
+  }
+
+  .setup-panel:has(.home-profile-row) .bottom-nav {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .home-play-btn {
+    font-size: 15px !important;
+  }
+
+  /* ── 12e — MODE SELECTOR ─────────────────────────────────────── */
+  .wizard-mode-grid {
+    grid-template-columns: 1.35fr 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .wizard-mode-big-card {
+    flex-direction: row !important;
+    height: auto !important;
+    align-items: center;
+  }
+
+  .wizard-mode-big-preview {
+    width: 110px !important;
+    height: 110px !important;
+    min-height: unset !important;
+    flex: none !important;
+  }
+
+  .wizard-mode-big-img {
+    height: 110px !important;
+  }
+
+  .wizard-section {
+    overflow-y: auto;
+    padding-top: var(--ls-pt);
+    padding-bottom: var(--ls-pb);
+    padding-left: var(--ls-pl);
+    padding-right: var(--ls-pr);
+  }
+
+  .tab-footer.wizard-footer {
+    position: static;
+  }
+
+  /* ── 12f — MATCH SETTINGS STEP ───────────────────────────────── */
+  /* Settings content becomes 2-col grid via setup-content scroll */
+  .wizard-section .wizard-side-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .wizard-section .wizard-three-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .wizard-label {
+    margin: 4px 0 2px;
+  }
+
+  /* ── 12a — PAUSE OVERLAY ─────────────────────────────────────── */
+  .nh-overlay {
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nh-pause-panels {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 28px;
+    width: 100%;
+    max-width: 740px;
+  }
+
+  .nh-pause-menu {
+    max-height: calc(100dvh - 36px);
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .nh-exit-confirm {
+    max-height: calc(100dvh - 36px);
+    overflow-y: auto;
+  }
+
+  /* ── 12b — EXIT CONFIRM MODAL ────────────────────────────────── */
+  /* .nh-exit-confirm is already centered via the pause grid */
+
+  /* ── 12c — MATCH REWARD ──────────────────────────────────────── */
+  .mr-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .mr-card {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    grid-template-rows: 1fr auto;
+  }
+
+  .mr-top {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    justify-content: center;
+  }
+
+  .mr-body {
+    grid-column: 2;
+    grid-row: 1;
+    overflow-y: auto;
+  }
+
+  .mr-actions {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* ── 13a — HORSE STABLE LIST ─────────────────────────────────── */
+  .stable-screen .stable-horse-list {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    flex-direction: unset !important;
+    gap: 10px !important;
+    padding: 4px var(--ls-pr) 12px var(--ls-pl) !important;
+    overflow-y: auto;
+    align-items: start;
+  }
+
+  /* ── 13b — HORSE CARD DETAIL ─────────────────────────────────── */
+  .horse-card-screen {
+    flex-direction: row;
+  }
+
+  .horse-card-hero {
+    width: 330px;
+    height: 100% !important;
+    flex: none !important;
+  }
+
+  .horse-card-content {
+    flex: 1;
+    overflow-y: auto;
+    min-width: 0;
+  }
+
+  .horse-card-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ── 13c — ONLINE ROOM LOBBY ─────────────────────────────────── */
+  .online-lobby {
+    height: 100%;
+    overflow-y: auto;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+  }
+
+  /* ── 13d — SETTINGS PAGE ─────────────────────────────────────── */
+  .settings-page {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+    align-items: start;
+  }
+
+  .settings-account-row {
+    grid-column: 1 / -1;
+  }
+
+  /* ── 13e — COIN SHOP ─────────────────────────────────────────── */
+  .coin-shop-body,
+  .coin-shop-content {
+    overflow-y: auto;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+  }
+
+  /* ── 13f — ABOUT GAME ────────────────────────────────────────── */
+  .about-page {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+    align-items: start;
+  }
+
+  /* ── 13g — AUTH GATE ─────────────────────────────────────────── */
+  .auth-gate-panel {
+    flex-direction: row !important;
+    align-items: stretch;
+    overflow: hidden;
+    max-height: 100dvh;
+  }
+
+  .auth-gate-brand {
+    flex: 1;
+    justify-content: center;
+    padding: var(--ls-pt) 24px var(--ls-pb) var(--ls-pl) !important;
+  }
+
+  .auth-gate-form {
+    width: 320px;
+    flex: none;
+    max-height: 100dvh;
+    overflow-y: auto;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) 24px !important;
+  }
+
+  /* Auth gate brand title */
+  .auth-gate-brand h1 {
+    font-size: clamp(28px, 5vw, 48px) !important;
+  }
+
+  /* ── 13h — HORSE ONBOARDING ──────────────────────────────────── */
+  .onboarding-step {
+    display: grid !important;
+    grid-template-columns: 230px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+    overflow: hidden;
+  }
+
+  .onboarding-options-grid,
+  .onboarding-choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    overflow-y: auto;
+    max-height: calc(100dvh - 40px);
+  }
+
+  /* ── SHARE RESULT PANEL ──────────────────────────────────────── */
+  .share-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ls-pt) var(--ls-pr) var(--ls-pb) var(--ls-pl);
+  }
+
+  .share-card {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    background: #1a0e04;
+    border: 1px solid rgba(190, 148, 60, 0.30);
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 680px;
+    max-height: calc(100dvh - 40px);
+  }
+
+  .share-card-preview {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0 16px 16px;
+    gap: 8px;
+  }
+
+  .share-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 16px 16px 0;
+    overflow-y: auto;
+  }
+}
+
+/* ── Share overlay (all orientations) ───────────────────────────── */
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.share-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: linear-gradient(180deg, #2a1808 0%, #130c02 100%);
+  border: 1px solid rgba(190, 148, 60, 0.30);
+  border-radius: 16px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90dvh;
+}
+
+.share-card-preview {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 0;
+  gap: 12px;
+}
+
+.share-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+}
+
+.share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.share-title {
+  font: 700 16px Oswald, sans-serif;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.share-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(214, 178, 110, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  flex: none;
+}
+
+.share-close-btn:hover {
+  color: var(--ink);
+  background: rgba(190, 148, 60, 0.12);
+}
+
+.share-format-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.share-format-btn {
+  flex: 1;
+  height: 34px;
+  border: 1px solid rgba(190, 148, 60, 0.28);
+  border-radius: 8px;
+  background: rgba(52, 32, 10, 0.70);
+  color: rgba(214, 178, 110, 0.65);
+  font: 600 12px Manrope, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.share-format-btn.active {
+  background: rgba(208, 160, 48, 0.22);
+  border-color: rgba(208, 160, 48, 0.55);
+  color: #f0c347;
+}
+
+.share-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(190, 148, 60, 0.22);
+  border-radius: 10px;
+  background: rgba(52, 32, 10, 0.80);
+  color: var(--ink);
+  font: 600 12px Manrope, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.share-btn:hover {
+  background: rgba(68, 42, 14, 0.90);
+}
+
+.share-btn-icon {
+  font-size: 16px;
+  flex: none;
+}
+
+.share-more-btn {
+  width: 100%;
+  height: 40px;
+  border: 1px solid rgba(190, 148, 60, 0.20);
+  border-radius: 9px;
+  background: none;
+  color: rgba(214, 178, 110, 0.60);
+  font: 600 12px Manrope, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.share-more-btn:hover {
+  background: rgba(52, 32, 10, 0.60);
+  color: var(--ink);
+}
+
+.share-canvas-preview {
+  border-radius: 8px;
+  overflow: hidden;
+  flex: none;
+}

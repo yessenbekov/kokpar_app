@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Star, Target, Sword } from "lucide-react";
+import { ShareResult } from "./ShareResult.jsx";
 
 function getLang() {
   try { return localStorage.getItem("kokpar_lang") || "ru"; } catch { return "ru"; }
@@ -11,12 +13,15 @@ function t(ru, kz, en) {
   return ru;
 }
 
-export function MatchReward({ reward, onRestart, onLobby }) {
+export function MatchReward({ reward, onRestart, onLobby, riderName = "" }) {
+  const [showShare, setShowShare] = useState(false);
+
   if (!reward) return null;
 
   const { won, scoreBlue, scoreRed, teamSide, playerGoals, playerSteals, xpGain, coinsGain, dailyBonusCoins, leveledUp, newLevel, horseName } = reward;
 
   return (
+    <>
     <div className="mr-overlay" role="dialog" aria-modal="true" aria-label={t("Итоги матча", "Матч нәтижесі", "Match Results")}>
       <div className="mr-card">
         <div className="mr-top">
@@ -90,11 +95,43 @@ export function MatchReward({ reward, onRestart, onLobby }) {
           <button className="mr-btn mr-btn--secondary" type="button" onClick={onLobby}>
             {t("В конюшню", "Қораға", "To Stable")}
           </button>
+          <button
+            className="mr-btn"
+            type="button"
+            onClick={() => setShowShare(true)}
+            style={{
+              border: "1px solid rgba(208,160,48,.5)",
+              background: "rgba(208,160,48,.14)",
+              color: "#f0c347",
+            }}
+          >
+            ↗ {t("Поделиться", "Бөлісу", "Share")}
+          </button>
           <button className="mr-btn mr-btn--primary" type="button" onClick={onRestart}>
             {t("Ещё раз", "Тағы рет", "Play again")}
           </button>
         </div>
       </div>
     </div>
+
+    <ShareResult
+      visible={showShare}
+      onClose={() => setShowShare(false)}
+      result={{
+        won,
+        scoreBlue,
+        scoreRed,
+        goals: playerGoals ?? 0,
+        tackles: playerSteals ?? 0,
+        possession: reward.possession ?? 50,
+        goalType: reward.goalType ?? "circle",
+        teamSize: String(reward.teamSize ?? "3"),
+        matchMinutes: reward.matchMinutes ?? 3,
+      }}
+      riderName={riderName}
+      horseName={horseName ?? ""}
+      t={t}
+    />
+    </>
   );
 }
