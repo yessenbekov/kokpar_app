@@ -65,12 +65,36 @@
     <link rel="preload" href="/models/riders/blue1.glb" as="fetch" crossorigin>
     <link rel="preload" href="/models/riders/red1.glb" as="fetch" crossorigin>
     <link rel="preload" href="/models/serke/serke.glb" as="fetch" crossorigin>
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!--
+        Статический контент для Googlebot (первый проход без JS).
+        React заменяет это содержимое при загрузке.
+      -->
+      <noscript>
+        <style>
+          .seo-fallback { font-family: sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; color: #222; }
+          .seo-fallback h1 { font-size: 2rem; margin-bottom: 12px; }
+          .seo-fallback p { line-height: 1.6; }
+          .seo-fallback a { color: #2590d0; }
+        </style>
+        <div class="seo-fallback">
+          <h1>Кокпар 3D — казахская конная игра онлайн</h1>
+          <p>
+            Традиционная казахская конная игра Көкпар в браузере. Выбирайте лошадь,
+            соревнуйтесь в формате 3×3, побеждайте соперников. Бесплатно, без установки.
+          </p>
+          <p>Для игры включите JavaScript в браузере.</p>
+          <p><a href="https://kokpar.online">kokpar.online</a></p>
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
