@@ -6,6 +6,7 @@ import { Marketplace } from "./Marketplace.jsx";
 import { MatchHistory } from "./MatchHistory.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 import { Shop } from "./Shop.jsx";
+import { AboutGame } from "./AboutGame.jsx";
 
 const _coinFmt = new Intl.NumberFormat("ru-RU");
 function formatCoins(value) {
@@ -414,11 +415,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 </div>
               )}
 
-              <button type="button" className="home-demeushire-row" onClick={() => { setHomeScreen(false); setNavTab("demeushire"); }}>
-                <span className="home-demeushire-icon">♥</span>
+              <button type="button" className="home-demeushire-row" onClick={() => { setHomeScreen(false); setNavTab("about"); }}>
+                <span className="home-demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 13, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 6, color: "#d4a028" }}>i</span>
                 <span className="home-demeushire-text">
-                  <strong>{t("Демеушілік · поддержать", "Демеушілік", "Support")}</strong>
-                  <span>{t("Игру делает один человек · о разработчике", "Ойынды бір адам жасайды", "Made by one person")}</span>
+                  <strong>{t("Об игре", "Ойын туралы", "About")}</strong>
+                  <span>{t("Веб-версия · полная игра в разработке", "Веб-нұсқа · толық ойын әзірленуде", "Web version · full game in development")}</span>
                 </span>
                 <span className="home-demeushire-arrow">›</span>
               </button>
@@ -511,9 +512,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       );
                     })}
                   </div>
-                  <button type="button" className="demeushire-row" onClick={() => setNavTab("demeushire")}>
-                    <span className="demeushire-icon">♥</span>
-                    <span className="demeushire-text">{t("Демеушілік · поддержать проект", "Демеушілік · жобаны қолдау", "Support the project")}</span>
+                  <button type="button" className="demeushire-row" onClick={() => setNavTab("about")}>
+                    <span className="demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 12, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 5, color: "#d4a028" }}>i</span>
+                    <span className="demeushire-text">{t("Об игре · веб-версия · полная в разработке", "Ойын туралы · веб-нұсқа · толық әзірленуде", "About · web version · full game in development")}</span>
                     <span className="demeushire-arrow">›</span>
                   </button>
 
@@ -778,8 +779,13 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             </div>
           )}
 
-          {/* TAB: ДЕМЕУШІЛІК */}
-          {navTab === "demeushire" && (
+          {/* TAB: ОБ ИГРЕ */}
+          {navTab === "about" && (
+            <AboutGame t={t} onBack={goHome} auth={auth} />
+          )}
+
+          {/* TAB: ДЕМЕУШІЛІК (скрыт, оставлен для совместимости) */}
+          {false && navTab === "demeushire" && (
             <Demeushire t={t} onBack={goHome} />
           )}
 
@@ -889,11 +895,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   )}
                 </div>
 
-                <button type="button" className="demeushire-row demeushire-row--settings" onClick={() => setNavTab("demeushire")}>
-                  <span className="demeushire-icon">♥</span>
+                <button type="button" className="demeushire-row demeushire-row--settings" onClick={() => setNavTab("about")}>
+                  <span className="demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 12, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 5, color: "#d4a028" }}>i</span>
                   <span className="demeushire-text">
-                    <strong>{t("Демеушілік · поддержать", "Демеушілік", "Support")}</strong>
-                    <span>{t("О разработчике и куда идут взносы", "Әзірлеуші туралы", "About the developer")}</span>
+                    <strong>{t("Об игре", "Ойын туралы", "About")}</strong>
+                    <span>{t("Веб-версия · полная игра в разработке", "Веб-нұсқа · толық ойын әзірленуде", "Web version · full game in development")}</span>
                   </span>
                   <span className="demeushire-arrow">›</span>
                 </button>

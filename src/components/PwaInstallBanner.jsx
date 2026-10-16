@@ -1,21 +1,5 @@
 import { useState, useEffect } from "react";
-
-// Detect if running as installed PWA
-function isInPwa() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: fullscreen)").matches ||
-    window.navigator.standalone === true
-  );
-}
-
-function isIos() {
-  return /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
-
-function isAndroid() {
-  return /Android/.test(navigator.userAgent);
-}
+import { isInPwa, isIos, isAndroid } from "../app/pwa.js";
 
 const DISMISSED_KEY = "pwa_install_dismissed";
 
