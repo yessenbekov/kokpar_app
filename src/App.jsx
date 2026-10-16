@@ -740,6 +740,8 @@ export default function App() {
           bodyCheckActive={hud.bodyCheckActive}
           bodyCheckCooldown={hud.bodyCheckCooldown}
           bodyCheckReady={hud.bodyCheckReady}
+          holdsSerke={hud.carry?.startsWith("Удерживай") || hud.carry?.startsWith("Сила")}
+          lang={settings.lang ?? "ru"}
         />
       )}
 

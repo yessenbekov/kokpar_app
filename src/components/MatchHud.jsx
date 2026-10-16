@@ -51,6 +51,8 @@ export function MatchHud({
     hud.serkeTeam === "red" ? "Красные владеют" :
     "Серке";
 
+  const playerHoldsSerke = hud.carry?.startsWith("Удерживай") || hud.carry?.startsWith("Сила");
+
   const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
 
   return (
@@ -132,7 +134,9 @@ export function MatchHud({
           <div className="nh-actions">
             <button className="nh-action-btn nh-action-amber" type="button">
               <span className="nh-action-amber-icon" />
-              {t("Поднять серке", "Серкені көтеру", "Pick up")}
+              {playerHoldsSerke
+                ? t("Бросить", "Лақтыру", "Throw")
+                : t("Поднять серке", "Серкені көтеру", "Pick up")}
               <kbd className="nh-action-key">Space</kbd>
             </button>
             <div className="nh-actions-row2">

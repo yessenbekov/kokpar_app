@@ -9,8 +9,11 @@ export function TouchControls({
   onBodyCheck,
   bodyCheckActive,
   bodyCheckCooldown,
-  bodyCheckReady
+  bodyCheckReady,
+  holdsSerke,
+  lang
 }) {
+  const t = (ru, kz, en) => lang === "kz" ? kz : lang === "en" ? (en ?? ru) : ru;
   return (
     <section className="touch-controls" aria-label="Сенсорное управление">
       <div
@@ -46,7 +49,7 @@ export function TouchControls({
         <button
           className="touch-btn-serke"
           type="button"
-          aria-label="Поднять серке"
+          aria-label={holdsSerke ? t("Бросить", "Лақтыру", "Throw") : t("Поднять серке", "Серкені көтеру", "Pick up")}
           onPointerDown={onActionPress}
           onPointerUp={onActionRelease}
           onPointerCancel={onActionRelease}
@@ -54,7 +57,9 @@ export function TouchControls({
           onContextMenu={(event) => event.preventDefault()}
         >
           <span className="touch-btn-serke-diamond" />
-          <span className="touch-btn-serke-label">Поднять</span>
+          <span className="touch-btn-serke-label">
+            {holdsSerke ? t("Бросить", "Лақтыру", "Throw") : t("Поднять", "Көтеру", "Pick up")}
+          </span>
         </button>
       </div>
     </section>

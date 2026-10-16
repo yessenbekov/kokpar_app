@@ -56,15 +56,12 @@ export function AboutGame({ t, onBack, auth }) {
 
   return (
     <div className="tab-pane about-page">
-      {/* Header */}
-      <div className="wizard-step-header">
-        <button type="button" className="wizard-back-btn" onClick={onBack}>‹</button>
-        <span className="wizard-step-title">{t("Об игре", "Ойын туралы", "About")}</span>
-      </div>
-
-      <div className="about-scroll">
-
-        {/* 1. Hero */}
+      {/* Left column: header + hero + wait button (landscape: sticky; portrait: inline) */}
+      <div className="about-left-col">
+        <div className="wizard-step-header">
+          <button type="button" className="wizard-back-btn" onClick={onBack}>‹</button>
+          <span className="wizard-step-title">{t("Об игре", "Ойын туралы", "About")}</span>
+        </div>
         <div className="about-hero">
           <div className="about-hero-img" />
           <div className="about-hero-overlay" />
@@ -80,6 +77,19 @@ export function AboutGame({ t, onBack, auth }) {
             </p>
           </div>
         </div>
+        <button
+          type="button"
+          className={`about-wait-btn${waitFull ? " about-wait-btn--done" : ""}`}
+          onClick={handleWaitFull}
+        >
+          {waitFull
+            ? t("Вы в списке ✓ — сообщим о релизе", "Тізімдесіз ✓ — шығарылым туралы хабарлаймыз", "You're on the list ✓ — we'll notify you")
+            : t("ЖДУ ПОЛНУЮ ВЕРСИЮ", "ТОЛЫҚ НҰСҚАНЫ КҮТЕМІН", "WAITING FOR FULL VERSION")}
+        </button>
+      </div>
+
+      {/* Right column: scrollable sections */}
+      <div className="about-scroll">
 
         {/* 2. Why */}
         <div className="about-section-label">{t("ЗАЧЕМ ЭТА ВЕРСИЯ", "БҰЛ НҰСҚА НЕ ҮШІН", "WHY THIS VERSION")}</div>
@@ -90,15 +100,6 @@ export function AboutGame({ t, onBack, auth }) {
             "I want to know if people need digital kokpar before investing years in a full game. Every match, review, and button press below is a signal that it's worth continuing."
           )}
         </p>
-        <button
-          type="button"
-          className={`about-wait-btn${waitFull ? " about-wait-btn--done" : ""}`}
-          onClick={handleWaitFull}
-        >
-          {waitFull
-            ? t("Вы в списке ✓ — сообщим о релизе", "Тізімдесіз ✓ — шығарылым туралы хабарлаймыз", "You're on the list ✓ — we'll notify you")
-            : t("ЖДУ ПОЛНУЮ ВЕРСИЮ", "ТОЛЫҚ НҰСҚАНЫ КҮТЕМІН", "WAITING FOR FULL VERSION")}
-        </button>
 
         {/* 3. Full version features */}
         <div className="about-section-label">{t("ЧТО БУДЕТ В ПОЛНОЙ ВЕРСИИ", "ТОЛЫҚ НҰСҚАДА НЕ БОЛАДЫ", "WHAT'S IN THE FULL VERSION")}</div>
@@ -293,7 +294,7 @@ export function AboutGame({ t, onBack, auth }) {
           kokpar ◆ online · {t("веб-версия", "веб-нұсқа", "web version")}
         </div>
 
-      </div>
+      </div>{/* /about-scroll */}
     </div>
   );
 }
