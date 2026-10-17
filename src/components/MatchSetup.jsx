@@ -7,6 +7,7 @@ import { MatchHistory } from "./MatchHistory.jsx";
 import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 import { Shop } from "./Shop.jsx";
 import { AboutGame } from "./AboutGame.jsx";
+import { EFIR_NEWS } from "../app/efirNews.js";
 
 const _coinFmt = new Intl.NumberFormat("ru-RU");
 function formatCoins(value) {
@@ -356,10 +357,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="home-profile-row">
               <div className="home-avatar">{profile.riderName.slice(0, 1)}</div>
               <div className="home-profile-info">
-                <span className="home-role">Шабандоз</span>
+                <span className="home-role">{t("Шабандоз", "Шабандоз", "Rider")}</span>
                 <span className="home-name">{profile.riderName || "Ерлан"}</span>
               </div>
-              <span className="home-level-chip">Ур. {profile.level}</span>
+              <span className="home-level-chip">{t("Ур.", "Дең.", "Lv.")} {profile.level}</span>
+              <div className="ef-air-chip"><span className="ef-air-dot" />{t("ЭФИР", "ЭФИР", "LIVE")}</div>
               <button className="home-coins-chip" type="button" onClick={() => setShowCoinShop(true)}>
                 {formatCoins(profile.coins)} ⌾<span className="coins-chip-plus">+</span>
               </button>
@@ -368,22 +370,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="home-scene-card">
               <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
-                <div className="home-emblem">
-                  <svg className="home-emblem-diamond" viewBox="0 0 90 104" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M45 2 L88 42 L45 100 L2 42 Z" fill="url(#dg)" stroke="rgba(240,195,71,0.5)" strokeWidth="1.5"/>
-                    <path d="M45 2 L60 24 L45 18 L30 24 Z" fill="rgba(240,195,71,0.6)" stroke="none"/>
-                    <defs>
-                      <linearGradient id="dg" x1="45" y1="2" x2="45" y2="100" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#f2e2b8"/>
-                        <stop offset="40%" stopColor="#d4a028"/>
-                        <stop offset="100%" stopColor="#8a5a10"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <span className="home-emblem-letter">К</span>
+                <div className="home-logo">{t("КОКПАР", "КӨКПАР", "KOKPAR")}</div>
+                <div className="home-team-chips">
+                  <div className="home-team-chip-blue">■ {t("СИНИЕ", "КӨКТЕР", "BLUE")}</div>
+                  <div className="home-team-chip-red">■ {t("КРАСНЫЕ", "ҚЫЗЫЛДАР", "RED")}</div>
                 </div>
-                <div className="home-logo">КӨКПАР</div>
-                <div className="home-logo-3d">3 D</div>
               </div>
             </div>
 
@@ -416,13 +407,25 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               )}
 
               <button type="button" className="home-demeushire-row" onClick={() => { setHomeScreen(false); setNavTab("about"); }}>
-                <span className="home-demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 13, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 6, color: "#d4a028" }}>i</span>
+                <span className="home-demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 13, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 0, color: "#d4a028" }}>i</span>
                 <span className="home-demeushire-text">
                   <strong>{t("Об игре", "Ойын туралы", "About")}</strong>
                   <span>{t("Веб-версия · полная игра в разработке", "Веб-нұсқа · толық ойын әзірленуде", "Web version · full game in development")}</span>
                 </span>
                 <span className="home-demeushire-arrow">›</span>
               </button>
+            </div>
+
+            {/* News ticker */}
+            <div className="ef-ticker" aria-hidden="true">
+              <div className="ef-ticker-label">{t("ЖАҢАЛЫҚ", "ЖАҢАЛЫҚ", "NEWS")}</div>
+              <div className="ef-ticker-track">
+                <div className="ef-ticker-inner">
+                  {[...EFIR_NEWS, ...EFIR_NEWS].map((item, i) => (
+                    <span key={i} className="ef-ticker-item">{item.ru}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </>
         )}
