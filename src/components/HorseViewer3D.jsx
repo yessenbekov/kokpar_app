@@ -253,7 +253,7 @@ export function HorseViewer3D({ coatId, style }) {
   }, [coatId]);
 
   return (
-    <div ref={mountRef} style={{ width: "100%", height: "100%", position: "relative", ...style }}>
+    <div ref={mountRef} style={{ width: "100%", height: "100%", position: "relative", zIndex: 2, ...style }}>
       {loading && (
         <div style={{
           position: "absolute", inset: 0,

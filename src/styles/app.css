@@ -14634,8 +14634,18 @@ body,
   }
 
   /* ── 13b — HORSE CARD DETAIL ─────────────────────────────────── */
+  /* Fix height chain: give tab-pane a definite height so horse-card-hero { height: 100% } resolves */
+  .setup-content:has(.horse-card-screen) .tab-pane {
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+  }
+
   .horse-card-screen {
     flex-direction: row;
+    height: 100%;
+    min-height: 0;
   }
 
   .horse-card-hero {
