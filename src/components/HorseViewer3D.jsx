@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { coatPresetById } from "../game/horseTypes.js";
 
 const HORSE_GLB_PATH = "/models/horse_arabian.glb";
 const gltfLoader = new GLTFLoader();
+gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 let cachedGltf = null;
 
 function loadHorse() {
