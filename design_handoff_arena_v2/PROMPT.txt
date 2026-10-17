@@ -1,8 +1,0 @@
-Реализуй design_handoff_arena_v2/README.md строго по шагам.
-
-Важно:
-- design_handoff_arena_v2/code/arenaV2.js скопируй в src/game/arenaV2.js БЕЗ ИЗМЕНЕНИЙ. Не переписывай, не «улучшай», не добавляй convertSRGBToLinear.
-- В createKokparGame.js удали старые небо/туман/свет/землю и вызовы createGroundDetails/createArenaEnvironment, подключи createArenaV2 и новые ворота, как в README.
-- Не трогай HUD, камеру, физику и модели лошадей.
-- После правок запусти игру и сравни с design_handoff_arena_v2/screenshots/01-game-golden.jpg, 03-goal-circle.jpg, 04-goal-kazan.jpg. Если не совпадает — найди, где код отличается от arenaV2.js, и исправь.
-- В конце перечисли, какие строки удалил и какие добавил.
