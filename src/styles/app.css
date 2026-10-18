@@ -15846,6 +15846,149 @@ body,
   border-radius: 0 !important;
 }
 
+/* Ready button — gold (primary action) */
+.ready-button {
+  background: rgba(255,255,255,.07) !important;
+  color: rgba(255,255,255,.8) !important;
+  border: 1px solid var(--ef-line) !important;
+  border-radius: 0 !important;
+  font: 600 13px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+.ready-button.active {
+  background: var(--ef-gold) !important;
+  color: var(--ef-gold-txt) !important;
+  border-color: var(--ef-gold) !important;
+  border-radius: 0 !important;
+  clip-path: var(--ef-clip);
+}
+
+.ready-button.secondary {
+  background: transparent !important;
+  color: rgba(255,255,255,.75) !important;
+  border: 1px solid var(--ef-line) !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+}
+
+/* Room code — scoreboard style */
+.lobby-code {
+  font: 700 16px/1 Oswald, sans-serif !important;
+  letter-spacing: .14em !important;
+  color: var(--ef-gold) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Host chip */
+.lobby-host-chip {
+  background: rgba(47,155,224,.15) !important;
+  color: var(--ef-blue) !important;
+  border: 1px solid rgba(47,155,224,.4) !important;
+  border-radius: 0 !important;
+  font: 700 10px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+}
+
+/* Lobby topline / summary */
+.lobby-topline {
+  background: rgba(255,255,255,.04) !important;
+  border-bottom: 1px solid var(--ef-line) !important;
+  border-radius: 0 !important;
+  color: rgba(255,255,255,.8) !important;
+  font: 500 12px/1 Manrope, sans-serif !important;
+}
+
+.lobby-summary span,
+.lobby-summary-btn {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid var(--ef-line) !important;
+  border-radius: 0 !important;
+  color: rgba(255,255,255,.7) !important;
+  font: 600 12px/1 Oswald, sans-serif !important;
+  letter-spacing: .08em !important;
+}
+
+/* Share buttons */
+.lobby-share button {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid var(--ef-line) !important;
+  border-radius: 0 !important;
+  color: rgba(255,255,255,.8) !important;
+}
+
+/* Team choice tabs */
+.team-choice {
+  border-radius: 0 !important;
+  font: 700 12px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+.team-choice.blue.active  { background: var(--ef-blue) !important; color: #fff !important; border-color: var(--ef-blue) !important; }
+.team-choice.red.active   { background: var(--ef-red) !important;  color: #fff !important; border-color: var(--ef-red) !important; }
+
+/* Player rows */
+.lobby-player-avatar {
+  border-radius: 50% !important;
+}
+
+.lobby-player.current {
+  background: rgba(255,255,255,.06) !important;
+  border-left: 2px solid var(--ef-gold) !important;
+}
+
+/* Join form */
+.lobby-join-form input {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+  background: rgba(255,255,255,.05) !important;
+  color: #fff !important;
+  font: 700 16px/1 Oswald, sans-serif !important;
+  letter-spacing: .14em !important;
+}
+
+.lobby-join-form button {
+  border-radius: 0 !important;
+  background: var(--ef-gold) !important;
+  color: var(--ef-gold-txt) !important;
+  border: none !important;
+  font: 700 13px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+}
+
+/* Room list cards */
+.lobby-room-card {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+  background: rgba(255,255,255,.05) !important;
+}
+
+.lobby-room-code {
+  font: 700 14px/1 Oswald, sans-serif !important;
+  color: var(--ef-gold) !important;
+  letter-spacing: .12em !important;
+}
+
+/* Choice cards (Create / Join) */
+.lobby-choice-card {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+  background: rgba(255,255,255,.05) !important;
+  color: rgba(255,255,255,.85) !important;
+}
+
+.lobby-choice-card:hover {
+  border-color: var(--ef-gold) !important;
+  background: rgba(240,195,71,.08) !important;
+}
+
+/* Status messages */
+.lobby-status { border-radius: 0 !important; }
+.lobby-status.success { border-left: 3px solid var(--ef-gold) !important; }
+.lobby-status.error   { border-left: 3px solid var(--ef-red) !important; }
+
 /* ── Horse strip ── */
 .horse-strip {
   border-radius: 0 !important;
