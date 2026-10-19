@@ -16014,4 +16014,95 @@ body,
   .ef-ticker { height: 26px; }
   .ef-ticker-item { line-height: 26px; font-size: 10px; }
 }
+/* ── Coin shop (cshop) Эфир overrides ── */
+.cshop-sheet {
+  border-radius: 0 !important;
+  border-top: 2px solid var(--ef-gold) !important;
+}
+
+.cshop-pkg {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+}
+
+.cshop-pkg--featured {
+  border-color: var(--ef-gold) !important;
+}
+
+.cshop-pkg-badge {
+  border-radius: 0 !important;
+  font: 700 9px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+  padding: 0 6px !important;
+}
+
+.cshop-method {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+  font: 700 12px/1 Oswald, sans-serif !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+
+.cshop-pay-btn {
+  border-radius: 0 !important;
+  clip-path: var(--ef-clip) !important;
+  font: 700 15px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+}
+
+.cshop-ad-row {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+}
+
+.cshop-ad-icon {
+  border-radius: 0 !important;
+}
+
+.cshop-ad-btn {
+  border-radius: 0 !important;
+}
+
+/* Coin screen (full-page) Эфир overrides */
+.cscreen-topbar {
+  border-bottom: 1px solid var(--ef-line) !important;
+}
+
+.cscreen-back {
+  border-radius: 0 !important;
+}
+
+.cscreen-balance-card {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+}
+
+.cscreen-pkg {
+  border-radius: 0 !important;
+  border: 1px solid var(--ef-line) !important;
+}
+
+.cscreen-pkg--featured {
+  border-color: var(--ef-gold) !important;
+}
+
+.cscreen-pkg-badge {
+  border-radius: 0 !important;
+  font: 700 9px/1 Oswald, sans-serif !important;
+  letter-spacing: .1em !important;
+}
+
+.cscreen-pkg-btn {
+  border-radius: 0 !important;
+  clip-path: var(--ef-clip) !important;
+  font: 700 12px/1 Oswald, sans-serif !important;
+  letter-spacing: .08em !important;
+}
+
+.cscreen-pkg-btn--featured {
+  border-radius: 0 !important;
+  clip-path: var(--ef-clip) !important;
+}
+
 /* ═══════════════════════════════════════════════════════ */
