@@ -540,7 +540,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   {t("Конюшня", "Қора", "Stable")}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => setShowCoinScreen(true)}>
-                  {t("Магазин", "Дүкен", "Shop")}
+                  {t("Казна", "Қазына", "Treasury")}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
                   {t("Настройки", "Баптаулар", "Settings")}
