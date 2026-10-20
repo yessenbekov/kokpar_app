@@ -13967,18 +13967,16 @@ body,
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Portrait: left-col is a plain block; about-scroll scrolls below it */
+/* Portrait: left-col and scroll are one continuous flow */
 .about-left-col {
   flex-shrink: 0;
 }
 
 .about-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   padding: 0 16px 32px;
 }
 .about-scroll > * + * {
