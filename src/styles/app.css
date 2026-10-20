@@ -11563,9 +11563,11 @@ body,
   .hud { padding-bottom: max(16px, env(safe-area-inset-bottom)) !important; }
 }
 
-@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) {
   .nh-pause-top-btn { display: flex; }
   .nh-exit-top-btn { display: grid; }
+}
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
   /* On desktop (non-touch), show HUD action buttons (stamina circle is inside) */
   .nh-actions { display: flex !important; }
 }
@@ -11785,8 +11787,8 @@ body,
   border-radius: 1px;
   background: rgba(242,226,184,.85);
 }
-/* On desktop the pause icon btn is hidden — use Пауза text button instead */
-@media (min-width: 900px) {
+/* On real mouse/keyboard devices hide the icon — text Пауза button is shown instead */
+@media (hover: hover) and (pointer: fine) {
   .nh-pause-icon-mobile { display: none !important; }
 }
 

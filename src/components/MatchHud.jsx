@@ -114,17 +114,13 @@ export function MatchHud({
               <span className="nh-pause-icon-bars"><span /><span /></span>
             </button>
           </div>
-          {!isTouchDevice && (
-            <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label="Пауза">
-              <span className="nh-pause-bars"><span /><span /></span>
-              {t("Пауза", "Үзіліс", "Pause")}
-            </button>
-          )}
-          {!isTouchDevice && (
-            <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label="Выход">
-              {t("Выход", "Шығу", "Exit")}
-            </button>
-          )}
+          <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label="Пауза">
+            <span className="nh-pause-bars"><span /><span /></span>
+            {t("Пауза", "Үзіліс", "Pause")}
+          </button>
+          <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label="Выход">
+            {t("Выход", "Шығу", "Exit")}
+          </button>
         </div>
       </div>
 
