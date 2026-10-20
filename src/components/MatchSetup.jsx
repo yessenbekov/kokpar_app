@@ -8,6 +8,7 @@ import { OnlineRoomLobby } from "./OnlineRoomLobby.jsx";
 import { Shop } from "./Shop.jsx";
 import { AboutGame } from "./AboutGame.jsx";
 import { EFIR_NEWS } from "../app/efirNews.js";
+import { matchHistoryStore } from "../app/matchHistoryStore.js";
 
 const _coinFmt = new Intl.NumberFormat("ru-RU");
 function formatCoins(value) {
@@ -230,6 +231,154 @@ function Demeushire({ t, onBack }) {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+const PAYMENTS_ENABLED = false;
+const COINS_WIN_TOTAL = 23;  // participation 8 + win 15
+const COINS_PARTICIPATION = 8;
+const COINS_DAILY = 50;
+
+function TreasuryScreen({ profile, t, onClose }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const history = matchHistoryStore.read();
+  const todayEntries = history.filter(e => e.playedAt?.slice(0, 10) === today);
+  const dailyReceived = profile.lastDailyBonus === today;
+  const todayGain = todayEntries.length > 0
+    ? todayEntries.reduce((s, e) => s + COINS_PARTICIPATION + (e.won ? COINS_WIN_TOTAL - COINS_PARTICIPATION : 0), 0)
+      + (dailyReceived ? COINS_DAILY : 0)
+    : 0;
+  const recent = history.slice(0, 4).map(e => {
+    const won = e.won;
+    const draw = e.scoreBlue === e.scoreRed;
+    const scoreStr = (e.scoreBlue !== undefined && e.scoreRed !== undefined)
+      ? ` ${e.scoreBlue} : ${e.scoreRed}` : "";
+    const label = won
+      ? t("ПОБЕДА", "ЖЕҢІС", "WIN") + scoreStr
+      : draw
+        ? t("НИЧЬЯ", "ТЕҢ", "DRAW") + scoreStr
+        : t("ПОРАЖЕНИЕ", "ЖЕҢІЛІС", "LOSS") + scoreStr;
+    const gain = COINS_PARTICIPATION + (won ? COINS_WIN_TOTAL - COINS_PARTICIPATION : 0);
+    return { label, gain };
+  });
+
+  const earnRows = [
+    {
+      num: "01",
+      label: t("ПОБЕДА В МАТЧЕ", "ЖЕҢІС МАТЧТА", "WIN A MATCH"),
+      reward: COINS_WIN_TOTAL,
+    },
+    {
+      num: "02",
+      label: t("УЧАСТИЕ В МАТЧЕ", "МАТЧҚА ҚАТЫСУ", "MATCH PARTICIPATION"),
+      sub: t("поражение или ничья", "жеңіліс немесе тең", "loss or draw"),
+      reward: COINS_PARTICIPATION,
+    },
+    {
+      num: "03",
+      label: t("ЕЖЕДНЕВНЫЙ ВХОД", "КҮНДЕЛІКТІ КІРУ", "DAILY LOGIN"),
+      reward: COINS_DAILY,
+      receivedToday: dailyReceived,
+    },
+  ];
+
+  const tickerItems = recent.length > 0
+    ? [...recent, ...recent].map((r, i) => `${r.label} +${r.gain} ⌾`).join("  │  ")
+    : null;
+
+  return (
+    <div className="treasury-wrap">
+      <div className="status-bar-spacer" />
+      {/* Topbar */}
+      <div className="treasury-topbar">
+        <button className="treasury-back" type="button" onClick={onClose} aria-label={t("Назад", "Артқа", "Back")}>‹</button>
+        <div className="treasury-title-ribbon">
+          <span className="treasury-title-ls">{t("ҚАЗЫНА · КАЗНА", "ҚАЗЫНА · КАЗНА", "TREASURY")}</span>
+          <span className="treasury-title-pt">{t("КАЗНА", "ҚАЗЫНА", "TREASURY")}</span>
+        </div>
+        <div className="treasury-topbar-balance">{formatCoins(profile.coins)} ⌾</div>
+      </div>
+
+      {/* Body */}
+      <div className="treasury-body">
+        {/* Left panel (portrait: full width; landscape: left col) */}
+        <div className="treasury-left">
+          {/* Balance card */}
+          <div className="treasury-balance-card">
+            <div className="treasury-balance-label">{t("БАЛАНС", "БАЛАНС", "BALANCE")}</div>
+            <div className="treasury-balance-amount">
+              {formatCoins(profile.coins)}<span className="treasury-sym"> ⌾</span>
+            </div>
+            {todayGain > 0 && (
+              <>
+                <div className="treasury-divider" />
+                <div className="treasury-today-row">
+                  <span className="treasury-today-label">{t("СЕГОДНЯ", "БҮГІН", "TODAY")}</span>
+                  <span className="treasury-today-gain">+{todayGain} ⌾</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Payments — portrait: after balance; landscape: below balance */}
+          {!PAYMENTS_ENABLED && (
+            <div className="treasury-soon-block">
+              <div className="treasury-soon-badge">{t("СКОРО", "ЖАҚЫНДА", "SOON")}</div>
+              <div className="treasury-soon-content">
+                <div className="treasury-soon-title">{t("ПОПОЛНЕНИЕ", "ТОЛТЫРУ", "TOP-UP")}</div>
+                <div className="treasury-soon-sub">{t("Наборы монет — в следующем обновлении", "Монет жинақтары — келесі жаңартуда", "Coin packs — in the next update")}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right panel (portrait: full width below; landscape: right col) */}
+        <div className="treasury-right">
+          <div className="treasury-earn-header">
+            <span>{t("КАК ЗАРАБОТАТЬ", "ҚАЛАЙ ТАБУҒА БОЛАДЫ", "HOW TO EARN")}</span>
+            <span>{t("НАГРАДА", "СЫЙЛЫҚ", "REWARD")}</span>
+          </div>
+          {earnRows.map((row) => (
+            <div key={row.num} className="treasury-earn-row">
+              <span className="treasury-row-num">{row.num}</span>
+              <div className="treasury-row-mid">
+                <span className="treasury-row-label">{row.label}</span>
+                {row.sub && <span className="treasury-row-sub">{row.sub}</span>}
+                {row.receivedToday && (
+                  <span className="treasury-row-done">✓ {t("ПОЛУЧЕНО", "АЛЫНДЫ", "RECEIVED")}</span>
+                )}
+              </div>
+              <span className={`treasury-row-reward${row.receivedToday ? " treasury-row-reward--dim" : ""}`}>
+                +{row.reward} ⌾
+              </span>
+            </div>
+          ))}
+
+          {/* Recent accruals — portrait list */}
+          {recent.length > 0 && (
+            <div className="treasury-recent-pt">
+              <div className="treasury-recent-label">{t("ПОСЛЕДНИЕ НАЧИСЛЕНИЯ", "СОҢҒЫ ЕСЕПТЕУЛЕР", "RECENT EARNINGS")}</div>
+              {recent.slice(0, 3).map((r, i) => (
+                <div key={i} className="treasury-recent-row">
+                  <span className="treasury-recent-item-label">{r.label}</span>
+                  <span className="treasury-recent-item-gain">+{r.gain} ⌾</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent accruals — landscape ticker at bottom */}
+      {tickerItems && (
+        <div className="treasury-ticker-ls" aria-hidden="true">
+          <div className="treasury-ticker-badge">{t("НАЧИСЛЕНИЯ", "ЕСЕПТЕУЛЕР", "EARNINGS")}</div>
+          <div className="treasury-ticker-track">
+            <div className="treasury-ticker-inner">{tickerItems}  │  {tickerItems}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -953,56 +1102,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
       </div>
 
-      {/* ── Coin shop overlay ── */}
-      {showCoinScreen && (
-        <div className="cscreen-wrap">
-          <div className="status-bar-spacer" />
-          <div className="cscreen-topbar">
-            <button className="cscreen-back" type="button" onClick={() => setShowCoinScreen(false)}>‹</button>
-            <div className="cscreen-title">{t("Монеты", "Монеттер", "Coins")}</div>
-            <span className="cscreen-balance-chip">{formatCoins(profile.coins)} ⌾</span>
-          </div>
-          <div className="cscreen-body">
-            <div className="cscreen-balance-card">
-              <div className="cscreen-balance-label">{t("Баланс", "Баланс", "Balance")}</div>
-              <div className="cscreen-balance-row">
-                <span className="cscreen-coin-circle" />
-                <span className="cscreen-balance-amount">{formatCoins(profile.coins)}</span>
-                <span className="cscreen-daily">
-                  {t("за матчи сегодня", "бүгін матчтар үшін", "from today's matches")}<br />
-                  <span className="cscreen-daily-gain">+120 ⌾</span>
-                </span>
-              </div>
-            </div>
-            <div className="cscreen-packages-section">
-              <div className="cscreen-section-label">{t("Наборы", "Жинақтар", "Packages")}</div>
-              <div className="cscreen-packages-grid">
-                <div className="cscreen-pkg">
-                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">300</span></div>
-                  <div className="cscreen-pkg-name">{t("Стартовый", "Стартовый", "Starter")}</div>
-                  <button className="cscreen-pkg-btn" type="button" disabled>299 ₸</button>
-                </div>
-                <div className="cscreen-pkg">
-                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">800</span></div>
-                  <div className="cscreen-pkg-name">+10% {kz ? "бонус" : "бонус"}</div>
-                  <button className="cscreen-pkg-btn" type="button" disabled>749 ₸</button>
-                </div>
-                <div className="cscreen-pkg cscreen-pkg--featured">
-                  <span className="cscreen-pkg-badge">{t("выгодно", "тиімді", "best value")}</span>
-                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">2 000</span></div>
-                  <div className="cscreen-pkg-name">+20% {kz ? "бонус" : "бонус"}</div>
-                  <button className="cscreen-pkg-btn cscreen-pkg-btn--featured" type="button" disabled>1 690 ₸</button>
-                </div>
-                <div className="cscreen-pkg">
-                  <div className="cscreen-pkg-row"><span className="cscreen-pkg-coin" /><span className="cscreen-pkg-amount">5 000</span></div>
-                  <div className="cscreen-pkg-name">+35% {kz ? "бонус" : "бонус"}</div>
-                  <button className="cscreen-pkg-btn" type="button" disabled>3 990 ₸</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Treasury (Казна) screen ── */}
+      {showCoinScreen && <TreasuryScreen profile={profile} t={t} onClose={() => setShowCoinScreen(false)} />}
 
       {showCoinShop && (
         <div className="cshop-overlay" onClick={() => setShowCoinShop(false)}>
