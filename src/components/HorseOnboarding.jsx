@@ -141,6 +141,18 @@ export function HorseOnboarding({ onComplete }) {
             <div className="ob-step-desc">{tl("Один конь достаётся бесплатно. Остальные стойла откроете за монеты.", "Бір жылқы тегін беріледі. Қалған орындарды монетаға ашасыз.", "One horse is free. Unlock more stalls with coins.")}</div>
           </div>
           <div className="ob-body">
+            <div className="ob-field-group">
+              <div className="ob-field-label">{tl("Имя коня", "Жылқының аты", "Horse name")}</div>
+              <input
+                className="ob-rider-name-input"
+                type="text"
+                placeholder={HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}
+                maxLength={24}
+                value={horseName}
+                onChange={(e) => setHorseName(e.target.value)}
+              />
+            </div>
+
             {HORSE_TYPES.map((ht) => {
               const isSelected = ht.id === selectedTypeId;
               const coat = coatPresetById(isSelected ? selectedCoatId : ht.defaultCoatId);
@@ -180,18 +192,6 @@ export function HorseOnboarding({ onComplete }) {
                   />
                 ))}
               </div>
-            </div>
-
-            <div className="ob-field-group">
-              <div className="ob-field-label">{tl("Имя коня", "Жылқының аты", "Horse name")}</div>
-              <input
-                className="ob-rider-name-input"
-                type="text"
-                placeholder={HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}
-                maxLength={24}
-                value={horseName}
-                onChange={(e) => setHorseName(e.target.value)}
-              />
             </div>
           </div>
         </>
