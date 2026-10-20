@@ -722,28 +722,28 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     {!isTraining && <span className="wizard-mode-pill">{selectedMode.name}</span>}
                   </div>
 
+                  <p className="wizard-label">{t("Цель", "Мақсат", "Goal")}</p>
+                  <div className="wizard-side-grid">
+                    <button type="button"
+                      className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => onSettingChange("goalType", "circle")}>
+                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
+                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
+                    </button>
+                    <button type="button"
+                      className={`wizard-option-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => onSettingChange("goalType", "kazan")}>
+                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Казан", "Қазан", "Kazan")}</strong>
+                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Препятствие", "Кедергі", "Obstacle")}</span>
+                    </button>
+                  </div>
+
                   {!isTraining && (
                     <>
-                      <p className="wizard-label">{t("Цель", "Мақсат", "Goal")}</p>
-                      <div className="wizard-side-grid">
-                        <button type="button"
-                          className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
-                          style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
-                          disabled={selectedMode.goalLocked}
-                          onClick={() => onSettingChange("goalType", "circle")}>
-                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
-                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
-                        </button>
-                        <button type="button"
-                          className={`wizard-option-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
-                          style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
-                          disabled={selectedMode.goalLocked}
-                          onClick={() => onSettingChange("goalType", "kazan")}>
-                          <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Казан", "Қазан", "Kazan")}</strong>
-                          <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Препятствие", "Кедергі", "Obstacle")}</span>
-                        </button>
-                      </div>
-
                       <p className="wizard-label">{t("Состав", "Құрам", "Teams")}</p>
                       <div className="wizard-three-grid">
                         {[3, 4, 5].map((size) => (
