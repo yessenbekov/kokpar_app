@@ -418,13 +418,13 @@ export function OnlineRoomLobby({
       <div className="lobby-summary">
         {isHost && room ? (
           <button type="button" className="lobby-summary-btn" disabled={busy}
-            onClick={() => { const s = [3,4,5]; updateRoomSetting("teamSize", s[(s.indexOf(roomSettings.teamSize)+1)%s.length]); }}>
+            onClick={() => { const s = [1,3,4,5]; updateRoomSetting("teamSize", s[(s.indexOf(roomSettings.teamSize)+1)%s.length]); }}>
             <Users size={15} strokeWidth={2.4} />
-            {roomSettings.teamSize}×{roomSettings.teamSize}
+            {roomSettings.teamSize === 1 ? "1×1 · Дуэль" : `${roomSettings.teamSize}×${roomSettings.teamSize}`}
             <span className="lobby-summary-edit">▾</span>
           </button>
         ) : (
-          <span><Users size={15} strokeWidth={2.4} />{roomSettings.teamSize}×{roomSettings.teamSize}</span>
+          <span><Users size={15} strokeWidth={2.4} />{roomSettings.teamSize === 1 ? "1×1 · Дуэль" : `${roomSettings.teamSize}×${roomSettings.teamSize}`}</span>
         )}
         {isHost && room ? (
           <button type="button" className="lobby-summary-btn" disabled={busy}
@@ -482,7 +482,7 @@ export function OnlineRoomLobby({
                     <button key={r.id} type="button" className="lobby-room-card" onClick={() => joinByCode(r.code)} disabled={busy}>
                       <span className="lobby-room-code">{r.code}</span>
                       <span className="lobby-room-meta">
-                        {r.teamSize}×{r.teamSize} · {goalLabel(r.goalType)} · {r.matchMinutes}мин
+                        {r.teamSize === 1 ? "1×1 Дуэль" : `${r.teamSize}×${r.teamSize}`} · {goalLabel(r.goalType)} · {r.matchMinutes}мин
                       </span>
                       <span className="lobby-room-players">{r.playerCount}/{r.teamSize * 2} 🏇</span>
                     </button>
