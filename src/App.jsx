@@ -630,8 +630,13 @@ export default function App() {
         <rect x="5" y="2" width="14" height="20" rx="2" />
         <path d="M12 18h.01" />
       </svg>
-      <p>Поверни устройство горизонтально</p>
-      <small>Игра работает только в альбомной ориентации</small>
+      <div className="portrait-lock-body">
+        <p>Поверни телефон горизонтально</p>
+        <p>Телефонды горизонталь бұрыңыз</p>
+        <p>Rotate your phone sideways</p>
+      </div>
+      <small>Игра работает только в горизонтальной ориентации<br />Ойын тек горизонталь режимінде жұмыс істейді</small>
+      <small className="portrait-lock-alt">Или открой на компьютере · немесе компьютерде · or use a desktop</small>
     </div>
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />

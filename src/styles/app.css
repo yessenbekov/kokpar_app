@@ -7268,7 +7268,7 @@ kbd.hint-key--space {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 16px;
   text-align: center;
   padding: 32px;
   pointer-events: none;
@@ -7281,17 +7281,38 @@ kbd.hint-key--space {
   animation: portrait-rotate 2.2s ease-in-out infinite;
 }
 
-.portrait-lock p {
+.portrait-lock-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.portrait-lock-body p {
   margin: 0;
-  font-size: 18px;
   font-weight: 600;
   color: var(--ink);
 }
 
+.portrait-lock-body p:first-child {
+  font-size: 19px;
+}
+
+.portrait-lock-body p:not(:first-child) {
+  font-size: 14px;
+  opacity: 0.65;
+}
+
 .portrait-lock small {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-2);
-  opacity: 0.7;
+  opacity: 0.6;
+  line-height: 1.6;
+}
+
+.portrait-lock-alt {
+  font-size: 11px !important;
+  opacity: 0.38 !important;
+  margin-top: -4px;
 }
 
 @keyframes portrait-rotate {
