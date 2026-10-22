@@ -26,7 +26,8 @@ function HorseToken({ horse }) {
   );
 }
 
-export function Shop({ profile, onBuyHorse }) {
+export function Shop({ profile, onBuyHorse, t: _t }) {
+  const t = _t ?? ((ru) => ru);
   const coins = profile.coins ?? 0;
 
   return (
@@ -56,7 +57,7 @@ export function Shop({ profile, onBuyHorse }) {
                   {formatCoins(shopHorse.price)}
                 </span>
                 {alreadyOwned ? (
-                  <span className="equipped-badge">Имеется</span>
+                  <span className="equipped-badge">{t("Имеется", "Бар", "Owned")}</span>
                 ) : (
                   <button
                     type="button"
@@ -64,7 +65,7 @@ export function Shop({ profile, onBuyHorse }) {
                     disabled={!canAfford}
                     onClick={() => onBuyHorse(shopHorse.typeId, shopHorse.name, shopHorse.price)}
                   >
-                    Купить
+                    {t("Купить", "Сатып алу", "Buy")}
                   </button>
                 )}
               </div>

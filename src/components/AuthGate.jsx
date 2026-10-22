@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
 
+function getLang() {
+  try { return localStorage.getItem("kokpar_lang") ?? "ru"; } catch { return "ru"; }
+}
+function t(ru, kz, en) {
+  const lang = getLang();
+  if (lang === "kz") return kz ?? ru;
+  if (lang === "en") return en ?? ru;
+  return ru;
+}
+
 export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onResetPassword, onGuestContinue, onGoogleSignIn }) {
   const [showAuth, setShowAuth] = useState(false);
   const [mode, setMode] = useState("login");
@@ -30,8 +40,8 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
 
   function submitRegister(e) {
     e.preventDefault();
-    if (password.length < 6) { setPasswordError("Минимум 6 символов"); return; }
-    if (password !== passwordConfirm) { setPasswordError("Пароли не совпадают"); return; }
+    if (password.length < 6) { setPasswordError(t("Минимум 6 символов", "Кемінде 6 таңба", "Minimum 6 characters")); return; }
+    if (password !== passwordConfirm) { setPasswordError(t("Пароли не совпадают", "Құпия сөздер сәйкес келмейді", "Passwords don't match")); return; }
     setPasswordError("");
     onSignUp(email, password);
   }
@@ -48,17 +58,17 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
         <div className="ob-splash-gradient" />
         <div className="ob-auth-overlay">
           <button className="ob-auth-back" type="button" onClick={() => setShowAuth(false)}>
-            ‹ Назад
+            ‹ {t("Назад", "Артқа", "Back")}
           </button>
           <div className="ob-auth-title">
-            {mode === "register" ? "Регистрация" : "Вход"}
+            {mode === "register" ? t("Регистрация", "Тіркелу", "Sign up") : t("Вход", "Кіру", "Sign in")}
           </div>
           <div className="ob-auth-tabs">
             <button type="button" className={`ob-auth-tab${mode === "login" ? " active" : ""}`} onClick={() => switchMode("login")}>
-              Вход
+              {t("Вход", "Кіру", "Sign in")}
             </button>
             <button type="button" className={`ob-auth-tab${mode === "register" ? " active" : ""}`} onClick={() => switchMode("register")}>
-              Регистрация
+              {t("Регистрация", "Тіркелу", "Sign up")}
             </button>
           </div>
 
@@ -67,12 +77,12 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
               <input className="ob-auth-input" type="email" inputMode="email" autoComplete="email"
                 placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} />
               <input className="ob-auth-input" type="password" autoComplete="current-password"
-                placeholder="пароль" value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
+                placeholder={t("пароль", "құпия сөз", "password")} value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
               <button className="ob-auth-submit" type="submit" disabled={busy || !email.trim() || !password}>
-                {auth.status === "sending" ? "Входим…" : "Войти"}
+                {auth.status === "sending" ? t("Входим…", "Кіру...", "Signing in…") : t("Войти", "Кіру", "Sign in")}
               </button>
               <button className="ob-skip-btn" type="button" disabled={busy || !email.trim() || resetSent} onClick={handleResetPassword}>
-                {resetSent ? "Письмо отправлено" : "Забыли пароль?"}
+                {resetSent ? t("Письмо отправлено", "Хат жіберілді", "Email sent") : t("Забыли пароль?", "Құпия сөзді ұмыттыңыз ба?", "Forgot password?")}
               </button>
             </form>
           )}
@@ -82,12 +92,12 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
               <input className="ob-auth-input" type="email" inputMode="email" autoComplete="email"
                 placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} />
               <input className="ob-auth-input" type="password" autoComplete="new-password"
-                placeholder="пароль (мин. 6 символов)" value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
+                placeholder={t("пароль (мин. 6 символов)", "құпия сөз (кем. 6 таңба)", "password (min. 6 chars)")} value={password} onChange={(e) => setPassword(e.target.value)} disabled={busy} />
               <input className="ob-auth-input" type="password" autoComplete="new-password"
-                placeholder="повторите пароль" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} disabled={busy} />
+                placeholder={t("повторите пароль", "құпия сөзді қайталаңыз", "repeat password")} value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} disabled={busy} />
               {passwordError && <p className="ob-auth-error">{passwordError}</p>}
               <button className="ob-auth-submit" type="submit" disabled={busy || !email.trim() || !password || !passwordConfirm}>
-                {auth.status === "sending" ? "Создаём…" : "Создать аккаунт"}
+                {auth.status === "sending" ? t("Создаём…", "Тіркелу...", "Creating…") : t("Создать аккаунт", "Тіркелу", "Create account")}
               </button>
             </form>
           )}
@@ -100,7 +110,7 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
                 <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
                 <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
               </svg>
-              Войти через Google
+              {t("Войти через Google", "Google арқылы кіру", "Sign in with Google")}
             </button>
           )}
 
@@ -125,11 +135,11 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
         </div>
         <div className="ob-splash-actions">
           <button className="ob-splash-btn-primary" type="button" onClick={onGuestContinue}>
-            Начать игру · Play
+            Ойнау · Играть · Play
           </button>
           <div className="ob-splash-btn-row">
             <button className="ob-splash-btn-social" type="button" onClick={() => setShowAuth(true)}>
-              Войти · Sign in
+              Кіру · Войти · Sign in
             </button>
             {onGoogleSignIn && (
               <button className="ob-splash-btn-social" type="button" onClick={onGoogleSignIn}>
@@ -138,11 +148,15 @@ export function AuthGate({ auth, onEmailSignIn, onPasswordSignIn, onSignUp, onRe
             )}
           </div>
           <button className="ob-splash-btn-ghost" type="button" onClick={onGuestContinue}>
-            Играть как гость · Play as guest
+            Қонақ · Гость · Guest
           </button>
         </div>
         <p className="ob-splash-legal">
-          Продолжая, вы принимаете правила игры и политику данных.
+          {t(
+            "Продолжая, вы принимаете правила игры и политику данных.",
+            "Жалғастыру арқылы ойын ережелері мен деректер саясатын қабылдайсыз.",
+            "By continuing, you accept the game rules and data policy."
+          )}
         </p>
       </div>
     </div>

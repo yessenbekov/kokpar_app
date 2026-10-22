@@ -12,15 +12,15 @@ function ratingFor(score) {
   return Math.round(clamp(score * 72, 45, 96));
 }
 
-function statRowsFor(horse) {
+function statRowsFor(horse, t) {
   const s = horse.stats;
   return [
-    { label: "Скорость",  score: s.speed },
-    { label: "Разгон",    score: s.acceleration },
-    { label: "Поворот",   score: (s.turn + s.grip + s.brake) / 3 },
-    { label: "Стамина",   score: (1 / s.staminaDrain + s.staminaRecovery) / 2 },
-    { label: "Борьба",    score: (s.contestPower + s.tacklePower + s.bodyCheckPower + s.stability) / 4 },
-    { label: "Стойкость", score: (s.carrySpeed + s.contestPower) / 2 },
+    { label: t("Скорость",  "Жылдамдық", "Speed"),   score: s.speed },
+    { label: t("Разгон",    "Үдеу",      "Accel."),  score: s.acceleration },
+    { label: t("Поворот",   "Бұрылыс",   "Turn"),    score: (s.turn + s.grip + s.brake) / 3 },
+    { label: t("Стамина",   "Шыдамдылық","Stamina"), score: (1 / s.staminaDrain + s.staminaRecovery) / 2 },
+    { label: t("Борьба",    "Күрес",     "Contest"), score: (s.contestPower + s.tacklePower + s.bodyCheckPower + s.stability) / 4 },
+    { label: t("Стойкость", "Беріктік",  "Carry"),   score: (s.carrySpeed + s.contestPower) / 2 },
   ];
 }
 
@@ -29,23 +29,23 @@ function paletteStyle(horse) {
   return { "--coat": p.coat, "--dark": p.dark, "--muzzle": p.muzzle, "--mark": p.marking };
 }
 
-function recordRowsFor(record = {}) {
+function recordRowsFor(record = {}, t) {
   return [
-    ["Матчи",   record.matches ?? 0],
-    ["Победы",  record.wins ?? 0],
-    ["Голы",    record.goals ?? 0],
-    ["Отборы",  record.steals ?? 0],
+    [t("Матчи",  "Матчтар", "Matches"), record.matches ?? 0],
+    [t("Победы", "Жеңістер","Wins"),    record.wins ?? 0],
+    [t("Голы",   "Голдар",  "Goals"),   record.goals ?? 0],
+    [t("Отборы", "Алулар",  "Steals"),  record.steals ?? 0],
   ];
 }
 
-const EQUIP_SLOTS = [
-  ["saddle",   "Ер"],
-  ["bridle",   "Жүген"],
-  ["blanket",  "Тоқым"],
-  ["legWraps", "Бинты"],
-];
-
-const SLOT_LABELS = { saddle: "Седло", bridle: "Узда", blanket: "Попона", legWraps: "Бинты" };
+function equipSlots(t) {
+  return [
+    ["saddle",   "Ер"],
+    ["bridle",   "Жүген"],
+    ["blanket",  "Тоқым"],
+    ["legWraps", t("Бинты", "Байлау", "Leg wraps")],
+  ];
+}
 
 export function HorseStable({
   horseId,
@@ -65,7 +65,9 @@ export function HorseStable({
   onGoToShop,
   onGoToMatch,
   onCardOpenChange,
+  t: _t,
 }) {
+  const t = _t ?? ((ru) => ru);
   const stableHorses = ownedHorses.length > 0 ? ownedHorses : [];
   const selectedOwnedHorse = stableHorses.find((h) => h.id === horseId) ?? stableHorses[0];
   const selectedHorse = horseTypeById(selectedOwnedHorse?.typeId);
@@ -123,9 +125,10 @@ export function HorseStable({
     const horse = selectedHorse;
     const owned = selectedOwnedHorse;
     const equipment = owned.equipment ?? {};
-    const statRows = statRowsFor(horse);
+    const statRows = statRowsFor(horse, t);
     const xpPct = Math.round((owned.xp / 100) * 100);
-    const recordRows = recordRowsFor(owned.record);
+    const recordRows = recordRowsFor(owned.record, t);
+    const EQUIP_SLOTS = equipSlots(t);
 
     return (
       <div className="horse-card-screen">
@@ -162,7 +165,7 @@ export function HorseStable({
               ) : (
                 <>
                   <span className="horse-card-name">{owned.name}</span>
-                  <span className="horse-card-tier-badge">Тир {horse.tier}</span>
+                  <span className="horse-card-tier-badge">{t("Тир", "Тир", "Tier")} {horse.tier}</span>
                   <button type="button" className="horse-card-edit-btn" onClick={() => { setDraftName(owned.name); setEditing(true); }}>
                     <Pencil size={13} strokeWidth={2.4} />
                   </button>
@@ -171,7 +174,7 @@ export function HorseStable({
             </div>
             <div className="horse-card-traits">
               <span>{horse.stable?.line ?? horse.name}</span>
-              <span>Связь {owned.bond ?? 0}/100</span>
+              <span>{t("Связь", "Байланыс", "Bond")} {owned.bond ?? 0}/100</span>
             </div>
           </div>
         </div>
@@ -181,7 +184,7 @@ export function HorseStable({
 
           {/* XP row */}
           <div className="horse-card-xp-row">
-            <span className="horse-card-xp-label">Ур. {owned.level}</span>
+            <span className="horse-card-xp-label">{t("Ур.", "Дең.", "Lv.")} {owned.level}</span>
             <span className="horse-card-xp-bar">
               <span className="horse-card-xp-fill" style={{ width: `${xpPct}%` }} />
             </span>
@@ -209,7 +212,7 @@ export function HorseStable({
 
             {/* Статистика */}
             <div className="horse-card-panel">
-              <div className="horse-card-panel-title">Статистика</div>
+              <div className="horse-card-panel-title">{t("Статистика", "Статистика", "Stats")}</div>
               <div className="horse-card-panel-grid">
                 {recordRows.map(([label, value]) => (
                   <div key={label} className="horse-card-panel-cell">
@@ -222,7 +225,7 @@ export function HorseStable({
 
             {/* Экипировка */}
             <div className="horse-card-panel">
-              <div className="horse-card-panel-title">Экипировка</div>
+              <div className="horse-card-panel-title">{t("Экипировка", "Жабдық", "Equipment")}</div>
               <div className="horse-card-panel-grid">
                 {EQUIP_SLOTS.map(([key, label]) => {
                   const equippedId = equipment[key];
@@ -236,7 +239,7 @@ export function HorseStable({
                       {item ? (
                         <div className="horse-card-panel-cell-val equipped-name">{item.name}</div>
                       ) : (
-                        <div className="horse-card-panel-cell-val empty-val">пусто</div>
+                        <div className="horse-card-panel-cell-val empty-val">{t("пусто", "бос", "empty")}</div>
                       )}
                     </div>
                   );
@@ -248,7 +251,7 @@ export function HorseStable({
           {/* Inventory */}
           {(profile?.inventory ?? []).length > 0 && (
             <div className="horse-card-inventory">
-              <div className="horse-card-panel-title">Инвентарь</div>
+              <div className="horse-card-panel-title">{t("Инвентарь", "Инвентарь", "Inventory")}</div>
               {(profile.inventory ?? []).map((itemId) => {
                 const it = itemById(itemId);
                 if (!it) return null;
@@ -265,8 +268,8 @@ export function HorseStable({
                         </>
                       ) : (
                         <>
-                          <button type="button" className="horse-card-inv-btn" onClick={() => setEquipPickerId(itemId)}>Надеть</button>
-                          <button type="button" className="horse-card-inv-btn sell" onClick={() => onListEquipment?.(null, it.slot, itemId)}>На торги</button>
+                          <button type="button" className="horse-card-inv-btn" onClick={() => setEquipPickerId(itemId)}>{t("Надеть", "Кию", "Equip")}</button>
+                          <button type="button" className="horse-card-inv-btn sell" onClick={() => onListEquipment?.(null, it.slot, itemId)}>{t("На торги", "Аукционға", "List")}</button>
                         </>
                       )}
                     </div>
@@ -280,9 +283,9 @@ export function HorseStable({
           {canDelete && (
             confirmDelete ? (
               <div className="horse-delete-confirm">
-                <span>Удалить {owned.name}?</span>
-                <button type="button" className="horse-delete-yes" onClick={handleDelete}>Удалить</button>
-                <button type="button" onClick={() => setConfirmDelete(false)}>Отмена</button>
+                <span>{t("Удалить", "Жою", "Delete")} {owned.name}?</span>
+                <button type="button" className="horse-delete-yes" onClick={handleDelete}>{t("Удалить", "Жою", "Delete")}</button>
+                <button type="button" onClick={() => setConfirmDelete(false)}>{t("Отмена", "Болдырмау", "Cancel")}</button>
               </div>
             ) : (
               <button type="button" className="horse-delete-trigger" onClick={() => setConfirmDelete(true)}>

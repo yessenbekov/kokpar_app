@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { localT } from "../app/i18n.js";
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -18,10 +19,10 @@ export class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div className="error-boundary" role="alert">
-          <strong>Что-то пошло не так</strong>
-          <span>{this.state.error?.message ?? "Неизвестная ошибка"}</span>
+          <strong>{localT("Что-то пошло не так", "Бірдеңе дұрыс болмады", "Something went wrong")}</strong>
+          <span>{this.state.error?.message ?? localT("Неизвестная ошибка", "Белгісіз қате", "Unknown error")}</span>
           <button type="button" onClick={() => this.setState({ error: null })}>
-            Попробовать снова
+            {localT("Попробовать снова", "Қайталап көру", "Try again")}
           </button>
         </div>
       );

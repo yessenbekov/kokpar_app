@@ -47,13 +47,15 @@ export function MatchHud({
   function t(ru, kz, en) { return lang === "kz" ? kz : lang === "en" ? (en ?? ru) : ru; }
 
   const serkeLabel =
-    hud.serkeTeam === "blue" ? "Синие владеют" :
-    hud.serkeTeam === "red" ? "Красные владеют" :
-    "Серке";
+    hud.serkeTeam === "blue" ? t("Синие владеют", "Көктер иеленді", "Blue holds") :
+    hud.serkeTeam === "red" ? t("Красные владеют", "Қызылдар иеленді", "Red holds") :
+    t("Серке", "Серке", "Serke");
 
   const playerHoldsSerke = hud.carry?.startsWith("Удерживай") || hud.carry?.startsWith("Сила");
 
-  const goalLabel = settings.goalType === "kazan" ? "Казан" : "Круг";
+  const goalLabel = settings.goalType === "kazan"
+    ? t("Казан", "Қазан", "Kazan")
+    : t("Круг", "Шеңбер", "Circle");
 
   return (
     <section className="hud" aria-label="Match status">
@@ -87,7 +89,7 @@ export function MatchHud({
               {serkeLabel}
             </span>
             {hud.serkeDistance > 0 && (
-              <span className="nh-serke-distance">{Math.round(hud.serkeDistance)} м</span>
+              <span className="nh-serke-distance">{Math.round(hud.serkeDistance)} {t("м", "м", "m")}</span>
             )}
           </div>
           <div className="nh-serke-bar">
@@ -104,21 +106,21 @@ export function MatchHud({
         {/* Icon buttons + Пауза + Выход */}
         <div className="nh-icons-wrap">
           <div className="nh-icons">
-            <button className="nh-icon-btn" type="button" onClick={onCycleCamera} aria-label="Камера">
+            <button className="nh-icon-btn" type="button" onClick={onCycleCamera} aria-label={t("Камера", "Камера", "Camera")}>
               <Camera size={16} strokeWidth={2.2} />
             </button>
-            <button className="nh-icon-btn" type="button" onClick={onToggleFeedback} aria-label="Звук">
+            <button className="nh-icon-btn" type="button" onClick={onToggleFeedback} aria-label={t("Звук", "Дыбыс", "Sound")}>
               {feedbackEnabled ? <Volume2 size={16} strokeWidth={2.2} /> : <VolumeX size={16} strokeWidth={2.2} />}
             </button>
-            <button className="nh-icon-btn nh-pause-icon-mobile" type="button" onClick={handlePause} aria-label="Пауза">
+            <button className="nh-icon-btn nh-pause-icon-mobile" type="button" onClick={handlePause} aria-label={t("Пауза", "Үзіліс", "Pause")}>
               <span className="nh-pause-icon-bars"><span /><span /></span>
             </button>
           </div>
-          <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label="Пауза">
+          <button className="nh-pause-top-btn" type="button" onClick={handlePause} aria-label={t("Пауза", "Үзіліс", "Pause")}>
             <span className="nh-pause-bars"><span /><span /></span>
             {t("Пауза", "Үзіліс", "Pause")}
           </button>
-          <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label="Выход">
+          <button className="nh-exit-top-btn" type="button" onClick={handlePause} aria-label={t("Выход", "Шығу", "Exit")}>
             {t("Выход", "Шығу", "Exit")}
           </button>
         </div>

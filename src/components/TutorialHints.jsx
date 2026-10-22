@@ -46,30 +46,42 @@ function ActionIcon({ touch }) {
   return <kbd className="hint-key hint-key--space">Space</kbd>;
 }
 
-const HINTS = [
-  {
-    id: "move",
-    step: "1/3",
-    title: "Скачи к серке",
-    text: (touch) => touch ? "Джойстик слева — управляй конём" : "WASD или стрелки — управляй конём"
-  },
-  {
-    id: "pickup",
-    step: "2/3",
-    title: "Подбери серке",
-    text: () => "Подъедь вплотную — серке подберётся сам"
-  },
-  {
-    id: "throw",
-    step: "3/3",
-    title: "Бросай в цель",
-    text: (touch) => touch
-      ? "Удерживай правую кнопку — зарядка. Отпусти — бросок в круг/казан"
-      : "Удерживай Space — зарядка. Отпусти — бросок в круг/казан"
-  }
-];
+function makeHints(t) {
+  return [
+    {
+      id: "move",
+      step: "1/3",
+      title: t("Скачи к серке", "Серкеге жүгір", "Ride to serke"),
+      text: (touch) => touch
+        ? t("Джойстик слева — управляй конём", "Сол жақ джойстик — жылқыны басқар", "Left joystick — steer your horse")
+        : t("WASD или стрелки — управляй конём", "WASD немесе көрсеткілер — жылқыны басқар", "WASD or arrows — steer your horse")
+    },
+    {
+      id: "pickup",
+      step: "2/3",
+      title: t("Подбери серке", "Серкені ал", "Pick up serke"),
+      text: () => t("Подъедь вплотную — серке подберётся сам", "Жақын кел — серке өздігінен алынады", "Ride close — serke is grabbed automatically")
+    },
+    {
+      id: "throw",
+      step: "3/3",
+      title: t("Бросай в цель", "Нысанаға лақтыр", "Throw at target"),
+      text: (touch) => touch
+        ? t("Удерживай правую кнопку — зарядка. Отпусти — бросок в круг/казан", "Оң батырманы ұстап тұр — зарядтау. Жібер — шеңберге/қазанға лақтыру", "Hold right button — charge. Release — throw to circle/kazan")
+        : t("Удерживай Space — зарядка. Отпусти — бросок в круг/казан", "Space ұстап тұр — зарядтау. Жібер — шеңберге/қазанға лақтыру", "Hold Space — charge. Release — throw to circle/kazan")
+    }
+  ];
+}
 
-export function TutorialHints({ active, hud }) {
+export function TutorialHints({ active, hud, lang = "ru" }) {
+  function t(ru, kz, en) {
+    if (lang === "kz") return kz ?? ru;
+    if (lang === "en") return en ?? ru;
+    return ru;
+  }
+
+  const HINTS = makeHints(t);
+
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(() => Boolean(localStorage.getItem(STORAGE_KEY)));
@@ -81,7 +93,6 @@ export function TutorialHints({ active, hud }) {
     if (!active || done) return;
     if (startedRef.current) return;
 
-    // Wait for match banner to clear before showing hints
     const delay = setTimeout(() => {
       startedRef.current = true;
       setVisible(true);
@@ -90,7 +101,6 @@ export function TutorialHints({ active, hud }) {
     return () => clearTimeout(delay);
   }, [active, done]);
 
-  // Advance to next hint when player picks up serke
   useEffect(() => {
     if (!visible || done || step !== 1) return;
     const carries = ["Кокпар у тебя", "Удерживай Space", "Space — пас"];
@@ -100,7 +110,6 @@ export function TutorialHints({ active, hud }) {
     }
   }, [hud.carry, visible, done, step]);
 
-  // Advance to throw hint when player charges
   useEffect(() => {
     if (!visible || done || step !== 2) return;
     if (hud.throwPower > 0) {
@@ -152,7 +161,7 @@ export function TutorialHints({ active, hud }) {
         <button
           className="tutorial-hints__close"
           type="button"
-          aria-label="Закрыть подсказки"
+          aria-label={t("Закрыть подсказки", "Кеңестерді жабу", "Close hints")}
           onClick={dismiss}
         >
           <X size={14} strokeWidth={2.5} />
