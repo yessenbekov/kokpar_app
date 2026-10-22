@@ -290,7 +290,7 @@ export function HorseStable({
             ) : (
               <button type="button" className="horse-delete-trigger" onClick={() => setConfirmDelete(true)}>
                 <Trash2 size={14} strokeWidth={2.3} />
-                <span>Удалить лошадь</span>
+                <span>{t("Удалить лошадь", "Жылқыны жою", "Delete horse")}</span>
               </button>
             )
           )}
@@ -306,14 +306,14 @@ export function HorseStable({
             onClick={() => onListHorse?.(owned.id)}
             disabled={!canDelete}
           >
-            Продать
+            {t("Продать", "Сату", "Sell")}
           </button>
           <button
             type="button"
             className="horse-card-footer-btn primary"
             onClick={() => { onHorseChange?.(owned.id); setShowCard(false); onGoToMatch?.(); }}
           >
-            Выбрать
+            {t("Выбрать", "Таңдау", "Select")}
           </button>
         </div>
       </div>
@@ -347,12 +347,12 @@ export function HorseStable({
                     <strong>{ownedHorse.name}</strong>
                     <span className="stable-tier-badge">{horse.tier}</span>
                   </div>
-                  <span className="stable-card-sub">{horse.name} · {horse.role} · Ур. {ownedHorse.level}</span>
+                  <span className="stable-card-sub">{horse.name} · {horse.role} · {t("Ур.", "Дең.", "Lv.")} {ownedHorse.level}</span>
                   <span className="stable-card-xp">
                     <span className="stable-card-xp-fill" style={{ width: `${xpPct}%` }} />
                   </span>
                 </div>
-                {active && <span className="stable-card-selected">Выбран</span>}
+                {active && <span className="stable-card-selected">{t("Выбран", "Таңдалды", "Selected")}</span>}
               </button>
             </div>
           );
@@ -394,18 +394,18 @@ export function HorseStable({
                 maxLength={24}
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
-                aria-label="Имя новой лошади"
+                aria-label={t("Имя новой лошади", "Жаңа жылқы аты", "New horse name")}
                 autoFocus
               />
-              <button type="submit" aria-label="Создать лошадь"><Check size={15} strokeWidth={2.7} /></button>
-              <button type="button" aria-label="Отмена" onClick={() => { setCreating(false); setCreateName(""); }}>
+              <button type="submit" aria-label={t("Создать лошадь", "Жылқы жасау", "Create horse")}><Check size={15} strokeWidth={2.7} /></button>
+              <button type="button" aria-label={t("Отмена", "Болдырмау", "Cancel")} onClick={() => { setCreating(false); setCreateName(""); }}>
                 <X size={15} strokeWidth={2.7} />
               </button>
             </div>
           </form>
         ) : canAddMore ? (
           <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
-            <span>+ Купить лошадь</span>
+            <span>+ {t("Купить лошадь", "Жылқы сатып алу", "Buy horse")}</span>
           </button>
         ) : (
           <button
