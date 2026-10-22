@@ -273,7 +273,12 @@ export function OnlineRoomLobby({
       const nextState = await action();
       hydrate(nextState);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Ошибка комнаты");
+      const msg = nextError instanceof Error ? nextError.message : "Ошибка комнаты";
+      if (msg.includes("violates check constraint") && msg.includes("team_size")) {
+        setError("1×1 пока недоступен — требуется обновление сервера");
+      } else {
+        setError(msg);
+      }
     } finally {
       setBusy(false);
     }
@@ -415,38 +420,50 @@ export function OnlineRoomLobby({
         <span>{players.length || 1}/{capacity} игроков</span>
       </div>
 
-      <div className="lobby-summary">
-        {isHost && room ? (
-          <button type="button" className="lobby-summary-btn" disabled={busy}
-            onClick={() => { const s = [1,3,4,5]; updateRoomSetting("teamSize", s[(s.indexOf(roomSettings.teamSize)+1)%s.length]); }}>
-            <Users size={15} strokeWidth={2.4} />
-            {roomSettings.teamSize === 1 ? "1×1 · Дуэль" : `${roomSettings.teamSize}×${roomSettings.teamSize}`}
-            <span className="lobby-summary-edit">▾</span>
-          </button>
-        ) : (
-          <span><Users size={15} strokeWidth={2.4} />{roomSettings.teamSize === 1 ? "1×1 · Дуэль" : `${roomSettings.teamSize}×${roomSettings.teamSize}`}</span>
-        )}
-        {isHost && room ? (
-          <button type="button" className="lobby-summary-btn" disabled={busy}
-            onClick={() => updateRoomSetting("goalType", roomSettings.goalType === "circle" ? "kazan" : "circle")}>
-            <CircleDot size={15} strokeWidth={2.4} />
-            {goalLabel(roomSettings.goalType)}
-            <span className="lobby-summary-edit">▾</span>
-          </button>
-        ) : (
-          <span><CircleDot size={15} strokeWidth={2.4} />{goalLabel(roomSettings.goalType)}</span>
-        )}
-        {isHost && room ? (
-          <button type="button" className="lobby-summary-btn" disabled={busy}
-            onClick={() => { const t = [2,3,5]; updateRoomSetting("matchMinutes", t[(t.indexOf(roomSettings.matchMinutes)+1)%t.length]); }}>
-            <Shield size={15} strokeWidth={2.4} />
-            {roomSettings.matchMinutes}:00
-            <span className="lobby-summary-edit">▾</span>
-          </button>
-        ) : (
-          <span><Shield size={15} strokeWidth={2.4} />{roomSettings.matchMinutes}:00</span>
-        )}
-      </div>
+      {room && (
+        <div className="lobby-settings-panel">
+          {isHost && <div className="lobby-settings-host-tag">Только хост может менять</div>}
+          <div className="lobby-setting-row">
+            <span className="lobby-setting-label"><Users size={13} strokeWidth={2.4} /> Состав</span>
+            <div className="lobby-setting-pills">
+              {[1, 3, 4, 5].map(s => (
+                <button key={s} type="button"
+                  className={`lobby-pill${roomSettings.teamSize === s ? " active" : ""}`}
+                  disabled={!isHost || busy}
+                  onClick={() => updateRoomSetting("teamSize", s)}>
+                  {s === 1 ? "1×1" : `${s}×${s}`}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="lobby-setting-row">
+            <span className="lobby-setting-label"><CircleDot size={13} strokeWidth={2.4} /> Цель</span>
+            <div className="lobby-setting-pills">
+              {["circle", "kazan"].map(g => (
+                <button key={g} type="button"
+                  className={`lobby-pill${roomSettings.goalType === g ? " active" : ""}`}
+                  disabled={!isHost || busy}
+                  onClick={() => updateRoomSetting("goalType", g)}>
+                  {g === "circle" ? "Круг" : "Казан"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="lobby-setting-row">
+            <span className="lobby-setting-label"><Shield size={13} strokeWidth={2.4} /> Время</span>
+            <div className="lobby-setting-pills">
+              {[2, 3, 5].map(m => (
+                <button key={m} type="button"
+                  className={`lobby-pill${roomSettings.matchMinutes === m ? " active" : ""}`}
+                  disabled={!isHost || busy}
+                  onClick={() => updateRoomSetting("matchMinutes", m)}>
+                  {m} мин
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {!room ? (
         <>

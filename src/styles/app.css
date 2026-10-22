@@ -13970,6 +13970,69 @@ body,
   margin-left: 1px;
 }
 
+/* ── Lobby settings panel ── */
+.lobby-settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(14, 8, 2, 0.6);
+  border: 1px solid rgba(190, 148, 60, 0.2);
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+.lobby-settings-host-tag {
+  font: 600 10px/1 Manrope, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(214, 178, 110, 0.45);
+  margin-bottom: 2px;
+}
+.lobby-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lobby-setting-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 12px/1 Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.6);
+  white-space: nowrap;
+  min-width: 72px;
+}
+.lobby-setting-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lobby-pill {
+  padding: 5px 10px;
+  font: 700 12px/1 Manrope, sans-serif;
+  color: rgba(214, 178, 110, 0.7);
+  background: rgba(14, 8, 2, 0.5);
+  border: 1px solid rgba(190, 148, 60, 0.22);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .1s, border-color .1s, color .1s;
+  white-space: nowrap;
+}
+.lobby-pill:hover:not(:disabled) {
+  background: rgba(36, 22, 6, 0.9);
+  border-color: rgba(210, 160, 48, 0.5);
+  color: #f0c347;
+}
+.lobby-pill.active {
+  background: rgba(190, 148, 60, 0.18);
+  border-color: #f0c347;
+  color: #f0c347;
+}
+.lobby-pill:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 /* ── Leave button — make it visible as active ── */
 .ready-button.secondary {
   background: rgba(50, 28, 8, 0.85) !important;
