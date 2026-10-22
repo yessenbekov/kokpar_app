@@ -717,7 +717,7 @@ export default function App() {
         </div>
       )}
 
-      <TutorialHints active={Boolean(activeSettings)} hud={hud} />
+      <TutorialHints active={Boolean(activeSettings)} hud={hud} lang={activeSettings?.lang ?? "ru"} />
 
       <MatchReward
         reward={matchReward}

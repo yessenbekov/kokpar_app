@@ -152,7 +152,7 @@ export function HorseStable({
               {editing ? (
                 <form className="horse-name-form" onSubmit={submitName} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input
-                    aria-label="Имя лошади"
+                    aria-label={t("Имя лошади", "Жылқы аты", "Horse name")}
                     maxLength={24}
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
@@ -414,11 +414,11 @@ export function HorseStable({
             onClick={onExpandStable}
             disabled={!onExpandStable || profile?.coins < stableSlotCost}
           >
-            <span>⊕ Расширить конюшню</span>
+            <span>⊕ {t("Расширить конюшню", "Қораны кеңейту", "Expand stable")}</span>
             <span className="expand-stable-cost">
               {stableSlotCost} 🪙
               {profile?.coins < stableSlotCost && (
-                <span className="expand-stable-short"> · не хватает {stableSlotCost - (profile?.coins ?? 0)}</span>
+                <span className="expand-stable-short"> · {t("не хватает", "жетпейді", "short by")} {stableSlotCost - (profile?.coins ?? 0)}</span>
               )}
             </span>
           </button>
@@ -428,7 +428,7 @@ export function HorseStable({
         {!creating && canAddMore && Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => (
           <div key={`empty-${i}`} className="stable-empty-slot">
             <div className="stable-empty-thumb" />
-            <span className="stable-empty-label">Свободное стойло</span>
+            <span className="stable-empty-label">{t("Свободное стойло", "Бос орын", "Empty stall")}</span>
           </div>
         ))}
       </div>
@@ -436,10 +436,10 @@ export function HorseStable({
       {/* Footer */}
       <div className="horse-card-footer">
         <button type="button" className="horse-card-footer-btn secondary" onClick={onGoToShop}>
-          Магазин
+          {t("Магазин", "Дүкен", "Shop")}
         </button>
         <button type="button" className="horse-card-footer-btn primary" onClick={onGoToMatch}>
-          К матчу
+          {t("К матчу", "Матчқа", "To match")}
         </button>
       </div>
     </div>

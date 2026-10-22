@@ -94,12 +94,12 @@ function sameOnlineState(left, right) {
   return Object.keys(EMPTY_ONLINE_STATE).every((key) => left[key] === right[key]);
 }
 
-function onlineStartLabel(lobbyState) {
-  if (!lobbyState.hasRoom) return "Создай или войди в комнату";
-  if (lobbyState.status === "starting") return "Стартуем";
-  if (!lobbyState.isHost) return "Ждем хоста";
-  if (!lobbyState.allReady) return "Все должны быть готовы";
-  return "Запустить комнату";
+function onlineStartLabel(lobbyState, t) {
+  if (!lobbyState.hasRoom) return t("Создай или войди в комнату", "Бөлме жасаңыз немесе кіріңіз", "Create or join a room");
+  if (lobbyState.status === "starting") return t("Стартуем", "Басталуда", "Starting");
+  if (!lobbyState.isHost) return t("Ждем хоста", "Хостты күтеміз", "Waiting for host");
+  if (!lobbyState.allReady) return t("Все должны быть готовы", "Барлығы дайын болуы керек", "Everyone must be ready");
+  return t("Запустить комнату", "Бөлмені іске қосу", "Launch room");
 }
 
 function Demeushire({ t, onBack }) {
@@ -441,7 +441,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     setNavTab("game");
     setWizardStep(0);
   }
-  const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState) : selectedMode.startLabel;
+  const startLabel = onlineMode ? onlineStartLabel(onlineLobbyState, t) : selectedMode.startLabel;
 
   const handleOnlineLobbyStateChange = useCallback((nextState) => {
     setOnlineLobbyState((currentState) => (sameOnlineState(currentState, nextState) ? currentState : nextState));
@@ -656,7 +656,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                           <span className="wizard-mode-body">
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <strong>{mode.name}</strong>
-                              {mode.soon && <span className="wizard-mode-soon-badge">скоро</span>}
+                              {mode.soon && <span className="wizard-mode-soon-badge">{t("скоро", "жақында", "soon")}</span>}
                             </div>
                             <span className="wizard-mode-short-desc">{MODE_SHORT_DESC[mode.id] ?? mode.role}</span>
                           </span>
@@ -689,7 +689,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="wizard-section">
                   <div className="wizard-step-header">
                     <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>‹</button>
-                    <span className="wizard-step-title">Комната</span>
+                    <span className="wizard-step-title">{t("Комната", "Бөлме", "Room")}</span>
                   </div>
                   <OnlineRoomLobby
                     auth={auth}
@@ -758,9 +758,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       <p className="wizard-label">{t("Время", "Уақыт", "Time")}</p>
                       <div className="wizard-three-grid">
                         {[
-                          { minutes: 2, label: "2 мин" },
-                          { minutes: 3, label: "3 мин" },
-                          { minutes: 5, label: "5 мин" }
+                          { minutes: 2, label: `2 ${t("мин", "мин", "min")}` },
+                          { minutes: 3, label: `3 ${t("мин", "мин", "min")}` },
+                          { minutes: 5, label: `5 ${t("мин", "мин", "min")}` }
                         ].map(({ minutes, label }) => (
                           <button key={minutes} type="button"
                             className={`wizard-option-card${settings.matchMinutes === minutes ? " active" : ""}`}
@@ -775,12 +775,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         <button type="button" className={`wizard-side-card blue${settings.teamSide !== "red" ? " active" : ""}`}
                           onClick={() => onSettingChange("teamSide", "blue")}>
                           <span style={{ width: 12, height: 12, borderRadius: 3, background: "#2590d0", display: "inline-block", flexShrink: 0 }} />
-                          <strong>Көк</strong>
+                          <strong>{t("Синие", "Көк", "Blue")}</strong>
                         </button>
                         <button type="button" className={`wizard-side-card red${settings.teamSide === "red" ? " active" : ""}`}
                           onClick={() => onSettingChange("teamSide", "red")}>
                           <span style={{ width: 12, height: 12, borderRadius: 3, background: "#e04535", display: "inline-block", flexShrink: 0 }} />
-                          <strong>Қызыл</strong>
+                          <strong>{t("Красные", "Қызыл", "Red")}</strong>
                         </button>
                       </div>
                     </>
@@ -824,7 +824,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       type="button"
                       className="horse-strip"
                       onClick={() => setNavTab("stable")}
-                      aria-label="Сменить лошадь"
+                      aria-label={t("Сменить лошадь", "Жылқыны ауыстыру", "Change horse")}
                     >
                       <span className="horse-strip-avatar">{selectedHorse.name.slice(0, 1)}</span>
                       <span className="horse-strip-info">
@@ -849,7 +849,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               {!stableCardOpen && (
                 <div className="wizard-step-header">
                   <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                  <span className="wizard-step-title">Қора · Конюшня</span>
+                  <span className="wizard-step-title">{t("Конюшня", "Қора", "Stable")}</span>
                   <span style={{ font: "700 12px Manrope, sans-serif", color: "rgba(214,178,110,.7)" }}>
                     {profile.ownedHorses.length} / {profile.stableCapacity}
                   </span>
@@ -876,6 +876,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   stableCapacity={profile.stableCapacity}
                   horseId={settings.horseId}
                   profile={profile}
+                  t={t}
                   onHorseChange={(horseId) => onSettingChange("horseId", horseId)}
                   onHorseRename={onHorseRename}
                   onHorseCreate={onHorseCreate}
@@ -894,19 +895,19 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               {stableTab === "shop" && (
                 <>
                   <div className="stable-tabs">
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>Конюшня</button>
-                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("shop")}>Магазин</button>
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />Торги</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>{t("Конюшня", "Қора", "Stable")}</button>
+                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("shop")}>{t("Магазин", "Дүкен", "Shop")}</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />{t("Торги", "Аукцион", "Auction")}</button>
                   </div>
-                  <Shop profile={profile} onBuyHorse={onBuyHorse} />
+                  <Shop profile={profile} onBuyHorse={onBuyHorse} t={t} />
                 </>
               )}
               {stableTab === "market" && (
                 <>
                   <div className="stable-tabs">
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>Конюшня</button>
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("shop")}>Магазин</button>
-                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />Торги</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>{t("Конюшня", "Қора", "Stable")}</button>
+                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("shop")}>{t("Магазин", "Дүкен", "Shop")}</button>
+                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />{t("Торги", "Аукцион", "Auction")}</button>
                   </div>
                   <Marketplace
                     profile={profile}
@@ -925,9 +926,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="tab-pane">
               <div className="wizard-step-header">
                 <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                <span className="wizard-step-title">История</span>
+                <span className="wizard-step-title">{t("История", "Тарих", "History")}</span>
               </div>
-              <MatchHistory />
+              <MatchHistory t={t} />
             </div>
           )}
 

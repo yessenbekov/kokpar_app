@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CircleDot, Clipboard, Crown, DoorOpen, Link2, LogIn, Plus, Radio, RefreshCw, Shield, Users, X } from "lucide-react";
 import { onlineRoomStore } from "../app/onlineRooms.js";
 
-function goalLabel(goalType) {
-  return goalType === "kazan" ? "Казан" : "Круг";
-}
-
-function teamLabel(team) {
-  return team === "red" ? "Қызыл" : "Көк";
+function makeLangT(lang) {
+  return (ru, kz, en) => {
+    if (lang === "kz") return kz ?? ru;
+    if (lang === "en") return en ?? ru;
+    return ru;
+  };
 }
 
 function roomCodeFromUrl() {
@@ -23,7 +23,7 @@ function inviteLink(room) {
   return url.toString();
 }
 
-function LobbyPlayer({ player, current, host, onKick }) {
+function LobbyPlayer({ player, current, host, onKick, kickLabel }) {
   return (
     <li className={current ? "lobby-player current" : "lobby-player"}>
       <span className="lobby-player-avatar">{player.riderName.slice(0, 1)}</span>
@@ -34,7 +34,7 @@ function LobbyPlayer({ player, current, host, onKick }) {
       {host && <Crown size={14} strokeWidth={2.5} style={{ color: "#f0c347", flexShrink: 0 }} />}
       {player.ready && <Check size={14} strokeWidth={2.5} style={{ color: "#7ed47e", flexShrink: 0 }} />}
       {onKick && (
-        <button className="lobby-kick" type="button" onClick={onKick} aria-label={`Кикнуть ${player.riderName}`}>
+        <button className="lobby-kick" type="button" onClick={onKick} aria-label={kickLabel ?? `Kick ${player.riderName}`}>
           <X size={13} strokeWidth={2.5} />
         </button>
       )}
@@ -71,6 +71,7 @@ export function OnlineRoomLobby({
   const leavingRef = useRef(false);
 
   const signedIn = auth.status === "signed-in";
+  const t = makeLangT(settings?.lang ?? "ru");
   const currentPlayer = useMemo(
     () => players.find((player) => player.userId === currentUserId) ?? null,
     [currentUserId, players]
@@ -109,7 +110,7 @@ export function OnlineRoomLobby({
 
   function hydrate(nextState) {
     if (nextState.error) {
-      setError(nextState.error instanceof Error ? nextState.error.message : "Ошибка комнаты");
+      setError(nextState.error instanceof Error ? nextState.error.message : t("Ошибка комнаты", "Бөлме қатесі", "Room error"));
       return;
     }
 
@@ -121,7 +122,7 @@ export function OnlineRoomLobby({
       setJoinCode("");
       startedRoomRef.current = "";
       onReadyChange(false);
-      setError("Хост закрыл комнату");
+      setError(t("Хост закрыл комнату", "Хост бөлмені жапты", "Host closed the room"));
       return;
     }
 
@@ -133,7 +134,7 @@ export function OnlineRoomLobby({
       setJoinCode("");
       startedRoomRef.current = "";
       onReadyChange(false);
-      setError("Вас выгнали из комнаты");
+      setError(t("Вас выгнали из комнаты", "Сізді бөлмеден шығарды", "You were kicked from the room"));
       return;
     }
 
@@ -153,7 +154,7 @@ export function OnlineRoomLobby({
     onlineRoomStore.fetch(room.id).then((nextState) => {
       if (active) hydrate(nextState);
     }).catch((nextError) => {
-      if (active) setError(nextError instanceof Error ? nextError.message : "Ошибка комнаты");
+      if (active) setError(nextError instanceof Error ? nextError.message : t("Ошибка комнаты", "Бөлме қатесі", "Room error"));
     });
 
     const unsubscribe = onlineRoomStore.subscribe(room.id, (nextState) => {
@@ -319,7 +320,7 @@ export function OnlineRoomLobby({
       const rooms = await onlineRoomStore.listOpenRooms();
       setOpenRooms(rooms);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось загрузить комнаты");
+      setError(e instanceof Error ? e.message : t("Не удалось загрузить комнаты", "Бөлмелерді жүктеу мүмкін болмады", "Failed to load rooms"));
     } finally {
       setLoadingRooms(false);
     }
@@ -364,7 +365,7 @@ export function OnlineRoomLobby({
       startedRoomRef.current = "";
       onReadyChange(false);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Ошибка выхода из комнаты");
+      setError(nextError instanceof Error ? nextError.message : t("Ошибка выхода из комнаты", "Бөлмеден шығу қатесі", "Error leaving room"));
     } finally {
       setBusy(false);
       leavingRef.current = false;
@@ -375,56 +376,56 @@ export function OnlineRoomLobby({
     if (!value) return;
 
     try {
-      if (!canCopy) throw new Error("Буфер обмена недоступен");
+      if (!canCopy) throw new Error(t("Буфер обмена недоступен", "Алмасу буфері қолжетімсіз", "Clipboard unavailable"));
       await navigator.clipboard.writeText(value);
       setCopied(label);
       setError("");
     } catch (nextError) {
       setCopied("");
-      setError(nextError instanceof Error ? nextError.message : "Не удалось скопировать");
+      setError(nextError instanceof Error ? nextError.message : t("Не удалось скопировать", "Көшіру мүмкін болмады", "Failed to copy"));
     }
   }
 
   if (!signedIn) {
     return (
-      <section className="online-lobby" aria-label="Онлайн комната">
+      <section className="online-lobby" aria-label={t("Онлайн комната", "Онлайн бөлме", "Online room")}>
         <div className="lobby-empty">
           <Radio size={18} strokeWidth={2.5} />
           <div>
-            <strong>Для онлайн-комнаты нужен аккаунт</strong>
-            <span>Войди через email, чтобы создать комнату или подключиться к другу.</span>
+            <strong>{t("Для онлайн-комнаты нужен аккаунт", "Онлайн бөлме үшін аккаунт қажет", "Account required for online room")}</strong>
+            <span>{t("Войди через email, чтобы создать комнату или подключиться к другу.", "Бөлме жасау немесе досқа қосылу үшін email арқылы кіріңіз.", "Sign in with email to create a room or join a friend.")}</span>
           </div>
         </div>
         <button className="ready-button" type="button" onClick={onBackToLogin}>
           <LogIn size={17} strokeWidth={2.6} />
-          <span>Войти</span>
+          <span>{t("Войти", "Кіру", "Sign in")}</span>
         </button>
       </section>
     );
   }
 
   return (
-    <section className="online-lobby" aria-label="Онлайн комната">
+    <section className="online-lobby" aria-label={t("Онлайн комната", "Онлайн бөлме", "Online room")}>
       <div className="lobby-topline">
         <span>
           <Radio size={16} strokeWidth={2.5} />
           {room ? (
             <>
-              Комната <b className="lobby-code">{room.code}</b>
+              {t("Комната", "Бөлме", "Room")} <b className="lobby-code">{room.code}</b>
               {isHost && <span className="lobby-host-chip">host</span>}
             </>
           ) : (
-            "Supabase комната"
+            t("Онлайн комната", "Онлайн бөлме", "Online room")
           )}
         </span>
-        <span>{players.length || 1}/{capacity} игроков</span>
+        <span>{players.length || 1}/{capacity} {t("игроков", "ойыншы", "players")}</span>
       </div>
 
       {room && (
         <div className="lobby-settings-panel">
-          {isHost && <div className="lobby-settings-host-tag">Только хост может менять</div>}
+          {isHost && <div className="lobby-settings-host-tag">{t("Только хост может менять", "Тек хост өзгерте алады", "Only host can change")}</div>}
           <div className="lobby-setting-row">
-            <span className="lobby-setting-label"><Users size={13} strokeWidth={2.4} /> Состав</span>
+            <span className="lobby-setting-label"><Users size={13} strokeWidth={2.4} /> {t("Состав", "Құрам", "Teams")}</span>
             <div className="lobby-setting-pills">
               {[1, 3, 4, 5].map(s => (
                 <button key={s} type="button"
@@ -437,27 +438,27 @@ export function OnlineRoomLobby({
             </div>
           </div>
           <div className="lobby-setting-row">
-            <span className="lobby-setting-label"><CircleDot size={13} strokeWidth={2.4} /> Цель</span>
+            <span className="lobby-setting-label"><CircleDot size={13} strokeWidth={2.4} /> {t("Цель", "Мақсат", "Goal")}</span>
             <div className="lobby-setting-pills">
               {["circle", "kazan"].map(g => (
                 <button key={g} type="button"
                   className={`lobby-pill${roomSettings.goalType === g ? " active" : ""}`}
                   disabled={!isHost || busy}
                   onClick={() => updateRoomSetting("goalType", g)}>
-                  {g === "circle" ? "Круг" : "Казан"}
+                  {g === "circle" ? t("Круг", "Шеңбер", "Circle") : t("Казан", "Қазан", "Kazan")}
                 </button>
               ))}
             </div>
           </div>
           <div className="lobby-setting-row">
-            <span className="lobby-setting-label"><Shield size={13} strokeWidth={2.4} /> Время</span>
+            <span className="lobby-setting-label"><Shield size={13} strokeWidth={2.4} /> {t("Время", "Уақыт", "Time")}</span>
             <div className="lobby-setting-pills">
               {[2, 3, 5].map(m => (
                 <button key={m} type="button"
                   className={`lobby-pill${roomSettings.matchMinutes === m ? " active" : ""}`}
                   disabled={!isHost || busy}
                   onClick={() => updateRoomSetting("matchMinutes", m)}>
-                  {m} мин
+                  {m} {t("мин", "мин", "min")}
                 </button>
               ))}
             </div>
@@ -472,13 +473,13 @@ export function OnlineRoomLobby({
             <div className="lobby-choice-grid">
               <button type="button" className="lobby-choice-card" onClick={createRoom} disabled={busy}>
                 <Plus size={30} strokeWidth={2.2} />
-                <strong>Создать</strong>
-                <span>Новая комната</span>
+                <strong>{t("Создать", "Жасау", "Create")}</strong>
+                <span>{t("Новая комната", "Жаңа бөлме", "New room")}</span>
               </button>
               <button type="button" className="lobby-choice-card" onClick={openJoinView} disabled={busy}>
                 <DoorOpen size={30} strokeWidth={2.2} />
-                <strong>Войти</strong>
-                <span>Открытые игры</span>
+                <strong>{t("Войти", "Кіру", "Join")}</strong>
+                <span>{t("Открытые игры", "Ашық ойындар", "Open games")}</span>
               </button>
             </div>
           )}
@@ -489,17 +490,17 @@ export function OnlineRoomLobby({
               {loadingRooms ? (
                 <div className="lobby-rooms-loading">
                   <RefreshCw size={18} strokeWidth={2.4} className="lobby-spin" />
-                  <span>Загружаем...</span>
+                  <span>{t("Загружаем...", "Жүктелуде...", "Loading...")}</span>
                 </div>
               ) : openRooms.length === 0 ? (
-                <div className="lobby-rooms-empty">Открытых комнат нет</div>
+                <div className="lobby-rooms-empty">{t("Открытых комнат нет", "Ашық бөлмелер жоқ", "No open rooms")}</div>
               ) : (
                 <div className="lobby-rooms-list">
                   {openRooms.map((r) => (
                     <button key={r.id} type="button" className="lobby-room-card" onClick={() => joinByCode(r.code)} disabled={busy}>
                       <span className="lobby-room-code">{r.code}</span>
                       <span className="lobby-room-meta">
-                        {r.teamSize === 1 ? "1×1 Дуэль" : `${r.teamSize}×${r.teamSize}`} · {goalLabel(r.goalType)} · {r.matchMinutes}мин
+                        {r.teamSize === 1 ? `1×1 ${t("Дуэль", "Дуэль", "Duel")}` : `${r.teamSize}×${r.teamSize}`} · {r.goalType === "kazan" ? t("Казан", "Қазан", "Kazan") : t("Круг", "Шеңбер", "Circle")} · {r.matchMinutes}{t("мин", "мин", "min")}
                       </span>
                       <span className="lobby-room-players">{r.playerCount}/{r.teamSize * 2} 🏇</span>
                     </button>
@@ -509,16 +510,16 @@ export function OnlineRoomLobby({
 
               <form className="lobby-join-form" onSubmit={joinRoom}>
                 <input
-                  aria-label="Код комнаты"
+                  aria-label={t("Код комнаты", "Бөлме коды", "Room code")}
                   value={joinCode}
                   onChange={(e) => setJoinCode(onlineRoomStore.normalizeCode(e.target.value))}
                   maxLength={6}
-                  placeholder="или введи КОД"
+                  placeholder={t("или введи КОД", "немесе КОД енгізіңіз", "or enter CODE")}
                   disabled={busy}
                 />
                 <button type="submit" disabled={busy || joinCode.length < 4}>
                   <DoorOpen size={16} strokeWidth={2.5} />
-                  <span>Войти</span>
+                  <span>{t("Войти", "Кіру", "Join")}</span>
                 </button>
               </form>
 
@@ -529,18 +530,18 @@ export function OnlineRoomLobby({
       ) : (
         <>
           <div className="lobby-share">
-            <button type="button" onClick={() => copyText(room.code, "Код скопирован")} disabled={busy}>
+            <button type="button" onClick={() => copyText(room.code, t("Код скопирован", "Код көшірілді", "Code copied"))} disabled={busy}>
               <Clipboard size={15} strokeWidth={2.5} />
-              <span>Код</span>
+              <span>{t("Код", "Код", "Code")}</span>
             </button>
-            <button type="button" onClick={() => copyText(inviteLink(room), "Ссылка скопирована")} disabled={busy}>
+            <button type="button" onClick={() => copyText(inviteLink(room), t("Ссылка скопирована", "Сілтеме көшірілді", "Link copied"))} disabled={busy}>
               <Link2 size={15} strokeWidth={2.5} />
-              <span>Ссылка</span>
+              <span>{t("Ссылка", "Сілтеме", "Link")}</span>
             </button>
-            <span>{room.status === "starting" ? "Стартуем" : `Готовы ${readyCount}/${activePlayers.length}`}</span>
+            <span>{room.status === "starting" ? t("Стартуем", "Бастауда", "Starting") : `${t("Готовы", "Дайын", "Ready")} ${readyCount}/${activePlayers.length}`}</span>
           </div>
 
-          <div className="team-pick" aria-label="Выбор стороны">
+          <div className="team-pick" aria-label={t("Выбор стороны", "Жақ таңдау", "Choose side")}>
             {["blue", "red"].map((team) => (
               <button
                 className={currentPlayer?.team === team ? `team-choice ${team} active` : `team-choice ${team}`}
@@ -549,7 +550,7 @@ export function OnlineRoomLobby({
                 onClick={() => updateTeam(team)}
                 disabled={busy}
               >
-                {teamLabel(team)}
+                {team === "red" ? t("Қызыл", "Қызыл", "Red") : t("Көк", "Көк", "Blue")}
               </button>
             ))}
             <button
@@ -558,19 +559,19 @@ export function OnlineRoomLobby({
               onClick={() => updateTeam("spectator")}
               disabled={busy}
             >
-              Зритель
+              {t("Зритель", "Бақылаушы", "Spectator")}
             </button>
           </div>
 
           {countdown !== null && (
             <div className="lobby-countdown" key={countdown}>
-              {countdown > 0 ? countdown : "Старт!"}
+              {countdown > 0 ? countdown : t("Старт!", "Старт!", "Go!")}
             </div>
           )}
 
           <div className="lobby-teams">
             <div className="lobby-team blue">
-              <strong>Көк команда</strong>
+              <strong>{t("Синяя команда", "Көк команда", "Blue team")}</strong>
               <ul>
                 {bluePlayers.map((player) => (
                   <LobbyPlayer
@@ -578,13 +579,14 @@ export function OnlineRoomLobby({
                     current={player.userId === currentUserId}
                     host={player.userId === room.hostUserId}
                     onKick={isHost && !busy && player.userId !== currentUserId && player.userId !== room.hostUserId ? () => kickPlayer(player.userId) : undefined}
+                    kickLabel={t(`Кикнуть ${player.riderName}`, `${player.riderName}-ды шығару`, `Kick ${player.riderName}`)}
                     key={player.userId}
                   />
                 ))}
               </ul>
             </div>
             <div className="lobby-team red">
-              <strong>Қызыл команда</strong>
+              <strong>{t("Красная команда", "Қызыл команда", "Red team")}</strong>
               <ul>
                 {redPlayers.map((player) => (
                   <LobbyPlayer
@@ -592,6 +594,7 @@ export function OnlineRoomLobby({
                     current={player.userId === currentUserId}
                     host={player.userId === room.hostUserId}
                     onKick={isHost && !busy && player.userId !== currentUserId && player.userId !== room.hostUserId ? () => kickPlayer(player.userId) : undefined}
+                    kickLabel={t(`Кикнуть ${player.riderName}`, `${player.riderName}-ды шығару`, `Kick ${player.riderName}`)}
                     key={player.userId}
                   />
                 ))}
@@ -601,7 +604,7 @@ export function OnlineRoomLobby({
 
           {spectators.length > 0 && (
             <div className="lobby-spectators">
-              <strong>Зрители</strong>
+              <strong>{t("Зрители", "Бақылаушылар", "Spectators")}</strong>
               <ul>
                 {spectators.map((player) => (
                   <LobbyPlayer
@@ -609,6 +612,7 @@ export function OnlineRoomLobby({
                     current={player.userId === currentUserId}
                     host={player.userId === room.hostUserId}
                     onKick={isHost && !busy && player.userId !== currentUserId ? () => kickPlayer(player.userId) : undefined}
+                    kickLabel={t(`Кикнуть ${player.riderName}`, `${player.riderName}-ды шығару`, `Kick ${player.riderName}`)}
                     key={player.userId}
                   />
                 ))}
@@ -620,12 +624,12 @@ export function OnlineRoomLobby({
             {!isSpectator && (
               <button className={playerReady ? "ready-button active" : "ready-button"} type="button" onClick={toggleReady} disabled={busy}>
                 <Check size={17} strokeWidth={2.6} />
-                <span>{playerReady ? "Готов" : "Готовиться"}</span>
+                <span>{playerReady ? t("Готов", "Дайын", "Ready") : t("Готовиться", "Дайындалу", "Get ready")}</span>
               </button>
             )}
             <button className={isSpectator ? "ready-button" : "ready-button secondary"} type="button" onClick={leaveRoom} disabled={busy}>
               <DoorOpen size={17} strokeWidth={2.6} />
-              <span>Выйти из комнаты</span>
+              <span>{t("Выйти из комнаты", "Бөлмеден шығу", "Leave room")}</span>
             </button>
           </div>
         </>
