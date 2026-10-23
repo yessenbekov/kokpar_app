@@ -26,7 +26,8 @@ export function HorseOnboarding({ onComplete }) {
   }
 
   const lang = language;
-  function tl(ru, kz, en) {
+  function tl(ru, kz, en, ky) {
+    if (lang === "ky") return ky ?? kz ?? ru;
     if (lang === "kz") return kz ?? ru;
     if (lang === "en") return en ?? ru;
     return ru;
@@ -59,6 +60,18 @@ export function HorseOnboarding({ onComplete }) {
             <div className="ob-step-desc">Интерфейс и комментарий матча. Можно сменить в настройках.</div>
           </div>
           <div className="ob-body">
+            <button
+              type="button"
+              className={`ob-lang-card${language === "ky" ? " ob-lang-card--selected" : ""}`}
+              onClick={() => setLanguage("ky")}
+            >
+              <span className="ob-lang-code">КЫР</span>
+              <div className="ob-lang-text">
+                <div className="ob-lang-name">Кыргызча</div>
+                <div className="ob-lang-desc">Толук которуу · добуш комментарий</div>
+              </div>
+              {language === "ky" && <span className="ob-check-circle">✓</span>}
+            </button>
             <button
               type="button"
               className={`ob-lang-card${language === "kz" ? " ob-lang-card--selected" : ""}`}

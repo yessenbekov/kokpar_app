@@ -6,8 +6,9 @@ const DISMISSED_KEY = "pwa_install_dismissed";
 function getLang() {
   try { return localStorage.getItem("kokpar_lang") ?? "ru"; } catch { return "ru"; }
 }
-function t(ru, kz, en) {
+function t(ru, kz, en, ky) {
   const lang = getLang();
+  if (lang === "ky") return ky ?? kz ?? ru;
   if (lang === "kz") return kz ?? ru;
   if (lang === "en") return en ?? ru;
   return ru;

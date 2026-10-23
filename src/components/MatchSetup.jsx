@@ -426,9 +426,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
     onSettingChange?.(key, value);
   }
   function toggleLang(l) { setLangState(l); saveSetting("lang", l, "kokpar_lang"); }
+  const ky = lang === "ky";
   const kz = lang === "kz";
   const en = lang === "en";
-  function t(ru, kz_text, en_text) {
+  function t(ru, kz_text, en_text, ky_text) {
+    if (lang === "ky") return ky_text ?? kz_text ?? ru;
     if (lang === "kz") return kz_text ?? ru;
     if (lang === "en") return en_text ?? ru;
     return ru;
@@ -954,8 +956,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 {/* Language */}
                 <div className="settings-section-label">{t("Язык", "Тіл", "Language")}</div>
                 <div className="settings-seg">
+                  <button type="button" className={`settings-seg-btn${ky ? " active" : ""}`} onClick={() => toggleLang("ky")}>Кыргызча</button>
                   <button type="button" className={`settings-seg-btn${kz ? " active" : ""}`} onClick={() => toggleLang("kz")}>Қазақша</button>
-                  <button type="button" className={`settings-seg-btn${!kz && !en ? " active" : ""}`} onClick={() => toggleLang("ru")}>Русский</button>
+                  <button type="button" className={`settings-seg-btn${!ky && !kz && !en ? " active" : ""}`} onClick={() => toggleLang("ru")}>Русский</button>
                   <button type="button" className={`settings-seg-btn${en ? " active" : ""}`} onClick={() => toggleLang("en")}>English</button>
                 </div>
 

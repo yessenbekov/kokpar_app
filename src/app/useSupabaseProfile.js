@@ -453,7 +453,7 @@ export function useSupabaseProfile({ onProfileLoaded } = {}) {
       ownedHorses: [horse],
       selectedHorseId: horse.id,
       selectedHorseType: horse.typeId,
-      language: typeof language === "string" && ["ru", "kz", "en"].includes(language) ? language : (baseProfile.language ?? "ru"),
+      language: typeof language === "string" && ["ru", "kz", "en", "ky"].includes(language) ? language : (baseProfile.language ?? "ru"),
       onboardingDone: true
     };
 

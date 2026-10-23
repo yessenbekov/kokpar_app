@@ -632,6 +632,7 @@ export default function App() {
       </svg>
       <div className="portrait-lock-body">
         <p>Поверни телефон горизонтально</p>
+        <p>Телефонду горизонталь бур</p>
         <p>Телефонды горизонталь бұрыңыз</p>
         <p>Rotate your phone sideways</p>
       </div>
