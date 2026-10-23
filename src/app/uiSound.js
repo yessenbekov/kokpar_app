@@ -5,6 +5,8 @@ let clickBuf = null;
 let clickBufFailed = false;
 let backBuf = null;
 let backBufFailed = false;
+let matchStartBuf = null;
+let matchStartBufFailed = false;
 
 function getCtx() {
   if (ctx) return ctx;
@@ -32,6 +34,14 @@ function getCtx() {
       .then((ab) => ctx.decodeAudioData(ab))
       .then((buf) => { backBuf = buf; })
       .catch(() => { backBufFailed = true; });
+  }
+
+  if (!matchStartBufFailed) {
+    fetch("/sounds/match-start.wav")
+      .then((r) => r.arrayBuffer())
+      .then((ab) => ctx.decodeAudioData(ab))
+      .then((buf) => { matchStartBuf = buf; })
+      .catch(() => { matchStartBufFailed = true; });
   }
 
   return ctx;
@@ -116,12 +126,18 @@ export function playMenuBack() {
   }
 }
 
-// Ascending fanfare on match start (always synthesized — more epic)
 export function playMatchStart() {
   const c = getCtx();
   if (!c || c.state === "suspended") return;
   const v = vol();
   if (v <= 0) return;
+
+  if (matchStartBuf) {
+    playSample(c, matchStartBuf, v);
+    return;
+  }
+
+  // Synthesized fallback — ascending fanfare
   const t = c.currentTime;
   [[392, 0], [523, 0.09], [659, 0.18], [784, 0.27]].forEach(([freq, delay]) => {
     const osc = c.createOscillator();
