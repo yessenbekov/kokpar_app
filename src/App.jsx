@@ -20,6 +20,8 @@ import { MatchSetup } from "./components/MatchSetup.jsx";
 import { TouchControls } from "./components/TouchControls.jsx";
 import PwaInstallBanner from "./components/PwaInstallBanner.jsx";
 import { createKokparGame } from "./game/createKokparGame.js";
+import { menuMusic } from "./app/menuMusic.js";
+import { playMatchStart } from "./app/uiSound.js";
 
 const JOYSTICK_RADIUS = 46;
 
@@ -29,6 +31,7 @@ export default function App() {
   const gameRef = useRef(null);
   const syncRef = useRef(null);
   const joystickRef = useRef(null);
+  const musicStartedRef = useRef(false);
   const initialProfileRef = useRef(null);
   if (!initialProfileRef.current) initialProfileRef.current = playerProfileStore.read();
   const [joystick, setJoystick] = useState({ active: false, x: 0, z: 0 });
@@ -226,7 +229,12 @@ export default function App() {
 
   useEffect(() => {
     function handleVisibilityChange() {
-      if (document.hidden) releaseTouchControls();
+      if (document.hidden) {
+        releaseTouchControls();
+        menuMusic.stop();
+      } else if (!activeSettings && musicStartedRef.current) {
+        menuMusic.start(settings.musicVol ?? 42);
+      }
     }
 
     window.addEventListener("blur", () => releaseTouchControls());
@@ -241,6 +249,30 @@ export default function App() {
   useEffect(() => {
     releaseTouchControls();
   }, [activeSettings]);
+
+  // Menu music: start on first interaction when on the setup screen, stop during match
+  useEffect(() => {
+    if (activeSettings) {
+      menuMusic.stop();
+      return undefined;
+    }
+    // On setup screen — wait for first pointer interaction to satisfy autoplay policy
+    function onFirstInteraction() {
+      musicStartedRef.current = true;
+      menuMusic.start(settings.musicVol ?? 42);
+    }
+    if (musicStartedRef.current) {
+      // Returning from match — resume immediately
+      menuMusic.start(settings.musicVol ?? 42);
+      return undefined;
+    }
+    document.addEventListener("pointerdown", onFirstInteraction, { once: true });
+    return () => document.removeEventListener("pointerdown", onFirstInteraction);
+  }, [activeSettings]);
+
+  useEffect(() => {
+    menuMusic.setVolume(settings.musicVol ?? 42);
+  }, [settings.musicVol]);
 
   function updateSetting(key, value) {
     const nextSettings = { ...settings, [key]: value };
@@ -581,6 +613,8 @@ export default function App() {
 
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
+
+    playMatchStart();
 
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
