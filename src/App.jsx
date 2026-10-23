@@ -20,7 +20,7 @@ import { MatchSetup } from "./components/MatchSetup.jsx";
 import { TouchControls } from "./components/TouchControls.jsx";
 import PwaInstallBanner from "./components/PwaInstallBanner.jsx";
 import { createKokparGame } from "./game/createKokparGame.js";
-import { playMatchStart } from "./app/uiSound.js";
+import { playMatchStart, playMenuClick, playMenuBack } from "./app/uiSound.js";
 
 const JOYSTICK_RADIUS = 46;
 
@@ -223,6 +223,22 @@ export default function App() {
     }
     document.addEventListener("pointerdown", requestFullscreen, { once: true });
     return () => document.removeEventListener("pointerdown", requestFullscreen);
+  }, []);
+
+  // Global button click sounds
+  useEffect(() => {
+    function onButtonDown(e) {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      // Detect "back" buttons by class or text content
+      const isBack = btn.classList.contains("ob-auth-back") ||
+        btn.classList.contains("mr-btn--secondary") ||
+        btn.dataset.sound === "back";
+      if (isBack) playMenuBack();
+      else playMenuClick();
+    }
+    document.addEventListener("pointerdown", onButtonDown, { passive: true });
+    return () => document.removeEventListener("pointerdown", onButtonDown);
   }, []);
 
   useEffect(() => {
