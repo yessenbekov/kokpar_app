@@ -2165,9 +2165,20 @@ export function createKokparGame(container, onHudChange, options = {}) {
     camera.updateProjectionMatrix();
   }
 
+  // Maps physical key codes to game key names — layout-independent (fixes Russian/Kazakh keyboard)
+  const KEY_CODE_MAP = {
+    KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d",
+    ArrowUp: "arrowup", ArrowDown: "arrowdown",
+    ArrowLeft: "arrowleft", ArrowRight: "arrowright",
+    Space: " ", KeyR: "r", KeyC: "c", KeyE: "e",
+  };
+  function resolveKey(event) {
+    return KEY_CODE_MAP[event.code] ?? event.key.toLowerCase();
+  }
+
   function onKeyDown(event) {
     feedback.prime();
-    const key = event.key.toLowerCase();
+    const key = resolveKey(event);
     if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)) {
       event.preventDefault();
     }
@@ -2196,7 +2207,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function onKeyUp(event) {
-    const key = event.key.toLowerCase();
+    const key = resolveKey(event);
     if (key === " " && releaseThrowCharge(player)) {
       keys.delete(key);
       return;
