@@ -1,8 +1,10 @@
 // UI sounds — click.wav for menu buttons, synthesized fanfare for match start
 let ctx = null;
 let noiseBuf = null;
-let clickBuf = null; // decoded click.wav
+let clickBuf = null;
 let clickBufFailed = false;
+let backBuf = null;
+let backBufFailed = false;
 
 function getCtx() {
   if (ctx) return ctx;
@@ -16,13 +18,20 @@ function getCtx() {
   const d = noiseBuf.getChannelData(0);
   for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
 
-  // Load click.wav
   if (!clickBufFailed) {
     fetch("/sounds/click.wav")
       .then((r) => r.arrayBuffer())
       .then((ab) => ctx.decodeAudioData(ab))
       .then((buf) => { clickBuf = buf; })
       .catch(() => { clickBufFailed = true; });
+  }
+
+  if (!backBufFailed) {
+    fetch("/sounds/back.mp3")
+      .then((r) => r.arrayBuffer())
+      .then((ab) => ctx.decodeAudioData(ab))
+      .then((buf) => { backBuf = buf; })
+      .catch(() => { backBufFailed = true; });
   }
 
   return ctx;
@@ -79,11 +88,13 @@ export function playMenuBack() {
   const v = vol();
   if (v <= 0) return;
 
-  if (clickBuf) {
+  if (backBuf) {
+    playSample(c, backBuf, v);
+  } else if (clickBuf) {
     const src = c.createBufferSource();
     const gain = c.createGain();
     src.buffer = clickBuf;
-    src.playbackRate.value = 0.75; // lower pitch = "back" feel
+    src.playbackRate.value = 0.75;
     gain.gain.value = v * 0.8;
     src.connect(gain);
     gain.connect(c.destination);
