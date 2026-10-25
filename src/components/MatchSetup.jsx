@@ -899,13 +899,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
               )}
               {stableTab === "market" && (
                 <Marketplace
-                    profile={profile}
-                    listingDraft={listingDraft}
-                    onListItem={handleListItem}
-                    onCancelListing={onCancelListing}
-                    onPurchase={onPurchase}
-                  />
-                </>
+                  profile={profile}
+                  listingDraft={listingDraft}
+                  onListItem={handleListItem}
+                  onCancelListing={onCancelListing}
+                  onPurchase={onPurchase}
+                />
               )}
             </div>
           )}
