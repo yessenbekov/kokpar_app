@@ -20,6 +20,7 @@ import { MatchSetup } from "./components/MatchSetup.jsx";
 import { TouchControls } from "./components/TouchControls.jsx";
 import PwaInstallBanner from "./components/PwaInstallBanner.jsx";
 import { createKokparGame } from "./game/createKokparGame.js";
+import { playMenuClick } from "./app/uiSound.js";
 
 const JOYSTICK_RADIUS = 46;
 
@@ -222,6 +223,14 @@ export default function App() {
     }
     document.addEventListener("pointerdown", requestFullscreen, { once: true });
     return () => document.removeEventListener("pointerdown", requestFullscreen);
+  }, []);
+
+  useEffect(() => {
+    function onButtonDown(e) {
+      if (e.target.closest("button")) playMenuClick();
+    }
+    document.addEventListener("pointerdown", onButtonDown, { passive: true });
+    return () => document.removeEventListener("pointerdown", onButtonDown);
   }, []);
 
 
