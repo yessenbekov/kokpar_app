@@ -857,7 +857,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   </span>
                 </div>
               )}
-              {!stableCardOpen && stableTab !== "stable" && (
+              {!stableCardOpen && (
                 <div className="stable-tabs">
                   <button type="button" className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("stable")}>
                     {t("Конюшня", "Қора", "Stable")}
@@ -895,23 +895,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 />
               )}
               {stableTab === "shop" && (
-                <>
-                  <div className="stable-tabs">
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>{t("Конюшня", "Қора", "Stable")}</button>
-                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("shop")}>{t("Магазин", "Дүкен", "Shop")}</button>
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />{t("Торги", "Аукцион", "Auction")}</button>
-                  </div>
-                  <Shop profile={profile} onBuyHorse={onBuyHorse} t={t} />
-                </>
+                <Shop profile={profile} onBuyHorse={onBuyHorse} t={t} />
               )}
               {stableTab === "market" && (
-                <>
-                  <div className="stable-tabs">
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("stable")}>{t("Конюшня", "Қора", "Stable")}</button>
-                    <button type="button" className="stable-tab-btn" onClick={() => setStableTab("shop")}>{t("Магазин", "Дүкен", "Shop")}</button>
-                    <button type="button" className="stable-tab-btn active" onClick={() => setStableTab("market")}><Gavel size={13} strokeWidth={2.4} />{t("Торги", "Аукцион", "Auction")}</button>
-                  </div>
-                  <Marketplace
+                <Marketplace
                     profile={profile}
                     listingDraft={listingDraft}
                     onListItem={handleListItem}
