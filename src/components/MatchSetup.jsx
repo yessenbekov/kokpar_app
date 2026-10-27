@@ -521,9 +521,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             <div className="home-scene-card">
               <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
+                <div className="home-scene-label">{t("СЕГОДНЯ НА АРЕНЕ", "БҮГІН АРЕНАДА", "TODAY ON ARENA")}</div>
                 <div className="home-logo">{t("КОКПАР", "КӨКПАР", "KOKPAR")}</div>
                 <div className="home-team-chips">
                   <div className="home-team-chip-blue">■ {t("СИНИЕ", "КӨКТЕР", "BLUE")}</div>
+                  <span className="home-match-info">{settings.teamSize} × {settings.teamSize} · {String(settings.matchMinutes ?? 3).padStart(2, "0")}:00</span>
                   <div className="home-team-chip-red">■ {t("КРАСНЫЕ", "ҚЫЗЫЛДАР", "RED")}</div>
                 </div>
               </div>
@@ -535,14 +537,14 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 type="button"
                 onClick={() => { setHomeScreen(false); setNavTab("game"); setWizardStep(0); }}
               >
-                {t("Ойнау · Играть", "Ойнау", "Play")}
+                {t("ОЙНАУ / ИГРАТЬ · PLAY", "ОЙНАУ / ОЙНАУ · PLAY", "ОЙНАУ / ИГРАТЬ · PLAY")}
               </button>
               <div className="home-sub-btns">
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); }}>
                   {t("Конюшня", "Қора", "Stable")}
                 </button>
-                <button type="button" className="home-sub-btn" onClick={() => setShowCoinScreen(true)}>
-                  {t("Казна", "Қазына", "Treasury")}
+                <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("stable"); setStableTab("shop"); }}>
+                  {t("Магазин", "Дүкен", "Shop")}
                 </button>
                 <button type="button" className="home-sub-btn" onClick={() => { setHomeScreen(false); setNavTab("profile"); }}>
                   {t("Настройки", "Баптаулар", "Settings")}
@@ -606,9 +608,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <div className="wizard-step-header" style={{ padding: "8px 0 18px" }}>
                     <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
                     <span className="wizard-step-title">{t("Режим", "Режим", "Mode")}</span>
+                    <span className="wizard-step-counter">{t("ШАГ 1 / 2", "ҚАД. 1 / 2", "STEP 1 / 2")}</span>
                   </div>
                   <div className="wizard-mode-grid">
-                    {GAME_MODES.map((mode) => {
+                    {GAME_MODES.map((mode, modeIdx) => {
                       const isActive = settings.modeId === mode.id;
                       const MODE_PREVIEW_TEXT = {
                         kokpar: "арт режима: борьба за серке",
@@ -625,20 +628,33 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         training: t("Свободный заезд: контроль, подбор серке, броски.", "Бос жүріс: бақылау, серке, лақтыру.", "Free ride: control, grab serke, throw."),
                         online_room: t("Создать комнату или войти по коду.", "Бөлме жасау немесе код бойынша кіру.", "Create room or join by code.")
                       };
+                      const modeNum = String(modeIdx + 1).padStart(2, "0");
                       if (isActive) {
                         return (
                           <div key={mode.id} className="wizard-mode-big-card">
                             <div className="wizard-mode-big-preview">
-                            {MODE_IMG[mode.id]
-                              ? <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-big-img" />
-                              : (MODE_PREVIEW_TEXT[mode.id] ?? "арт режима")}
-                          </div>
+                              {MODE_IMG[mode.id]
+                                ? <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-big-img" />
+                                : (MODE_PREVIEW_TEXT[mode.id] ?? "арт режима")}
+                              <div className="wizard-mode-vybrano">
+                                <span className="wizard-mode-num">{modeNum}</span>
+                                <span>{t("ВЫБРАНО", "ТАҢДАЛДЫ", "SELECTED")}</span>
+                              </div>
+                            </div>
                             <div className="wizard-mode-big-body">
                               <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                                 <span className="wizard-mode-big-title">{mode.name}</span>
                                 {MODE_BADGE[mode.id] && <span className="wizard-classic-badge">{MODE_BADGE[mode.id]}</span>}
                               </div>
                               <p className="wizard-mode-big-desc">{MODE_SHORT_DESC[mode.id] ?? mode.description}</p>
+                              <button
+                                type="button"
+                                className="wizard-mode-dalye-btn"
+                                disabled={selectedMode.soon}
+                                onClick={() => setWizardStep(1)}
+                              >
+                                {t("ДАЛЕЕ", "ӘРІ ҚАРАЙ", "NEXT")} ▶
+                              </button>
                             </div>
                           </div>
                         );
@@ -657,8 +673,10 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                           </div>
                           <span className="wizard-mode-body">
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span className="wizard-mode-num-small">{modeNum}</span>
                               <strong>{mode.name}</strong>
                               {mode.soon && <span className="wizard-mode-soon-badge">{t("скоро", "жақында", "soon")}</span>}
+                              {mode.id === "online_room" && !mode.soon && <span className="wizard-mode-live-badge">+ LIVE</span>}
                             </div>
                             <span className="wizard-mode-short-desc">{MODE_SHORT_DESC[mode.id] ?? mode.role}</span>
                           </span>
@@ -672,17 +690,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <span className="demeushire-arrow">›</span>
                   </button>
 
-                  <div className="tab-footer">
-                    <button
-                      className="start-button"
-                      type="button"
-                      style={{ width: "100%" }}
-                      disabled={selectedMode.soon}
-                      onClick={() => setWizardStep(1)}
-                    >
-                        {t("Далее · Настройки матча", "Әрі қарай · Матч баптаулары", "Next · Match settings")}
-                      </button>
-                  </div>
                 </div>
               )}
 
@@ -720,11 +727,27 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                 <div className="wizard-section">
                   <div className="wizard-step-header">
                     <button type="button" className="wizard-back-btn" onClick={() => setWizardStep(0)}>‹</button>
-                    <span className="wizard-step-title">{isTraining ? t("Тренировка", "Тренировка", "Training") : t("Матч", "Матч", "Match")}</span>
-                    {!isTraining && <span className="wizard-mode-pill">{selectedMode.name}</span>}
+                    <span className="wizard-step-title">{isTraining ? t("Тренировка", "Тренировка", "Training") : t("ПЕРЕД МАТЧЕМ", "МАТЧ АЛДЫНДА", "PRE-MATCH")}</span>
+                    {!isTraining && <span className="wizard-step-counter">{t("ШАГ 2 / 2", "ҚАД. 2 / 2", "STEP 2 / 2")}</span>}
                   </div>
 
-                  <p className="wizard-label">{t("Цель", "Мақсат", "Goal")}</p>
+                  {!isTraining && (
+                    <div className="match-setup-teams">
+                      <div className="match-setup-team blue">
+                        <span className="match-setup-team-label">{t("СИНИЕ · ВЫ", "КӨК · СІЗ", "BLUE · YOU")}</span>
+                        <span className="match-setup-team-name">{profile.riderName || "Ерлан"}<br /><small>+ {(settings.teamSize ?? 3) - 1} {t("ИИ", "ЖИ", "AI")}</small></span>
+                      </div>
+                      <div className="match-setup-vs">
+                        <span>{String(settings.matchMinutes ?? 3).padStart(2, "0")}:00</span>
+                      </div>
+                      <div className="match-setup-team red">
+                        <span className="match-setup-team-label">{t("КРАСНЫЕ", "ҚЫЗЫЛ", "RED")}</span>
+                        <span className="match-setup-team-name">{settings.teamSize ?? 3} {t("ИИ", "ЖИ", "AI")}<br /><small>{t("Норма", "Орташа", "Normal")}</small></span>
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="wizard-label">{t("ВОРОТА", "ҚАҚПА", "GOAL")}</p>
                   <div className="wizard-side-grid">
                     <button type="button"
                       className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
@@ -790,12 +813,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
 
                   {!isTraining && (
                     <>
-                      <p className="wizard-label">{t("Сложность", "Қиындық", "Difficulty")}</p>
+                      <p className="wizard-label">{t("СОПЕРНИК", "ҚАРСЫЛАС", "OPPONENT")}</p>
                       <div className="wizard-diff-seg">
                         {[
-                          { id: "easy",   label: t("Лёгкая", "Жеңіл", "Easy")  },
-                          { id: "normal", label: t("Средняя", "Орташа", "Normal") },
-                          { id: "hard",   label: t("Сложная", "Қиын", "Hard") }
+                          { id: "easy",   label: t("ЛЕГКО", "ЖЕҢІЛ", "EASY")  },
+                          { id: "normal", label: t("НОРМА", "ОРТАША", "NORMAL") },
+                          { id: "hard",   label: t("ЖЁСТКО", "ҚИЫН", "HARD") }
                         ].map(({ id, label }) => (
                           <button key={id} type="button"
                             className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
@@ -807,11 +830,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     </>
                   )}
 
-                  <p className="wizard-label">{t("Освещение", "Жарықтандыру", "Lighting")}</p>
+                  <p className="wizard-label">{t("СВЕТ", "ЖАРЫҚ", "LIGHTING")}</p>
                   <div className="wizard-diff-seg">
                     {[
-                      { id: "golden", label: t("Золотой час", "Алтын сағат", "Golden hour") },
-                      { id: "midday", label: t("Полдень", "Күндіз", "Midday") }
+                      { id: "golden", label: t("ЗАКАТ", "БАТЫС", "SUNSET") },
+                      { id: "midday", label: t("ПОЛДЕНЬ", "ТҮСТЕН КЕЙІН", "MIDDAY") }
                     ].map(({ id, label }) => (
                       <button key={id} type="button"
                         className={`wizard-diff-seg-btn${(settings.lightPreset ?? "golden") === id ? " active" : ""}`}
@@ -835,9 +858,8 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       </span>
                       <span style={{ font: "700 12px Manrope, sans-serif", color: "#3aabee" }}>{t("Сменить", "Ауыстыру", "Change")}</span>
                     </button>
-                    <button className="start-button" type="button" onClick={handleStart} disabled={!canStart}>
-                      <Play size={19} fill="currentColor" strokeWidth={2.4} />
-                      <span>{startLabel}</span>
+                    <button className="start-button home-play-btn" type="button" onClick={handleStart} disabled={!canStart}>
+                      {t("НА СТАРТ", "БАСТАУ", "START")}
                     </button>
                   </div>
                 </div>

@@ -16593,3 +16593,324 @@ body,
 }
 
 /* ═══════════════════════════════════════════════════════ */
+
+/* ── Home screen: СЕГОДНЯ НА АРЕНЕ badge + match info ── */
+.home-scene-label {
+  background: var(--ef-gold);
+  color: #1a0d00;
+  font: 700 10px/1 Oswald, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+.home-match-info {
+  font: 600 11px/1 Manrope, sans-serif;
+  color: rgba(255,255,255,.85);
+  align-self: center;
+  letter-spacing: .04em;
+}
+/* Align team chips with match info centered */
+.home-team-chips {
+  align-items: center;
+}
+
+/* ── Mode selector: step counter + number badges ── */
+.wizard-step-counter {
+  margin-left: auto;
+  font: 600 11px/1 Manrope, sans-serif;
+  color: rgba(214,178,110,.6);
+  letter-spacing: .06em;
+}
+.wizard-mode-vybrano {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 10px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.9);
+}
+.wizard-mode-num {
+  font: 700 13px/1 Oswald, sans-serif;
+  color: var(--ef-gold);
+}
+.wizard-mode-big-preview { position: relative; }
+.wizard-mode-num-small {
+  font: 700 12px/1 Oswald, sans-serif;
+  color: rgba(214,178,110,.7);
+  min-width: 20px;
+}
+.wizard-mode-live-badge {
+  background: #c0392b;
+  color: #fff;
+  font: 700 9px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+.wizard-mode-dalye-btn {
+  width: 100%;
+  height: 44px;
+  margin-top: 10px;
+  background: var(--ef-gold);
+  color: #1a0d00;
+  border: none;
+  font: 700 15px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--ef-clip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.wizard-mode-dalye-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Match setup: team preview panel ── */
+.match-setup-teams {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.match-setup-team {
+  flex: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.match-setup-team.blue { background: rgba(37,144,208,.18); border: 1px solid rgba(37,144,208,.35); border-radius: 6px; }
+.match-setup-team.red  { background: rgba(200,60,50,.18);  border: 1px solid rgba(200,60,50,.35);  border-radius: 6px; text-align: right; }
+.match-setup-team-label {
+  font: 700 9px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+}
+.match-setup-team.blue .match-setup-team-label { color: #3aabee; }
+.match-setup-team.red  .match-setup-team-label { color: #e04535; }
+.match-setup-team-name {
+  font: 700 15px/1.2 Oswald, sans-serif;
+  color: #fff;
+  text-transform: uppercase;
+}
+.match-setup-team-name small {
+  font: 400 11px/1 Manrope, sans-serif;
+  color: rgba(255,255,255,.55);
+}
+.match-setup-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+}
+.match-setup-vs span {
+  font: 700 18px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.7);
+  letter-spacing: .04em;
+}
+
+/* ── Shop detail / horse comparison screen ── */
+.shop-detail-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+.shop-detail-hero {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.shop-detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.shop-detail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,7,4,.9) 0%, rgba(10,7,4,.35) 55%, transparent 100%);
+}
+.shop-detail-hero-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+}
+.shop-detail-badge-saddle {
+  background: rgba(37,144,208,.85);
+  color: #fff;
+  font: 700 9px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+.shop-detail-badge-tier {
+  background: rgba(40,30,10,.8);
+  border: 1px solid rgba(208,160,48,.4);
+  color: var(--ef-gold);
+  font: 700 9px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+.shop-detail-horse-title {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  font: 700 36px/1 Oswald, sans-serif;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-shadow: 0 2px 12px rgba(0,0,0,.7);
+  font-style: italic;
+}
+.shop-detail-stats {
+  padding: 14px 16px 8px;
+  flex: 1;
+}
+.shop-detail-vs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.shop-detail-vs-left, .shop-detail-vs-right {
+  font: 700 11px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  color: rgba(214,178,110,.75);
+  text-transform: uppercase;
+  flex: 1;
+}
+.shop-detail-vs-right { text-align: right; }
+.shop-detail-vs-center {
+  font: 700 11px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.4);
+  padding: 0 8px;
+}
+.shop-detail-stat-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 72px 1fr 24px;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+}
+.shop-stat-val {
+  font: 700 12px/1 Manrope, sans-serif;
+  color: rgba(214,178,110,.8);
+}
+.shop-stat-val.left  { text-align: right; }
+.shop-stat-val.right { text-align: left; }
+.shop-stat-val.better { color: #3aabee; }
+.shop-stat-label {
+  font: 600 10px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.5);
+  text-align: center;
+  text-transform: uppercase;
+}
+.shop-stat-bar-wrap {
+  height: 4px;
+  background: rgba(255,255,255,.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.shop-stat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: rgba(214,178,110,.5);
+}
+.shop-stat-bar-fill.right { background: #3aabee; margin-left: auto; }
+.shop-stat-bar-wrap.right { direction: rtl; }
+.shop-stat-bar-fill.bond  { background: rgba(214,178,110,.6); }
+.shop-detail-bond-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.shop-stat-label-solo {
+  font: 600 10px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+  min-width: 48px;
+}
+.shop-stat-bar-wrap.full { flex: 1; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+.shop-stat-val-solo {
+  font: 700 12px/1 Manrope, sans-serif;
+  color: rgba(214,178,110,.8);
+  min-width: 24px;
+  text-align: right;
+}
+.shop-detail-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(10,7,4,.6);
+  flex-shrink: 0;
+}
+.shop-detail-buy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--ef-gold);
+  color: #1a0d00;
+  border: none;
+  font: 700 15px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--ef-clip);
+  width: 100%;
+}
+.shop-detail-buy-btn:disabled { opacity: .45; cursor: not-allowed; }
+.shop-detail-price {
+  font: 700 16px/1 Oswald, sans-serif;
+}
+.shop-detail-equip-btn {
+  width: 100%;
+  height: 40px;
+  background: rgba(52,32,10,.7);
+  border: 1px solid rgba(190,148,60,.25);
+  color: rgba(214,178,110,.7);
+  font: 600 12px/1 Oswald, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 0;
+}
+.shop-detail-owned {
+  text-align: center;
+  font: 600 13px/1 Manrope, sans-serif;
+  color: rgba(214,178,110,.6);
+  padding: 12px;
+}
+.shop-horse-thumb {
+  width: 72px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.shop-horse-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
