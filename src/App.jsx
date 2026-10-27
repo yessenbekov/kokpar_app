@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { track } from "./app/analytics.js";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { createListing, cancelListing, purchaseListing } from "./app/marketplaceStore.js";
@@ -309,6 +310,7 @@ export default function App() {
     const playerWon =
       (teamSide === "blue" && event.score.blue > event.score.red) ||
       (teamSide === "red" && event.score.red > event.score.blue);
+    track("match_finished", { won: playerWon, mode: settingsSnapshot.modeId ?? "kokpar" });
 
     const XP_PARTICIPATION = 15;
     const XP_WIN = 25;
@@ -591,6 +593,7 @@ export default function App() {
 
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
+    track("game_start", { mode: matchSettings.modeId ?? "kokpar" });
 
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});

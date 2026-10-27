@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CircleDot, Clipboard, Crown, DoorOpen, Link2, LogIn, Plus, Radio, RefreshCw, Shield, Users, X } from "lucide-react";
 import { onlineRoomStore } from "../app/onlineRooms.js";
+import { track } from "../app/analytics.js";
 
 function makeLangT(lang) {
   return (ru, kz, en) => {
@@ -290,6 +291,7 @@ export function OnlineRoomLobby({
       const nextState = await onlineRoomStore.create({ profile, selectedHorse, settings });
       setCurrentUserId(nextState.currentUserId ?? "");
       setJoinCode(nextState.room?.code ?? "");
+      track("room_created");
       return nextState;
     });
   }
@@ -299,6 +301,7 @@ export function OnlineRoomLobby({
     await runRoomAction(async () => {
       const nextState = await onlineRoomStore.join({ code: joinCode, profile, selectedHorse, settings });
       setCurrentUserId(nextState.currentUserId ?? "");
+      track("room_joined");
       return nextState;
     });
   }
