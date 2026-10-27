@@ -16914,3 +16914,243 @@ body,
   object-fit: cover;
   object-position: center 30%;
 }
+
+/* ═══════════════════════════════════════════════════════
+   P2 — MODE SELECTION SCREEN  (portrait)
+   ═══════════════════════════════════════════════════════ */
+
+/* Make tab-pane containing p2-mode have no padding + fill height */
+.tab-pane:has(.p2-mode) {
+  padding: 0;
+  height: 100%;
+  min-height: unset;
+  gap: 0;
+  overflow: hidden;
+}
+.setup-content:has(.p2-mode) {
+  overflow: hidden;
+}
+
+.p2-mode {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0704;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.p2-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 12px calc(16px + env(safe-area-inset-left, 0px));
+  flex-shrink: 0;
+  background: transparent;
+}
+.p2-back-btn {
+  width: 36px;
+  height: 32px;
+  background: rgba(255,255,255,.08);
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.p2-title-chip {
+  height: 32px;
+  padding: 0 18px 0 14px;
+  background: #f0c347;
+  color: #0a0704;
+  font: 700 15px/32px Oswald, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+.p2-step-counter {
+  margin-left: auto;
+  padding-right: calc(8px + env(safe-area-inset-right, 0px));
+  font: 400 14px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.5);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.p2-step-counter strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ── Card list fills remaining height ── */
+.p2-card-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+  padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  min-height: 0;
+}
+
+/* ── Active card (01) ── */
+.p2-card-active {
+  flex: 1.7;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid #f0c347;
+  min-height: 0;
+}
+.p2-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.p2-card-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 25%, rgba(10,7,4,.95) 82%);
+}
+.p2-card-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px;
+  gap: 0;
+}
+.p2-card-numrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.p2-num {
+  font: 700 40px/1 Oswald, sans-serif;
+  color: #f0c347;
+  line-height: 1;
+}
+.p2-vybrano {
+  font: 600 10px/1 Oswald, sans-serif;
+  letter-spacing: .16em;
+  color: rgba(255,255,255,.75);
+  text-transform: uppercase;
+  align-self: center;
+}
+.p2-card-name {
+  font: 700 42px/1 Oswald, sans-serif;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  margin: 2px 0 6px;
+  font-style: italic;
+}
+.p2-card-desc {
+  font: 400 12.5px/1.4 Manrope, sans-serif;
+  color: rgba(255,255,255,.75);
+  margin: 0 0 12px;
+}
+.p2-dalye-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  height: 52px;
+  background: #f0c347;
+  color: #0a0704;
+  border: none;
+  border-radius: 0;
+  font: 700 19px/1 Oswald, sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  flex-shrink: 0;
+}
+.p2-dalye-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Inactive cards (02, 03) ── */
+.p2-card-inactive {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid rgba(255,255,255,.18);
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border-radius: 0;
+  min-height: 0;
+}
+.p2-card-inactive.p2-card-soon { opacity: .55; cursor: not-allowed; }
+.p2-card-img-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  opacity: .5;
+}
+.p2-card-grad-h {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10,7,4,.95) 30%, rgba(10,7,4,.3));
+  z-index: 1;
+}
+.p2-card-inner-inactive {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px;
+  width: 100%;
+}
+.p2-num-inactive {
+  font: 700 32px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.3);
+  min-width: 44px;
+  flex-shrink: 0;
+}
+.p2-card-name-inactive {
+  font: 700 26px/1.1 Oswald, sans-serif;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+.p2-card-desc-inactive {
+  font: 400 11.5px/1.35 Manrope, sans-serif;
+  color: rgba(255,255,255,.6);
+  margin-top: 4px;
+}
+.p2-live-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  background: #e04a3a;
+  color: #fff;
+  font: 700 11px/1 Oswald, sans-serif;
+  letter-spacing: .06em;
+  padding: 5px 9px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

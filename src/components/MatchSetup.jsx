@@ -601,95 +601,81 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {navTab === "game" && (
             <div className="tab-pane">
 
-              {/* Step 0 — mode selection */}
+              {/* Step 0 — mode selection (P2 design) */}
               {wizardStep === 0 && (
-                <div className="wizard-section">
-                  {/* Header with back + title (replaces topbar on this screen) */}
-                  <div className="wizard-step-header" style={{ padding: "8px 0 18px" }}>
-                    <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                    <span className="wizard-step-title">{t("Режим", "Режим", "Mode")}</span>
-                    <span className="wizard-step-counter">{t("ШАГ 1 / 2", "ҚАД. 1 / 2", "STEP 1 / 2")}</span>
+                <div className="p2-mode">
+                  {/* Header */}
+                  <div className="p2-header">
+                    <button type="button" className="p2-back-btn" onClick={goHome}>‹</button>
+                    <span className="p2-title-chip">{t("РЕЖИМ", "РЕЖИМ", "MODE")}</span>
+                    <span className="p2-step-counter">{t("ШАГ", "ҚАД.", "STEP")} <strong>1</strong> / 2</span>
                   </div>
-                  <div className="wizard-mode-grid">
+
+                  {/* Card list */}
+                  <div className="p2-card-list">
                     {GAME_MODES.map((mode, modeIdx) => {
                       const isActive = settings.modeId === mode.id;
-                      const MODE_PREVIEW_TEXT = {
-                        kokpar: "арт режима: борьба за серке",
-                        training: "арт режима: вольный заезд",
-                        online_room: "арт режима: онлайн-лобби"
-                      };
-                      const MODE_BADGE = {
-                        kokpar: t("Классика", "Классика", "Classic"),
-                        training: t("Практика", "Практика", "Practice"),
-                        online_room: t("Онлайн", "Онлайн", "Online")
-                      };
                       const MODE_SHORT_DESC = {
-                        kokpar: t("Матч с выбором круга или казана.", "Матч — шеңбер немесе қазан.", "Match with circle or kazan goal."),
-                        training: t("Свободный заезд: контроль, подбор серке, броски.", "Бос жүріс: бақылау, серке, лақтыру.", "Free ride: control, grab serke, throw."),
-                        online_room: t("Создать комнату или войти по коду.", "Бөлме жасау немесе код бойынша кіру.", "Create room or join by code.")
+                        kokpar: t("Классика · матч на круг или казан", "Матч — шеңбер немесе қазан", "Classic · circle or kazan match"),
+                        training: t("Подбор серке и броски", "Серке алу және лақтыру", "Pick up serke and throw"),
+                        online_room: t("Комната по коду", "Код бойынша бөлме", "Room by code")
                       };
                       const modeNum = String(modeIdx + 1).padStart(2, "0");
+
                       if (isActive) {
                         return (
-                          <div key={mode.id} className="wizard-mode-big-card">
-                            <div className="wizard-mode-big-preview">
-                              {MODE_IMG[mode.id]
-                                ? <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-big-img" />
-                                : (MODE_PREVIEW_TEXT[mode.id] ?? "арт режима")}
-                              <div className="wizard-mode-vybrano">
-                                <span className="wizard-mode-num">{modeNum}</span>
-                                <span>{t("ВЫБРАНО", "ТАҢДАЛДЫ", "SELECTED")}</span>
+                          <div key={mode.id} className="p2-card-active">
+                            {MODE_IMG[mode.id] && (
+                              <img src={MODE_IMG[mode.id]} alt={mode.name} className="p2-card-img" />
+                            )}
+                            <div className="p2-card-grad" />
+                            <div className="p2-card-inner">
+                              <div className="p2-card-numrow">
+                                <span className="p2-num">{modeNum}</span>
+                                <span className="p2-vybrano">{t("ВЫБРАНО", "ТАҢДАЛДЫ", "SELECTED")}</span>
                               </div>
-                            </div>
-                            <div className="wizard-mode-big-body">
-                              <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                                <span className="wizard-mode-big-title">{mode.name}</span>
-                                {MODE_BADGE[mode.id] && <span className="wizard-classic-badge">{MODE_BADGE[mode.id]}</span>}
-                              </div>
-                              <p className="wizard-mode-big-desc">{MODE_SHORT_DESC[mode.id] ?? mode.description}</p>
+                              <div className="p2-card-name">{mode.name}</div>
+                              <p className="p2-card-desc">{MODE_SHORT_DESC[mode.id]}</p>
                               <button
                                 type="button"
-                                className="wizard-mode-dalye-btn"
+                                className="p2-dalye-btn"
                                 disabled={selectedMode.soon}
                                 onClick={() => setWizardStep(1)}
                               >
-                                {t("ДАЛЕЕ", "ӘРІ ҚАРАЙ", "NEXT")} ▶
+                                <span>{t("ДАЛЕЕ", "ӘРІ ҚАРАЙ", "NEXT")}</span>
+                                <span>▶</span>
                               </button>
                             </div>
                           </div>
                         );
                       }
+
                       return (
                         <button
                           key={mode.id}
                           type="button"
-                          className={`wizard-mode-card${mode.soon ? " disabled" : ""}`}
-                          style={mode.soon ? { opacity: 0.6, borderStyle: "dashed" } : {}}
+                          className={`p2-card-inactive${mode.soon ? " p2-card-soon" : ""}`}
                           disabled={mode.soon}
                           onClick={() => onSettingChange("modeId", mode.id)}
                         >
-                          <div className={`wizard-mode-img-box mode-img-${MODE_ICON_COLOR[mode.id] ?? "gold"}`}>
-                            {MODE_IMG[mode.id] && <img src={MODE_IMG[mode.id]} alt={mode.name} className="wizard-mode-thumb-img" />}
-                          </div>
-                          <span className="wizard-mode-body">
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span className="wizard-mode-num-small">{modeNum}</span>
-                              <strong>{mode.name}</strong>
-                              {mode.soon && <span className="wizard-mode-soon-badge">{t("скоро", "жақында", "soon")}</span>}
-                              {mode.id === "online_room" && !mode.soon && <span className="wizard-mode-live-badge">+ LIVE</span>}
+                          {MODE_IMG[mode.id] && (
+                            <img src={MODE_IMG[mode.id]} alt={mode.name} className="p2-card-img-bg" />
+                          )}
+                          <div className="p2-card-grad-h" />
+                          <div className="p2-card-inner-inactive">
+                            <span className="p2-num-inactive">{modeNum}</span>
+                            <div>
+                              <div className="p2-card-name-inactive">{mode.name.toUpperCase()}</div>
+                              <div className="p2-card-desc-inactive">{MODE_SHORT_DESC[mode.id]}</div>
                             </div>
-                            <span className="wizard-mode-short-desc">{MODE_SHORT_DESC[mode.id] ?? mode.role}</span>
-                          </span>
+                          </div>
+                          {mode.id === "online_room" && !mode.soon && (
+                            <span className="p2-live-badge">● LIVE</span>
+                          )}
                         </button>
                       );
                     })}
                   </div>
-                  <button type="button" className="demeushire-row" onClick={() => setNavTab("about")}>
-                    <span className="demeushire-icon" style={{ fontStyle: "normal", fontWeight: 700, fontSize: 12, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(208,160,48,.18)", borderRadius: 5, color: "#d4a028" }}>i</span>
-                    <span className="demeushire-text">{t("Об игре · веб-версия · полная в разработке", "Ойын туралы · веб-нұсқа · толық әзірленуде", "About · web version · full game in development")}</span>
-                    <span className="demeushire-arrow">›</span>
-                  </button>
-
                 </div>
               )}
 
