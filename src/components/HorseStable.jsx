@@ -324,36 +324,42 @@ export function HorseStable({
      1d — Stable list screen
   ─────────────────────────────────────────── */
   return (
-    <div className="stable-screen">
+    <div className="st4-screen">
 
-      {/* Horse list */}
-      <div className="stable-horse-list">
-        {stableHorses.map((ownedHorse) => {
+      {/* List sub-header */}
+      <div className="st4-list-header">
+        <span className="st4-list-label">{t("ВАШИ ЛОШАДИ", "СІЗДІҢ АТТАРЫҢЫЗ", "YOUR HORSES")}</span>
+        <span className="st4-list-count">{stableHorses.length} / {stableCapacity}</span>
+      </div>
+
+      {/* Horse rows */}
+      <div className="st4-horse-list">
+        {stableHorses.map((ownedHorse, idx) => {
           const horse = horseTypeById(ownedHorse.typeId);
           const active = selectedOwnedHorse?.id === ownedHorse.id;
           const xpPct = Math.round((ownedHorse.xp / 100) * 100);
-
           const coat = coatPresetById(ownedHorse.coatId);
+          const num = String(idx + 1).padStart(2, "0");
           return (
-            <div key={ownedHorse.id} className="stable-card-row">
-              <button
-                className={active ? "stable-card active" : "stable-card"}
-                type="button"
-                onClick={() => { onHorseChange(ownedHorse.id); setShowCard(true); }}
-              >
-                <div className="stable-card-thumb" style={{ background: `linear-gradient(150deg, ${coat.coat}, ${coat.dark})` }} />
-                <div className="stable-card-copy">
-                  <div className="stable-card-name-row">
-                    <strong>{ownedHorse.name}</strong>
-                    <span className="stable-tier-badge">{horse.tier}</span>
-                  </div>
-                  <span className="stable-card-sub">{horse.name} · {horse.role} · {t("Ур.", "Дең.", "Lv.")} {ownedHorse.level}</span>
-                  <span className="stable-card-xp">
-                    <span className="stable-card-xp-fill" style={{ width: `${xpPct}%` }} />
-                  </span>
-                </div>
-                {active && <span className="stable-card-selected">{t("Выбран", "Таңдалды", "Selected")}</span>}
-              </button>
+            <div
+              key={ownedHorse.id}
+              className={`st4-horse-row${active ? " active" : ""}`}
+              onClick={() => { onHorseChange(ownedHorse.id); setShowCard(true); }}
+            >
+              <span className={`st4-row-num${active ? " active" : ""}`}>{num}</span>
+              <div className="st4-row-thumb" style={{ background: coat.coat }}>
+                <div className="st4-row-thumb-grad" />
+                <span className="st4-row-thumb-letter">{ownedHorse.name.slice(0, 1).toUpperCase()}</span>
+              </div>
+              <div className="st4-row-info">
+                <div className="st4-row-name">{ownedHorse.name.toUpperCase()}</div>
+                <div className="st4-row-sub">{horse.name.toUpperCase()} · {horse.role.toUpperCase()}</div>
+                <div className="st4-row-xp"><span className="st4-row-xp-fill" style={{ width: `${xpPct}%` }} /></div>
+              </div>
+              <div className="st4-row-right">
+                {active && <span className="st4-row-saddle">{t("В СЕДЛЕ", "ЕРДЕ", "IN USE")}</span>}
+                <span className="st4-row-level">{t("УР.", "ДЕҢ.", "LV.")} {ownedHorse.level}</span>
+              </div>
             </div>
           );
         })}
@@ -404,42 +410,41 @@ export function HorseStable({
             </div>
           </form>
         ) : canAddMore ? (
-          <button className="add-horse-button" type="button" onClick={() => setCreating(true)}>
-            <span>+ {t("Купить лошадь", "Жылқы сатып алу", "Buy horse")}</span>
+          <button className="st4-add-horse" type="button" onClick={() => setCreating(true)}>
+            <span className="st4-add-plus">+</span>
+            <span>{t("КУПИТЬ ЛОШАДЬ", "ЖЫЛҚЫ САТЫП АЛУ", "BUY HORSE")}</span>
           </button>
         ) : (
           <button
-            className={`add-horse-button expand-stable-button${profile?.coins < stableSlotCost ? " expand-stable-locked" : ""}`}
+            className={`st4-add-horse${profile?.coins < stableSlotCost ? " locked" : ""}`}
             type="button"
             onClick={onExpandStable}
             disabled={!onExpandStable || profile?.coins < stableSlotCost}
           >
-            <span>⊕ {t("Расширить конюшню", "Қораны кеңейту", "Expand stable")}</span>
-            <span className="expand-stable-cost">
-              {stableSlotCost} 🪙
-              {profile?.coins < stableSlotCost && (
-                <span className="expand-stable-short"> · {t("не хватает", "жетпейді", "short by")} {stableSlotCost - (profile?.coins ?? 0)}</span>
-              )}
-            </span>
+            <span className="st4-add-plus">⊕</span>
+            <span>{t("РАСШИРИТЬ КОНЮШНЮ", "ҚОРАНЫ КЕҢЕЙТУ", "EXPAND STABLE")} · {stableSlotCost} ⌾</span>
           </button>
         )}
 
-        {/* Empty stall slots */}
-        {!creating && canAddMore && Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => (
-          <div key={`empty-${i}`} className="stable-empty-slot">
-            <div className="stable-empty-thumb" />
-            <span className="stable-empty-label">{t("Свободное стойло", "Бос орын", "Empty stall")}</span>
-          </div>
-        ))}
+        {/* Empty stalls */}
+        {!creating && canAddMore && Array.from({ length: Math.max(0, stableCapacity - stableHorses.length - 1) }).map((_, i) => {
+          const slotNum = String(stableHorses.length + 2 + i).padStart(2, "0");
+          return (
+            <div key={`empty-${i}`} className="st4-empty-slot">
+              <span>{slotNum} · {t("СВОБОДНО", "БОС", "FREE")}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer */}
-      <div className="horse-card-footer">
-        <button type="button" className="horse-card-footer-btn secondary" onClick={onGoToShop}>
-          {t("Магазин", "Дүкен", "Shop")}
+      <div className="st4-footer">
+        <button type="button" className="st4-btn-match" onClick={onGoToMatch}>
+          <span>{t("К МАТЧУ", "МАТЧҚА", "TO MATCH")}</span>
+          <span>▶</span>
         </button>
-        <button type="button" className="horse-card-footer-btn primary" onClick={onGoToMatch}>
-          {t("К матчу", "Матчқа", "To match")}
+        <button type="button" className="st4-btn-shop" onClick={onGoToShop}>
+          {t("МАГАЗИН", "ДҮКЕН", "SHOP")}
         </button>
       </div>
     </div>

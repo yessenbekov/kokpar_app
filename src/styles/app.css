@@ -17154,3 +17154,294 @@ body,
   align-items: center;
   gap: 5px;
 }
+
+/* ─── ST4: Stable List (portrait redesign) ────────────────── */
+
+/* Пустой padding у tab-pane когда внутри st4 */
+.tab-pane:has(.st4-screen) {
+  padding: 0;
+  background: #0a0704;
+  gap: 0;
+}
+
+/* Header */
+.st4-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 12px;
+  flex-shrink: 0;
+  background: #0a0704;
+}
+.st4-title-chip {
+  height: 32px;
+  padding: 0 24px 0 14px;
+  background: #f0c347;
+  color: #0a0704;
+  font: 700 15px/32px Oswald, sans-serif;
+  letter-spacing: .12em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  white-space: nowrap;
+}
+.st4-balance-chip {
+  margin-left: auto;
+  height: 28px;
+  padding: 0 12px;
+  background: #f0c347;
+  color: #0a0704;
+  font: 700 14px/28px Oswald, sans-serif;
+  white-space: nowrap;
+  border-radius: 0;
+}
+
+/* Tabs */
+.st4-tabs {
+  display: flex;
+  gap: 3px;
+  padding: 0 20px 12px;
+  flex-shrink: 0;
+  background: #0a0704;
+}
+.st4-tab-btn {
+  flex: 1;
+  height: 36px;
+  background: rgba(255,255,255,.06);
+  border: none;
+  color: rgba(255,255,255,.7);
+  font: 600 13px/36px Oswald, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  cursor: pointer;
+  border-radius: 0;
+  padding: 0;
+}
+.st4-tab-btn.active {
+  background: #f0c347;
+  color: #0a0704;
+}
+
+/* List sub-header */
+.st4-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 8px;
+  background: #0a0704;
+}
+.st4-list-label,
+.st4-list-count {
+  font: 700 10px/1 Manrope, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: rgba(255,255,255,.55);
+}
+
+/* Screen wrapper */
+.st4-screen {
+  display: flex;
+  flex-direction: column;
+  background: #0a0704;
+  min-height: 100%;
+  padding-top: 8px;
+}
+
+/* Horse list */
+.st4-horse-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 20px;
+}
+
+/* Horse row */
+.st4-horse-row {
+  display: grid;
+  grid-template-columns: 30px 64px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+  height: 78px;
+  background: rgba(255,255,255,.06);
+  border-left: 4px solid rgba(255,255,255,.18);
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  cursor: pointer;
+  border-radius: 0;
+  overflow: hidden;
+}
+.st4-horse-row.active {
+  border-left-color: #f0c347;
+}
+.st4-horse-row:hover {
+  background: rgba(255,255,255,.10);
+}
+
+/* Number */
+.st4-row-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 20px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.4);
+}
+.st4-row-num.active {
+  color: #f0c347;
+}
+
+/* Coat thumbnail */
+.st4-row-thumb {
+  position: relative;
+  width: 64px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.st4-row-thumb-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.35));
+  pointer-events: none;
+}
+.st4-row-thumb-letter {
+  position: relative;
+  z-index: 1;
+  font: 700 30px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.85);
+}
+
+/* Info column */
+.st4-row-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+.st4-row-name {
+  font: 700 17px/1.1 Oswald, sans-serif;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.st4-row-sub {
+  font: 700 8.5px/1.2 Manrope, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: rgba(255,255,255,.55);
+}
+.st4-row-xp {
+  height: 4px;
+  background: rgba(255,255,255,.12);
+  margin-top: 4px;
+  overflow: hidden;
+}
+.st4-row-xp-fill {
+  display: block;
+  height: 100%;
+  background: #f0c347;
+}
+
+/* Right column */
+.st4-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  padding-right: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.st4-row-saddle {
+  background: #2f9be0;
+  color: #fff;
+  font: 700 10px/1 Oswald, sans-serif;
+  padding: 4px 7px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-radius: 0;
+}
+.st4-row-level {
+  font: 600 12px/1 Oswald, sans-serif;
+  color: rgba(255,255,255,.75);
+}
+
+/* Add horse / expand */
+.st4-add-horse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 64px;
+  background: rgba(240,195,71,.06);
+  border: 1px dashed rgba(240,195,71,.55);
+  border-radius: 0;
+  cursor: pointer;
+  color: #f0c347;
+  font: 700 14px/1 Oswald, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.st4-add-horse.locked {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.st4-add-plus {
+  font: 700 22px/1 Oswald, sans-serif;
+}
+
+/* Empty stall */
+.st4-empty-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  border: 1px dashed rgba(255,255,255,.14);
+  border-radius: 0;
+  color: rgba(255,255,255,.35);
+  font: 700 10px/1 Oswald, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+/* Footer */
+.st4-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  margin-top: auto;
+}
+.st4-btn-match {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 68px;
+  background: #f0c347;
+  color: #0a0704;
+  font: 700 24px/1 Oswald, sans-serif;
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.st4-btn-shop {
+  height: 50px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 0;
+  color: #fff;
+  font: 700 14px/1 Oswald, sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: .08em;
+}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, Gavel, HardDrive, History, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, User, Users, X, Zap } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, CircleDot, Clock3, Cloud, Flag, HardDrive, History, LoaderCircle, LogIn, LogOut, Mail, Pencil, Play, Trophy, User, Users, X, Zap } from "lucide-react";
 import { GAME_MODES, gameModeById } from "../app/gameModes.js";
 import { HorseStable } from "./HorseStable.jsx";
 import { Marketplace } from "./Marketplace.jsx";
@@ -584,7 +584,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
         )}
 
         {/* Top bar (hidden on game step 0 and on settings — those screens have their own header) */}
-        {!homeScreen && !(navTab === "game" && wizardStep === 0) && navTab !== "profile" && (
+        {!homeScreen && !(navTab === "game" && wizardStep === 0) && navTab !== "profile" && navTab !== "stable" && (
           <div className="setup-topbar">
             <span className="setup-topbar-title">Кокпар 3D</span>
             <button className="setup-topbar-coins" type="button" onClick={() => setShowCoinShop(true)}>
@@ -857,25 +857,22 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
           {navTab === "stable" && (
             <div className="tab-pane">
               {!stableCardOpen && (
-                <div className="wizard-step-header">
-                  <button type="button" className="wizard-back-btn" onClick={goHome}>‹</button>
-                  <span className="wizard-step-title">{t("Конюшня", "Қора", "Stable")}</span>
-                  <span style={{ font: "700 12px Manrope, sans-serif", color: "rgba(214,178,110,.7)" }}>
-                    {profile.ownedHorses.length} / {profile.stableCapacity}
-                  </span>
+                <div className="st4-header">
+                  <button type="button" className="p2-back-btn" onClick={goHome}>‹</button>
+                  <span className="st4-title-chip">{t("КОНЮШНЯ", "ҚОРА", "STABLE")}</span>
+                  <span className="st4-balance-chip">{formatCoins(profile.coins)} ⌾</span>
                 </div>
               )}
               {!stableCardOpen && (
-                <div className="stable-tabs">
-                  <button type="button" className={stableTab === "stable" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("stable")}>
-                    {t("Конюшня", "Қора", "Stable")}
+                <div className="st4-tabs">
+                  <button type="button" className={`st4-tab-btn${stableTab === "stable" ? " active" : ""}`} onClick={() => setStableTab("stable")}>
+                    {t("КОНЮШНЯ", "ҚОРА", "STABLE")}
                   </button>
-                  <button type="button" className={stableTab === "shop" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("shop")}>
-                    {t("Магазин", "Дүкен", "Shop")}
+                  <button type="button" className={`st4-tab-btn${stableTab === "shop" ? " active" : ""}`} onClick={() => setStableTab("shop")}>
+                    {t("МАГАЗИН", "ДҮКЕН", "SHOP")}
                   </button>
-                  <button type="button" className={stableTab === "market" ? "stable-tab-btn active" : "stable-tab-btn"} onClick={() => setStableTab("market")}>
-                    <Gavel size={13} strokeWidth={2.4} />
-                    {t("Торги", "Аукцион", "Auction")}
+                  <button type="button" className={`st4-tab-btn${stableTab === "market" ? " active" : ""}`} onClick={() => setStableTab("market")}>
+                    {t("ТОРГИ", "АУКЦИОН", "AUCTION")}
                   </button>
                 </div>
               )}
