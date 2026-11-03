@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { track } from "./app/analytics.js";
 import { yandexAdAfterMatch } from "./app/yandex.js";
+import { gdAdAfterMatch } from "./app/gamedistribution.js";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { createListing, cancelListing, purchaseListing } from "./app/marketplaceStore.js";
@@ -313,6 +314,7 @@ export default function App() {
       (teamSide === "red" && event.score.red > event.score.blue);
     track("match_finished", { won: playerWon, mode: settingsSnapshot.modeId ?? "kokpar" });
     yandexAdAfterMatch();
+    gdAdAfterMatch();
 
     const XP_PARTICIPATION = 15;
     const XP_WIN = 25;
