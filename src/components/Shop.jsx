@@ -22,8 +22,8 @@ function statRows(horse) {
 }
 
 const HORSE_IMAGE = {
-  zhuyrik: "/images/modes/mode-kokpar.webp",
-  auyr:    "/images/modes/mode-training.webp",
+  zhuyrik: "./images/modes/mode-kokpar.webp",
+  auyr:    "./images/modes/mode-training.webp",
 };
 
 export function Shop({ profile, onBuyHorse, t: _t }) {
@@ -43,7 +43,7 @@ export function Shop({ profile, onBuyHorse, t: _t }) {
     const shopRows = statRows(ht);
     const myRows = currentType ? statRows(currentType) : null;
     const bondVal = currentOwned?.bond ?? 0;
-    const imgSrc = HORSE_IMAGE[shopHorse.typeId] ?? "/images/modes/mode-kokpar.webp";
+    const imgSrc = HORSE_IMAGE[shopHorse.typeId] ?? "./images/modes/mode-kokpar.webp";
 
     return (
       <div className="shop-detail-screen">
@@ -135,7 +135,7 @@ export function Shop({ profile, onBuyHorse, t: _t }) {
           const ht = horseTypeById(shopHorse.typeId);
           const alreadyOwned = profile.ownedHorses.some(h => h.typeId === shopHorse.typeId);
           const canAfford = coins >= shopHorse.price;
-          const imgSrc = HORSE_IMAGE[shopHorse.typeId] ?? "/images/modes/mode-kokpar.webp";
+          const imgSrc = HORSE_IMAGE[shopHorse.typeId] ?? "./images/modes/mode-kokpar.webp";
 
           return (
             <div

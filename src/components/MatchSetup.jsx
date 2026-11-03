@@ -486,9 +486,9 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
   const MODE_INITIAL = { kokpar: "К", training: "Т", online_room: "О", kokbori: "К" };
   const MODE_ICON_COLOR = { kokpar: "gold", training: "gold", online_room: "blue", kokbori: "muted" };
   const MODE_IMG = {
-    kokpar: "/images/modes/mode-kokpar.webp",
-    training: "/images/modes/mode-training.webp",
-    online_room: "/images/modes/mode-online.webp",
+    kokpar: "./images/modes/mode-kokpar.webp",
+    training: "./images/modes/mode-training.webp",
+    online_room: "./images/modes/mode-online.webp",
   };
   const isTraining = selectedMode.id === "training";
 
@@ -519,7 +519,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
             </div>
 
             <div className="home-scene-card">
-              <img src="/images/modes/home-bg.webp" alt="" className="home-scene-bg" />
+              <img src="./images/modes/home-bg.webp" alt="" className="home-scene-bg" />
               <div className="home-scene-inner">
                 <div className="home-scene-label">{t("СЕГОДНЯ НА АРЕНЕ", "БҮГІН АРЕНАДА", "TODAY ON ARENA")}</div>
                 <div className="home-logo">{t("КОКПАР", "КӨКПАР", "KOKPAR")}</div>

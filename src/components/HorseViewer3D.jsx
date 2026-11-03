@@ -5,7 +5,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { coatPresetById } from "../game/horseTypes.js";
 
-const HORSE_GLB_PATH = "/models/horse_arabian.glb";
+const HORSE_GLB_PATH = "./models/horse_arabian.glb";
 const gltfLoader = new GLTFLoader();
 gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 let cachedGltf = null;
