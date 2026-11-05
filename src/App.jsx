@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { track } from "./app/analytics.js";
 import { yandexAdAfterMatch } from "./app/yandex.js";
 import { gdAdAfterMatch } from "./app/gamedistribution.js";
-import { cgAdAfterMatch } from "./app/crazygames.js";
+import { cgAdAfterMatch, cgLoadingStop, cgGameplayStart, cgGameplayStop } from "./app/crazygames.js";
 import { gameModeById } from "./app/gameModes.js";
 import { makeInitialHud, readUrlSettings, shouldAutoStart } from "./app/matchConfig.js";
 import { createListing, cancelListing, purchaseListing } from "./app/marketplaceStore.js";
@@ -80,7 +80,7 @@ export default function App() {
 
     try {
       gameRef.current = createKokparGame(mountRef.current, setHud, gameSettings);
-      gameRef.current.assetsReadyPromise.then(() => setReady(true)).catch(() => setReady(true));
+      gameRef.current.assetsReadyPromise.then(() => { setReady(true); cgLoadingStop(); }).catch(() => { setReady(true); cgLoadingStop(); });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown WebGL error";
       setSceneError(message);
@@ -314,6 +314,7 @@ export default function App() {
       (teamSide === "blue" && event.score.blue > event.score.red) ||
       (teamSide === "red" && event.score.red > event.score.blue);
     track("match_finished", { won: playerWon, mode: settingsSnapshot.modeId ?? "kokpar" });
+    cgGameplayStop();
     yandexAdAfterMatch();
     gdAdAfterMatch();
     cgAdAfterMatch();
@@ -600,6 +601,7 @@ export default function App() {
   function startMatch(settingsOverride) {
     const matchSettings = settingsOverride ? { ...settings, ...settingsOverride } : settings;
     track("game_start", { mode: matchSettings.modeId ?? "kokpar" });
+    cgGameplayStart();
 
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
@@ -612,6 +614,7 @@ export default function App() {
   }
 
   function openSettings() {
+    cgGameplayStop();
     gameRef.current?.destroy();
     gameRef.current = null;
     setActiveSettings(null);
