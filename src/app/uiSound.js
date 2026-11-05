@@ -1,4 +1,4 @@
-// UI click sound — loaded from /sounds/click.wav
+// UI click sound — loaded from ./sounds/click.wav
 let ctx = null;
 let clickBuf = null;
 let loadStarted = false;
@@ -16,7 +16,7 @@ function ensureLoaded() {
   loadStarted = true;
   const c = getCtx();
   if (!c) return;
-  fetch("/sounds/click.wav")
+  fetch("./sounds/click.wav")
     .then((r) => r.arrayBuffer())
     .then((ab) => c.decodeAudioData(ab))
     .then((buf) => { clickBuf = buf; })

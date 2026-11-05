@@ -6,7 +6,7 @@ import { COLORS } from "./constants.js";
 import { coatPresetById } from "./horseTypes.js";
 import { horseTypeById } from "./horseTypes.js";
 
-const MODEL_MANIFEST_URL = "/models/manifest.json";
+const MODEL_MANIFEST_URL = "./models/manifest.json";
 
 const DEFAULT_MODEL_MANIFEST = {
   riderHorse: null,
@@ -540,9 +540,9 @@ export function createKazanModelInstance(assetPipeline, teamColor) {
 }
 
 export const MODEL_ASSET_HINTS = {
-  horse: "/models/horses/horse.glb",
-  rider: "/models/riders/rider.glb",
-  riderHorse: "/models/horses/rider-horse.glb",
-  serke: "/models/serke/serke.glb",
-  kazan: "/models/kazan/kazan.glb"
+  horse: "./models/horses/horse.glb",
+  rider: "./models/riders/rider.glb",
+  riderHorse: "./models/horses/rider-horse.glb",
+  serke: "./models/serke/serke.glb",
+  kazan: "./models/kazan/kazan.glb"
 };
