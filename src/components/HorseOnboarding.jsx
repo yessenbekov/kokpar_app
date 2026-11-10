@@ -150,19 +150,29 @@ export function HorseOnboarding({ onComplete }) {
         <>
           <div className="ob-header">
             <div className="ob-step-label">{tl("Шаг 3 из", "Қадам 3 /", "Step 3 of")} {TOTAL_STEPS}</div>
-            <div className="ob-step-title">{tl("Выберите коня", "Жылқы таңдаңыз", "Choose your horse")}</div>
-            <div className="ob-step-desc">{tl("Один конь достаётся бесплатно. Остальные стойла откроете за монеты.", "Бір жылқы тегін беріледі. Қалған орындарды монетаға ашасыз.", "One horse is free. Unlock more stalls with coins.")}</div>
+            <div className="ob-step-title">{tl("Выберите коня и дайте ему имя", "Жылқы таңдап, атын қойыңыз", "Choose a horse and name it")}</div>
+            <div className="ob-step-desc">{tl("Введите имя коня — оно будет видно в матчах и в таблице лидеров. Первый конь бесплатно.", "Жылқының атын жазыңыз — ол матчта және рейтингте көрінеді. Бірінші жылқы тегін.", "Enter your horse's name — it shows in matches and leaderboard. First horse is free.")}</div>
           </div>
           <div className="ob-body">
             <div className="ob-field-group">
-              <div className="ob-field-label">{tl("Имя коня", "Жылқының аты", "Horse name")}</div>
+              <div className="ob-field-label">
+                {tl("Имя коня", "Жылқының аты", "Horse name")}
+                <span style={{ color: "rgba(240,195,71,0.7)", marginLeft: 6, fontSize: "0.85em" }}>
+                  {tl("(обязательно)", "(міндетті)", "(required)")}
+                </span>
+              </div>
               <input
                 className="ob-rider-name-input"
                 type="text"
-                placeholder={HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}
+                placeholder={tl(
+                  `Введите имя, например «${HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}»`,
+                  `Мысалы «${HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Құлагер"}»`,
+                  `e.g. «${HORSE_TYPES.find((h) => h.id === selectedTypeId)?.name ?? "Kulagen"}»`
+                )}
                 maxLength={24}
                 value={horseName}
                 onChange={(e) => setHorseName(e.target.value)}
+                autoFocus
               />
             </div>
 
@@ -211,6 +221,16 @@ export function HorseOnboarding({ onComplete }) {
       )}
 
       <div className="ob-footer">
+        {!canContinue && step === 2 && (
+          <div style={{ textAlign: "center", color: "rgba(240,195,71,0.6)", fontSize: "0.82rem", marginBottom: 8 }}>
+            {tl("⬆ Введите имя коня, чтобы продолжить", "⬆ Жылқының атын жазыңыз", "⬆ Enter horse name to continue")}
+          </div>
+        )}
+        {!canContinue && step === 1 && (
+          <div style={{ textAlign: "center", color: "rgba(240,195,71,0.6)", fontSize: "0.82rem", marginBottom: 8 }}>
+            {tl("⬆ Введите ваше имя, чтобы продолжить", "⬆ Атыңызды жазыңыз", "⬆ Enter your name to continue")}
+          </div>
+        )}
         <button
           className={`ob-continue-btn${!canContinue ? " ob-continue-btn--disabled" : ""}`}
           type="button"
