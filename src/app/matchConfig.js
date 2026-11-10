@@ -25,7 +25,7 @@ export function settingsFromProfile(profile = {}) {
   return {
     modeId: mode.id,
     goalType: mode.goalLocked ? mode.defaultGoalType : preferences.goalType === "kazan" ? "kazan" : mode.defaultGoalType,
-    teamSize: [3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
+    teamSize: [1, 2, 3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
     matchMinutes: [2, 3, 5].includes(Number(preferences.matchMinutes))
       ? Number(preferences.matchMinutes)
       : DEFAULT_SETTINGS.matchMinutes,
@@ -108,7 +108,7 @@ export function readUrlSettings(profile) {
           ? "kazan"
           : "circle"
         : profileSettings.goalType,
-    teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
+    teamSize: [1, 2, 3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
     matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : profileSettings.matchMinutes,
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,

@@ -721,7 +721,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <div className="match-setup-teams">
                       <div className="match-setup-team blue">
                         <span className="match-setup-team-label">{t("СИНИЕ · ВЫ", "КӨК · СІЗ", "BLUE · YOU")}</span>
-                        <span className="match-setup-team-name">{profile.riderName || "Ерлан"}<br /><small>+ {(settings.teamSize ?? 3) - 1} {t("ИИ", "ЖИ", "AI")}</small></span>
+                        <span className="match-setup-team-name">{profile.riderName || "Ерлан"}{(settings.teamSize ?? 3) > 1 && <><br /><small>+ {(settings.teamSize ?? 3) - 1} {t("ИИ", "ЖИ", "AI")}</small></>}</span>
                       </div>
                       <div className="match-setup-vs">
                         <span>{String(settings.matchMinutes ?? 3).padStart(2, "0")}:00</span>
@@ -757,7 +757,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <>
                       <p className="wizard-label">{t("Состав", "Құрам", "Teams")}</p>
                       <div className="wizard-three-grid">
-                        {[3, 4, 5].map((size) => (
+                        {[1, 2, 3, 4, 5].map((size) => (
                           <button key={size} type="button"
                             className={`wizard-option-card${settings.teamSize === size ? " active" : ""}`}
                             onClick={() => onSettingChange("teamSize", size)}>
