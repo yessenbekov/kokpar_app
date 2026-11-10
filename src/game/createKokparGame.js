@@ -519,6 +519,7 @@ export function createKokparGame(container, onHudChange, options = {}) {
     scoreRadius,
     scoringGoalFor,
     goalDistanceFor,
+    goalType: gameSettings.goalType,
     targetName,
     throwPreviewLine,
     throwPreviewGeometry,
@@ -545,6 +546,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar,
     scoringGoalFor,
     opponentTeam,
+    goals: [goalFor(TEAM.blue), goalFor(TEAM.red)],
+    goalType: gameSettings.goalType,
+    kazanBlockRadius: gameSettings.goalType === "kazan" ? KAZAN_BLOCK_RADIUS : 0,
     difficultyUrgencyScale: difficulty.urgencyScale,
     difficultyWanderScale: difficulty.wanderScale
   });

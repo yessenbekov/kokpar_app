@@ -23,6 +23,7 @@ export function createThrowSystem({
   scoreRadius,
   scoringGoalFor,
   goalDistanceFor,
+  goalType,
   targetName,
   throwPreviewLine,
   throwPreviewGeometry,
@@ -109,8 +110,14 @@ export function createThrowSystem({
       const toGoal = normalize2D(target.x - startX, target.z - startZ);
       const aimedGoal = rotate2D(toGoal, clamp(aimOffset, -THROW_AIM_MAX_ANGLE, THROW_AIM_MAX_ANGLE));
       aim = normalize2D(aimedGoal.x * 0.88 + forward.x * 0.12, aimedGoal.z * 0.88 + forward.z * 0.12);
-      throwSpeed = clamp((goalDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
-      vy = (4.1 + clamp(goalDistance / 10, 0, 2.1)) * (0.75 + power * 0.55);
+      if (goalType === "kazan") {
+        // Kazan needs a soft arcing drop — ignore rider speed so the ball lands in the bowl
+        throwSpeed = clamp(goalDistance * 0.92 * powerScale, THROW_MIN_SPEED * 0.28, 14);
+        vy = (4.6 + clamp(goalDistance / 8, 0, 2.0)) * (0.80 + power * 0.42);
+      } else {
+        throwSpeed = clamp((goalDistance * 1.18 + riderSpeed * 0.28) * powerScale, THROW_MIN_SPEED * 0.5, THROW_MAX_SPEED * 1.12);
+        vy = (4.1 + clamp(goalDistance / 10, 0, 2.1)) * (0.75 + power * 0.55);
+      }
     } else {
       // Free throw: distance is driven by rider momentum — standing still = short lob only
       const sideAim = { x: -forward.z, z: forward.x };
