@@ -804,10 +804,12 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         {[
                           { id: "easy",   label: t("ЛЕГКО", "ЖЕҢІЛ", "EASY")  },
                           { id: "normal", label: t("НОРМА", "ОРТАША", "NORMAL") },
-                          { id: "hard",   label: t("ЖЁСТКО", "ҚИЫН", "HARD") }
-                        ].map(({ id, label }) => (
+                          { id: "hard",   label: t("ЖЁСТКО", "ҚИЫН", "HARD") },
+                          { id: "imba",   label: "ИМБА", imba: true }
+                        ].map(({ id, label, imba: isImba }) => (
                           <button key={id} type="button"
                             className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
+                            style={isImba ? { color: (settings.difficulty ?? "normal") === id ? "#fff" : "#e05c5c", borderColor: "rgba(224,92,92,0.4)" } : undefined}
                             onClick={() => onSettingChange("difficulty", id)}>
                             {label}
                           </button>

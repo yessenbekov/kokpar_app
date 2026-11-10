@@ -201,11 +201,12 @@ function distanceFromCenter(point) {
 
 export function createKokparGame(container, onHudChange, options = {}) {
   const DIFFICULTY_PRESETS = {
-    easy:   { urgencyScale: 0.70, wanderScale: 1.85, speedScale: 0.87, accelScale: 0.84, bodyCheckDist: 4.5, throwBase: 0.54, throwStam: 0.12, passRadius: 13 },
-    normal: { urgencyScale: 1.0,  wanderScale: 1.0,  speedScale: 1.0,  accelScale: 1.0,  bodyCheckDist: 6.3, throwBase: 0.74, throwStam: 0.18, passRadius: 8.5 },
-    hard:   { urgencyScale: 1.18, wanderScale: 0.52, speedScale: 1.10, accelScale: 1.08, bodyCheckDist: 8.2, throwBase: 0.88, throwStam: 0.22, passRadius: 6.0 }
+    easy:   { urgencyScale: 0.70, wanderScale: 1.85, speedScale: 0.87, accelScale: 0.84, bodyCheckDist: 4.5,  throwBase: 0.54, throwStam: 0.12, passRadius: 13 },
+    normal: { urgencyScale: 1.0,  wanderScale: 1.0,  speedScale: 1.0,  accelScale: 1.0,  bodyCheckDist: 6.3,  throwBase: 0.74, throwStam: 0.18, passRadius: 8.5 },
+    hard:   { urgencyScale: 1.18, wanderScale: 0.52, speedScale: 1.10, accelScale: 1.08, bodyCheckDist: 8.2,  throwBase: 0.88, throwStam: 0.22, passRadius: 6.0 },
+    imba:   { urgencyScale: 1.55, wanderScale: 0.12, speedScale: 1.30, accelScale: 1.28, bodyCheckDist: 11.5, throwBase: 0.97, throwStam: 0.30, passRadius: 3.0 }
   };
-  const difficultyKey = ["easy", "normal", "hard"].includes(options.difficulty) ? options.difficulty : "normal";
+  const difficultyKey = ["easy", "normal", "hard", "imba"].includes(options.difficulty) ? options.difficulty : "normal";
   const difficulty = DIFFICULTY_PRESETS[difficultyKey];
 
   const gameSettings = {
