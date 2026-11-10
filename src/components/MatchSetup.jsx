@@ -757,7 +757,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <>
                       <p className="wizard-label">{t("Состав", "Құрам", "Teams")}</p>
                       <div className="wizard-three-grid">
-                        {[1, 2, 3, 4, 5].map((size) => (
+                        {[1, 3, 4, 5].map((size) => (
                           <button key={size} type="button"
                             className={`wizard-option-card${settings.teamSize === size ? " active" : ""}`}
                             onClick={() => onSettingChange("teamSize", size)}>
