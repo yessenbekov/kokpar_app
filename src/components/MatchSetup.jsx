@@ -736,20 +736,20 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <p className="wizard-label">{t("ВОРОТА", "ҚАҚПА", "GOAL")}</p>
                   <div className="wizard-side-grid">
                     <button type="button"
-                      className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
-                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
-                      disabled={selectedMode.goalLocked}
-                      onClick={() => onSettingChange("goalType", "circle")}>
-                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
-                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
-                    </button>
-                    <button type="button"
                       className={`wizard-option-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
                       style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
                       disabled={selectedMode.goalLocked}
                       onClick={() => onSettingChange("goalType", "kazan")}>
                       <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Казан", "Қазан", "Kazan")}</strong>
                       <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Препятствие", "Кедергі", "Obstacle")}</span>
+                    </button>
+                    <button type="button"
+                      className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => onSettingChange("goalType", "circle")}>
+                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
+                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
                     </button>
                   </div>
 
