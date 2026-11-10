@@ -8487,6 +8487,11 @@ kbd.hint-key--space {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
+.wizard-four-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
 
 /* Difficulty cards — final wizard step */
 .wizard-diff-grid {
