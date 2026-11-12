@@ -14,6 +14,9 @@ export function createAISystem({
   kokpar,
   scoringGoalFor,
   opponentTeam,
+  goals,
+  goalType,
+  kazanBlockRadius,
   difficultyUrgencyScale = 1,
   difficultyWanderScale = 1
 }) {
@@ -59,6 +62,29 @@ export function createAISystem({
       x: point.x - forward.x * backAmount + side.x * sideAmount,
       z: point.z - forward.z * backAmount + side.z * sideAmount
     };
+  }
+
+  // Returns a waypoint that steers around any kazan goal blocking the path
+  function kazanAvoidTarget(rider, rawTarget) {
+    if (goalType !== "kazan" || !goals || !kazanBlockRadius) return rawTarget;
+    const avoidRadius = kazanBlockRadius + 2.5;
+    for (const goal of goals) {
+      const mx = (rider.x + rawTarget.x) / 2;
+      const mz = (rider.z + rawTarget.z) / 2;
+      if (distance2D({ x: mx, z: mz }, goal) < avoidRadius) {
+        // Goal is on the path — go around to nearest edge
+        const toTarget = normalize2D(rawTarget.x - rider.x, rawTarget.z - rider.z);
+        const side = { x: -toTarget.z, z: toTarget.x };
+        const toGoal = normalize2D(goal.x - rider.x, goal.z - rider.z);
+        const cross = toGoal.x * side.x + toGoal.z * side.z;
+        const avoidDir = cross >= 0 ? 1 : -1;
+        return {
+          x: goal.x + side.x * avoidDir * avoidRadius,
+          z: goal.z + side.z * avoidDir * avoidRadius
+        };
+      }
+    }
+    return rawTarget;
   }
 
   function clampFieldTarget(target, margin = 6) {
@@ -313,7 +339,7 @@ export function createAISystem({
     if (looseRank === 0) {
       return {
         role: "pickup",
-        target: kokpar,
+        target: kazanAvoidTarget(rider, kokpar),
         urgency: 1.16,
         closeRadius: 1.5,
         wander: 1

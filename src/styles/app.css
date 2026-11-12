@@ -8487,6 +8487,11 @@ kbd.hint-key--space {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
+.wizard-four-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
 
 /* Difficulty cards — final wizard step */
 .wizard-diff-grid {
@@ -9514,8 +9519,24 @@ body,
   font-weight: 700;
 }
 
+.wizard-diff-seg-btn.imba {
+  color: #e05c5c;
+  border-color: rgba(224, 92, 92, 0.35);
+}
+
+.wizard-diff-seg-btn.imba.active {
+  background: rgba(200, 50, 50, 0.22);
+  color: #ff6b6b;
+  border-color: rgba(224, 92, 92, 0.7);
+  text-shadow: 0 0 8px rgba(255, 80, 80, 0.5);
+}
+
 .wizard-diff-seg-btn:hover:not(.active) {
   background: rgba(68, 42, 14, 0.60);
+}
+
+.wizard-diff-seg-btn.imba:hover:not(.active) {
+  background: rgba(180, 40, 40, 0.15);
 }
 
 /* ── Wizard diff cards (if still used) ── */
@@ -15622,6 +15643,14 @@ body,
 .wizard-diff-seg-btn.active {
   background: var(--ef-gold) !important;
   color: var(--ef-gold-txt) !important;
+}
+.wizard-diff-seg-btn.imba {
+  color: #e05c5c !important;
+}
+.wizard-diff-seg-btn.imba.active {
+  background: rgba(200, 50, 50, 0.28) !important;
+  color: #ff6b6b !important;
+  text-shadow: 0 0 8px rgba(255, 80, 80, 0.5);
 }
 
 /* Team side cards */

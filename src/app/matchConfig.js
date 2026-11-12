@@ -25,7 +25,7 @@ export function settingsFromProfile(profile = {}) {
   return {
     modeId: mode.id,
     goalType: mode.goalLocked ? mode.defaultGoalType : preferences.goalType === "kazan" ? "kazan" : mode.defaultGoalType,
-    teamSize: [3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
+    teamSize: [1, 3, 4, 5].includes(Number(preferences.teamSize)) ? Number(preferences.teamSize) : DEFAULT_SETTINGS.teamSize,
     matchMinutes: [2, 3, 5].includes(Number(preferences.matchMinutes))
       ? Number(preferences.matchMinutes)
       : DEFAULT_SETTINGS.matchMinutes,
@@ -37,7 +37,7 @@ export function settingsFromProfile(profile = {}) {
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
     teamSide: preferences.teamSide === "red" ? "red" : "blue",
-    difficulty: ["easy", "normal", "hard"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty,
+    difficulty: ["easy", "normal", "hard", "imba"].includes(preferences.difficulty) ? preferences.difficulty : DEFAULT_SETTINGS.difficulty,
     lightPreset: ["golden", "midday"].includes(preferences.lightPreset) ? preferences.lightPreset : DEFAULT_SETTINGS.lightPreset,
     lang: preferences.lang ?? null,
     sfxVol: preferences.sfxVol ?? null,
@@ -108,7 +108,7 @@ export function readUrlSettings(profile) {
           ? "kazan"
           : "circle"
         : profileSettings.goalType,
-    teamSize: [3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
+    teamSize: [1, 3, 4, 5].includes(teamSizeParam) ? teamSizeParam : profileSettings.teamSize,
     matchMinutes: [2, 3, 5].includes(matchMinutesParam) ? matchMinutesParam : profileSettings.matchMinutes,
     horseId: selectedHorse.id,
     horseType: selectedHorse.typeId,
@@ -118,7 +118,7 @@ export function readUrlSettings(profile) {
     horseLevel: selectedHorse.level ?? 1,
     horseBond: selectedHorse.bond ?? 0,
     teamSide: params.get("side") === "red" || params.get("teamSide") === "red" ? "red" : profileSettings.teamSide,
-    difficulty: ["easy", "normal", "hard"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty,
+    difficulty: ["easy", "normal", "hard", "imba"].includes(params.get("difficulty")) ? params.get("difficulty") : profileSettings.difficulty,
     lightPreset: ["golden", "midday"].includes(params.get("lightPreset")) ? params.get("lightPreset") : profileSettings.lightPreset,
     lang: profileSettings.lang,
     sfxVol: profileSettings.sfxVol,

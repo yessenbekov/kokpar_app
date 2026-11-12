@@ -721,7 +721,7 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                     <div className="match-setup-teams">
                       <div className="match-setup-team blue">
                         <span className="match-setup-team-label">{t("СИНИЕ · ВЫ", "КӨК · СІЗ", "BLUE · YOU")}</span>
-                        <span className="match-setup-team-name">{profile.riderName || "Ерлан"}<br /><small>+ {(settings.teamSize ?? 3) - 1} {t("ИИ", "ЖИ", "AI")}</small></span>
+                        <span className="match-setup-team-name">{profile.riderName || "Ерлан"}{(settings.teamSize ?? 3) > 1 && <><br /><small>+ {(settings.teamSize ?? 3) - 1} {t("ИИ", "ЖИ", "AI")}</small></>}</span>
                       </div>
                       <div className="match-setup-vs">
                         <span>{String(settings.matchMinutes ?? 3).padStart(2, "0")}:00</span>
@@ -736,14 +736,6 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                   <p className="wizard-label">{t("ВОРОТА", "ҚАҚПА", "GOAL")}</p>
                   <div className="wizard-side-grid">
                     <button type="button"
-                      className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
-                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
-                      disabled={selectedMode.goalLocked}
-                      onClick={() => onSettingChange("goalType", "circle")}>
-                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
-                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
-                    </button>
-                    <button type="button"
                       className={`wizard-option-card${settings.goalType === "kazan" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
                       style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
                       disabled={selectedMode.goalLocked}
@@ -751,13 +743,21 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                       <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Казан", "Қазан", "Kazan")}</strong>
                       <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Препятствие", "Кедергі", "Obstacle")}</span>
                     </button>
+                    <button type="button"
+                      className={`wizard-option-card${settings.goalType === "circle" ? " active" : ""}${selectedMode.goalLocked ? " disabled" : ""}`}
+                      style={{ flexDirection: "column", height: "auto", padding: "13px 14px", display: "flex", alignItems: "flex-start", gap: 4 }}
+                      disabled={selectedMode.goalLocked}
+                      onClick={() => onSettingChange("goalType", "circle")}>
+                      <strong style={{ fontFamily: "Oswald, sans-serif", fontSize: 17, fontWeight: 600 }}>{t("Круг", "Шеңбер", "Circle")}</strong>
+                      <span style={{ fontFamily: "Manrope, sans-serif", fontSize: 12, color: "rgba(214,178,110,.75)" }}>{t("Разметка на земле", "Жерде белгілеу", "Ground marking")}</span>
+                    </button>
                   </div>
 
                   {!isTraining && (
                     <>
                       <p className="wizard-label">{t("Состав", "Құрам", "Teams")}</p>
-                      <div className="wizard-three-grid">
-                        {[3, 4, 5].map((size) => (
+                      <div className="wizard-four-grid">
+                        {[1, 3, 4, 5].map((size) => (
                           <button key={size} type="button"
                             className={`wizard-option-card${settings.teamSize === size ? " active" : ""}`}
                             onClick={() => onSettingChange("teamSize", size)}>
@@ -804,10 +804,11 @@ export function MatchSetup({ profile, settings, auth, onBackToLogin, onSignOut, 
                         {[
                           { id: "easy",   label: t("ЛЕГКО", "ЖЕҢІЛ", "EASY")  },
                           { id: "normal", label: t("НОРМА", "ОРТАША", "NORMAL") },
-                          { id: "hard",   label: t("ЖЁСТКО", "ҚИЫН", "HARD") }
-                        ].map(({ id, label }) => (
+                          { id: "hard",   label: t("ЖЁСТКО", "ҚИЫН", "HARD") },
+                          { id: "imba",   label: "ИМБА", imba: true }
+                        ].map(({ id, label, imba: isImba }) => (
                           <button key={id} type="button"
-                            className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}`}
+                            className={`wizard-diff-seg-btn${(settings.difficulty ?? "normal") === id ? " active" : ""}${isImba ? " imba" : ""}`}
                             onClick={() => onSettingChange("difficulty", id)}>
                             {label}
                           </button>

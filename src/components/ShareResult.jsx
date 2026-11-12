@@ -47,19 +47,23 @@ export function ShareResult({ visible, onClose, result, riderName = "", horseNam
     const pCanvas = previewCanvasRef.current;
     if (!hCanvas || !pCanvas) return;
 
-    hCanvas.width  = CANVAS_W;
-    hCanvas.height = canvasH;
-    const ctx = hCanvas.getContext("2d");
-    drawCard(ctx, CANVAS_W, canvasH, {
-      won, scoreBlue, scoreRed, goals, tackles, possession,
-      teamSize, matchMinutes, riderName, horseName, t
-    });
+    async function render() {
+      await document.fonts.ready;
+      hCanvas.width  = CANVAS_W;
+      hCanvas.height = canvasH;
+      const ctx = hCanvas.getContext("2d");
+      drawCard(ctx, CANVAS_W, canvasH, {
+        won, scoreBlue, scoreRed, goals, tackles, possession,
+        teamSize, matchMinutes, riderName, horseName, t
+      });
 
-    // Draw scaled preview
-    pCanvas.width  = PREVIEW_W;
-    pCanvas.height = previewH;
-    const pCtx = pCanvas.getContext("2d");
-    pCtx.drawImage(hCanvas, 0, 0, PREVIEW_W, previewH);
+      // Draw scaled preview
+      pCanvas.width  = PREVIEW_W;
+      pCanvas.height = previewH;
+      const pCtx = pCanvas.getContext("2d");
+      pCtx.drawImage(hCanvas, 0, 0, PREVIEW_W, previewH);
+    }
+    render();
   }, [visible, format, won, scoreBlue, scoreRed, goals, tackles, possession,
       teamSize, matchMinutes, riderName, horseName]);
 
