@@ -648,18 +648,42 @@ export default function App() {
   return (
     <ErrorBoundary>
     <div className={`portrait-lock${activeSettings ? " portrait-lock--active" : ""}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <path d="M12 18h.01" />
-      </svg>
+      <div className="portrait-lock-phone-wrap">
+        <svg className="portrait-lock-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" />
+          <path d="M12 18h.01" />
+        </svg>
+        <svg className="portrait-lock-arrow" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M38 10 A20 20 0 0 1 38 38" />
+          <polyline points="34,6 38,10 42,6" />
+        </svg>
+      </div>
       <div className="portrait-lock-body">
         <p>Поверни телефон горизонтально</p>
-        <p>Телефонду горизонталь бур</p>
         <p>Телефонды горизонталь бұрыңыз</p>
         <p>Rotate your phone sideways</p>
       </div>
-      <small>Игра работает только в горизонтальной ориентации<br />Ойын тек горизонталь режимінде жұмыс істейді</small>
-      <small className="portrait-lock-alt">Или открой на компьютере · немесе компьютерде · or use a desktop</small>
+      <div className="portrait-lock-hint">
+        🔒 Если экран не поворачивается — разблокируй поворот в настройках телефона
+      </div>
+      <button
+        type="button"
+        className="portrait-lock-btn"
+        onClick={() => {
+          try {
+            const el = document.documentElement;
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (req) req.call(el).then(() => {
+              screen.orientation?.lock?.("landscape").catch(() => {});
+            }).catch(() => {
+              screen.orientation?.lock?.("landscape").catch(() => {});
+            });
+          } catch {}
+        }}
+      >
+        ▶ Начать игру
+      </button>
+      <small className="portrait-lock-alt">Или открой на компьютере · or use a desktop</small>
     </div>
     <main className="game" aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />

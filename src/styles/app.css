@@ -7268,17 +7268,37 @@ kbd.hint-key--space {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   text-align: center;
   padding: 32px;
   pointer-events: none;
 }
 
-.portrait-lock svg {
+.portrait-lock-phone-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portrait-lock-phone {
   width: 64px;
   height: 64px;
   color: var(--ink-2);
   animation: portrait-rotate 2.2s ease-in-out infinite;
+}
+
+.portrait-lock-arrow {
+  position: absolute;
+  right: -4px;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  color: #d4a028;
+  opacity: 0.85;
+  animation: portrait-arrow-pulse 2.2s ease-in-out infinite;
 }
 
 .portrait-lock-body {
@@ -7315,10 +7335,45 @@ kbd.hint-key--space {
   margin-top: -4px;
 }
 
+.portrait-lock-hint {
+  font-size: 13px;
+  color: rgba(214,178,110,0.75);
+  background: rgba(208,160,48,0.10);
+  border: 1px solid rgba(208,160,48,0.22);
+  border-radius: 10px;
+  padding: 10px 16px;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.portrait-lock-btn {
+  pointer-events: all;
+  background: rgba(208,160,48,0.18);
+  border: 1.5px solid rgba(208,160,48,0.55);
+  color: #f0c347;
+  font-family: Oswald, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 12px 32px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+.portrait-lock-btn:active {
+  background: rgba(208,160,48,0.32);
+}
+
 @keyframes portrait-rotate {
   0%, 100% { transform: rotate(0deg); }
   40%       { transform: rotate(90deg); }
   60%       { transform: rotate(90deg); }
+}
+
+@keyframes portrait-arrow-pulse {
+  0%, 100% { opacity: 0.3; }
+  40%       { opacity: 1; }
+  60%       { opacity: 1; }
 }
 
 @media (orientation: portrait) and (max-width: 1024px) {
