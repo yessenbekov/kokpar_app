@@ -7257,129 +7257,44 @@ kbd.hint-key--space {
   cursor: pointer;
 }
 
-/* ── Portrait-mode lock overlay ──────────────────────────────────────────── */
-.portrait-lock {
-  display: none;
+/* ── Portrait CSS rotation (game rotates 90° when phone is held portrait) ── */
+@media (orientation: portrait) and (max-width: 1024px) {
+  .game--rotated {
+    position: fixed;
+    top: calc((100vh - 100vw) / 2);
+    left: calc((100vw - 100vh) / 2);
+    width: 100vh;
+    height: 100vw;
+    min-height: unset;
+    transform: rotate(90deg);
+    transform-origin: center center;
+    overflow: hidden;
+  }
+}
+
+.rotate-hint {
   position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #1a0e04;
-  color: var(--ink);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  text-align: center;
-  padding: 32px;
-  pointer-events: none;
-}
-
-.portrait-lock-phone-wrap {
-  position: relative;
-  width: 96px;
-  height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.portrait-lock-phone {
-  width: 64px;
-  height: 64px;
-  color: var(--ink-2);
-  animation: portrait-rotate 2.2s ease-in-out infinite;
-}
-
-.portrait-lock-arrow {
-  position: absolute;
-  right: -4px;
-  top: 0;
-  width: 36px;
-  height: 36px;
-  color: #d4a028;
-  opacity: 0.85;
-  animation: portrait-arrow-pulse 2.2s ease-in-out infinite;
-}
-
-.portrait-lock-body {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.portrait-lock-body p {
-  margin: 0;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.portrait-lock-body p:first-child {
-  font-size: 19px;
-}
-
-.portrait-lock-body p:not(:first-child) {
-  font-size: 14px;
-  opacity: 0.65;
-}
-
-.portrait-lock small {
-  font-size: 12px;
-  color: var(--ink-2);
-  opacity: 0.6;
-  line-height: 1.6;
-}
-
-.portrait-lock-alt {
-  font-size: 11px !important;
-  opacity: 0.38 !important;
-  margin-top: -4px;
-}
-
-.portrait-lock-hint {
-  font-size: 13px;
-  color: rgba(214,178,110,0.75);
-  background: rgba(208,160,48,0.10);
-  border: 1px solid rgba(208,160,48,0.22);
-  border-radius: 10px;
-  padding: 10px 16px;
-  max-width: 280px;
-  line-height: 1.5;
-}
-
-.portrait-lock-btn {
-  pointer-events: all;
-  background: rgba(208,160,48,0.18);
-  border: 1.5px solid rgba(208,160,48,0.55);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.72);
   color: #f0c347;
   font-family: Oswald, sans-serif;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.06em;
-  padding: 12px 32px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
-}
-.portrait-lock-btn:active {
-  background: rgba(208,160,48,0.32);
+  padding: 14px 28px;
+  border-radius: 12px;
+  pointer-events: none;
+  animation: rotate-hint-fade 2.5s ease-in-out forwards;
 }
 
-@keyframes portrait-rotate {
-  0%, 100% { transform: rotate(0deg); }
-  40%       { transform: rotate(90deg); }
-  60%       { transform: rotate(90deg); }
-}
-
-@keyframes portrait-arrow-pulse {
-  0%, 100% { opacity: 0.3; }
-  40%       { opacity: 1; }
-  60%       { opacity: 1; }
-}
-
-@media (orientation: portrait) and (max-width: 1024px) {
-  .portrait-lock--active {
-    display: flex;
-  }
+@keyframes rotate-hint-fade {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
