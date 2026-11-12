@@ -2571,34 +2571,34 @@ button {
 }
 
 .banner {
-  position: absolute;
-  z-index: 3;
+  position: fixed;
+  z-index: 10;
   left: 50%;
-  bottom: 24px;
-  width: min(620px, calc(100% - 36px));
+  bottom: 20px;
+  width: min(480px, calc(100% - 36px));
   transform: translateX(-50%);
-  padding: 13px 16px;
+  padding: 10px 16px;
   border: 1px solid rgba(255, 245, 220, 0.18);
   border-radius: 8px;
-  background: rgba(32, 23, 15, 0.84);
+  background: rgba(32, 23, 15, 0.82);
   color: #fff3d2;
   text-align: center;
-  box-shadow: 0 18px 54px rgba(40, 25, 12, 0.26);
+  box-shadow: 0 8px 24px rgba(40, 25, 12, 0.22);
   pointer-events: none;
 }
 
 .banner strong {
   display: block;
-  margin-bottom: 4px;
-  font-size: 18px;
+  margin-bottom: 3px;
+  font-size: 16px;
   line-height: 1.15;
 }
 
 .banner span {
   display: block;
-  color: rgba(255, 243, 210, 0.78);
-  font-size: 13px;
-  line-height: 1.35;
+  color: rgba(255, 243, 210, 0.75);
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .loading {
@@ -7257,74 +7257,45 @@ kbd.hint-key--space {
   cursor: pointer;
 }
 
-/* ── Portrait-mode lock overlay ──────────────────────────────────────────── */
-.portrait-lock {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #1a0e04;
-  color: var(--ink);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  text-align: center;
-  padding: 32px;
-  pointer-events: none;
-}
-
-.portrait-lock svg {
-  width: 64px;
-  height: 64px;
-  color: var(--ink-2);
-  animation: portrait-rotate 2.2s ease-in-out infinite;
-}
-
-.portrait-lock-body {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.portrait-lock-body p {
-  margin: 0;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.portrait-lock-body p:first-child {
-  font-size: 19px;
-}
-
-.portrait-lock-body p:not(:first-child) {
-  font-size: 14px;
-  opacity: 0.65;
-}
-
-.portrait-lock small {
-  font-size: 12px;
-  color: var(--ink-2);
-  opacity: 0.6;
-  line-height: 1.6;
-}
-
-.portrait-lock-alt {
-  font-size: 11px !important;
-  opacity: 0.38 !important;
-  margin-top: -4px;
-}
-
-@keyframes portrait-rotate {
-  0%, 100% { transform: rotate(0deg); }
-  40%       { transform: rotate(90deg); }
-  60%       { transform: rotate(90deg); }
-}
-
+/* ── Portrait CSS rotation (game rotates 90° when phone is held portrait) ── */
 @media (orientation: portrait) and (max-width: 1024px) {
-  .portrait-lock--active {
-    display: flex;
+  .game--rotated {
+    position: fixed;
+    /* Use JS-set vars (window.innerHeight/innerWidth) for exact iOS Safari viewport */
+    top: calc((var(--game-vh, 100vh) - var(--game-vw, 100vw)) / 2);
+    left: calc((var(--game-vw, 100vw) - var(--game-vh, 100vh)) / 2);
+    width: var(--game-vh, 100vh);
+    height: var(--game-vw, 100vw);
+    min-height: unset;
+    transform: rotate(90deg);
+    transform-origin: center center;
+    overflow: hidden;
   }
+}
+
+.rotate-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f0c347;
+  font-family: Oswald, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 14px 28px;
+  border-radius: 12px;
+  pointer-events: none;
+  animation: rotate-hint-fade 2.5s ease-in-out forwards;
+}
+
+@keyframes rotate-hint-fade {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════════════════

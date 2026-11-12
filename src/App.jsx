@@ -48,6 +48,8 @@ export default function App() {
   const [setupEntered, setSetupEntered] = useState(() => shouldAutoStart() || initialProfileRef.current.onboardingDone);
   const [matchReward, setMatchReward] = useState(null);
   const [syncStatus, setSyncStatus] = useState("idle");
+  const [isPortrait, setIsPortrait] = useState(() => window.innerWidth < window.innerHeight && window.innerWidth < 1024);
+  const [showRotateHint, setShowRotateHint] = useState(false);
   const { authState, needsOnboarding, completeOnboarding, signInWithPassword, signInWithGoogle, signUp, resetPassword, signInWithEmail, signOut, syncProfile, applyMatchReward } = useSupabaseProfile({
     onProfileLoaded: loadSyncedProfile
   });
@@ -159,6 +161,40 @@ export default function App() {
     }
   }, [needsOnboarding]);
 
+  useEffect(() => {
+    function handleResize() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      document.documentElement.style.setProperty("--game-vw", `${vw}px`);
+      document.documentElement.style.setProperty("--game-vh", `${vh}px`);
+      setIsPortrait(vw < vh && vw < 1024);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!activeSettings || !isPortrait) return;
+
+    setShowRotateHint(true);
+    const timer = setTimeout(() => setShowRotateHint(false), 2500);
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+    if (!isIOS) {
+      try {
+        const el = document.documentElement;
+        const req = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (req) req.call(el).then(() => {
+          screen.orientation?.lock?.("landscape").catch(() => {});
+        }).catch(() => {});
+      } catch {}
+    }
+
+    return () => clearTimeout(timer);
+  }, [activeSettings]);
+
   function setGameTouchInput(input) {
     gameRef.current?.setTouchInput?.(input);
   }
@@ -168,8 +204,11 @@ export default function App() {
     const rect = joystickRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const dx = event.clientX - (rect.left + rect.width / 2);
-    const dz = event.clientY - (rect.top + rect.height / 2);
+    const rawDx = event.clientX - (rect.left + rect.width / 2);
+    const rawDz = event.clientY - (rect.top + rect.height / 2);
+    // When game is rotated 90° CW in portrait, rotate input to match
+    const dx = isPortrait && activeSettings ? rawDz : rawDx;
+    const dz = isPortrait && activeSettings ? -rawDx : rawDz;
     const distance = Math.hypot(dx, dz);
     const scale = distance > JOYSTICK_RADIUS ? JOYSTICK_RADIUS / distance : 1;
     const x = (dx * scale) / JOYSTICK_RADIUS;
@@ -647,21 +686,11 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-    <div className={`portrait-lock${activeSettings ? " portrait-lock--active" : ""}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <path d="M12 18h.01" />
-      </svg>
-      <div className="portrait-lock-body">
-        <p>Поверни телефон горизонтально</p>
-        <p>Телефонду горизонталь бур</p>
-        <p>Телефонды горизонталь бұрыңыз</p>
-        <p>Rotate your phone sideways</p>
-      </div>
-      <small>Игра работает только в горизонтальной ориентации<br />Ойын тек горизонталь режимінде жұмыс істейді</small>
-      <small className="portrait-lock-alt">Или открой на компьютере · немесе компьютерде · or use a desktop</small>
-    </div>
-    <main className="game" aria-label="Kokpar Game">
+    {showRotateHint && (
+      <div className="rotate-hint" aria-live="polite">↻ Поверни телефон</div>
+    )}
+
+    <main className={`game${activeSettings && isPortrait ? " game--rotated" : ""}`} aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
       {showAuthGate && (
@@ -732,13 +761,6 @@ export default function App() {
       )}
 
       {activeSettings && <FieldRadar radar={hud.radar} goalType={activeSettings.goalType} />}
-
-      {activeSettings && hud.showBanner && (
-        <div className="banner" role="status" aria-live="polite">
-          <strong>{hud.message}</strong>
-          <span>{hud.submessage}</span>
-        </div>
-      )}
 
       <TutorialHints active={Boolean(activeSettings)} hud={hud} lang={activeSettings?.lang ?? "ru"} />
 

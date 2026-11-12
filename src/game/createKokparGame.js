@@ -2159,9 +2159,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
 
   function resize() {
-    const rect = container.getBoundingClientRect();
-    renderer.setSize(rect.width, rect.height, false);
-    camera.aspect = rect.width / Math.max(rect.height, 1);
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / Math.max(h, 1);
     camera.updateProjectionMatrix();
   }
 
