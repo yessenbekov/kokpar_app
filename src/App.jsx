@@ -163,8 +163,13 @@ export default function App() {
 
   useEffect(() => {
     function handleResize() {
-      setIsPortrait(window.innerWidth < window.innerHeight && window.innerWidth < 1024);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      document.documentElement.style.setProperty("--game-vw", `${vw}px`);
+      document.documentElement.style.setProperty("--game-vh", `${vh}px`);
+      setIsPortrait(vw < vh && vw < 1024);
     }
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
