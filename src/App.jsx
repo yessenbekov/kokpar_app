@@ -9,6 +9,7 @@ import { createListing, cancelListing, purchaseListing } from "./app/marketplace
 import { onlineMatchStore } from "./app/onlineMatches.js";
 import { createOnlineMatchSync } from "./app/onlineMatchSync.js";
 import { matchHistoryStore } from "./app/matchHistoryStore.js";
+import { saveImbaResult } from "./app/imbaResultsStore.js";
 import { newOwnedHorse, sanitizePlayerProfile } from "./app/playerProfile.js";
 import { playerProfileStore } from "./app/profileStore.js";
 import { supabaseProfileStore } from "./app/supabaseProfileStore.js";
@@ -439,6 +440,26 @@ export default function App() {
       setMatchReward(reward);
       applyMatchReward(horseId, reward.xpGain, playerWon).catch((error) => {
         console.warn("server reward sync failed", error);
+      });
+    }
+
+    if (settingsSnapshot.difficulty === "imba") {
+      const currentProfile = playerProfileStore.read();
+      const userId = authState.user?.id;
+      const horse = currentProfile.ownedHorses.find((h) => h.id === horseId);
+      const playerScore = teamSide === "blue" ? event.score.blue : event.score.red;
+      const opponentScore = teamSide === "blue" ? event.score.red : event.score.blue;
+      saveImbaResult({
+        userId,
+        riderName: currentProfile.riderName,
+        horseName: horse?.name ?? "",
+        scorePlayer: playerScore,
+        scoreOpponent: opponentScore,
+        won: playerWon,
+        goals: event.playerGoals ?? 0,
+        steals: event.playerSteals ?? 0,
+        teamSize: settingsSnapshot.teamSize,
+        goalType: settingsSnapshot.goalType
       });
     }
   }
