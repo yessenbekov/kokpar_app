@@ -15644,6 +15644,14 @@ body,
   background: var(--ef-gold) !important;
   color: var(--ef-gold-txt) !important;
 }
+.wizard-diff-seg-btn.imba {
+  color: #e05c5c !important;
+}
+.wizard-diff-seg-btn.imba.active {
+  background: rgba(200, 50, 50, 0.28) !important;
+  color: #ff6b6b !important;
+  text-shadow: 0 0 8px rgba(255, 80, 80, 0.5);
+}
 
 /* Team side cards */
 .wizard-side-card {
