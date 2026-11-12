@@ -689,6 +689,12 @@ export default function App() {
     {showRotateHint && (
       <div className="rotate-hint" aria-live="polite">↻ Поверни телефон</div>
     )}
+    {activeSettings && hud.showBanner && (
+      <div className="banner" role="status" aria-live="polite">
+        <strong>{hud.message}</strong>
+        <span>{hud.submessage}</span>
+      </div>
+    )}
     <main className={`game${activeSettings && isPortrait ? " game--rotated" : ""}`} aria-label="Kokpar Game">
       <div className="viewport" ref={mountRef} />
 
@@ -760,13 +766,6 @@ export default function App() {
       )}
 
       {activeSettings && <FieldRadar radar={hud.radar} goalType={activeSettings.goalType} />}
-
-      {activeSettings && hud.showBanner && (
-        <div className="banner" role="status" aria-live="polite">
-          <strong>{hud.message}</strong>
-          <span>{hud.submessage}</span>
-        </div>
-      )}
 
       <TutorialHints active={Boolean(activeSettings)} hud={hud} lang={activeSettings?.lang ?? "ru"} />
 
