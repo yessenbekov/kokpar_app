@@ -454,6 +454,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     duelRiders: new Set(),
     playerGoals: 0,
     playerSteals: 0,
+    playerContestsWon: 0,
+    playerContestsLost: 0,
     breakawayCooldown: 0,
     announcedFinal30: false,
     announcedFinal10: false,
@@ -834,6 +836,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
       mountedContest,
       contestBalance,
       contestLeadingTeam,
+      contestActive: kokpar.contest.active,
+      contestProgress: kokpar.contest.progress,
+      contestMode: kokpar.contest.active ? kokpar.contest.mode : null,
+      contestTimeLeft: kokpar.contest.active
+        ? Math.max(0, (kokpar.contest.mode === "mounted" ? MOUNTED_CONTEST_MAX_SECONDS : CONTEST_MAX_SECONDS) - kokpar.contest.time)
+        : 0,
+      playerTeam: player.team,
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
       bodyCheckActive: contactSystem.isBodyCheckActive(player),
       bodyCheckReady:
@@ -1396,6 +1405,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     match.finishEventSent = false;
     match.playerGoals = 0;
     match.playerSteals = 0;
+    match.playerContestsWon = 0;
+    match.playerContestsLost = 0;
     match.blueHoldSec = 0;
     match.redHoldSec = 0;
     match.announcedFinal30 = false;
@@ -2275,7 +2286,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
               emitMatchEvent("match_finished", {
                 winner,
                 playerGoals: match.playerGoals,
-                playerSteals: match.playerSteals
+                playerSteals: match.playerSteals,
+                playerContestsWon: match.playerContestsWon,
+                playerContestsLost: match.playerContestsLost
               });
             }
             showMessage(winner, "Можно начать новый матч.", 999);

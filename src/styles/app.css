@@ -11851,6 +11851,79 @@ body,
 
 .nh-exit-top-btn:active { background: rgba(100,28,18,.9); }
 
+/* ── Contest bar ── */
+.nh-contest-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nh-contest-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  opacity: 0.9;
+}
+
+.nh-contest-tug {
+  position: relative;
+  width: 220px;
+  height: 16px;
+  border-radius: 8px;
+  overflow: visible;
+  display: flex;
+}
+
+.nh-ct-blue {
+  flex: 1;
+  background: linear-gradient(to right, rgba(59,130,246,0.25), rgba(59,130,246,0.7));
+  border-radius: 8px 0 0 8px;
+}
+
+.nh-ct-red {
+  flex: 1;
+  background: linear-gradient(to left, rgba(239,68,68,0.25), rgba(239,68,68,0.7));
+  border-radius: 0 8px 8px 0;
+}
+
+.nh-ct-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 22px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,0.4);
+  transition: left 0.1s linear;
+  z-index: 2;
+}
+
+.nh-contest-timer-bar {
+  width: 220px;
+  height: 3px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.nh-contest-timer-fill {
+  height: 100%;
+  background: rgba(255,255,255,0.55);
+  border-radius: 2px;
+  transition: width 0.08s linear;
+}
+
 /* ── Bottom strip ── */
 .nh-bottom {
   display: flex;

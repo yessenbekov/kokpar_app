@@ -19,7 +19,7 @@ export function MatchReward({ reward, onRestart, onLobby, riderName = "" }) {
 
   if (!reward) return null;
 
-  const { won, scoreBlue, scoreRed, teamSide, playerGoals, playerSteals, xpGain, coinsGain, dailyBonusCoins, leveledUp, newLevel, horseName } = reward;
+  const { won, scoreBlue, scoreRed, teamSide, playerGoals, playerSteals, playerContestsWon, xpGain, coinsGain, dailyBonusCoins, leveledUp, newLevel, horseName } = reward;
 
   return (
     <>
@@ -60,6 +60,12 @@ export function MatchReward({ reward, onRestart, onLobby, riderName = "" }) {
               <span className="mr-stat-label"><Sword size={13} strokeWidth={2.2} /> {t("Отборы", "Тартыстар", "Steals")}</span>
               <span className="mr-stat-value">{playerSteals}</span>
             </div>
+            {(playerContestsWon ?? 0) > 0 && (
+              <div className="mr-stat-item">
+                <span className="mr-stat-label">⚔ {t("Борьбы", "Тартыс", "Contests")}</span>
+                <span className="mr-stat-value">{playerContestsWon}</span>
+              </div>
+            )}
             <div className="mr-stat-item">
               <span className="mr-stat-label">{t("XP", "XP", "XP")}</span>
               <span className="mr-stat-value mr-stat-value--xp">+{xpGain}</span>

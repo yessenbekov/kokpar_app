@@ -117,9 +117,10 @@ export function createContestSystem({
   }
 
   function contestPowerForTeam(team, candidates) {
-    return candidates
-      .filter((rider) => rider.team === team)
-      .reduce((total, rider) => total + contestPowerForRider(rider), 0);
+    const teamRiders = candidates.filter((rider) => rider.team === team);
+    const basePower = teamRiders.reduce((total, rider) => total + contestPowerForRider(rider), 0);
+    const synergyMultiplier = teamRiders.length >= 3 ? 1.2 : teamRiders.length >= 2 ? 1.1 : 1.0;
+    return basePower * synergyMultiplier;
   }
 
   function contestLeader(candidates) {
@@ -207,9 +208,11 @@ export function createContestSystem({
   }
 
   function startContest(rider, active) {
+    const speed = Math.hypot(rider.vx, rider.vz);
+    const sprintBonus = clamp((speed - 8) / 16, 0, 0.22);
     kokpar.contest.active = true;
     kokpar.contest.mode = "loose";
-    kokpar.contest.progress = rider.team === TEAM.blue ? 0.12 : -0.12;
+    kokpar.contest.progress = rider.team === TEAM.blue ? 0.12 + sprintBonus : -(0.12 + sprintBonus);
     kokpar.contest.time = 0;
     kokpar.contest.leader = rider;
     kokpar.contest.holder = null;
@@ -284,19 +287,27 @@ export function createContestSystem({
         Math.sign(kokpar.contest.progress) === challengerSign && Math.abs(kokpar.contest.progress) >= 0.42;
 
       if (challengerWinning && kokpar.contest.time >= MOUNTED_CONTEST_MIN_SECONDS) {
+        if (challenger.human) match.playerContestsWon = (match.playerContestsWon ?? 0) + 1;
+        else if (holder.human) match.playerContestsLost = (match.playerContestsLost ?? 0) + 1;
         takeKokpar(challenger, { contested: true, stolen: true, mounted: true });
         return;
       }
 
       if (holderWinning && kokpar.contest.time >= MOUNTED_CONTEST_MIN_SECONDS) {
+        if (holder.human) match.playerContestsWon = (match.playerContestsWon ?? 0) + 1;
+        else if (challenger.human) match.playerContestsLost = (match.playerContestsLost ?? 0) + 1;
         holderKeepsMountedContest(holder, challenger);
         return;
       }
 
       if (timedOut) {
         if (challengerLeads) {
+          if (challenger.human) match.playerContestsWon = (match.playerContestsWon ?? 0) + 1;
+          else if (holder.human) match.playerContestsLost = (match.playerContestsLost ?? 0) + 1;
           takeKokpar(challenger, { contested: true, stolen: true, mounted: true });
         } else {
+          if (holder.human) match.playerContestsWon = (match.playerContestsWon ?? 0) + 1;
+          else if (challenger.human) match.playerContestsLost = (match.playerContestsLost ?? 0) + 1;
           holderKeepsMountedContest(holder, challenger);
         }
       }
@@ -308,7 +319,13 @@ export function createContestSystem({
     const timedOut = kokpar.contest.time >= CONTEST_MAX_SECONDS;
 
     if ((oneTeamLeft && kokpar.contest.time >= 0.75) || decisive || timedOut) {
-      takeKokpar(kokpar.contest.leader ?? candidates[0], { contested: true });
+      const winner = kokpar.contest.leader ?? candidates[0];
+      const playerInContest = candidates.some((r) => r.human);
+      if (playerInContest) {
+        if (winner.human) match.playerContestsWon = (match.playerContestsWon ?? 0) + 1;
+        else match.playerContestsLost = (match.playerContestsLost ?? 0) + 1;
+      }
+      takeKokpar(winner, { contested: true });
     }
   }
 

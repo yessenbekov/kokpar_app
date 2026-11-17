@@ -126,6 +126,33 @@ export function MatchHud({
         </div>
       </div>
 
+      {/* ── Contest bar ── */}
+      {hud.contestActive && (
+        <div className="nh-contest-wrap">
+          <div className="nh-contest-label">
+            {hud.contestMode === "mounted"
+              ? t("Тянут серке", "Серке тартысы", "Tug of serke")
+              : t("Борьба за серке", "Серке үшін күрес", "Contest")}
+          </div>
+          <div className="nh-contest-tug">
+            <div className="nh-ct-blue" />
+            <div className="nh-ct-red" />
+            <div
+              className="nh-ct-thumb"
+              style={{ left: `${((hud.contestProgress ?? 0) + 1) / 2 * 100}%` }}
+            />
+          </div>
+          <div className="nh-contest-timer-bar">
+            <div
+              className="nh-contest-timer-fill"
+              style={{
+                width: `${(1 - (hud.contestTimeLeft ?? 0) / (hud.contestMode === "mounted" ? 2.35 : 1.55)) * 100}%`
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* ── Bottom strip ── */}
       <div className="nh-bottom">
         {!isTouchDevice && (

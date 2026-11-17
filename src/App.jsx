@@ -409,6 +409,7 @@ export default function App() {
         scoreRed: event.score.red,
         playerGoals: event.playerGoals ?? 0,
         playerSteals: event.playerSteals ?? 0,
+        playerContestsWon: event.playerContestsWon ?? 0,
         teamSide
       };
 
