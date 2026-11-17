@@ -388,6 +388,34 @@ export function createContactSystem({
         b.vx *= 0.992;
         b.vz *= 0.992;
 
+        if (isDuelClash) {
+          // Боком: when horses run in the same direction side-by-side,
+          // apply sustained lateral body-press (not just a bounce)
+          const speedA = Math.hypot(a.vx, a.vz);
+          const speedB = Math.hypot(b.vx, b.vz);
+          if (speedA > 1.5 && speedB > 1.5) {
+            const velDot = (a.vx * b.vx + a.vz * b.vz) / (speedA * speedB);
+            if (velDot > 0.3) {
+              // Sustained lateral press proportional to alignment and penetration
+              const sidePress = penetration * velDot * 1.1;
+              a.vx -= nx * sidePress;
+              a.vz -= nz * sidePress;
+              b.vx += nx * sidePress;
+              b.vz += nz * sidePress;
+              // Forward drag: pressing bodies slow each other slightly
+              const fwdA = a.vx * (b.vx / speedB) + a.vz * (b.vz / speedB);
+              const fwdB = b.vx * (a.vx / speedA) + b.vz * (a.vz / speedA);
+              a.vx -= (b.vx / speedB) * fwdA * 0.06 * velDot;
+              a.vz -= (b.vz / speedB) * fwdA * 0.06 * velDot;
+              b.vx -= (a.vx / speedA) * fwdB * 0.06 * velDot;
+              b.vz -= (a.vz / speedA) * fwdB * 0.06 * velDot;
+              // Visual feedback
+              a.hitFlash = Math.max(a.hitFlash ?? 0, 0.2 + velDot * 0.15);
+              b.hitFlash = Math.max(b.hitFlash ?? 0, 0.2 + velDot * 0.15);
+            }
+          }
+        }
+
         let bodyCheckConnected = false;
         if (a.team !== b.team) {
           if (isBodyCheckDriving(a)) {
