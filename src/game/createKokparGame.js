@@ -1081,6 +1081,11 @@ export function createKokparGame(container, onHudChange, options = {}) {
   }
 
   function clearContest() {
+    if (kokpar.contest.mode === "mounted" && isMountedContestParticipant(player)) {
+      keys.delete(" ");
+      touchInput.action = false;
+      player.throwCooldown = Math.max(player.throwCooldown ?? 0, 0.55);
+    }
     kokpar.contest.active = false;
     kokpar.contest.mode = "loose";
     kokpar.contest.progress = 0;
