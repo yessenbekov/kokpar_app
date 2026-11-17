@@ -2246,7 +2246,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
 
     readGamepad();
 
-    const dt = clamp((now - lastFrameTime) / 1000, 0, 0.033);
+    const rawDt = clamp((now - lastFrameTime) / 1000, 0, 0.033);
+    const inMountedDuel = isMountedContestParticipant(player);
+    const dt = inMountedDuel ? rawDt * 0.6 : rawDt;
     const time = now / 1000;
     lastFrameTime = now;
 
