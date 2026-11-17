@@ -192,7 +192,10 @@ export function MatchHud({
       <div className="nh-bottom">
         {!isTouchDevice && (
           <div className="nh-actions">
-            <button className="nh-action-btn nh-action-amber" type="button">
+            {hud.grabBlocked && (
+              <div className="nh-grab-hint">{t("Замедли лошадь", "Жылдамдықты азайт", "Slow down")}</div>
+            )}
+            <button className={`nh-action-btn nh-action-amber${hud.grabBlocked ? " nh-action-blocked" : ""}`} type="button">
               <span className="nh-action-amber-icon" />
               {playerHoldsSerke
                 ? t("Бросить", "Лақтыру", "Throw")

@@ -32,7 +32,7 @@ import { createArenaV2 } from "./arenaV2.js";
 import { createThrowSystem } from "./throwSystem.js";
 import { createAISystem } from "./aiSystem.js";
 import { createCameraSystem } from "./cameraSystem.js";
-import { createContestSystem } from "./contestSystem.js";
+import { createContestSystem, MAX_GRAB_SPEED } from "./contestSystem.js";
 import { createRiderMovement } from "./riderMovement.js";
 
 
@@ -764,6 +764,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       return canThrowAtTarget(player) ? "Удерживай Space" : "Удерживай Space — бросок";
     }
     if (kokpar.holder) return `${kokpar.holder.name} держит`;
+    const distToSerke = distance2D(player, kokpar);
+    if (distToSerke < GRAB_RADIUS && Math.hypot(player.vx, player.vz) > MAX_GRAB_SPEED) {
+      return "Замедли лошадь";
+    }
     return "Кокпар на поле";
   }
 
@@ -859,6 +863,14 @@ export function createKokparGame(container, onHudChange, options = {}) {
         if (Math.abs(aDist - bDist) < 1.0) return null;
         return aDist < bDist ? a.team : b.team;
       })(),
+      grabBlocked:
+        !kokpar.holder &&
+        !kokpar.contest.active &&
+        !kokpar.flightTeam &&
+        match.phase === "live" &&
+        !match.over &&
+        distance2D(player, kokpar) < GRAB_RADIUS &&
+        Math.hypot(player.vx, player.vz) > MAX_GRAB_SPEED,
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
       bodyCheckActive: contactSystem.isBodyCheckActive(player),
       bodyCheckReady:

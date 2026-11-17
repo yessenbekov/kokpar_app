@@ -12055,6 +12055,7 @@ body,
   flex-direction: column;
   align-items: flex-end;
   gap: 11px;
+  position: relative;
 }
 
 .nh-action-btn {
@@ -12068,6 +12069,27 @@ body,
   box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
+.nh-grab-hint {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 700 12px/1 Manrope, sans-serif;
+  color: #f4c842;
+  letter-spacing: .04em;
+  text-shadow: 0 0 8px rgba(244,200,66,.7);
+  animation: grab-hint-pulse 0.65s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes grab-hint-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.nh-action-blocked {
+  opacity: 0.45;
+  filter: saturate(0.3);
+}
 .nh-action-amber {
   height: 58px;
   border: 1px solid rgba(240,195,71,.6);

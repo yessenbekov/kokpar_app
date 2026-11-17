@@ -4,6 +4,7 @@ import { TEAM } from "./constants.js";
 const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
 const DUEL_CLOSE_PICKUP = 2.5;
+export const MAX_GRAB_SPEED = 13.0;
 const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
 const CONTEST_MAX_SECONDS = 1.55;
@@ -337,6 +338,10 @@ export function createContestSystem({
     if (kokpar.contest.active && !kokpar.holder) return;
 
     if (!kokpar.holder && kokpar.looseCooldown <= 0 && distance2D(rider, kokpar) < GRAB_RADIUS) {
+      if (rider.human) {
+        const speed = Math.hypot(rider.vx, rider.vz);
+        if (speed > MAX_GRAB_SPEED) return;
+      }
       const nearby = contestCandidates();
       const opponentNearby = nearby.some((candidate) => candidate.team !== rider.team);
 
