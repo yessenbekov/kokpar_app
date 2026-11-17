@@ -836,7 +836,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
       mountedContest,
       contestBalance,
       contestLeadingTeam,
-      contestActive: kokpar.contest.active,
+      contestActive: kokpar.contest.active && (
+        mountedContest ||
+        (kokpar.contest.mode !== "mounted" && contestCandidates().some((r) => r.human))
+      ),
       contestProgress: kokpar.contest.progress,
       contestMode: kokpar.contest.active ? kokpar.contest.mode : null,
       contestTimeLeft: kokpar.contest.active
