@@ -848,6 +848,17 @@ export function createKokparGame(container, onHudChange, options = {}) {
       contestBeatPhase: mountedContest ? (kokpar.contest.time % 0.5) / 0.5 : 0,
       rhythmFeedback: mountedContest ? (player.rhythmFeedback ?? null) : null,
       playerTeam: player.team,
+      duelMode: match.duelMode,
+      duelPositionLead: (() => {
+        if (!match.duelMode || kokpar.holder || kokpar.contest.active) return null;
+        const duelArr = Array.from(match.duelRiders);
+        if (duelArr.length < 2) return null;
+        const [a, b] = duelArr;
+        const aDist = distance2D(a, kokpar);
+        const bDist = distance2D(b, kokpar);
+        if (Math.abs(aDist - bDist) < 1.0) return null;
+        return aDist < bDist ? a.team : b.team;
+      })(),
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
       bodyCheckActive: contactSystem.isBodyCheckActive(player),
       bodyCheckReady:

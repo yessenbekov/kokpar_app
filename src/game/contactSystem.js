@@ -369,8 +369,11 @@ export function createContactSystem({
         const nz = dz / distance;
         const relativeNormalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
         const approachSpeed = Math.max(0, -relativeNormalSpeed);
-        const push = penetration * 0.34;
-        const impulse = clamp(penetration * 0.62 + approachSpeed * 0.12, 0.24, 1.45);
+        const isDuelClash = match.duelMode && a.team !== b.team &&
+          match.duelRiders.has(a) && match.duelRiders.has(b);
+        const duelScale = isDuelClash ? 1.9 : 1.0;
+        const push = penetration * 0.34 * duelScale;
+        const impulse = clamp(penetration * 0.62 + approachSpeed * 0.12, 0.24, 1.45) * duelScale;
 
         a.x -= nx * push;
         a.z -= nz * push;

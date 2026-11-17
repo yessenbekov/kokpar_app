@@ -11851,6 +11851,42 @@ body,
 
 .nh-exit-top-btn:active { background: rgba(100,28,18,.9); }
 
+/* ── Duel mode indicator ── */
+.nh-duel-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nh-duel-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+.nh-duel-position {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 12px;
+  border-radius: 20px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.nh-duel-blue    { color: #60a5fa; background: rgba(59,130,246,0.18); }
+.nh-duel-red     { color: #f87171; background: rgba(239,68,68,0.18); }
+.nh-duel-neutral { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+
 /* ── Contest bar ── */
 .nh-contest-wrap {
   position: absolute;

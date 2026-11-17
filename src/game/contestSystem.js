@@ -3,6 +3,7 @@ import { TEAM } from "./constants.js";
 
 const GRAB_RADIUS = 4.2;
 const STEAL_RADIUS = 4.7;
+const DUEL_CLOSE_PICKUP = 2.5;
 const CONTEST_RADIUS = 5.4;
 const CONTEST_MIN_SECONDS = 0.55;
 const CONTEST_MAX_SECONDS = 1.55;
@@ -339,7 +340,16 @@ export function createContestSystem({
       const nearby = contestCandidates();
       const opponentNearby = nearby.some((candidate) => candidate.team !== rider.team);
 
-      if (opponentNearby) {
+      if (match.duelMode && opponentNearby) {
+        const opponent = riders.find((r) => r.team !== rider.team && match.duelRiders.has(r));
+        const riderDist = distance2D(rider, kokpar);
+        const opponentDist = opponent ? distance2D(opponent, kokpar) : 999;
+        if (riderDist < DUEL_CLOSE_PICKUP && opponentDist > GRAB_RADIUS) {
+          takeKokpar(rider, { active, wonCenterDuel: true });
+        } else {
+          startContest(rider, active);
+        }
+      } else if (opponentNearby) {
         startContest(rider, active);
       } else {
         takeKokpar(rider, { active });

@@ -126,6 +126,20 @@ export function MatchHud({
         </div>
       </div>
 
+      {/* ── Duel mode indicator ── */}
+      {hud.duelMode && !hud.contestActive && (
+        <div className="nh-duel-wrap">
+          <div className="nh-duel-label">{t("Жекпе-жек", "Жекпе-жек", "Duel")}</div>
+          <div className={`nh-duel-position${hud.duelPositionLead ? ` nh-duel-${hud.duelPositionLead}` : " nh-duel-neutral"}`}>
+            {hud.duelPositionLead === "blue"
+              ? t("Синие в позиции", "Көк орында", "Blue in position")
+              : hud.duelPositionLead === "red"
+              ? t("Красные в позиции", "Қызыл орында", "Red in position")
+              : t("Борьба за позицию", "Орын үшін күрес", "Fighting for position")}
+          </div>
+        </div>
+      )}
+
       {/* ── Contest bar ── */}
       {hud.contestActive && (
         <div className="nh-contest-wrap">
