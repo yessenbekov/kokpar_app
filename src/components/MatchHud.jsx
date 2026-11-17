@@ -150,6 +150,27 @@ export function MatchHud({
               }}
             />
           </div>
+          {hud.contestMode === "mounted" && (
+            <div className="nh-rhythm-row">
+              <div
+                className="nh-rhythm-beat"
+                style={{
+                  opacity: Math.max(0, 1 - (hud.contestBeatPhase ?? 0) * 2.2),
+                  transform: `scale(${1 + (hud.contestBeatPhase ?? 0) * 0.55})`,
+                }}
+              />
+              {hud.rhythmFeedback === "perfect" && (
+                <span className="nh-rhythm-fb nh-rhythm-perfect">
+                  {t("ИДЕАЛЬНО", "КЕРЕМЕТ", "PERFECT")}
+                </span>
+              )}
+              {hud.rhythmFeedback === "good" && (
+                <span className="nh-rhythm-fb nh-rhythm-good">
+                  {t("ХОРОШО", "ЖАҚСЫ", "GOOD")}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 

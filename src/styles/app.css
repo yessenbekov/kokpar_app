@@ -11924,6 +11924,43 @@ body,
   transition: width 0.08s linear;
 }
 
+/* ── Rhythm tap guide ── */
+.nh-rhythm-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 28px;
+  position: relative;
+}
+
+.nh-rhythm-beat {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  transition: none;
+  flex-shrink: 0;
+}
+
+.nh-rhythm-fb {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  animation: rhythm-fb-pop 0.45s ease-out forwards;
+}
+
+.nh-rhythm-perfect { color: #4ade80; }
+.nh-rhythm-good    { color: #fbbf24; }
+
+@keyframes rhythm-fb-pop {
+  0%   { opacity: 1; transform: scale(1.2) translateY(0); }
+  60%  { opacity: 1; transform: scale(1) translateY(-4px); }
+  100% { opacity: 0; transform: scale(0.9) translateY(-8px); }
+}
+
 /* ── Bottom strip ── */
 .nh-bottom {
   display: flex;

@@ -845,6 +845,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
       contestTimeLeft: kokpar.contest.active
         ? Math.max(0, (kokpar.contest.mode === "mounted" ? MOUNTED_CONTEST_MAX_SECONDS : CONTEST_MAX_SECONDS) - kokpar.contest.time)
         : 0,
+      contestBeatPhase: mountedContest ? (kokpar.contest.time % 0.5) / 0.5 : 0,
+      rhythmFeedback: mountedContest ? (player.rhythmFeedback ?? null) : null,
       playerTeam: player.team,
       bodyCheckCooldown: clamp(player.bodyCheckCooldown / BODY_CHECK_COOLDOWN_SECONDS, 0, 1),
       bodyCheckActive: contactSystem.isBodyCheckActive(player),
@@ -1000,8 +1002,9 @@ export function createKokparGame(container, onHudChange, options = {}) {
     if (typeof nextInput.action === "boolean") {
       touchInput.action = nextInput.action;
 
-      if (touchInput.action && !wasActionPressed && kokpar.holder === player) {
-        startThrowCharge(player);
+      if (touchInput.action && !wasActionPressed) {
+        processRhythmTap();
+        if (kokpar.holder === player) startThrowCharge(player);
       } else if (!touchInput.action && wasActionPressed) {
         releaseThrowCharge(player);
       }
@@ -1051,6 +1054,32 @@ export function createKokparGame(container, onHudChange, options = {}) {
     gamepadWasActive = false;
   }
 
+  function processRhythmTap() {
+    if (!isMountedContestParticipant(player)) return;
+    const now = performance.now();
+    const lastTap = player.rhythmLastTap ?? 0;
+    const interval = lastTap > 0 ? (now - lastTap) / 1000 : 999;
+
+    let burst = 0;
+    let quality = "miss";
+
+    if (interval >= 0.3 && interval <= 0.7) {
+      burst = 0.38;
+      quality = "perfect";
+    } else if (interval >= 0.15 && interval <= 0.9) {
+      burst = 0.18;
+      quality = "good";
+    } else if (interval > 0.9) {
+      burst = 0.12;
+      quality = "good";
+    }
+
+    player.rhythmLastTap = now;
+    player.tugEffort = clamp((player.tugEffort ?? 0) + burst, 0, 1);
+    player.rhythmFeedback = quality;
+    player.rhythmFeedbackAge = 0;
+  }
+
   function clearContest() {
     kokpar.contest.active = false;
     kokpar.contest.mode = "loose";
@@ -1059,6 +1088,8 @@ export function createKokparGame(container, onHudChange, options = {}) {
     kokpar.contest.leader = null;
     kokpar.contest.holder = null;
     kokpar.contest.challenger = null;
+    player.rhythmLastTap = 0;
+    player.rhythmFeedback = null;
     riders.forEach((rider) => {
       rider.tugEffort = 0;
     });
@@ -2213,10 +2244,13 @@ export function createKokparGame(container, onHudChange, options = {}) {
       keys.delete(key);
       return;
     }
-    if (key === " " && !event.repeat && kokpar.holder === player) {
-      if (startThrowCharge(player)) {
-        keys.delete(key);
-        return;
+    if (key === " " && !event.repeat) {
+      processRhythmTap();
+      if (kokpar.holder === player) {
+        if (startThrowCharge(player)) {
+          keys.delete(key);
+          return;
+        }
       }
     }
     if (key === " " && kokpar.throwCharging) {
@@ -2318,6 +2352,10 @@ export function createKokparGame(container, onHudChange, options = {}) {
     arenaPresentation.update(dt, time);
     updateCamera(dt);
     renderer.render(scene, camera);
+    if (player.rhythmFeedback) {
+      player.rhythmFeedbackAge = (player.rhythmFeedbackAge ?? 0) + rawDt;
+      if (player.rhythmFeedbackAge > 0.45) player.rhythmFeedback = null;
+    }
     publishHud();
     animationFrame = requestAnimationFrame(frame);
   }
